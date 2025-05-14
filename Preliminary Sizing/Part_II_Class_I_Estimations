@@ -1,0 +1,62 @@
+import math
+import numpy as np
+
+# Based on Part II "Preliminary Configuration Design and Integration of the Propulsion System" by Roskam
+# For manned aircraft, use "5. Business Jet"
+# For unmanned aircraft, use "8. Military Trainers"
+
+
+########################## Chapter 6: Class I Method for Wing Planform Design and for Sizing and Locating Lateral Control Surfaces ##########################
+
+
+
+
+
+
+
+
+
+########################## Chapter 7: Class I Method for Verifying Clean Airplane C_L_max and for Sizing High Lift Devices ##########################
+
+
+
+
+
+
+
+
+########################## Chapter 8: Class I Method for Empennage Sizing and Disposition and for Control Surface Sizing and Disposition ##########################
+
+
+
+
+
+
+
+
+
+########################## Chapter 9: Class I Method for Landing Gear Sizing and Disposition ##########################
+
+
+
+
+
+
+
+########################## Chapter 10: Class I Weight and Balance Analysis ##########################
+
+
+
+
+
+
+
+########################## Chapter 11: Class I Method for Stability and Control Analysis ##########################
+
+
+
+
+
+
+
+########################## Chapter 12: Class I Method for Drag Polar Determination ##########################
