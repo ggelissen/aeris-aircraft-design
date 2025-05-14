@@ -36,12 +36,12 @@ print(f"Take-off weight: {W_TO:.2f} kg")
 R_cruise = 8000         # m
 V_cruise = 240          # m/s
 L_D_cruise = 12         # range (10-12)
-c_j_cruise = 0.7       # lbs/lbs/hr - range (0.5-0.9)
+c_j_cruise = 0.7/3600     # lbs/lbs/hr - range (0.5-0.9)
 
 # Constants for loiter
 L_D_loiter = 14         # range (12-14)
-c_j_loiter = 0.5        # lbs/lbs/hr - range (0.4-0.6)
-E_loiter = 2            # hr    TODO: check this value
+c_j_loiter = 0.5/3600       # lbs/lbs/hr - range (0.4-0.6)
+E_loiter = 2*3600            # hr    TODO: check this value
 
 # Fuel fractions for different mission profiles
 # 1: engine start, 2: taxi, 3: take-off, 4: climb, 5: cruise, 6: loiter, 7: descent, 8: landing
@@ -62,7 +62,7 @@ print(f"Fuel weight: {W_F:.2f} kg")
 
 # Calculate tentative weights
 W_tfo = 0                               # neglected
-W_crew = 100                             # no crew, since unmanned
+W_crew = 100                            # no crew, since unmanned
 W_OE_tent = W_TO - W_F - W_PL           # kg
 W_E_tent = W_OE_tent - W_tfo - W_crew   # kg
 
