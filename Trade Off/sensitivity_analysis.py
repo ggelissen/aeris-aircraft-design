@@ -2,7 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from trade_off_main import calculate_trade_off_scores, results_sustainability, crit_weights, calculate_weighted_scores
+from trade_off_main import calculate_trade_off_scores, results_sustainability, crit_weights, calculate_weighted_scores, calculate_weighted_scores_from_kpi
 
 
 def perform_sensitivity_analysis(base_crit_weights, variation_percentage=0.25):
@@ -112,7 +112,7 @@ def perform_kpi_sensitivity_analysis(base_kpi_weights, results, variation_percen
 
 def plot_sensitivity_analysis(sensitivity_results):
     # Ensure the directory for saving figures exists
-    output_dir = os.path.join('Figures', 'Sensitivity Analysis')
+    output_dir = os.path.join('Figures', 'Sensitivity Analysis', 'Criteria Weights')
     os.makedirs(output_dir, exist_ok=True)
 
     base_scores = calculate_trade_off_scores(crit_weights)
@@ -141,15 +141,18 @@ def plot_sensitivity_analysis(sensitivity_results):
         plt.close()
 
 
-def plot_kpi_sensitivity_analysis(sensitivity_results, criterion, base_kpi_weights, results):
-    options = results["options"]
+def plot_kpi_sensitivity_analysis(sensitivity_results, criterion, kpi_weights, kpi_results):
+    options = list(range(len(next(iter(kpi_results.values()))))) 
 
     for kpi, results in sensitivity_results.items():
+        if kpi not in kpi_results:
+            raise KeyError(f"The KPI '{kpi}' is missing in the provided kpi_results for {criterion}.")
+
         increased_scores = results['increased_scores']
         decreased_scores = results['decreased_scores']
 
         # Calculate error bars as the deviation from base scores
-        base_scores = calculate_weighted_scores(results, base_kpi_weights)
+        base_scores = calculate_weighted_scores_from_kpi(kpi_results, kpi_weights)
         lower_errors = [abs(base - dec) for base, dec in zip(base_scores, decreased_scores)]
         upper_errors = [abs(inc - base) for base, inc in zip(base_scores, increased_scores)]
 
@@ -165,13 +168,13 @@ def plot_kpi_sensitivity_analysis(sensitivity_results, criterion, base_kpi_weigh
         plt.xticks(options)
         plt.legend()
         plt.grid(axis='y')
-        plt.savefig(f"Figures/Sensitivity Analysis/kpi_sensitivity_{criterion}_{kpi}.png")
+        plt.savefig(f"Figures/Sensitivity Analysis/KPI Weights/sensitivity_{criterion}_{kpi}.pdf")
         plt.close()
 
 
 def plot_combined_sensitivity_analysis(sensitivity_results):
     # Ensure the directory for saving figures exists
-    output_dir = os.path.join('Figures', 'Sensitivity Analysis')
+    output_dir = os.path.join('Figures', 'Sensitivity Analysis', 'Criteria Weights')
     os.makedirs(output_dir, exist_ok=True)
 
     options = results_sustainability['options']

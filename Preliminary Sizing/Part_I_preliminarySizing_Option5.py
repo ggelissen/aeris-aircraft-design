@@ -104,6 +104,7 @@ W_S_L = 0.5 * V_stall ** 2 * rho_L * C_L_max_L      # landing configuration
 S = W_TO / W_S
 S_TO = W_TO / W_S_TO
 S_L = W_TO / W_S_L
+print(f"Wing area: {S:.2f} m^2")
 
 
 #### Sizing for take-off distance ####

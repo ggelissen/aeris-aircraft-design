@@ -12,7 +12,7 @@ from sensitivity_analysis import *
 crit_weights = {"Sustainability": 0.25, "Cost": 0.3, "Performance": 0.2, "Risk": 0.15, "Transportability": 0.1}
 
 # KPI weights
-kpi_sustainability = {"TSFC": 0.6, "production/end-of-life": 0.4}
+kpi_sustainability = {"TSFC": 0.6, "life-cycle": 0.4}
 kpi_cost = {"development": 0.2, "acquisition": 0.4, "operational": 0.4}
 kpi_performance = {"payload": 0.5, "stab-control": 0.5}
 kpi_risk = {"reliability": 0.5, "certification": 0.2, "safety": 0.3}
@@ -25,7 +25,7 @@ kpi_transportability = {"ease": 0.45, "accessibility": 0.55}
 results_sustainability = {
     "options": [1, 2, 3, 4, 5],
     "TSFC": [0.4, 0.7, 0.5, 0.1, 0.9],                          # TODO: replace with actual values
-    "production/end-of-life": [0.1, 0.3, 0.5, 0.7, 0.3]         # TODO: replace with actual values
+    "life-cycle": [0.1, 0.3, 0.5, 0.7, 0.3]         # TODO: replace with actual values
 }
 
 results_cost = {
@@ -61,6 +61,16 @@ def calculate_weighted_scores(results, kpi_weights):
         score = 0
         for kpi, weight in kpi_weights.items():
             score += results[kpi][i] * weight
+        scores.append(score)
+    return scores
+
+def calculate_weighted_scores_from_kpi(kpi_results, kpi_weights):
+    scores = []
+    num_options = len(next(iter(kpi_results.values())))  # Infer the number of options from the first KPI
+    for i in range(num_options):
+        score = 0
+        for kpi, weight in kpi_weights.items():
+            score += kpi_results[kpi][i] * weight
         scores.append(score)
     return scores
 
