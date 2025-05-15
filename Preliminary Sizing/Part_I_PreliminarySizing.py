@@ -18,33 +18,29 @@ import numpy as np
 #                        = 1100 kg (incl. Lidar + Radiospectrometer + Airborne Mass Spectrometer))
 
 W_PL_lst = [300, 600, 850, 1100] # kg
-W_PL = W_PL_lst[0] 
+W_PL = W_PL_lst[2] 
 print(f"Payload weight: {W_PL:.2f} kg")
 
 
 ####    Guessing likely value of take-off weight W_TO    ####
 
 # Reference unmanned aircraft: XQ-58A    
-W_TO = 3000 # kg
+W_TO = 4000 # kg
 print(f"Take-off weight: {W_TO:.2f} kg")
 
 
 ####    Determination of mission fuel weight W_F    ####
 
 # Constants for cruise
-R_cruise = 8000         # m
+R_cruise = 8000e3         # m
 V_cruise = 240          # m/s
-L_D_cruise = 15
-c_j_cruise = 0.75       # lbs/lbs/hr - range (0.5-1.0)
-c_p_cruise = 0.5        # lbs/hp/hr - range (0.4-0.6)
-theta_p_cruise = 0.82
+L_D_cruise = 14
+c_j_cruise = 0.456/3600       # lbs/lbs/hr - Roskam range (0.5-1.0) - Williams FJ44-3AP 
 
 # Constants for loiter
-L_D_loiter = 18
-c_j_loiter = 0.5        # lbs/lbs/hr - range (0.4-0.6)
-c_p_loiter = 0.6        # lbs/hp/hr - range (0.5-0.7)
-theta_p_loiter = 0.77
-E_loiter = 2            # hr    TODO: check this value
+L_D_loiter = 16
+c_j_loiter = 0.75*0.456/3600        # lbs/lbs/hr - Roskam range (0.4-0.6) - Williams FJ44-3AP 
+E_loiter = 0.5*3600                 # hr    TODO: check this value
 
 # Fuel fractions for different mission profiles
 # 1: engine start, 2: taxi, 3: take-off, 4: climb, 5: cruise, 6: loiter, 7: descent, 8: landing
@@ -53,7 +49,7 @@ W6_W5 = 1/ np.exp((E_loiter * c_j_loiter) / (L_D_loiter))
 fuel_fractions = {1: 0.99, 2: 0.99, 3: 0.99, 4: 0.98, 5: W5_W4, 6: W6_W5, 7: 0.99, 8: 0.995}
 
 # Calculate fuel weight components
-W_F_res = 1/4 * W_TO                            # reserve fuel weight
+W_F_res = 0.05 * W_TO                            # reserve fuel weight
 M_ff = math.prod(fuel_fractions.values())       # mission fuel fraction
 W_F_used = (1 - M_ff) * W_TO                    # fuel weight used
 W_F = W_F_used + W_F_res                        # total fuel weight
@@ -70,9 +66,9 @@ W_OE_tent = W_TO - W_F - W_PL           # kg
 W_E_tent = W_OE_tent - W_tfo - W_crew   # kg
 
 # Calculate empty weight using Roskam interpolation method
-A = 0.6632                                  # based on "Military Trainers"
-B = 0.8640                                  # based on "Military Trainers"
-W_E = 10 ** ((np.log10(W_TO) - A) / B)
+A = 0.3765                                # based on "Business Jet"
+B = 227.795                                 # based on "Business Jet"
+W_E = A * W_TO + B
 
 # Compare interpolated weight with tentative weight
 error = W_E - W_E_tent
@@ -108,7 +104,12 @@ S = W_TO / W_S
 S_TO = W_TO / W_S_TO
 S_L = W_TO / W_S_L
 
+print(f"Wing loading: {W_S:.2f} N/m^2")
+print(f"Wing loading (take-off): {W_S_TO:.2f} N/m^2")
+print(f"Wing loading (landing): {W_S_L:.2f} N/m^2")
+print(f"Wing area: {S:.2f} m^2")
 
-#### Sizing for take-off distance ####
+T_W = W_S_TO / (C_L_max_TO * 1795.5)
 
-# TO BE CONTINUED ....
+T_TO = T_W * W_TO * 9.81
+print(f"Take-off thrust: {T_TO:.2f} N")

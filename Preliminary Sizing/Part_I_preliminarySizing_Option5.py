@@ -26,7 +26,7 @@ print(f"Payload weight: {W_PL:.2f} kg")
 ####    Guessing likely value of take-off weight W_TO    ####
 
 # Reference manned  
-W_TO = 8000 # kg
+W_TO = 9500 # kg
 print(f"Take-off weight: {W_TO:.2f} kg")
 
 
