@@ -26,22 +26,22 @@ print(f"Payload weight: {W_PL:.2f} kg")
 ####    Guessing likely value of take-off weight W_TO    ####
 
 # Reference manned aircraft: like transport performance   
-W_TO = 4000 # kg
+W_TO = 3000 # kg
 print(f"Take-off weight: {W_TO:.2f} kg")
 
 
 ####    Determination of mission fuel weight W_F    ####
 
 # Constants for cruise
-R_cruise = 8000000         # m
+R_cruise = 8000e3         # m
 V_cruise = 240          # m/s
 L_D_cruise =  14     # range (13-15) frpm transport aircraft
-c_j_cruise = 0./3600     # lbs/lbs/hr - range (0.5-0.9)
+c_j_cruise = 0.433/3600     # lbs/lbs/hr - range (0.5-0.9)
 
 # Constants for loiter
 L_D_loiter = 16         # range (14-18)
-c_j_loiter = 0.5/3600       # lbs/lbs/hr - range (0.4-0.6)
-E_loiter = 2*3600            # hr    TODO: check this value
+c_j_loiter = 0.433*0.75/3600       # lbs/lbs/hr - range (0.4-0.6)
+E_loiter = 0.5*3600            # hr    TODO: check this value
 
 # Fuel fractions for different mission profiles
 # 1: engine start, 2: taxi, 3: take-off, 4: climb, 5: cruise, 6: loiter, 7: descent, 8: landing
@@ -50,7 +50,7 @@ W6_W5 = 1/ np.exp((E_loiter * c_j_loiter) / (L_D_loiter))
 fuel_fractions = {1: 0.99, 2: 0.995, 3: 0.995, 4: 0.98, 5: W5_W4, 6: W6_W5, 7: 0.99, 8: 0.992}
 
 # Calculate fuel weight components
-W_F_res = 1/4 * W_TO                            # reserve fuel weight
+W_F_res = 0.05 * W_TO                            # reserve fuel weight
 M_ff = math.prod(fuel_fractions.values())       # mission fuel fraction
 W_F_used = (1 - M_ff) * W_TO                    # fuel weight used
 W_F = W_F_used + W_F_res                        # total fuel weight
@@ -67,9 +67,9 @@ W_OE_tent = W_TO - W_F - W_PL           # kg
 W_E_tent = W_OE_tent - W_tfo - W_crew   # kg
 
 # Calculate empty weight using Roskam interpolation method
-A = 0.2678                               # based on "Business Jet"
-B = 0.9979                               # based on "Business Jet"
-W_E = 10 ** ((np.log10(W_TO) - A) / B)
+A = 0.6545                               # based on "Business Jet"
+B = -154.87                               # based on "Business Jet"
+W_E = A * W_TO + B
 
 # Compare interpolated weight with tentative weight
 error = W_E - W_E_tent
