@@ -118,8 +118,6 @@ def perform_result_sensitivity_analysis(base_results, variation_percentage=0.25,
     Returns:
         dict: Sensitivity results for each criterion and option, including propagated final scores.
     """
-    logging.debug("Starting result sensitivity analysis.")
-    logging.debug(f"Base Results: {base_results}")
 
     sensitivity_results = {}
 
@@ -127,7 +125,6 @@ def perform_result_sensitivity_analysis(base_results, variation_percentage=0.25,
         if criterion == "options":
             continue
 
-        logging.debug(f"Analyzing criterion: {criterion}")
         criterion_sensitivity = {}
 
         for option_index, base_score in enumerate(criterion_results):
@@ -179,49 +176,6 @@ def plot_sensitivity_analysis(sensitivity_results):
         plt.legend()
         plt.grid(axis='y')
         plt.savefig(os.path.join(output_dir, f"sensitivity_{criterion}.pdf"))
-        plt.close()
-
-
-def plot_result_sensitivity_analysis(sensitivity_results, base_results):
-    """
-    Plot the sensitivity analysis for input scores (results).
-
-    Args:
-        sensitivity_results (dict): Sensitivity results for each criterion and option.
-        base_results (dict): The base results for each criterion and option.
-    """
-    logging.debug("Plotting result sensitivity analysis.")
-
-    output_dir = os.path.join('Figures', 'Sensitivity Analysis', 'Inputs')
-    os.makedirs(output_dir, exist_ok=True)
-
-    options = base_results["options"]
-
-    for criterion, criterion_sensitivity in sensitivity_results.items():
-        if criterion == "options":
-            continue
-
-        logging.debug(f"Plotting sensitivity for criterion: {criterion}")
-
-        plt.figure(figsize=(10, 6))
-
-        for option_index, sensitivity in criterion_sensitivity.items():
-            base_score = base_results[criterion][option_index]
-            increased_score = sensitivity["increased_results"][option_index]
-            decreased_score = sensitivity["decreased_results"][option_index]
-
-            # Plot base, increased, and decreased scores
-            plt.bar(option_index - 0.2, base_score, width=0.2, color='skyblue', label='Base Score' if option_index == 0 else "")
-            plt.bar(option_index, increased_score, width=0.2, color='green', label='Increased Score' if option_index == 0 else "")
-            plt.bar(option_index + 0.2, decreased_score, width=0.2, color='red', label='Decreased Score' if option_index == 0 else "")
-
-        plt.title(f"Result Sensitivity Analysis for {criterion}")
-        plt.xlabel("Options")
-        plt.ylabel("Scores")
-        plt.xticks(range(len(options)), options)
-        plt.legend()
-        plt.grid(axis='y')
-        plt.savefig(os.path.join(output_dir, f"sensitivity_results_{criterion}.pdf"))
         plt.close()
 
 
@@ -442,117 +396,4 @@ def plot_kpi_sensitivity_subplots(sensitivity_results_by_criteria, kpi_weights_b
     # Adjust layout for square grid
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, 'kpi_sensitivity_subplots.pdf'))
-    plt.close()
-
-
-def plot_combined_result_sensitivity_analysis(sensitivity_results, base_results):
-    """
-    Combine all KPIs into one plot per criterion with increased and decreased scores using error bars.
-
-    Args:
-        sensitivity_results (dict): Sensitivity results for each criterion and option.
-        base_results (dict): The base results for each criterion and option.
-    """
-    logging.debug("Plotting combined result sensitivity analysis.")
-
-    output_dir = os.path.join('Figures', 'Sensitivity Analysis', 'Inputs')
-    os.makedirs(output_dir, exist_ok=True)
-
-    options = base_results["options"]
-
-    for criterion, criterion_sensitivity in sensitivity_results.items():
-        if criterion == "options":
-            continue
-
-        logging.debug(f"Plotting combined sensitivity for criterion: {criterion}")
-
-        # Initialize data for the grouped bar plot
-        base_scores = base_results[criterion]
-        lower_errors = []
-        upper_errors = []
-
-        for option_index, sensitivity in criterion_sensitivity.items():
-            increased_score = sensitivity["increased_results"][option_index]
-            decreased_score = sensitivity["decreased_results"][option_index]
-
-            lower_errors.append(abs(base_scores[option_index] - decreased_score))
-            upper_errors.append(abs(increased_score - base_scores[option_index]))
-
-        # Create the plot
-        x = np.arange(len(options))  # the label locations
-
-        plt.figure(figsize=(10, 6))
-        plt.bar(x, base_scores, color='skyblue', label='Base Scores')
-        plt.errorbar(x, base_scores, yerr=[lower_errors, upper_errors], fmt='o',
-                     ecolor='red', elinewidth=1.5, capsize=5, label='Error Bars')
-
-        plt.title(f"Combined Result Sensitivity Analysis for {criterion}")
-        plt.xlabel("Options")
-        plt.ylabel("Scores")
-        plt.xticks(x, options)
-        plt.legend()
-        plt.grid(axis='y')
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, f"combined_sensitivity_results_{criterion}.pdf"))
-        plt.close()
-
-
-def plot_result_sensitivity_subplots(sensitivity_results_by_criteria, base_results_by_criteria):
-    """
-    Create a big plot with all criteria as subplots for result sensitivity analysis.
-
-    Args:
-        sensitivity_results_by_criteria (dict): Sensitivity results for all criteria.
-        base_results_by_criteria (dict): Base results for all criteria.
-    """
-    logging.debug("Plotting result sensitivity subplots.")
-
-    output_dir = os.path.join('Figures', 'Sensitivity Analysis', 'Inputs')
-    os.makedirs(output_dir, exist_ok=True)
-
-    num_criteria = len(sensitivity_results_by_criteria)
-    num_rows = int(np.ceil(np.sqrt(num_criteria)))
-    num_cols = int(np.ceil(num_criteria / num_rows))
-    fig, axes = plt.subplots(num_rows, num_cols, figsize=(18, 12))
-
-    # Adjust layout to remove unused subplot and center the bottom plot
-    if num_criteria < num_rows * num_cols:
-        for idx in range(num_criteria, num_rows * num_cols):
-            fig.delaxes(axes.flatten()[idx])
-
-    for idx, (criterion, sensitivity_results) in enumerate(sensitivity_results_by_criteria.items()):
-        row, col = divmod(idx, num_cols)
-        ax = axes[row, col] if num_criteria > 1 else axes
-
-        base_scores = base_results_by_criteria[criterion]
-        lower_errors = []
-        upper_errors = []
-
-        for option_index, sensitivity in sensitivity_results.items():
-            increased_score = sensitivity["increased_results"][option_index]
-            decreased_score = sensitivity["decreased_results"][option_index]
-
-            lower_errors.append(abs(base_scores[option_index] - decreased_score))
-            upper_errors.append(abs(increased_score - base_scores[option_index]))
-
-        x = np.arange(len(base_results_by_criteria["options"]))  # the label locations
-
-        # Use a blue gradient for the bars
-        colors = plt.cm.Blues(np.linspace(0.4, 0.9, len(base_scores)))
-
-        ax.bar(x, base_scores, color=colors, label='Base Scores')
-        ax.errorbar(x, base_scores, yerr=[lower_errors, upper_errors], fmt='o',
-                    ecolor='red', elinewidth=1.5, capsize=5, label='Error Bars')
-
-        ax.set_title(f"{criterion}")
-        ax.set_xlabel("Options")
-        ax.set_ylabel("Scores")
-        ax.set_xticks(x)
-        ax.set_xticklabels(base_results_by_criteria["options"])
-        ax.legend()
-        ax.grid(axis='y')
-
-    # Adjust layout for square grid
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, 'result_sensitivity_subplots.pdf'))
     plt.close()

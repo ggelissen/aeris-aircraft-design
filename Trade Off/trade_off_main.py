@@ -204,34 +204,3 @@ if __name__ == "__main__":
 
     plot_kpi_sensitivity_subplots(sensitivity_results_by_criteria, kpi_weights_by_criteria, kpi_results_by_criteria)
     print("KPI Sensitivity Subplots for all criteria have been saved.")
-
-    # Perform result sensitivity analysis
-    print("\nPerforming Result Sensitivity Analysis...")
-    all_results = {
-        "Sustainability": results_sustainability,
-        "Cost": results_cost,
-        "Performance": results_performance,
-        "Risk": results_risk,
-        "Transportability": results_transportability
-    }
-
-    result_sensitivity_results = {}
-    for criterion, results in all_results.items():
-        result_sensitivity_results[criterion] = perform_result_sensitivity_analysis(results, variation_percentage=0.25)
-
-    # Plot result sensitivity analysis
-    for criterion, sensitivity_results in result_sensitivity_results.items():
-        plot_result_sensitivity_analysis(sensitivity_results, all_results[criterion])
-
-    print("Result Sensitivity Analysis completed and plots saved.")
-
-    # Perform combined result sensitivity analysis
-    print("\nPerforming Combined Result Sensitivity Analysis...")
-    for criterion, sensitivity_results in result_sensitivity_results.items():
-        plot_combined_result_sensitivity_analysis(sensitivity_results, all_results[criterion])
-    print("Combined Result Sensitivity Analysis completed and plots saved.")
-
-    # Generate subplots for result sensitivity analysis across all criteria
-    print("\nGenerating Result Sensitivity Subplots for all criteria...")
-    plot_result_sensitivity_subplots(result_sensitivity_results, all_results)
-    print("Result Sensitivity Subplots for all criteria have been saved.")
