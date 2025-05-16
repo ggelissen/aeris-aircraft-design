@@ -169,3 +169,37 @@ if __name__ == "__main__":
         # Plot the results for KPI sensitivity analysis
         plot_kpi_sensitivity_analysis(kpi_sensitivity_results, criterion, kpi_weights, results)
         print(f"KPI Sensitivity Analysis for {criterion} completed.")
+
+    # Perform combined KPI sensitivity analysis for each criterion
+    for criterion, (results, kpi_weights) in zip(
+        crit_weights.keys(),
+        zip(
+            [results_sustainability, results_cost, results_performance, results_risk, results_transportability],
+            [kpi_sustainability, kpi_cost, kpi_performance, kpi_risk, kpi_transportability],
+        ),
+    ):
+        print(f"\nGenerating Combined KPI Sensitivity Analysis for {criterion}...")
+        kpi_sensitivity_results = perform_kpi_sensitivity_analysis(kpi_weights, results, variation_percentage=0.25)
+        plot_combined_kpi_sensitivity_analysis(kpi_sensitivity_results, criterion, kpi_weights, results)
+        print(f"Combined KPI Sensitivity Analysis for {criterion} completed.")
+
+    # Generate subplots for KPI sensitivity analysis across all criteria
+    print("\nGenerating KPI Sensitivity Subplots for all criteria...")
+    sensitivity_results_by_criteria = {}
+    kpi_weights_by_criteria = {}
+    kpi_results_by_criteria = {}
+
+    for criterion, (results, kpi_weights) in zip(
+        crit_weights.keys(),
+        zip(
+            [results_sustainability, results_cost, results_performance, results_risk, results_transportability],
+            [kpi_sustainability, kpi_cost, kpi_performance, kpi_risk, kpi_transportability],
+        ),
+    ):
+        kpi_sensitivity_results = perform_kpi_sensitivity_analysis(kpi_weights, results, variation_percentage=0.25)
+        sensitivity_results_by_criteria[criterion] = kpi_sensitivity_results
+        kpi_weights_by_criteria[criterion] = kpi_weights
+        kpi_results_by_criteria[criterion] = results
+
+    plot_kpi_sensitivity_subplots(sensitivity_results_by_criteria, kpi_weights_by_criteria, kpi_results_by_criteria)
+    print("KPI Sensitivity Subplots for all criteria have been saved.")

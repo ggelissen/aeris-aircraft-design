@@ -133,7 +133,7 @@ def plot_sensitivity_analysis(sensitivity_results):
         plt.title(f"Sensitivity Analysis for {criterion}")
         plt.xlabel("Options")
         plt.ylabel("Scores")
-        plt.ylim(0.95*min(base_scores),1.05*max(base_scores))
+        plt.ylim(0.95 * min(base_scores), 1.05 * max(base_scores))
         plt.xticks(options)
         plt.legend()
         plt.grid(axis='y')
@@ -164,7 +164,6 @@ def plot_kpi_sensitivity_analysis(sensitivity_results, criterion, kpi_weights, k
         plt.title(f"KPI Sensitivity Analysis for {criterion} - {kpi}")
         plt.xlabel("Options")
         plt.ylabel("Scores")
-        plt.ylim(0.95 * min(base_scores), 1.05 * max(base_scores))
         plt.xticks(options)
         plt.legend()
         plt.grid(axis='y')
@@ -222,4 +221,133 @@ def plot_combined_sensitivity_analysis(sensitivity_results):
     # Save the plot
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, 'combined_sensitivity_analysis.pdf'))
+    plt.close()
+
+
+def plot_combined_kpi_sensitivity_analysis(sensitivity_results, criterion, kpi_weights, kpi_results):
+    # Ensure the directory for saving figures exists
+    output_dir = os.path.join('Figures', 'Sensitivity Analysis', 'KPI Weights')
+    os.makedirs(output_dir, exist_ok=True)
+
+    options = list(range(len(next(iter(kpi_results.values())))))  # Infer options from KPI results
+    kpis = list(kpi_weights.keys())
+
+    # Initialize data for the grouped bar plot
+    base_scores = calculate_weighted_scores_from_kpi(kpi_results, kpi_weights)
+    grouped_data = {kpi: base_scores for kpi in kpis}
+    lower_errors = {kpi: [] for kpi in kpis}
+    upper_errors = {kpi: [] for kpi in kpis}
+
+    # Correctly calculate error bars for combined KPI sensitivity analysis
+    for kpi, results in sensitivity_results.items():
+        increased_scores = results['increased_scores']
+        decreased_scores = results['decreased_scores']
+
+        # Calculate error bars as the deviation from base scores
+        lower_errors[kpi] = [abs(base - dec) for base, dec in zip(base_scores, decreased_scores)]
+        upper_errors[kpi] = [abs(inc - base) for base, inc in zip(base_scores, increased_scores)]
+
+    # Create the grouped bar plot
+    x = np.arange(len(options))  # the label locations
+    width = 0.15  # the width of the bars
+    bar_spacing = 0.05  # Adjust spacing as needed
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    # Use a blue gradient for the bars
+    colors = plt.cm.Blues(np.linspace(0.4, 0.9, len(kpis)))
+
+    for i, (kpi, color) in enumerate(zip(kpis, colors)):
+        ax.bar(x + i * (width + bar_spacing), grouped_data[kpi], width, label=kpi,
+               yerr=[lower_errors[kpi], upper_errors[kpi]],
+               capsize=5, alpha=0.8, color=color)
+        
+    # Calculate global minimum and maximum values for y-axis scaling based on changed scores
+    global_min = min(min(base_scores) - max(lower_errors[kpi]) for kpi in kpis)
+    global_max = max(max(base_scores) + max(upper_errors[kpi]) for kpi in kpis)
+
+    # Add labels, title, and legend
+    ax.set_xlabel('Options')
+    ax.set_ylabel('Scores')
+    ax.set_title(f'Combined KPI Sensitivity Analysis for {criterion}')
+    ax.set_ylim(global_min * 0.95, global_max * 1.05)
+    ax.set_xticks(x + width * (len(kpis) - 1) / 2)
+    ax.set_xticklabels(options)
+    ax.legend()
+
+    # Save the plot
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, f'combined_kpi_sensitivity_{criterion}.pdf'))
+    plt.close()
+
+
+def plot_kpi_sensitivity_subplots(sensitivity_results_by_criteria, kpi_weights_by_criteria, kpi_results_by_criteria):
+    # Ensure the directory for saving figures exists
+    output_dir = os.path.join('Figures', 'Sensitivity Analysis', 'KPI Weights')
+    os.makedirs(output_dir, exist_ok=True)
+
+    num_criteria = len(sensitivity_results_by_criteria)
+    num_rows = int(np.ceil(np.sqrt(num_criteria)))
+    num_cols = int(np.ceil(num_criteria / num_rows))
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(18, 12))
+
+    # Adjust layout to remove unused subplot and center the bottom plot
+    if num_criteria < num_rows * num_cols:
+        for idx in range(num_criteria, num_rows * num_cols):
+            fig.delaxes(axes.flatten()[idx])
+
+    # Add slight spacing between bars
+    bar_spacing = 0.05  # Adjust spacing as needed
+
+    for idx, (criterion, sensitivity_results) in enumerate(sensitivity_results_by_criteria.items()):
+        row, col = divmod(idx, num_cols)
+        ax = axes[row, col] if num_criteria > 1 else axes
+        kpi_weights = kpi_weights_by_criteria[criterion]
+        kpi_results = kpi_results_by_criteria[criterion]
+
+        options = list(range(len(next(iter(kpi_results.values())))))  # Infer options from KPI results
+        kpis = list(kpi_weights.keys())
+
+        # Initialize data for the grouped bar plot
+        base_scores = calculate_weighted_scores_from_kpi(kpi_results, kpi_weights)
+        grouped_data = {kpi: base_scores for kpi in kpis}
+        lower_errors = {kpi: [] for kpi in kpis}
+        upper_errors = {kpi: [] for kpi in kpis}
+
+        for kpi, results in sensitivity_results.items():
+            increased_scores = results['increased_scores']
+            decreased_scores = results['decreased_scores']
+
+            # Calculate error bars as the deviation from base scores
+            lower_errors[kpi] = [abs(base - dec) for base, dec in zip(base_scores, decreased_scores)]
+            upper_errors[kpi] = [abs(inc - base) for base, inc in zip(base_scores, increased_scores)]
+
+        # Calculate global minimum and maximum values for y-axis scaling based on error bars
+        global_min = min(min(base_scores) - max(lower_errors[kpi]) for kpi in kpis)
+        global_max = max(max(base_scores) + max(upper_errors[kpi]) for kpi in kpis)
+
+        # Create the grouped bar plot for the current criterion
+        x = np.arange(len(options))  # the label locations
+        width = 0.15  # the width of the bars
+
+        # Use a blue gradient for the bars
+        colors = plt.cm.Blues(np.linspace(0.4, 0.9, len(kpis)))
+
+        for i, (kpi, color) in enumerate(zip(kpis, colors)):
+            ax.bar(x + i * (width + bar_spacing), grouped_data[kpi], width, label=kpi,
+                   yerr=[lower_errors[kpi], upper_errors[kpi]],
+                   capsize=5, alpha=0.8, color=color)
+
+        # Add labels, title, and legend
+        ax.set_xlabel('Options')
+        ax.set_ylabel('Scores')
+        ax.set_title(f'KPI Sensitivity Analysis for {criterion}')
+        ax.set_ylim(global_min * 0.95, global_max * 1.05)
+        ax.set_xticks(x + (width + bar_spacing) * (len(kpis) - 1) / 2)
+        ax.set_xticklabels(options)
+        ax.legend()
+
+    # Adjust layout for square grid
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'kpi_sensitivity_subplots.pdf'))
     plt.close()
