@@ -12,11 +12,11 @@ from sensitivity_analysis import *
 crit_weights = {"Sustainability": 0.25, "Cost": 0.3, "Performance": 0.2, "Risk": 0.15, "Transportability": 0.1}
 
 # KPI weights
-kpi_sustainability = {"TSFC": 0.6, "life-cycle": 0.4}
-kpi_cost = {"development": 0.2, "acquisition": 0.4, "operational": 0.4}
-kpi_performance = {"payload": 0.5, "stab-control": 0.5}
-kpi_risk = {"reliability": 0.5, "certification": 0.2, "safety": 0.3}
-kpi_transportability = {"ease": 0.45, "accessibility": 0.55}
+kpi_sustainability = {"Fuel Consumption": 0.7, "Maintainability": 0.2, "Noise Pollution": 0.1}
+kpi_cost = {"Development": 0.2, "Acquisition": 0.4, "Operational": 0.4}
+kpi_performance = {"Payload Capacity": 0.5, "Stability and Control": 0.5}
+kpi_risk = {"Reliability": 0.4, "Certification": 0.3, "Safety": 0.3}
+kpi_transportability = {"Ease of Disassembly": 0.40, "Payload Accessibility": 0.60}
 
 
 
@@ -24,34 +24,35 @@ kpi_transportability = {"ease": 0.45, "accessibility": 0.55}
 
 results_sustainability = {
     "options": [1, 2, 3, 4, 5],
-    "TSFC": [0.4, 0.7, 0.5, 0.1, 0.9],                          # TODO: replace with actual values
-    "life-cycle": [0.1, 0.3, 0.5, 0.7, 0.3]         # TODO: replace with actual values
+    "Fuel Consumption": [4, 4, 5, 1, 2],                         
+    "Maintainability": [1, 3, 5, 4, 3],
+    "Noise Pollution": [3, 4, 5, 3, 1]
 }
 
 results_cost = {
     "options": [1, 2, 3, 4, 5],
-    "development": [0.1, 0.3, 0.5, 0.7, 0.9],                   # TODO: replace with actual values
-    "acquisition": [0.9, 0.7, 0.5, 0.3, 0.1],                   # TODO: replace with actual values
-    "operational": [0.5, 0.6, 0.7, 0.8, 0.9]                    # TODO: replace with actual values
+    "Development": [2, 2, 1, 4, 4],                  
+    "Acquisition": [4, 4, 3, 2, 1],                  
+    "Operational": [4, 4, 4, 3, 2]               
 }
 
 results_performance = {
     "options": [1, 2, 3, 4, 5],                                 
-    "payload": [0.3, 0.5, 0.7, 0.9, 0.6],                       # TODO: replace with actual values
-    "stab-control": [0.9, 0.7, 0.5, 0.3, 0.1]                   # TODO: replace with actual values
+    "Payload Capacity": [4, 4, 5, 1, 3],                    
+    "Stability and Control": [4, 5, 4, 3, 5]             
 }
 
 results_risk = {
     "options": [1, 2, 3, 4, 5],                                 
-    "reliability": [0.7, 0.5, 0.3, 0.9, 0.1],                   # TODO: replace with actual values
-    "certification": [0.1, 0.3, 0.5, 0.7, 0.9],                 # TODO: replace with actual values
-    "safety": [0.9, 0.7, 0.5, 0.3, 0.1]                         # TODO: replace with actual values
-}
+    "Reliability": [3, 3, 1, 4, 4],               
+    "Certification": [2, 2, 2, 4, 4],               
+    "Safety": [3, 4, 4, 2, 3] 
+}                        
 
 results_transportability = {
     "options": [1, 2, 3, 4, 5],
-    "ease": [0.5, 0.6, 0.7, 0.8, 0.9],                          # TODO: replace with actual values
-    "accessibility": [0.9, 0.7, 0.5, 0.3, 0.5]                  # TODO: replace with actual values
+    "Ease of Disassembly": [5, 4, 1, 2, 3],                         
+    "Payload Accessibility": [5, 5, 3, 2, 2]          
 }
 
 #### Calculate the weighted scores for each option ####
@@ -203,3 +204,34 @@ if __name__ == "__main__":
 
     plot_kpi_sensitivity_subplots(sensitivity_results_by_criteria, kpi_weights_by_criteria, kpi_results_by_criteria)
     print("KPI Sensitivity Subplots for all criteria have been saved.")
+
+    # Perform result sensitivity analysis
+    print("\nPerforming Result Sensitivity Analysis...")
+    all_results = {
+        "Sustainability": results_sustainability,
+        "Cost": results_cost,
+        "Performance": results_performance,
+        "Risk": results_risk,
+        "Transportability": results_transportability
+    }
+
+    result_sensitivity_results = {}
+    for criterion, results in all_results.items():
+        result_sensitivity_results[criterion] = perform_result_sensitivity_analysis(results, variation_percentage=0.25)
+
+    # Plot result sensitivity analysis
+    for criterion, sensitivity_results in result_sensitivity_results.items():
+        plot_result_sensitivity_analysis(sensitivity_results, all_results[criterion])
+
+    print("Result Sensitivity Analysis completed and plots saved.")
+
+    # Perform combined result sensitivity analysis
+    print("\nPerforming Combined Result Sensitivity Analysis...")
+    for criterion, sensitivity_results in result_sensitivity_results.items():
+        plot_combined_result_sensitivity_analysis(sensitivity_results, all_results[criterion])
+    print("Combined Result Sensitivity Analysis completed and plots saved.")
+
+    # Generate subplots for result sensitivity analysis across all criteria
+    print("\nGenerating Result Sensitivity Subplots for all criteria...")
+    plot_result_sensitivity_subplots(result_sensitivity_results, all_results)
+    print("Result Sensitivity Subplots for all criteria have been saved.")
