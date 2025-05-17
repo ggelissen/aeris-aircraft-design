@@ -13,9 +13,9 @@ crit_weights = {"Sustainability": 0.25, "Cost": 0.3, "Performance": 0.2, "Risk":
 
 # KPI weights
 kpi_sustainability = {"Fuel Consumption": 0.7, "Maintainability": 0.2, "Noise Pollution": 0.1}
-kpi_cost = {"Development": 0.2, "Acquisition": 0.4, "Operational": 0.4}
+kpi_cost = {"Development Cost": 0.2, "Acquisition Cost": 0.4, "Operational Cost": 0.4}
 kpi_performance = {"Payload Capacity": 0.5, "Stability and Control": 0.5}
-kpi_risk = {"Reliability": 0.4, "Certification": 0.3, "Safety": 0.3}
+kpi_risk = {"Reliability": 0.4, "Certification Risk": 0.3, "Safety": 0.3}
 kpi_transportability = {"Ease of Disassembly": 0.40, "Payload Accessibility": 0.60}
 
 
@@ -24,28 +24,28 @@ kpi_transportability = {"Ease of Disassembly": 0.40, "Payload Accessibility": 0.
 
 results_sustainability = {
     "options": [1, 2, 3, 4, 5],
-    "Fuel Consumption": [4, 4, 5, 1, 2],                         
-    "Maintainability": [1, 3, 5, 4, 3],
-    "Noise Pollution": [3, 4, 5, 3, 1]
+    "Fuel Consumption": [3, 3, 4, 1, 1],                         
+    "Maintainability": [3, 4, 4, 4, 2],
+    "Noise Pollution": [3, 4, 5, 1, 2]
 }
 
 results_cost = {
     "options": [1, 2, 3, 4, 5],
-    "Development": [2, 2, 1, 4, 4],                  
-    "Acquisition": [4, 4, 3, 2, 1],                  
-    "Operational": [4, 4, 4, 3, 2]               
+    "Development Cost": [4, 4, 4, 2, 1],                  
+    "Acquisition Cost": [4, 4, 4, 2, 1],                  
+    "Operational Cost": [4, 4, 4, 2, 2]               
 }
 
 results_performance = {
     "options": [1, 2, 3, 4, 5],                                 
     "Payload Capacity": [4, 4, 5, 1, 3],                    
-    "Stability and Control": [4, 5, 4, 3, 5]             
+    "Stability and Control": [3, 4, 2, 3, 4]             
 }
 
 results_risk = {
     "options": [1, 2, 3, 4, 5],                                 
     "Reliability": [3, 3, 1, 4, 4],               
-    "Certification": [2, 2, 2, 4, 4],               
+    "Certification Risk": [2, 2, 2, 4, 4],               
     "Safety": [3, 4, 4, 2, 3] 
 }                        
 
@@ -138,23 +138,27 @@ if __name__ == "__main__":
     print("\nFinal Trade-Off Table:")
     print(tabulate(trade_off_table_data, headers=trade_off_headers, floatfmt=".2f", tablefmt="grid"))
 
+    # Print the winner
+    winner_index = np.argmax(trade_off_scores)
+    print(f"\nWinner: Option {results_sustainability['options'][winner_index]} with a score of {trade_off_scores[winner_index]:.2f}")
+
     # Perform sensitivity analysis
-    print("\nPerforming Sensitivity Analysis...")
+    #print("\nPerforming Sensitivity Analysis...")
     sensitivity_analysis_results = perform_sensitivity_analysis(crit_weights, variation_percentage=0.5)
 
-    for criterion, results in sensitivity_analysis_results.items():
-        print(f"\nSensitivity for varying {criterion}:")
-        print(f"  Increased Weights: {results['increased_weights']}")
-        print(f"  New Scores with increased weight: {[round(x,4) for x in results['increased_scores']]}")
-        print(f"  Winner with increased weight: Option {results['winner_increase']}")
-        print(f"  Decreased Weights: {results['decreased_weights']}")
-        print(f"  New Scores with decreased weight: {[round(x,4) for x in results['decreased_scores']]}")
-        print(f"  Winner with decreased weight: Option {results['winner_decrease']}")
+    # for criterion, results in sensitivity_analysis_results.items():
+    #     print(f"\nSensitivity for varying {criterion}:")
+    #     print(f"  Increased Weights: {results['increased_weights']}")
+    #     print(f"  New Scores with increased weight: {[round(x,4) for x in results['increased_scores']]}")
+    #     print(f"  Winner with increased weight: Option {results['winner_increase']}")
+    #     print(f"  Decreased Weights: {results['decreased_weights']}")
+    #     print(f"  New Scores with decreased weight: {[round(x,4) for x in results['decreased_scores']]}")
+    #     print(f"  Winner with decreased weight: Option {results['winner_decrease']}")
 
     # Generate graphs for sensitivity analysis
     plot_sensitivity_analysis(sensitivity_analysis_results)
     plot_combined_sensitivity_analysis(sensitivity_analysis_results)
-    print("\nGraphs for sensitivity analysis have been saved.")
+    #print("\nGraphs for sensitivity analysis have been saved.")
 
     # Perform KPI sensitivity analysis for each criterion
     for criterion, (results, kpi_weights) in zip(
@@ -164,12 +168,12 @@ if __name__ == "__main__":
             [kpi_sustainability, kpi_cost, kpi_performance, kpi_risk, kpi_transportability],
         ),
     ):
-        print(f"\nPerforming KPI Sensitivity Analysis for {criterion}...")
-        kpi_sensitivity_results = perform_kpi_sensitivity_analysis(kpi_weights, results, variation_percentage=0.25)
+        #print(f"\nPerforming KPI Sensitivity Analysis for {criterion}...")
+        kpi_sensitivity_results = perform_kpi_sensitivity_analysis(kpi_weights, results, variation_percentage=0.5)
 
         # Plot the results for KPI sensitivity analysis
         plot_kpi_sensitivity_analysis(kpi_sensitivity_results, criterion, kpi_weights, results)
-        print(f"KPI Sensitivity Analysis for {criterion} completed.")
+        #print(f"KPI Sensitivity Analysis for {criterion} completed.")
 
     # Perform combined KPI sensitivity analysis for each criterion
     for criterion, (results, kpi_weights) in zip(
@@ -179,13 +183,13 @@ if __name__ == "__main__":
             [kpi_sustainability, kpi_cost, kpi_performance, kpi_risk, kpi_transportability],
         ),
     ):
-        print(f"\nGenerating Combined KPI Sensitivity Analysis for {criterion}...")
-        kpi_sensitivity_results = perform_kpi_sensitivity_analysis(kpi_weights, results, variation_percentage=0.25)
+        #print(f"\nGenerating Combined KPI Sensitivity Analysis for {criterion}...")
+        kpi_sensitivity_results = perform_kpi_sensitivity_analysis(kpi_weights, results, variation_percentage=0.5)
         plot_combined_kpi_sensitivity_analysis(kpi_sensitivity_results, criterion, kpi_weights, results)
-        print(f"Combined KPI Sensitivity Analysis for {criterion} completed.")
+        #print(f"Combined KPI Sensitivity Analysis for {criterion} completed.")
 
     # Generate subplots for KPI sensitivity analysis across all criteria
-    print("\nGenerating KPI Sensitivity Subplots for all criteria...")
+    #print("\nGenerating KPI Sensitivity Subplots for all criteria...")
     sensitivity_results_by_criteria = {}
     kpi_weights_by_criteria = {}
     kpi_results_by_criteria = {}
@@ -197,10 +201,10 @@ if __name__ == "__main__":
             [kpi_sustainability, kpi_cost, kpi_performance, kpi_risk, kpi_transportability],
         ),
     ):
-        kpi_sensitivity_results = perform_kpi_sensitivity_analysis(kpi_weights, results, variation_percentage=0.25)
+        kpi_sensitivity_results = perform_kpi_sensitivity_analysis(kpi_weights, results, variation_percentage=0.5)
         sensitivity_results_by_criteria[criterion] = kpi_sensitivity_results
         kpi_weights_by_criteria[criterion] = kpi_weights
         kpi_results_by_criteria[criterion] = results
 
     plot_kpi_sensitivity_subplots(sensitivity_results_by_criteria, kpi_weights_by_criteria, kpi_results_by_criteria)
-    print("KPI Sensitivity Subplots for all criteria have been saved.")
+    #print("KPI Sensitivity Subplots for all criteria have been saved.")

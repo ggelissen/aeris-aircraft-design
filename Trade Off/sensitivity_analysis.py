@@ -6,7 +6,7 @@ import logging
 from trade_off_main import calculate_trade_off_scores, results_sustainability, crit_weights, calculate_weighted_scores, calculate_weighted_scores_from_kpi
 
 
-def perform_sensitivity_analysis(base_crit_weights, variation_percentage=0.25):
+def perform_sensitivity_analysis(base_crit_weights, variation_percentage=0.5):
     base_scores = calculate_trade_off_scores(base_crit_weights)
     sensitivity_results = {}
 
@@ -16,17 +16,13 @@ def perform_sensitivity_analysis(base_crit_weights, variation_percentage=0.25):
         original_weight = increased_weights[criterion_to_vary]
         increase_amount = original_weight * variation_percentage
         increased_weights[criterion_to_vary] = min(1.0, original_weight + increase_amount)
+
         # Adjust other weights proportionally to maintain sum of 1
-        if sum(increased_weights.values()) > 1.0:
-            total_other_weights = sum(w for k, w in base_crit_weights.items() if k != criterion_to_vary)
-            if total_other_weights > 0:
-                for k, w in increased_weights.items():
-                    if k != criterion_to_vary:
-                        increased_weights[k] = w - (increase_amount * (w / total_other_weights))
-                        increased_weights[k] = max(0, increased_weights[k])
-            current_sum = sum(increased_weights.values())
-            if current_sum > 0:
-                increased_weights = {k: v / current_sum for k, v in increased_weights.items()}
+        total_other_weights = sum(w for k, w in base_crit_weights.items() if k != criterion_to_vary)
+        if total_other_weights > 0:
+            for k in increased_weights.keys():
+                if k != criterion_to_vary:
+                    increased_weights[k] *= (1.0 - increased_weights[criterion_to_vary]) / total_other_weights
 
         increased_scores = calculate_trade_off_scores(increased_weights)
         winner_increase = results_sustainability['options'][increased_scores.index(max(increased_scores))]
@@ -35,16 +31,13 @@ def perform_sensitivity_analysis(base_crit_weights, variation_percentage=0.25):
         decreased_weights = base_crit_weights.copy()
         decrease_amount = original_weight * variation_percentage
         decreased_weights[criterion_to_vary] = max(0.0, original_weight - decrease_amount)
-        if sum(decreased_weights.values()) < 1.0:
-            total_other_weights = sum(w for k, w in base_crit_weights.items() if k != criterion_to_vary)
-            if total_other_weights > 0:
-                for k, w in decreased_weights.items():
-                    if k != criterion_to_vary:
-                        decreased_weights[k] = w + (decrease_amount * (w / total_other_weights))
-                        decreased_weights[k] = min(1, decreased_weights[k])
-            current_sum = sum(decreased_weights.values())
-            if current_sum > 0:
-                decreased_weights = {k: v / current_sum for k, v in decreased_weights.items()}
+
+        # Adjust other weights proportionally to maintain sum of 1
+        total_other_weights = sum(w for k, w in base_crit_weights.items() if k != criterion_to_vary)
+        if total_other_weights > 0:
+            for k in decreased_weights.keys():
+                if k != criterion_to_vary:
+                    decreased_weights[k] *= (1.0 - decreased_weights[criterion_to_vary]) / total_other_weights
 
         decreased_scores = calculate_trade_off_scores(decreased_weights)
         winner_decrease = results_sustainability['options'][decreased_scores.index(max(decreased_scores))]
@@ -181,7 +174,7 @@ def plot_sensitivity_analysis(sensitivity_results):
 
 def plot_kpi_sensitivity_analysis(sensitivity_results, criterion, kpi_weights, kpi_results):
 
-    options = list(range(len(next(iter(kpi_results.values())))))
+    options = list(range(len(next(iter(kpi_results.values())))+1)[1:])
 
     for kpi, results in sensitivity_results.items():
 
@@ -275,7 +268,7 @@ def plot_combined_kpi_sensitivity_analysis(sensitivity_results, criterion, kpi_w
     output_dir = os.path.join('Figures', 'Sensitivity Analysis', 'KPI Weights')
     os.makedirs(output_dir, exist_ok=True)
 
-    options = list(range(len(next(iter(kpi_results.values())))))  # Infer options from KPI results
+    options = list(range(len(next(iter(kpi_results.values())))+1)[1:])
     kpis = list(kpi_weights.keys())
 
     # Initialize data for the grouped bar plot
@@ -351,7 +344,7 @@ def plot_kpi_sensitivity_subplots(sensitivity_results_by_criteria, kpi_weights_b
         kpi_weights = kpi_weights_by_criteria[criterion]
         kpi_results = kpi_results_by_criteria[criterion]
 
-        options = list(range(len(next(iter(kpi_results.values())))))  # Infer options from KPI results
+        options = list(range(len(next(iter(kpi_results.values())))+1)[1:]) # Infer options from KPI results
         kpis = list(kpi_weights.keys())
 
         # Initialize data for the grouped bar plot
