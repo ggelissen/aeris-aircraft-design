@@ -39,7 +39,7 @@ results_cost = {
 results_performance = {
     "options": [1, 2, 3, 4, 5],                                 
     "Payload Capacity": [4, 4, 5, 1, 3],                    
-    "Stability and Control": [3, 4, 2, 3, 4]             
+    "Stability and Control": [4, 4, 2, 3, 4]             
 }
 
 results_risk = {
@@ -158,6 +158,10 @@ if __name__ == "__main__":
     # Generate graphs for sensitivity analysis
     plot_sensitivity_analysis(sensitivity_analysis_results)
     plot_combined_sensitivity_analysis(sensitivity_analysis_results)
+    # --- Cumulative Boxplot Visualization: Combined Sensitivity Analysis ---
+    plot_combined_sensitivity_boxplot(sensitivity_analysis_results)
+x    # --- Emphasized Cumulative Boxplot Visualization: Combined Sensitivity Analysis ---
+    plot_combined_sensitivity_boxplot(sensitivity_analysis_results, variation_percentage=1.0)
     #print("\nGraphs for sensitivity analysis have been saved.")
 
     # Perform KPI sensitivity analysis for each criterion
@@ -208,3 +212,8 @@ if __name__ == "__main__":
 
     plot_kpi_sensitivity_subplots(sensitivity_results_by_criteria, kpi_weights_by_criteria, kpi_results_by_criteria)
     #print("KPI Sensitivity Subplots for all criteria have been saved.")
+
+    # --- Grouped Bar Visualization: Scores with Each Criterion Zeroed ---
+    #print("\nGenerating grouped bar visualization: Final scores with each main criterion set to zero weight...")
+    plot_grouped_scores_with_criteria_zeroed(crit_weights, calculate_trade_off_scores, results_sustainability['options'])
+    #print("Grouped bar visualization saved as 'grouped_scores_with_criteria_zeroed.pdf'.")

@@ -19,14 +19,14 @@ import matplotlib.pyplot as plt
 #                        = 1100 kg (incl. Lidar + Radiospectrometer + Airborne Mass Spectrometer))
 
 W_PL_lst = [300, 600, 850, 1100] # kg
-W_PL = W_PL_lst[2] 
+W_PL = W_PL_lst[1] 
 print(f"Payload weight: {W_PL:.2f} kg")
 
 
 ####    Guessing likely value of take-off weight W_TO    ####
 
 # Reference unmanned aircraft: XQ-58A    
-W_TO = 4000 # kg
+W_TO = 3200 # kg
 print(f"Take-off weight: {W_TO:.2f} kg")
 
 
