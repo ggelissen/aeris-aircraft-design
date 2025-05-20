@@ -367,7 +367,7 @@ def plot_kpi_sensitivity_subplots(sensitivity_results_by_criteria, kpi_weights_b
         for i, (kpi, color) in enumerate(zip(kpis, colors)):
             ax.bar(x + i * (width + bar_spacing), grouped_data[kpi], width, label=kpi,
                    yerr=[lower_errors[kpi], upper_errors[kpi]],
-                   capsize=5, alpha=0.8, color=color)
+                   capsize=5, color=color)
 
         ax.set_xlabel('Options', fontsize=16)
         ax.set_ylabel('Scores', fontsize=16)

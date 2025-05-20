@@ -12,7 +12,7 @@ from sensitivity_analysis import *
 crit_weights = {"Sustainability": 0.25, "Cost": 0.3, "Performance": 0.2, "Risk": 0.15, "Transportability": 0.1}
 
 # KPI weights
-kpi_sustainability = {"Fuel Consumption": 0.7, "Maintainability": 0.2, "Noise Pollution": 0.1}
+kpi_sustainability = {"Fuel Consumption": 0.7, "Production and Disposal": 0.3}
 kpi_cost = {"Development Cost": 0.2, "Acquisition Cost": 0.4, "Operational Cost": 0.4}
 kpi_performance = {"Payload Capacity": 0.5, "Stability and Control": 0.5}
 kpi_risk = {"Reliability": 0.4, "Certification Risk": 0.3, "Safety": 0.3}
@@ -24,9 +24,8 @@ kpi_transportability = {"Ease of Disassembly": 0.40, "Payload Accessibility": 0.
 
 results_sustainability = {
     "options": [1, 2, 3, 4, 5],
-    "Fuel Consumption": [3, 3, 4, 1, 1],                         
-    "Maintainability": [3, 4, 4, 4, 2],
-    "Noise Pollution": [3, 4, 5, 1, 2]
+    "Fuel Consumption": [3, 4, 5, 1, 1],                         
+    "Production and Disposal": [4, 4, 3, 2, 1]
 }
 
 results_cost = {
@@ -160,7 +159,7 @@ if __name__ == "__main__":
     plot_combined_sensitivity_analysis(sensitivity_analysis_results)
     # --- Cumulative Boxplot Visualization: Combined Sensitivity Analysis ---
     plot_combined_sensitivity_boxplot(sensitivity_analysis_results)
-x    # --- Emphasized Cumulative Boxplot Visualization: Combined Sensitivity Analysis ---
+    # --- Emphasized Cumulative Boxplot Visualization: Combined Sensitivity Analysis ---
     plot_combined_sensitivity_boxplot(sensitivity_analysis_results, variation_percentage=1.0)
     #print("\nGraphs for sensitivity analysis have been saved.")
 

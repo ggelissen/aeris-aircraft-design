@@ -26,7 +26,7 @@ print(f"Payload weight: {W_PL:.2f} kg")
 ####    Guessing likely value of take-off weight W_TO    ####
 
 # Reference unmanned aircraft: XQ-58A    
-W_TO = 3200 # kg
+W_TO = 4500 # kg
 print(f"Take-off weight: {W_TO:.2f} kg")
 
 
@@ -35,13 +35,13 @@ print(f"Take-off weight: {W_TO:.2f} kg")
 # Constants for cruise
 R_cruise = 8000e3         # m
 V_cruise = 240          # m/s
-L_D_cruise = 14
-c_j_cruise = 0.456/3600       # lbs/lbs/hr - Roskam range (0.5-1.0) - Williams FJ44-3AP 
+L_D_cruise = 15
+c_j_cruise = 0.685/3600       # lbs/lbs/hr - Roskam range (0.5-1.0) - Williams FJ44-3AP 
 
 # Constants for loiter
-L_D_loiter = 16
-c_j_loiter = 0.75*0.456/3600        # lbs/lbs/hr - Roskam range (0.4-0.6) - Williams FJ44-3AP 
-E_loiter = 0.5*3600                 # hr    TODO: check this value
+L_D_loiter = 17
+c_j_loiter = 0.75*0.685/3600        # lbs/lbs/hr - Roskam range (0.4-0.6) - Williams FJ44-3AP 
+E_loiter = 0.*3600                 # hr    TODO: check this value
 
 # Fuel fractions for different mission profiles
 # 1: engine start, 2: taxi, 3: take-off, 4: climb, 5: cruise, 6: loiter, 7: descent, 8: landing
