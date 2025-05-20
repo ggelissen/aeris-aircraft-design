@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Based on Part I "Preliminary Sizing of Airplanes" by Roskam
 # For manned aircraft, use "5. Business Jet" (p. 5)
@@ -18,14 +19,14 @@ import numpy as np
 #                        = 1100 kg (incl. Lidar + Radiospectrometer + Airborne Mass Spectrometer))
 
 W_PL_lst = [300, 600, 850, 1100] # kg
-W_PL = W_PL_lst[2] 
+W_PL = W_PL_lst[1] 
 print(f"Payload weight: {W_PL:.2f} kg")
 
 
 ####    Guessing likely value of take-off weight W_TO    ####
 
 # Reference unmanned aircraft: XQ-58A    
-W_TO = 4000 # kg
+W_TO = 3200 # kg
 print(f"Take-off weight: {W_TO:.2f} kg")
 
 
@@ -113,3 +114,33 @@ T_W = W_S_TO / (C_L_max_TO * 1795.5)
 
 T_TO = T_W * W_TO * 9.81
 print(f"Take-off thrust: {T_TO:.2f} N")
+
+
+########################## Chapter 4: Payload-Range Diagram ##########################
+
+# Define a range of payload weights to analyze
+payload_weights = np.linspace(300, 1100, 10)  # kg, from minimum to maximum payload
+ranges = []
+
+# Constants for cruise (already defined in the file)
+for W_PL in payload_weights:
+    # Recalculate fuel weight and mission fuel fraction
+    W_OE_tent = W_TO - W_PL
+    W_F_tent = W_TO - W_OE_tent - W_PL
+    M_ff = 1 - (W_F_tent / W_TO)
+
+    # Calculate range using the Breguet range equation
+    R_cruise = V_cruise * L_D_cruise * np.log(1 / M_ff) / c_j_cruise
+    ranges.append(R_cruise / 1e3)  # Convert to kilometers
+
+# Plot the payload-range diagram
+plt.figure(figsize=(10, 6))
+plt.plot(ranges, payload_weights, marker='o', label='Payload-Range Curve')
+plt.title('Payload-Range Diagram')
+plt.xlabel('Range (km)')
+plt.ylabel('Payload Weight (kg)')
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.savefig('payload_range_diagram.pdf')
+plt.show()
