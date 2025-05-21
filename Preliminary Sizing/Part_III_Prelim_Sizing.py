@@ -246,7 +246,7 @@ def constraint_climb_gradient_jet_pd(wing_loading_range_Npm2, grad_req, alt_grad
 
 # --- Plotting Function (from previous combined code) ---
 def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs W/S Diagram", design_point=None):
-    plt.figure(figsize=(14, 9))
+    plt.figure(figsize=(14, 7))
     colors = plt.cm.get_cmap('tab10', len(constraints_data_pd))
     
     for i, constr in enumerate(constraints_data_pd):
@@ -266,20 +266,14 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
             if not plt.gca().get_lines(): TW_max_for_plot = 0.6
 
             plt.vlines(x=constr['W_S_max'], ymin=TW_min_for_plot, ymax=TW_max_for_plot, label=constr['label'], colors=color, linestyles=constr.get('style', '--'))
-            # Arrow indicating feasible region (left of the line)
-            if constr['W_S_max'] > wing_loading_Npm2[0]: # Only draw arrow if line is within plot
-                 plt.annotate('', xy=(constr['W_S_max'] - max(10, 0.01*constr['W_S_max']), (TW_min_for_plot + TW_max_for_plot) * 0.5),
-                             xytext=(constr['W_S_max'] + max(50, 0.05*(wing_loading_Npm2[-1]-wing_loading_Npm2[0])), (TW_min_for_plot + TW_max_for_plot) * 0.5),
-                             arrowprops=dict(facecolor=color, shrink=0.05, width=1, headwidth=5),
-                             annotation_clip=False)
 
     if design_point:
-        plt.plot(design_point['W_S'], design_point['T_W'], 'ko', markersize=10, label=f"Design Point ({design_point['label']})")
+        plt.plot(design_point['W_S'], design_point['T_W'], 'ko', markersize=4, label=f"Design Point ({design_point['label']})")
         plt.text(design_point['W_S']*1.02, design_point['T_W']*1.02, f" W/S={design_point['W_S']:.0f}\n T/W={design_point['T_W']:.3f}", fontsize=9)
 
 
     plt.xlabel("Wing Loading (W/S) $[N/m^2]$")
-    plt.ylabel("Thrust-to-Weight Ratio ($T_{TO}/W_{TO}$)")
+    plt.ylabel("Thrust-to-Weight Ratio (T/W)")
     #plt.title(title)
     plt.legend(loc='center left', bbox_to_anchor=(1.01, 0.5), fontsize='small')
     plt.grid(True)
@@ -293,8 +287,9 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
     else:
         plt.ylim(0, 0.6)
 
-    plt.xlim(wing_loading_Npm2[0], wing_loading_Npm2[-1])
-    plt.tight_layout(rect=[0, 0, 0.8, 1])
+    plt.ylim(0, 0.6)
+    plt.xlim(wing_loading_Npm2[0], 4000)
+    plt.tight_layout(w_pad=0.5)
     plt.savefig("Figures/Performance Diagrams/TW_WS_Diagram_BusinessJet_Detailed.pdf")
     print("\nPerformance Diagram saved as TW_WS_Diagram_BusinessJet_Detailed.pdf")
 
@@ -343,7 +338,7 @@ if __name__ == "__main__":
 
     W_S_range_Npm2_pd = np.linspace(1500, 6000, 200)
     constraints_list_pd = []
-    rho_SL_pd, _, _, _, _, _ = get_isa_conditions_pd(0)
+    _, _, rho_SL_pd, _, _, _ = get_isa_conditions_pd(0)
 
     # 1. Stall Speed
     ws_stall_cl = constraint_stall_speed_pd(W_S_range_Npm2_pd, rho_SL_pd, kts_to_ms(V_s_clean_req_kts_pd), C_Lmax_s_clean)
@@ -371,6 +366,19 @@ if __name__ == "__main__":
     tw_roc = constraint_climb_rate_jet_pd(W_S_range_Npm2_pd, climb_rate_req_ms_pd, climb_rate_alt_m_pd, C_D0_cruise_cfg, e_cruise_cfg, uav_A_perf, W_climb_frac_W_TO=climb_rate_W_frac_pd)
     constraints_list_pd.append({'label': f'Rate of Climb ($\geq{climb_rate_req_ms_pd}$m/s @ SL, A={uav_A_perf})', 'T_W_values': tw_roc, 'style': '-'})
 
+    # --- Find intersection of stall clean and rate of climb lines ---
+    # Get the stall clean constraint (vertical line at W_S_max)
+    ws_stall_cl_val = ws_stall_cl
+    # Get the rate of climb curve (tw_roc)
+    # Find the index where W_S_range_Npm2_pd crosses ws_stall_cl_val
+    idx_stall = np.argmin(np.abs(W_S_range_Npm2_pd - ws_stall_cl_val))
+    ws_intersect = W_S_range_Npm2_pd[idx_stall]
+    tw_intersect = tw_roc[idx_stall]
+    # Round to nearest hundred
+    ws_intersect_rounded = int(round(ws_intersect, -2))
+    tw_intersect_rounded = round(tw_intersect, 2)
+    design_point_example = {'W_S': ws_intersect, 'T_W': tw_intersect, 'label': f'Intersection ({ws_intersect_rounded}, {tw_intersect_rounded})'}
+
     # 6. Climb Gradient AEO (T/O config, using C_D0_grad_AEO, e_grad_AEO)
     tw_grad_aeo = constraint_climb_gradient_jet_pd(W_S_range_Npm2_pd, climb_grad_AEO_req_pd, climb_grad_AEO_alt_m_pd, C_D0_grad_AEO, e_grad_AEO, uav_A_perf, is_OEI=False, num_engines=num_engines_uav_perf)
     constraints_list_pd.append({'label': f'Climb Grad AEO ($\geq{climb_grad_AEO_req_pd*100:.1f}$% @ SL, A={uav_A_perf})', 'T_W_values': tw_grad_aeo, 'style': '-'})
@@ -379,14 +387,4 @@ if __name__ == "__main__":
     tw_grad_oei = constraint_climb_gradient_jet_pd(W_S_range_Npm2_pd, climb_grad_OEI_req_pd, climb_grad_OEI_alt_m_pd, C_D0_grad_OEI, e_grad_OEI, uav_A_perf, is_OEI=True, num_engines=num_engines_uav_perf, delta_CD0_OEI=delta_CD0_OEI_val_pd)
     constraints_list_pd.append({'label': f'Climb Grad OEI ($\geq{climb_grad_OEI_req_pd*100:.1f}$% @ {climb_grad_OEI_alt_m_pd:.0f}m, A={uav_A_perf})', 'T_W_values': tw_grad_oei, 'style': '--'})
 
-    # Example Design Point (chosen manually after inspecting the plot from a similar example like PDF2 P111)
-    # This point would ideally be derived by finding the "bottom-left" corner of the feasible region.
-    # For A=9, C_Lmax_L=2.4 (for landing W/S), C_Lmax_TO=1.9 (for T/O T/W)
-    # From PDF2 P111/P100 type plots, a typical design point for a business jet might be:
-    # W/S around 2800-3500 N/m^2, T/W around 0.25-0.35
-    # Let's pick an illustrative point based on the generated lines.
-    # This requires running the code once to see the lines. For now, placeholder.
-    # design_point_example = {'W_S': 3000, 'T_W': 0.28, 'label': 'Illustrative DP (A=9)'}
-
-
-    plot_TW_WS_diagram_pd(W_S_range_Npm2_pd, constraints_list_pd, title=f"T/W vs W/S Diagram - Business Jet (A={uav_A_perf})") #, design_point=design_point_example)
+    plot_TW_WS_diagram_pd(W_S_range_Npm2_pd, constraints_list_pd, title=f"T/W vs W/S Diagram - Business Jet (A={uav_A_perf})", design_point=design_point_example)

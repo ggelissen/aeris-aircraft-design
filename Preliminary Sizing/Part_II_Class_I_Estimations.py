@@ -498,31 +498,35 @@ def plot_payload_range_diagram(pr_data, export_path=None):
     plt.show()
 
 
+
+
+print("--- Running Agile UAV Concept ---")
+uav_aircraft_params = {
+    "type": "uav", # Used for specific mission profile and L/D example values
+    "type_for_coeffs": "uav", # Used for W_E = a*W_TO + b
+    "A": 9.0,
+    "c_j_kg_Ns": lb_hr_lbf_to_kg_Ns(0.685), # 0.685 lb/hr/lb -> kg/Ns
+    "M_tfo": 0.005 # As per example calculation on page 42 of ADSEE I Lecture 2 (Weight Estimation)
+}
+uav_mission_params = {
+    "W_PL_N": kg_to_N(600), # 600 kg payload
+    "W_crew_N": kg_to_N(0), # 0 kg crew
+    "R_cruise1_m": km_to_m(6500), # 6500 km design range
+    "V_cruise_ms": kmh_to_ms(864) # 864 km/hr cruise speed
+}
+uav_reserve_params = { # Mission extension type reserves
+    "type": "mission_extension",
+    "R_cruise2_m": km_to_m(460), # 460 km alternate range
+    "E_loiter_s": min_to_s(120) # 120 min loiter
+}
+
+uav_results = class1_weight_estimation(
+    uav_aircraft_params, uav_mission_params, uav_reserve_params
+)
+
+
 # --- Main Example Usage ---
 if __name__ == "__main__":
-    print("--- Running Agile UAV Concept ---")
-    uav_aircraft_params = {
-        "type": "uav", # Used for specific mission profile and L/D example values
-        "type_for_coeffs": "uav", # Used for W_E = a*W_TO + b
-        "A": 9.0,
-        "c_j_kg_Ns": lb_hr_lbf_to_kg_Ns(0.685), # 0.685 lb/hr/lb -> kg/Ns
-        "M_tfo": 0.005 # As per example calculation on page 42 of ADSEE I Lecture 2 (Weight Estimation)
-    }
-    uav_mission_params = {
-        "W_PL_N": kg_to_N(600), # 600 kg payload
-        "W_crew_N": kg_to_N(0), # 0 kg crew
-        "R_cruise1_m": km_to_m(6500), # 6500 km design range
-        "V_cruise_ms": kmh_to_ms(864) # 864 km/hr cruise speed
-    }
-    uav_reserve_params = { # Mission extension type reserves
-        "type": "mission_extension",
-        "R_cruise2_m": km_to_m(460), # 460 km alternate range
-        "E_loiter_s": min_to_s(120) # 120 min loiter
-    }
-
-    uav_results = class1_weight_estimation(
-        uav_aircraft_params, uav_mission_params, uav_reserve_params
-    )
 
     if uav_results:
         # Example: Payload-Range data points
