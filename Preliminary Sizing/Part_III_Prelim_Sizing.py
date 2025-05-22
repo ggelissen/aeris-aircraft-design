@@ -290,8 +290,8 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
     plt.ylim(0, 0.6)
     plt.xlim(wing_loading_Npm2[0], 4000)
     plt.tight_layout(w_pad=0.5)
-    plt.savefig("Figures/Performance Diagrams/TW_WS_Diagram_BusinessJet_Detailed.pdf")
-    print("\nPerformance Diagram saved as TW_WS_Diagram_BusinessJet_Detailed.pdf")
+    plt.savefig("Figures/Performance Diagrams/TW_WS_Diagram.pdf")
+    print("\nPerformance Diagram saved as TW_WS_Diagram.pdf")
 
 
 # --- Main Execution for Performance Diagram ---
@@ -342,49 +342,50 @@ if __name__ == "__main__":
 
     # 1. Stall Speed
     ws_stall_cl = constraint_stall_speed_pd(W_S_range_Npm2_pd, rho_SL_pd, kts_to_ms(V_s_clean_req_kts_pd), C_Lmax_s_clean)
-    constraints_list_pd.append({'label': f'Stall Clean ($V_s \leq {V_s_clean_req_kts_pd}$ kts, $C_{{Lmax}}={C_Lmax_s_clean:.2f}$)', 'W_S_max': ws_stall_cl, 'style': '-.'})
+    constraints_list_pd.append({'label': f'Stall Speed $(V_s)_{{TO}}$ (Clean)', 'W_S_max': ws_stall_cl, 'style': '-.'})
     
     ws_stall_L_at_landing = constraint_stall_speed_pd(W_S_range_Npm2_pd, rho_SL_pd, kts_to_ms(V_s_land_req_kts_pd), C_Lmax_s_L)
     ws_stall_L_at_TO = ws_stall_L_at_landing / W_L_over_W_TO_jet_pd if ws_stall_L_at_landing else None
-    constraints_list_pd.append({'label': f'Stall Landing ($V_s \leq {V_s_land_req_kts_pd}$ kts, $C_{{Lmax,L}}={C_Lmax_s_L:.2f}$)', 'W_S_max': ws_stall_L_at_TO, 'style': ':'})
+    constraints_list_pd.append({'label': f'Stall Speed $(V_s)_L$ (Landing)', 'W_S_max': ws_stall_L_at_TO, 'style': ':'})
 
     # 2. Take-Off
     for clmax_to in [1.6, 1.9, 2.2]: # PDF2 P27 values
         tw_to = constraint_take_off_distance_jet_pd(W_S_range_Npm2_pd, S_TO_req_m_pd, clmax_to, sigma_TO=1.0)
-        constraints_list_pd.append({'label': f'Take-Off ($S_{{TO}}\leq{S_TO_req_m_pd:.0f}$m, $C_{{Lmax,TO}}={clmax_to:.1f}$)', 'T_W_values': tw_to, 'style': '-'})
+        constraints_list_pd.append({'label': f'Take-Off Distance $S_{{TO}}$ @ $(C_L)_{{max}} = {clmax_to}$', 'T_W_values': tw_to, 'style': '-'})
 
     # 3. Landing
+    ws_land_18 = None
     for clmax_l in [1.8, 2.1, C_Lmax_l_cfg_base]: # C_Lmax_l_cfg_base is 2.4 from P12 example
         ws_land = constraint_landing_distance_pd(W_S_range_Npm2_pd, S_L_req_m_pd, clmax_l, W_L_over_W_TO_jet_pd, rho_SL_pd, "CS25")
-        constraints_list_pd.append({'label': f'Landing ($S_L\leq{S_L_req_m_pd:.0f}$m, $C_{{Lmax,L}}={clmax_l:.1f}$)', 'W_S_max': ws_land, 'style': '--'})
-    
+        constraints_list_pd.append({'label': f'Landing Distance $S_L$ @ $(C_L)_{{max}} = {clmax_l}$', 'W_S_max': ws_land, 'style': '--'})
+        if clmax_l == 1.8:
+            ws_land_18 = ws_land
+
     # 4. Cruise Speed
     tw_cruise = constraint_cruise_speed_jet_pd(W_S_range_Npm2_pd, cruise_V_ms_pd, cruise_alt_m_pd, C_D0_cruise_cfg, e_cruise_cfg, uav_A_perf, cruise_W_frac_pd, cruise_thrust_setting_pd)
-    constraints_list_pd.append({'label': f'Cruise ($V={cruise_V_ms_pd}$m/s @ {cruise_alt_m_pd/1000:.0f}km, A={uav_A_perf})', 'T_W_values': tw_cruise, 'style': '-'})
+    constraints_list_pd.append({'label': f'Cruise Speed $V_c$', 'T_W_values': tw_cruise, 'style': '-'})
 
     # 5. Climb Rate AEO (Clean config assumed for best RoC speed condition)
     tw_roc = constraint_climb_rate_jet_pd(W_S_range_Npm2_pd, climb_rate_req_ms_pd, climb_rate_alt_m_pd, C_D0_cruise_cfg, e_cruise_cfg, uav_A_perf, W_climb_frac_W_TO=climb_rate_W_frac_pd)
-    constraints_list_pd.append({'label': f'Rate of Climb ($\geq{climb_rate_req_ms_pd}$m/s @ SL, A={uav_A_perf})', 'T_W_values': tw_roc, 'style': '-'})
+    constraints_list_pd.append({'label': f'Rate of Climb c (AEO)', 'T_W_values': tw_roc, 'style': '-'})
 
-    # --- Find intersection of stall clean and rate of climb lines ---
-    # Get the stall clean constraint (vertical line at W_S_max)
-    ws_stall_cl_val = ws_stall_cl
-    # Get the rate of climb curve (tw_roc)
-    # Find the index where W_S_range_Npm2_pd crosses ws_stall_cl_val
-    idx_stall = np.argmin(np.abs(W_S_range_Npm2_pd - ws_stall_cl_val))
-    ws_intersect = W_S_range_Npm2_pd[idx_stall]
-    tw_intersect = tw_roc[idx_stall]
-    # Round to nearest hundred
-    ws_intersect_rounded = int(round(ws_intersect, -2))
-    tw_intersect_rounded = round(tw_intersect, 2)
-    design_point_example = {'W_S': ws_intersect, 'T_W': tw_intersect, 'label': f'Intersection ({ws_intersect_rounded}, {tw_intersect_rounded})'}
+    # --- Find intersection of rate of climb curve and landing distance (clmax=1.8) ---
+    if ws_land_18 is not None:
+        idx_land = np.argmin(np.abs(W_S_range_Npm2_pd - ws_land_18))
+        ws_intersect = W_S_range_Npm2_pd[idx_land]
+        tw_intersect = tw_roc[idx_land]
+        ws_intersect_rounded = int(round(ws_intersect, -2))
+        tw_intersect_rounded = round(tw_intersect, 2)
+        design_point_example = {'W_S': ws_intersect, 'T_W': tw_intersect, 'label': f'Intersection ({ws_intersect_rounded}, {tw_intersect_rounded})'}
+    else:
+        design_point_example = None
 
     # 6. Climb Gradient AEO (T/O config, using C_D0_grad_AEO, e_grad_AEO)
     tw_grad_aeo = constraint_climb_gradient_jet_pd(W_S_range_Npm2_pd, climb_grad_AEO_req_pd, climb_grad_AEO_alt_m_pd, C_D0_grad_AEO, e_grad_AEO, uav_A_perf, is_OEI=False, num_engines=num_engines_uav_perf)
-    constraints_list_pd.append({'label': f'Climb Grad AEO ($\geq{climb_grad_AEO_req_pd*100:.1f}$% @ SL, A={uav_A_perf})', 'T_W_values': tw_grad_aeo, 'style': '-'})
+    constraints_list_pd.append({'label': f'Climb Gradient c/V (AEO)', 'T_W_values': tw_grad_aeo, 'style': '-'})
 
     # 7. Climb Gradient OEI (T/O config, C_D0_grad_OEI is C_D0_grad_AEO + delta_CD0_OEI_val)
     tw_grad_oei = constraint_climb_gradient_jet_pd(W_S_range_Npm2_pd, climb_grad_OEI_req_pd, climb_grad_OEI_alt_m_pd, C_D0_grad_OEI, e_grad_OEI, uav_A_perf, is_OEI=True, num_engines=num_engines_uav_perf, delta_CD0_OEI=delta_CD0_OEI_val_pd)
-    constraints_list_pd.append({'label': f'Climb Grad OEI ($\geq{climb_grad_OEI_req_pd*100:.1f}$% @ {climb_grad_OEI_alt_m_pd:.0f}m, A={uav_A_perf})', 'T_W_values': tw_grad_oei, 'style': '--'})
+    constraints_list_pd.append({'label': f'Climb Gradient c/V (OEI)', 'T_W_values': tw_grad_oei, 'style': '--'})
 
     plot_TW_WS_diagram_pd(W_S_range_Npm2_pd, constraints_list_pd, title=f"T/W vs W/S Diagram - Business Jet (A={uav_A_perf})", design_point=design_point_example)
