@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # --- Import utilities from Class I module ---
-from Part_II_Class_I_Estimations import (
+from 1_PrelimSizing_Part_I import (
     kg_to_N, N_to_kg, km_to_m, m_to_km, kmh_to_ms, ms_to_kmh,
     min_to_s
 )

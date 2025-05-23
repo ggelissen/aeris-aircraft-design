@@ -511,13 +511,13 @@ uav_aircraft_params = {
 uav_mission_params = {
     "W_PL_N": kg_to_N(600), # 600 kg payload
     "W_crew_N": kg_to_N(0), # 0 kg crew
-    "R_cruise1_m": km_to_m(6500), # 6500 km design range
+    "R_cruise1_m": km_to_m(7600), # 6500 km design range
     "V_cruise_ms": kmh_to_ms(864) # 864 km/hr cruise speed
 }
 uav_reserve_params = { # Mission extension type reserves
     "type": "mission_extension",
     "R_cruise2_m": km_to_m(460), # 460 km alternate range
-    "E_loiter_s": min_to_s(120) # 120 min loiter
+    "E_loiter_s": min_to_s(30) # 120 min loiter
 }
 
 uav_results = class1_weight_estimation(
