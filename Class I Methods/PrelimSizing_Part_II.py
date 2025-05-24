@@ -2,9 +2,10 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from AERIS_Class import AERIS
 
 # --- Import utilities from Class I module ---
-from 1_PrelimSizing_Part_I import (
+from PrelimSizing_Part_I import (
     kg_to_N, N_to_kg, km_to_m, m_to_km, kmh_to_ms, ms_to_kmh,
     min_to_s
 )
@@ -296,10 +297,13 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
 
 # --- Main Execution for Performance Diagram ---
 if __name__ == "__main__":
+
     print("--- Generating T/W vs W/S Diagram for Business Jet (Performance Module) ---")
 
-    uav_A_perf = 9.0
-    num_engines_uav_perf = 1
+    AERIS = AERIS()
+
+    uav_A_perf = AERIS.A 
+    num_engines_uav_perf = AERIS.num_engines
 
     # Aerodynamic parameters (PDF2 P12 "Jet" example data or specific configs)
     # Using specific configurations for clarity based on constraint context
@@ -311,29 +315,29 @@ if __name__ == "__main__":
 
     C_D0_cruise_cfg, e_cruise_cfg, _, _ = get_aircraft_config_aerodynamics_pd("uav", "clean_config_P12", uav_A_perf) # Clean for cruise/climb rate
 
-    # Performance Requirements (from PDF2 business jet examples)
-    V_s_clean_req_kts_pd = 100  # [cite: 35]
-    V_s_land_req_kts_pd = 85    # [cite: 35]
-    S_TO_req_m_pd = ft_to_m(5000) # Approx 1524 m, example value
-    S_L_req_m_pd = 1200         # [cite: 87]
-    W_L_over_W_TO_jet_pd = 0.88 # [cite: 88]
+    # Performance Requirements
+    V_s_clean_req_kts_pd = AERIS.V_s_clean  # [cite: 35]
+    V_s_land_req_kts_pd = AERIS.V_s_land    # [cite: 35]
+    S_TO_req_m_pd = AERIS.S_TO              # [cite: 87]
+    S_L_req_m_pd = AERIS.S_L                # [cite: 87]
+    W_L_over_W_TO_jet_pd = 0.88             # [cite: 88]
 
-    cruise_alt_m_pd = 10000     # [cite: 101]
-    cruise_V_ms_pd = 200        # [cite: 101]
-    cruise_W_frac_pd = 0.8      # [cite: 101]
-    cruise_thrust_setting_pd = 0.9 # [cite: 101]
+    cruise_alt_m_pd = AERIS.h_cruise                                # [cite: 101]
+    cruise_V_ms_pd = AERIS.V_cruise                                 # [cite: 101]
+    cruise_W_frac_pd = 0.8                                          # [cite: 101]
+    cruise_thrust_setting_pd = AERIS.cruise_thrust_setting          # [cite: 101]
 
-    climb_rate_req_ms_pd = 20   # m/s at SL [cite: 119]
-    climb_rate_alt_m_pd = 0
+    climb_rate_req_ms_pd = AERIS.c
+    climb_rate_alt_m_pd = AERIS.c_alt
     climb_rate_W_frac_pd = 1.0
 
-    climb_grad_AEO_req_pd = 0.2
-    climb_grad_AEO_alt_m_pd = 0   # at sea level
+    climb_grad_AEO_req_pd = AERIS.c_V_AEO
+    climb_grad_AEO_alt_m_pd = AERIS.c_V_AEO_alt
     C_D0_grad_AEO, e_grad_AEO, _, _ = get_aircraft_config_aerodynamics_pd("uav", "take_off_gear_up_P12", uav_A_perf) # T/O config for this
 
-    climb_grad_OEI_req_pd = 0.024 # FAR 25.121 for 2 engines [cite: 143] (2.4%)
-    climb_grad_OEI_alt_m_pd = ft_to_m(35) # 2nd segment typically starts at 35ft screen height (can vary, this is approx)
-    delta_CD0_OEI_val_pd = 0.005
+    climb_grad_OEI_req_pd = AERIS.c_V_OEI
+    climb_grad_OEI_alt_m_pd = ft_to_m(AERIS.c_V_OEI_alt)
+    delta_CD0_OEI_val_pd = AERIS.delta_CD0_OEI
     C_D0_grad_OEI, e_grad_OEI, _, _ = get_aircraft_config_aerodynamics_pd("uav", "take_off_gear_up_P12", uav_A_perf) # T/O config for OEI
 
     W_S_range_Npm2_pd = np.linspace(1500, 6000, 200)
@@ -389,3 +393,5 @@ if __name__ == "__main__":
     constraints_list_pd.append({'label': f'Climb Gradient c/V (OEI)', 'T_W_values': tw_grad_oei, 'style': '--'})
 
     plot_TW_WS_diagram_pd(W_S_range_Npm2_pd, constraints_list_pd, title=f"T/W vs W/S Diagram - Business Jet (A={uav_A_perf})", design_point=design_point_example)
+
+    print("Design Point: W/S = {:.0f} N/m^2, T/W = {:.3f}".format(ws_intersect, tw_intersect))
