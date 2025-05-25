@@ -93,6 +93,10 @@ class DesignParameters:
     
 
 class WeightParameters:
+    """
+    Class to hold weight-related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
     def __init__(self):
         self.W_TO = 30787.8                         # Maximum Take-Off Weight (MTOW) in N
         self.W_OE = 11973.3                         # Operational Empty Weight (OEW) in N
@@ -102,6 +106,10 @@ class WeightParameters:
         self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
 
 class WingParameters:
+    """
+    Class to hold wing-related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
     def __init__(self, W_TO: float = None, W_S: float = None):
         self.S_w = W_TO / W_S                       # Wing Area in m^2
         self.A_w = None                             # Aspect Ratio
@@ -118,6 +126,10 @@ class WingParameters:
         self.Gamma_w = None                         # Wing Dihedral Angle in degrees
 
 class PerformanceParameters:
+    """
+    Class to hold performance-related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
     def __init__(self):
         self.climb_rate = None                      # Climb Rate in m/s
         self.climb_rate_alt = None                  # Climb Rate Altitude in m
@@ -132,6 +144,10 @@ class PerformanceParameters:
         self.CL_max_cruise = None                   # Maximum Lift Coefficient at Cruise
 
 class FuselageParameters:
+    """
+    Class to hold fuselage-related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
     def __init__(self):
         self.D_f = None                             # Fuselage Diameter in m
         self.l_f = None                             # Fuselage Length in m
@@ -139,6 +155,10 @@ class FuselageParameters:
         self.l_n = None                             # Nose Length in m
 
 class EngineParameters:
+    """
+    Class to hold engine-related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
     def __init__(self, W_TO: float = None, T_W: float = None):
         self.N_engines = 1                          # Number of Engines
         self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
@@ -149,6 +169,10 @@ class EngineParameters:
         self.engine_diameter = None                 # Engine Diameter in m
 
 class EmpennageParameters:
+    """
+    Class to hold empennage-related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
     def __init__(self):
         self.S_h = None                             # Horizontal Stabilizer Area in m^2
         self.S_v = None                             # Vertical Stabilizer Area in m^2
@@ -164,6 +188,10 @@ class EmpennageParameters:
         self.airfoil_t = None                       # V-Tail Airfoil Type
 
 class LandingGearParameters:
+    """
+    Class to hold landing gear-related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
     def __init__(self):
         self.n_mlg = 2                              # Number of Main Landing Gear Units
         self.n_nlg = 1                              # Number of Nose Landing Gear Units
