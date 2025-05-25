@@ -2,7 +2,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from AERIS_Class import AERIS
+from design_variables import AERIS
 
 # --- Import utilities from Class I module ---
 from PrelimSizing_Part_I import (

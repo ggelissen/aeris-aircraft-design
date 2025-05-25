@@ -1,5 +1,100 @@
 import math as m
 import numpy as np
+import yaml
+
+class DesignParameters:
+    def __init__(self, initial_config_path=None):
+        """
+        Initialize the design parameters for the aircraft.
+        If an initial configuration file is provided, load the parameters from it.
+        """
+        # Top-level Parameters
+        self.range = None
+        self.cruise_speed = None
+        self.stall_speed_clean = None
+        self.stall_speed_land = None
+        self.cruise_altitude = None
+        self.take_off_distance = None
+        self.landing_distance = None
+
+        # Subsystem Parameters
+        self.performance = PerformanceParameters()
+        self.wing = WingParameters()
+        self.fuselage = FuselageParameters()
+        self.engine = EngineParameters()
+        self.empennage = EmpennageParameters()
+        self.landing_gear = LandingGearParameters()
+
+        # Loads Initial Configuration from YAML File (design_config.yaml)
+        self.initial_config_path = initial_config_path
+        if self.initial_config_path:
+            self.load_from_yaml(self.initial_config_path)
+
+    def load_from_yaml(self, file_path):
+        """
+        Load design parameters from a YAML file.
+        :param file_path: Path to the YAML configuration file.
+        """
+        with open(file_path, 'r') as file:
+            config = yaml.safe_load(file)
+
+        # Load top-level parameters
+        self.range = config.get('range')
+        self.cruise_speed = config.get('cruise_speed')
+        self.stall_speed_clean = config.get('stall_speed_clean')
+        self.stall_speed_land = config.get('stall_speed_land')
+        self.cruise_altitude = config.get('cruise_altitude')
+        self.take_off_distance = config.get('take_off_distance')
+        self.landing_distance = config.get('landing_distance')
+
+        # Load subsystem parameters
+        if 'wing'in config:
+            self.wing.load_from_dict(config.get('wing', {}))
+        if 'performance' in config:
+            self.performance.load_from_dict(config.get('performance', {}))
+        if 'fuselage' in config:
+            self.fuselage.load_from_dict(config.get('fuselage', {}))
+        if 'engine' in config:
+            self.engine.load_from_dict(config.get('engine', {}))
+        if 'empennage' in config:
+            self.empennage.load_from_dict(config.get('empennage', {}))
+        if 'landing_gear' in config:
+            self.landing_gear.load_from_dict(config.get('landing_gear', {}))
+
+    def update_parameter(self, parameter_name, value):
+        """
+        Update a specific design parameter.
+        :param parameter_name: Name of the parameter to update.
+        :param value: New value for the parameter.
+        """
+        keys = parameter_name.split('.')
+        current = self
+        for key in keys[:-1]:
+            current = getattr(current, key, None)
+            if current is None:
+                raise AttributeError(f"Parameter '{parameter_name}' not found.")
+        setattr(current, keys[-1], value)
+        print(f"Updated {parameter_name} to {value}")]
+
+    def get_parameter(self, parameter_name):
+        """
+        Get the value of a specific design parameter.
+        :param parameter_name: Name of the parameter to retrieve.
+        :return: Value of the specified parameter.
+        """
+        keys = parameter_name.split('.')
+        current = self
+        for key in keys:
+            current = getattr(current, key, None)
+            if current is None:
+                raise AttributeError(f"Parameter '{parameter_name}' not found.")
+        return current
+    
+
+class WingParameters:
+    def __init__(self):
+        self.
+
 
 
 class AERIS:
