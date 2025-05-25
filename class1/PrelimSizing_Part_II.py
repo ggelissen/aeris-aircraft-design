@@ -2,10 +2,10 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from design_variables import AERIS
+#from design_variables import DesignParameters
 
 # --- Import utilities from Class I module ---
-from PrelimSizing_Part_I import (
+from class1.PrelimSizing_Part_I import (
     kg_to_N, N_to_kg, km_to_m, m_to_km, kmh_to_ms, ms_to_kmh,
     min_to_s
 )

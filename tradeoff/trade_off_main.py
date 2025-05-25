@@ -4,7 +4,7 @@ from tabulate import tabulate
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-from sensitivity_analysis import *
+from tradeoff.sensitivity_analysis import *
 
 #### Define the trade-off criteria and their weights ####
 

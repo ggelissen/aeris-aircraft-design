@@ -1,0 +1,26 @@
+# Top-Level Parameters
+range: 6500e3                   # Range in meters
+cruise_speed: 240               # Cruise speed in m/s
+stall_speed_clean: 100          # Stall speed clean configuration in kts
+stall_speed_land: 85            # Stall speed landing configuration in kts
+cruise_altitude: 121000         # Cruise altitude in meters
+takeoff_distance: 1500          # Takeoff distance in meters
+landing_distance: 1200          # Landing distance in meters
+
+# Performance Parameters
+climb_rate: 20                  # Climb Rate in m/s
+climb_rate_alt: 0               # Climb Rate Altitude in m
+climb_gradient_AEO: 0.2         # Climb Gradient AEO
+climb_gradient_OEI: 0.024       # Climb Gradient OEI
+climb_gradient_AEO_alt: 0       # Climb Gradient AEO Altitude in ft
+climb_gradient_OEI_alt: 35      # Climb Gradient OEI Altitude in ft
+delta_CD0_OEI: 0.005            # Zero-Lift Drag Coefficient Differential AEO
+CL_max_TO: 1.6                  # Maximum Lift Coefficient at Take-Off
+CL_max_L: 1.8                   # Maximum Lift Coefficient at Landing
+
+# Engine Parameters
+cruise_thrust_setting: 0.9      # Thrust setting for cruise
+engine_weight: 234.1 * 9.81     # Engine Weight in N
+engine_max_thrust: 13.34e3      # Engine Maximum Thrust in N
+engine_length: 1.58             # Engine Length in m
+engine_diameter: 0.80           # Engine Diameter in m
