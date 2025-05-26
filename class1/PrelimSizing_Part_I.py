@@ -1,56 +1,19 @@
 import math
 import matplotlib.pyplot as plt
 import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.unit_conversions import *
+from design_variables import DesignParameters
 
 # Use Arial font for better readability
 plt.rcParams['font.family'] = 'Arial'
 plt.rcParams['font.size'] = 13
 
 # --- Constants ---
-G = 9.80665  # Acceleration due to gravity (m/s^2)
+G = 9.80665  # Gravity constant in m/s^2
 
-# --- Conversion Functions ---
-def kg_to_N(mass_kg):
-    """Converts mass in kg to weight in N."""
-    return mass_kg * G
-
-def N_to_kg(weight_N):
-    """Converts weight in N to mass in kg."""
-    return weight_N / G
-
-def km_to_m(dist_km):
-    """Converts kilometers to meters."""
-    return dist_km * 1000
-
-def m_to_km(dist_m):
-    """Converts meters to kilometers."""
-    return dist_m / 1000
-
-def kmh_to_ms(speed_kmh):
-    """Converts km/h to m/s."""
-    return speed_kmh / 3.6
-
-def ms_to_kmh(speed_ms):
-    """Converts m/s to km/h."""
-    return speed_ms * 3.6
-
-def min_to_s(time_min):
-    """Converts minutes to seconds."""
-    return time_min * 60
-
-def lb_hr_hp_to_kg_J(cp_lb_hr_hp):
-    """Converts specific fuel consumption from lb/(hr*hp) to kg/J."""
-    # 1 lb = 0.453592 kg
-    # 1 hp = 745.7 W = 745.7 J/s
-    # 1 hr = 3600 s
-    return cp_lb_hr_hp * (0.453592 / (3600 * 745.7))
-
-def lb_hr_lbf_to_kg_Ns(cj_lb_hr_lbf):
-    """Converts specific fuel consumption from lb_mass/(hr*lb_force) to kg/(N*s)."""
-    # 1 lb_mass = 0.453592 kg
-    # 1 hr = 3600 s
-    # 1 lb_force = 4.44822 N
-    return cj_lb_hr_lbf * (0.453592 / (3600 * 4.44822))
 
 # --- Aerodynamics: Drag Polar and L/D ---
 def get_drag_polar_params(aircraft_type):
@@ -499,40 +462,37 @@ def plot_payload_range_diagram(pr_data, export_path=None):
 
 
 
-
-print("--- Running Agile UAV Concept ---")
-uav_aircraft_params = {
-    "type": "uav", # Used for specific mission profile and L/D example values
-    "type_for_coeffs": "uav", # Used for W_E = a*W_TO + b
-    "A": 9.0,
-    "c_j_kg_Ns": lb_hr_lbf_to_kg_Ns(0.685), # 0.685 lb/hr/lb -> kg/Ns
-    "M_tfo": 0.005 # As per example calculation on page 42 of ADSEE I Lecture 2 (Weight Estimation)
-}
-uav_mission_params = {
-    "W_PL_N": kg_to_N(600), # 600 kg payload
-    "W_crew_N": kg_to_N(0), # 0 kg crew
-    "R_cruise1_m": km_to_m(7600), # 6500 km design range
-    "V_cruise_ms": kmh_to_ms(864) # 864 km/hr cruise speed
-}
-uav_reserve_params = { # Mission extension type reserves
-    "type": "mission_extension",
-    "R_cruise2_m": km_to_m(460), # 460 km alternate range
-    "E_loiter_s": min_to_s(30) # 120 min loiter
-}
-
-uav_results = class1_weight_estimation(
-    uav_aircraft_params, uav_mission_params, uav_reserve_params
-)
-
-
 # --- Main Example Usage ---
 if __name__ == "__main__":
 
+    params = DesignParameters()
+    params.load_from_yaml("design_config.yaml")
+
+    uav_aircraft_params = {
+        "type": "uav", # Used for specific mission profile and L/D example values
+        "type_for_coeffs": "uav", # Used for W_E = a*W_TO + b
+        "A": params.wing.A_w,
+        "c_j_kg_Ns": lb_hr_lbf_to_kg_Ns(params.engine.cruise_tsfc), # 0.685 lb/hr/lb -> kg/Ns
+        "M_tfo": 0.005 # As per example calculation on page 42 of ADSEE I Lecture 2 (Weight Estimation)
+    }
+    uav_mission_params = {
+        "W_PL_N": params.weight.W_PL, # 600 kg payload
+        "W_crew_N": 0, # 0 kg crew
+        "R_cruise1_m": params.range, # 6500 km design range
+        "V_cruise_ms": params.cruise_speed # 864 km/hr cruise speed
+    }
+    uav_reserve_params = { # Mission extension type reserves
+        "type": "mission_extension",
+        "R_cruise2_m": params.diversion_distance, # 460 km alternate range
+        "E_loiter_s": params.loiter_time # 120 min loiter
+    }
+
+    uav_results = class1_weight_estimation(
+        uav_aircraft_params, uav_mission_params, uav_reserve_params
+    )
+
     if uav_results:
-        # Example: Payload-Range data points
-        W_P_max = uav_mission_params["W_PL_N"] # Design payload is max payload for this example corner
-        
-        # Let's assume for this example, max fuel capacity allows for design fuel
+        W_P_max = uav_mission_params["W_PL_N"] 
         W_F_max = uav_results["W_F_total_N"] 
 
         pr_mission_config = {"V_cruise_ms": uav_mission_params["V_cruise_ms"],
@@ -547,8 +507,6 @@ if __name__ == "__main__":
         )
         plot_payload_range_diagram(pr_data, export_path="Figures/Performance Diagrams/payload_range_diagram.pdf")
 
-        # Example: Sensitivity Study
-        # Varying design range R_cruise1_m
         ranges_to_test_km = [6000, 6500, 7000, 7500, 8000, 8500]
         ranges_to_test_m = [km_to_m(r) for r in ranges_to_test_km]
         
@@ -557,6 +515,3 @@ if __name__ == "__main__":
             param_to_vary="mission_params.R_cruise1_m",
             values_to_test=ranges_to_test_m
         )
-        # print("\nSensitivity Study Results (Varying Design Range R_cruise1):")
-        # for res_point in sensitivity_results:
-        #      print(f"  R_cruise1: {m_to_km(res_point['param_value']):.0f} km, W_TO: {res_point['W_TO_kg']:.2f} kg")

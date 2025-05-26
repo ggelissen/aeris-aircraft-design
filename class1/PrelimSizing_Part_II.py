@@ -2,13 +2,12 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-#from design_variables import DesignParameters
+import os
+import sys
 
-# --- Import utilities from Class I module ---
-from class1.PrelimSizing_Part_I import (
-    kg_to_N, N_to_kg, km_to_m, m_to_km, kmh_to_ms, ms_to_kmh,
-    min_to_s
-)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.unit_conversions import *
+from design_variables import DesignParameters
 
 # --- ISA Atmospheric Conditions ---
 G = 9.80665  # Gravitational acceleration (m/s^2)
@@ -18,30 +17,6 @@ T_0_ISA_PD = 288.15  # Sea level standard temperature (K)
 P_0_ISA_PD = 101325 # Sea level standard pressure (Pa)
 LAPSE_RATE_ISA_PD = 0.0065 # Temperature lapse rate in troposphere (K/m)
 RHO_0_ISA_PD = 1.225 # Sea level standard density (kg/m^3)\
-
-def ft_to_m(feet):
-    """
-    Convert feet to meters.
-    """
-    return feet * 0.3048
-
-def m_to_ft(meters):
-    """
-    Convert meters to feet.
-    """
-    return meters / 0.3048
-
-def kts_to_ms(knots):
-    """
-    Convert knots to meters per second.
-    """
-    return knots * 0.514444
-
-def psf_to_Npm2(psf):
-    """
-    Convert pounds per square foot to Newtons per square meter.
-    """
-    return psf * 47.8803
 
 def get_isa_conditions_pd(altitude_m):
     """
@@ -300,10 +275,11 @@ if __name__ == "__main__":
 
     print("--- Generating T/W vs W/S Diagram for Business Jet (Performance Module) ---")
 
-    AERIS = AERIS()
+    params = DesignParameters()
+    params.load_from_yaml("design_config.yaml")
 
-    uav_A_perf = AERIS.A 
-    num_engines_uav_perf = AERIS.num_engines
+    uav_A_perf = params.wing.A_w
+    num_engines_uav_perf = params.engine.N_engines
 
     # Aerodynamic parameters (PDF2 P12 "Jet" example data or specific configs)
     # Using specific configurations for clarity based on constraint context
@@ -316,28 +292,28 @@ if __name__ == "__main__":
     C_D0_cruise_cfg, e_cruise_cfg, _, _ = get_aircraft_config_aerodynamics_pd("uav", "clean_config_P12", uav_A_perf) # Clean for cruise/climb rate
 
     # Performance Requirements
-    V_s_clean_req_kts_pd = AERIS.V_s_clean  # [cite: 35]
-    V_s_land_req_kts_pd = AERIS.V_s_land    # [cite: 35]
-    S_TO_req_m_pd = AERIS.S_TO              # [cite: 87]
-    S_L_req_m_pd = AERIS.S_L                # [cite: 87]
+    V_s_clean_req_kts_pd = params.stall_speed_clean  
+    V_s_land_req_kts_pd = params.stall_speed_land   
+    S_TO_req_m_pd = params.take_off_distance        
+    S_L_req_m_pd = params.landing_distance        
     W_L_over_W_TO_jet_pd = 0.88             # [cite: 88]
 
-    cruise_alt_m_pd = AERIS.h_cruise                                # [cite: 101]
-    cruise_V_ms_pd = AERIS.V_cruise                                 # [cite: 101]
-    cruise_W_frac_pd = 0.8                                          # [cite: 101]
-    cruise_thrust_setting_pd = AERIS.cruise_thrust_setting          # [cite: 101]
+    cruise_alt_m_pd = params.cruise_altitude                        
+    cruise_V_ms_pd = params.cruise_speed                               
+    cruise_W_frac_pd = 0.8                                     
+    cruise_thrust_setting_pd = params.engine.cruise_thrust_setting          
 
-    climb_rate_req_ms_pd = AERIS.c
-    climb_rate_alt_m_pd = AERIS.c_alt
+    climb_rate_req_ms_pd = params.performance.climb_rate
+    climb_rate_alt_m_pd = params.performance.climb_rate_alt
     climb_rate_W_frac_pd = 1.0
 
-    climb_grad_AEO_req_pd = AERIS.c_V_AEO
-    climb_grad_AEO_alt_m_pd = AERIS.c_V_AEO_alt
+    climb_grad_AEO_req_pd = params.performance.climb_gradient_AEO
+    climb_grad_AEO_alt_m_pd = ft_to_m(params.performance.climb_gradient_AEO_alt)
     C_D0_grad_AEO, e_grad_AEO, _, _ = get_aircraft_config_aerodynamics_pd("uav", "take_off_gear_up_P12", uav_A_perf) # T/O config for this
 
-    climb_grad_OEI_req_pd = AERIS.c_V_OEI
-    climb_grad_OEI_alt_m_pd = ft_to_m(AERIS.c_V_OEI_alt)
-    delta_CD0_OEI_val_pd = AERIS.delta_CD0_OEI
+    climb_grad_OEI_req_pd = params.performance.climb_gradient_OEI
+    climb_grad_OEI_alt_m_pd = ft_to_m(params.performance.climb_gradient_OEI_alt)
+    delta_CD0_OEI_val_pd = params.performance.delta_CD0_OEI  
     C_D0_grad_OEI, e_grad_OEI, _, _ = get_aircraft_config_aerodynamics_pd("uav", "take_off_gear_up_P12", uav_A_perf) # T/O config for OEI
 
     W_S_range_Npm2_pd = np.linspace(1500, 6000, 200)
