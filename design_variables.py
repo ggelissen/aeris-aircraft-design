@@ -16,6 +16,7 @@ class DesignParameters:
         self.cruise_altitude = None
         self.take_off_distance = None
         self.landing_distance = None
+        self.max_eq_velocity = None
 
         # Subsystem Parameters
         self.weight = WeightParameters()
@@ -44,6 +45,7 @@ class DesignParameters:
         self.cruise_speed = config.get('cruise_speed')
         self.stall_speed_clean = config.get('stall_speed_clean')
         self.stall_speed_land = config.get('stall_speed_land')
+        self.max_eq_velocity = config.get('max_eq_velocity')
         self.cruise_altitude = config.get('cruise_altitude')
         self.take_off_distance = config.get('take_off_distance')
         self.landing_distance = config.get('landing_distance')
