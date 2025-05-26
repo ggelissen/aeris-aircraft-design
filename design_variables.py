@@ -16,6 +16,8 @@ class DesignParameters:
         self.cruise_altitude = None
         self.take_off_distance = None
         self.landing_distance = None
+        self.diversion_distance = None
+        self.loiter_time = None
 
         # Subsystem Parameters
         self.weight = WeightParameters()
@@ -45,8 +47,10 @@ class DesignParameters:
         self.stall_speed_clean = config.get('stall_speed_clean')
         self.stall_speed_land = config.get('stall_speed_land')
         self.cruise_altitude = config.get('cruise_altitude')
-        self.take_off_distance = config.get('take_off_distance')
+        self.take_off_distance = config.get('takeoff_distance')
         self.landing_distance = config.get('landing_distance')
+        self.diversion_distance = config.get('diversion_distance')
+        self.loiter_time = config.get('loiter_time')
 
         # Load subsystem parameters
         if 'wing'in config:
@@ -105,6 +109,11 @@ class WeightParameters:
         self.W_S = 2563                             # Wing Loading in N/m^2
         self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
 
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
 class WingParameters:
     """
     Class to hold wing-related parameters for the aircraft design.
@@ -113,17 +122,24 @@ class WingParameters:
     def __init__(self, W_TO: float = None, W_S: float = None):
         self.S_w = W_TO / W_S                       # Wing Area in m^2
         self.A_w = None                             # Aspect Ratio
-        self.b_w = m.sqrt(self.A_w * self.S_w)      # Wing Span in m
-        self.mac = self.S / self.b                  # Mean Aerodynamic Chord in m
+        if self.S_w is not None and self.A_w is not None:
+            self.b_w = m.sqrt(self.A_w * self.S_w)  # Wing Span in m
+            self.mac = self.S_w / self.b_w          # Mean Aerodynamic Chord in m
         self.lambda_w = None                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
         self.t_c_w_r = None                         # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = None                         # Wing Thickness-to-Chord Ratio at Tip
-        self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
+        if self.t_c_w_r is not None and self.t_c_w_t is not None:
+            self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
         self.airfoil_w = None                       # Wing Airfoil Type
         self.i_w = None                             # Wing Incidence Angle in degrees
         self.epsilon_t = None                       # Wing Twist Angle in degrees
         self.Gamma_w = None                         # Wing Dihedral Angle in degrees
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 class PerformanceParameters:
     """
@@ -143,6 +159,11 @@ class PerformanceParameters:
         self.CL_max_L = None                        # Maximum Lift Coefficient at Landing
         self.CL_max_cruise = None                   # Maximum Lift Coefficient at Cruise
 
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
 class FuselageParameters:
     """
     Class to hold fuselage-related parameters for the aircraft design.
@@ -151,8 +172,14 @@ class FuselageParameters:
     def __init__(self):
         self.D_f = None                             # Fuselage Diameter in m
         self.l_f = None                             # Fuselage Length in m
-        self.lf_df = self.l_f / self.D_f            # Fuselage Length-to-Diameter Ratio
+        if self.D_f is not None and self.l_f is not None:
+            self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
         self.l_n = None                             # Nose Length in m
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 class EngineParameters:
     """
@@ -167,6 +194,13 @@ class EngineParameters:
         self.engine_max_thrust = None               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
+        self.cruise_tsfc = None                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h
+        self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 class EmpennageParameters:
     """
@@ -177,7 +211,8 @@ class EmpennageParameters:
         self.S_h = None                             # Horizontal Stabilizer Area in m^2
         self.S_v = None                             # Vertical Stabilizer Area in m^2
         self.S_t = None                             # Total Stabilizer Area in m^2
-        self.Gamma_h = np.arctan2(self.S_v, self.S_h) # Butterfly Angle in radians
+        if self.S_h is not None and self.S_v is not None:
+            self.Gamma_h = np.arctan2(self.S_v, self.S_h) # Butterfly Angle in radians
         self.x_t = None                             # V-Tail Position in m
         self.V_t = None                             # V-Tail Volume Coefficient
         self.i_t = None                             # V-Tail Incidence Angle in degrees
@@ -186,6 +221,11 @@ class EmpennageParameters:
         self.lambda_t = None                        # V-Tail Taper Ratio
         self.t_c_t = None                           # V-Tail Thickness-to-Chord Ratio
         self.airfoil_t = None                       # V-Tail Airfoil Type
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 class LandingGearParameters:
     """
@@ -203,3 +243,8 @@ class LandingGearParameters:
         self.l_nlg = None                           # Nose Landing Gear Length in m
         self.psi_mlg = None                         # Main Landing Gear Pressure in psi
         self.psi_nlg = None                         # Nose Landing Gear Pressure in psi
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
