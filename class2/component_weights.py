@@ -54,7 +54,7 @@ def empennage_weight_lb(params: DesignParameters):
     WA_emp = 0.5  #for composite tail, 0.8-1.2 for metal gen aviation, 3.5-8 for supersonic fighters
     W_HT = WA_emp * m2_to_ft2(params.empennage.S_h)
     W_VT = WA_emp * m2_to_ft2(params.empennage.S_v)
-    W_emp = W_HT*math.cos**2(params.empennage.vtail_dihedral) + W_VT*math.sin**2(params.empennage.vtail_dihedral)
+    W_emp = W_HT*math.cos(params.empennage.vtail_dihedral)**2 + W_VT*math.sin(params.empennage.vtail_dihedral)**2
     W_emp_N = lbf_to_N(W_emp)  # Convert to Newtons for consistency
     return W_emp_N
 
