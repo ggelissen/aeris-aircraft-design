@@ -36,6 +36,7 @@ fuse_id = vsp.AddGeom("FUSELAGE", "")
 
 # Add wing
 wing_id = vsp.AddGeom("WING", "")
+wing_model = vsp.AddFeaStruct(wing_id)
 
 # Set fuselage length
 vsp.SetParmVal(fuse_id, "Length", "Design", 15.0)
@@ -50,23 +51,21 @@ vsp.SetParmVal(wing_id, "Root_Chord", "XSec_1", 3.0)
 vsp.SetParmVal(wing_id, "Tip_Chord", "XSec_1", 1.5)
 vsp.SetParmVal(wing_id, "Sweep", "XSec_1", 30.0)
 
-# Set root airfoil
-vsp.ChangeXSecShape(wing_id, 0, vsp.XS_FOUR_SERIES)
-xsec_id = vsp.GetXSec(wing_id, 0)
+# Set airfoil
+vsp.InsertXSec(wing_id, 0, vsp.XS_FOUR_SERIES)  # Insert a four-series airfoil at the first cross-section
 vsp.SetParmVal(wing_id, "Camber", "XSecCurve_0", 0.02)    # 2% camber
 vsp.SetParmVal(wing_id, "CamberLoc", "XSecCurve_0", 0.4)  # at 40% chord
 vsp.SetParmVal(wing_id, "ThickChord", "XSecCurve_0", 0.12)  # 12% thickness
 
-# Set tip airfoil
-vsp.ChangeXSecShape(wing_id, 1, vsp.XS_FOUR_SERIES)
-xsec_id = vsp.GetXSec(wing_id, 1)
-vsp.SetParmVal(wing_id, "Camber", "XSecCurve_1", 0.02)    # 2% camber
-vsp.SetParmVal(wing_id, "CamberLoc", "XSecCurve_1", 0.4)  # at 40% chord
-vsp.SetParmVal(wing_id, "ThickChord", "XSecCurve_1", 0.12)  # 12% thickness
-
 # Position wing on fuselage
 vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", 5.0)
 vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", 0)
+
+# Add wingribs
+num_wingribs = 10 # in total
+ribs = []
+for i in range(num_wingribs):
+    ribs.append(vsp.AddFeaPart(wing_id, wing_model, vsp.FEA_RIB))
 
 # add v_tail
 hstab_id = vsp.AddGeom("WING")
