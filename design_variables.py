@@ -131,15 +131,16 @@ class WingParameters:
     """
     def __init__(self, W_TO: float = None, W_S: float = None):
         self.S_w = W_TO / W_S                       # Wing Area in m^2
-        self.A_w = None                             # Aspect Ratio
+        self.A_w = 9.0                             # Aspect Ratio
         if self.S_w is not None and self.A_w is not None:
             self.b_w = m.sqrt(self.A_w * self.S_w)  # Wing Span in m
             self.mac = self.S_w / self.b_w          # Mean Aerodynamic Chord in m
-        self.lambda_w = None                        # Wing Taper Ratio
+        self.lambda_w = 0.4                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.Lambda_w_semi = None                  # Wing semi-Chord Sweep Angle in degrees
-        self.t_c_w_r = None                         # Wing Thickness-to-Chord Ratio at Root
-        self.t_c_w_t = None                         # Wing Thickness-to-Chord Ratio at Tip
+        self.Lambda_w_quarter = 40*np.pi/180      #PLACEHOLDER            # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_w_semi = 35*np.pi/180   #PLACEHOLDER               # Wing semi-Chord Sweep Angle in radians
+        self.t_c_w_r = 0.12        #PLACEHOLDER                 # Wing Thickness-to-Chord Ratio at Root
+        self.t_c_w_t = None                     # Wing Thickness-to-Chord Ratio at Tip
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
         self.airfoil_w = None                       # Wing Airfoil Type
@@ -183,8 +184,8 @@ class FuselageParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.D_f = 2 #placeholder                             # Fuselage Diameter in m
-        self.l_f = 20 #PLACEHOLDER!!!!!                             # Fuselage Length in m
+        self.D_f = 1.5 #placeholder                             # Fuselage Diameter in m
+        self.l_f = 10 #PLACEHOLDER!!!!!                             # Fuselage Length in m
         if self.D_f is not None and self.l_f is not None:
             self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
         self.l_n = 2 #placeholder                             # Nose Length in m
