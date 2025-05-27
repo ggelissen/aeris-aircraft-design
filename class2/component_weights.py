@@ -1,76 +1,14 @@
 import math
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.unit_conversions import *
 from design_variables import DesignParameters
 
 
 # --- Constants ---
 G = 9.80665  # Acceleration due to gravity (m/s^2)
-
-# --- Conversion Functions ---
-def kg_to_N(mass_kg):
-    """Converts mass in kg to weight in N."""
-    return mass_kg * G
-
-def N_to_kg(weight_N):
-    """Converts weight in N to mass in kg."""
-    return weight_N / G
-
-def km_to_m(dist_km):
-    """Converts kilometers to meters."""
-    return dist_km * 1000
-
-def m_to_km(dist_m):
-    """Converts meters to kilometers."""
-    return dist_m / 1000
-
-def kmh_to_ms(speed_kmh):
-    """Converts km/h to m/s."""
-    return speed_kmh / 3.6
-
-def ms_to_kmh(speed_ms):
-    """Converts m/s to km/h."""
-    return speed_ms * 3.6
-
-def min_to_s(time_min):
-    """Converts minutes to seconds."""
-    return time_min * 60
-
-def lb_hr_hp_to_kg_J(cp_lb_hr_hp):
-    """Converts specific fuel consumption from lb/(hr*hp) to kg/J."""
-    # 1 lb = 0.453592 kg
-    # 1 hp = 745.7 W = 745.7 J/s
-    # 1 hr = 3600 s
-    return cp_lb_hr_hp * (0.453592 / (3600 * 745.7))
-
-def lb_hr_lbf_to_kg_Ns(cj_lb_hr_lbf):
-    """Converts specific fuel consumption from lb_mass/(hr*lb_force) to kg/(N*s)."""
-    # 1 lb_mass = 0.453592 kg
-    # 1 hr = 3600 s
-    # 1 lb_force = 4.44822 N
-    return cj_lb_hr_lbf * (0.453592 / (3600 * 4.44822))
-
-def ft_to_m(feet):
-    """
-    Convert feet to meters.
-    """
-    return feet * 0.3048
-
-def m_to_ft(meters):
-    """
-    Convert meters to feet.
-    """
-    return meters / 0.3048
-
-def kts_to_ms(knots):
-    """
-    Convert knots to meters per second.
-    """
-    return knots * 0.514444
-
-def N_to_lbf(weight_N):
-    """Converts weight in N to pounds."""
-    # 1 N = 0.224809 lb
-    return weight_N * 0.224809
-
 
 
 params = DesignParameters()
@@ -84,7 +22,7 @@ def wing_weight_N(WTO, wing_params):
 def fuselage_weight_lb(params: DesignParameters):
     #equation from Gundlach
     l_f_ft = m_to_ft(params.fuselage.l_f)   # ft
-    W_PL_LBS = N_to_lbf(W_PL_N)              # lbs
+    W_PL_LBS = N_to_lbf(params.weight.W_PL)              # lbs
     V_eqMax = params.max_eq_velocity        # kts
     N_z = params.max_load_factor            # g
     
@@ -98,17 +36,51 @@ def fuselage_weight_lb(params: DesignParameters):
 
     return W_fus_lb
 
-def nacelle_weight_lb(params: DesignParameters):
-    # equation from Gundlach
-    F_nac = 0.06                     #0.055 for low bypass turbofan, 0.065 for high bypass turbofan
-    T_max = N_to_lbf(params.engine_max_thrust)   # lbf
-    W_nacelle_lb = F_nac*T_max                  #lbf
-    return W_nacelle_lb
+
 
 def landing_gear_weight_lb(params: DesignParameters):
-    # equation from Roskam
-    
+    # equation from gundlach
+    F_lg = 0.04  # range from 0.03 - 0.06
+    W_lg_lb = F_lg * N_to_lbf(params.weight.WTO)  # lb
+    return W_lg_lb
 
-def empennage_weight(WTO, empennage_params):
+
+def empennage_weight_lb(params: DesignParameters):
     #equation from Gundlach
-    W_emp = W_HT*math.cos**2(vtail_dihedral) + W_VT*math.sin**2(vtail_dihedral)
+    WA_emp = 0.5  #for composite tail, 0.8-1.2 for metal gen aviation, 3.5-8 for supersonic fighters
+    W_HT = WA_emp * m2_to_ft2(params.empennage.S_h)
+    W_VT = WA_emp * m2_to_ft2(params.empennage.S_v)
+    W_emp = W_HT*math.cos**2(params.empennage.vtail_dihedral) + W_VT*math.sin**2(params.empennage.vtail_dihedral)
+    return W_emp
+
+def propulsion_weight_lb(params: DesignParameters):
+    # equation from Gundlach
+    F_nac = 0.06                     #0.055 for low bypass turbofan, 0.065 for high bypass turbofan
+    F_fs = 0.692 # estimation for MALE single engine [torenbeek]
+    E1 = 0.67 # estimation for Male single engine [torenbeek]
+    T_max = N_to_lbf(params.engine.engine_max_thrust)   # lbf
+    W_nacelle_lb = F_nac*T_max                  #lbf
+    W_fuel_system_lb = F_fs * N_to_lbf(params.weight.W_F)**E1  # lbf
+    #W_ai = air induction system?
+    W_propulsion_lb = W_nacelle_lb + N_to_lbf(params.engine.engine_weight) + W_fuel_system_lb  # lbf
+    return W_propulsion_lb
+
+#fixed equipment weight estimation
+
+def fixed_equipment_weight_lb(params: DesignParameters):
+    W_autopilot = 50 #10-50 lb for MALE UAS
+    W_AirDataSystem = 1 #0.5-1 lb 
+    W_GPS = 0.5 #lb
+    W_INS = 22 #8-22 lb
+    W_processor = 25 #lb not sure about this one
+    W_wiring = 0.35 #0.2-0.35 lb
+    W_line_of_sight = 2 #not sure about this one
+    W_SATCOM = 85 #lb
+    W_avion = W_autopilot + W_AirDataSystem + W_GPS + W_INS + W_processor + W_wiring + W_line_of_sight + W_SATCOM
+    F_FCS = 0.0002 #0.00007 - 0.0002
+    W_FCS = F_FCS * m2_to_ft2(params.control_surface.S_a) * params.max_eq_velocity**2 
+    W_fixed_equipment_lb = W_avion + W_FCS
+    return W_fixed_equipment_lb
+
+
+

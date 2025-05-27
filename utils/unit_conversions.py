@@ -66,3 +66,15 @@ def psf_to_Npm2(psf):
     Convert pounds per square foot to Newtons per square meter.
     """
     return psf * 47.8803
+
+def N_to_lbf(weight_N):
+    """
+    Convert Newtons to pounds-force.
+    """
+    return weight_N / 4.44822
+
+def m2_to_ft2(area_m2):
+    """
+    Convert square meters to square feet.
+    """
+    return area_m2 * 10.7639

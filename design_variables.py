@@ -28,6 +28,7 @@ class DesignParameters:
         self.engine = EngineParameters(W_TO=self.weight.W_TO, T_W=self.weight.T_W)
         self.empennage = EmpennageParameters()
         self.landing_gear = LandingGearParameters()
+        self.control_surface = ControlSurfaceParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -67,6 +68,8 @@ class DesignParameters:
             self.empennage.load_from_dict(config.get('empennage', {}))
         if 'landing_gear' in config:
             self.landing_gear.load_from_dict(config.get('landing_gear', {}))
+        if 'control_surface' in config:
+            self.control_surface.load_from_dict(config.get('control_surface', {}))
 
     def update_parameter(self, parameter_name, value):
         """
@@ -223,6 +226,7 @@ class EmpennageParameters:
         self.lambda_t = None                        # V-Tail Taper Ratio
         self.t_c_t = None                           # V-Tail Thickness-to-Chord Ratio
         self.airfoil_t = None                       # V-Tail Airfoil Type
+        self.vtail_dihedral = None                  # V-Tail Dihedral Angle in radians
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -245,6 +249,22 @@ class LandingGearParameters:
         self.l_nlg = None                           # Nose Landing Gear Length in m
         self.psi_mlg = None                         # Main Landing Gear Pressure in psi
         self.psi_nlg = None                         # Nose Landing Gear Pressure in psi
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+class ControlSurfaceParameters:
+    """
+    Class to hold control surface-related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
+    def __init__(self):
+        self.S_a = None                             # Control Surface Area in m^2
+        self.x_a = None                             # Control Surface Position in m
+        self.delta_a = None                         # Control Surface Deflection Angle in degrees
+        self.C_m_a = None                           # Control Surface Moment Coefficient
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
