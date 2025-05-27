@@ -73,6 +73,12 @@ def N_to_lbf(weight_N):
     """
     return weight_N / 4.44822
 
+def lbf_to_N(weight_lbf):
+    """
+    Convert pounds-force to Newtons.
+    """
+    return weight_lbf * 4.44822
+
 def m2_to_ft2(area_m2):
     """
     Convert square meters to square feet.
