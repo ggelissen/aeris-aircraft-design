@@ -13,7 +13,7 @@ import matplotlib
 import pyvista as pv
 import numpy as np
 
-from subsystems.structures.vspfunctions import print_all_params
+from vspfunctions import print_all_params
 
 matplotlib.use('Qt5Agg')
 import openvsp as vsp
