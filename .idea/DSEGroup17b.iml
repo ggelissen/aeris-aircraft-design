@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="PYTHON_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/subsystems/structures/packages/AvlPy" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/subsystems/structures/packages/CHARM" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/subsystems/structures/packages/degen_geom" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/subsystems/structures/packages/openvsp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/subsystems/structures/packages/openvsp_config" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/subsystems/structures/packages/pyPMARC" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/subsystems/structures/packages/utilities" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/subsystems/structures/packages/vsp_airfoils" isTestSource="false" />
+    </content>
+    <orderEntry type="jdk" jdkName="DSEGroup17c" jdkType="Python SDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="PyDocumentationSettings">
+    <option name="format" value="PLAIN" />
+    <option name="myDocStringFormat" value="Plain" />
+  </component>
+</module>
