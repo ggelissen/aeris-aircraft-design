@@ -18,6 +18,9 @@ S_emp = params.empennage.S_t
 
 def wing_weight_N(WTO, wing_params):
     #choose the appropriate method based on the wing type
+    W_wing = 0
+    W_wing_N = lbf_to_N(W_wing)
+    return W_wing_N
 
 def fuselage_weight_lb(params: DesignParameters):
     #equation from Gundlach
@@ -33,8 +36,8 @@ def fuselage_weight_lb(params: DesignParameters):
     F_matl = 1      #1 is carbonfiber or metal, 2 if fiberglass or unknown, 2.187 if wood
    
     W_fus_lb = 0.5257 * F_MG * F_NG * F_press * F_VT * F_matl * l_f_ft**0.3796 * (W_PL_LBS * N_z)**0.4863 * V_eqMax**2
-
-    return W_fus_lb
+    W_fus_N = lbf_to_N(W_fus_lb)  # Convert to Newtons for consistency
+    return W_fus_N
 
 
 
@@ -42,7 +45,8 @@ def landing_gear_weight_lb(params: DesignParameters):
     # equation from gundlach
     F_lg = 0.04  # range from 0.03 - 0.06
     W_lg_lb = F_lg * N_to_lbf(params.weight.WTO)  # lb
-    return W_lg_lb
+    W_lg_N = lbf_to_N(W_lg_lb)  # Convert to Newtons for consistency
+    return W_lg_N
 
 
 def empennage_weight_lb(params: DesignParameters):
@@ -51,7 +55,8 @@ def empennage_weight_lb(params: DesignParameters):
     W_HT = WA_emp * m2_to_ft2(params.empennage.S_h)
     W_VT = WA_emp * m2_to_ft2(params.empennage.S_v)
     W_emp = W_HT*math.cos**2(params.empennage.vtail_dihedral) + W_VT*math.sin**2(params.empennage.vtail_dihedral)
-    return W_emp
+    W_emp_N = lbf_to_N(W_emp)  # Convert to Newtons for consistency
+    return W_emp_N
 
 def propulsion_weight_lb(params: DesignParameters):
     # equation from Gundlach
@@ -63,7 +68,8 @@ def propulsion_weight_lb(params: DesignParameters):
     W_fuel_system_lb = F_fs * N_to_lbf(params.weight.W_F)**E1  # lbf
     #W_ai = air induction system?
     W_propulsion_lb = W_nacelle_lb + N_to_lbf(params.engine.engine_weight) + W_fuel_system_lb  # lbf
-    return W_propulsion_lb
+    W_propulsion_N = lbf_to_N(W_propulsion_lb)  # Convert to Newtons for consistency
+    return W_propulsion_N
 
 #fixed equipment weight estimation
 
@@ -80,7 +86,8 @@ def fixed_equipment_weight_lb(params: DesignParameters):
     F_FCS = 0.0002 #0.00007 - 0.0002
     W_FCS = F_FCS * m2_to_ft2(params.control_surface.S_a) * params.max_eq_velocity**2 
     W_fixed_equipment_lb = W_avion + W_FCS
-    return W_fixed_equipment_lb
+    W_fixed_equipment_N = lbf_to_N(W_fixed_equipment_lb)  # Convert to Newtons for consistency
+    return W_fixed_equipment_N
 
 
 
