@@ -19,7 +19,8 @@ class DesignParameters:
         self.diversion_distance = None
         self.loiter_time = None
         self.max_eq_velocity = None
-        self.max_load_factor = None
+        self.max_load_factor = None 
+        
 
         # Subsystem Parameters
         self.weight = WeightParameters()
@@ -101,8 +102,7 @@ class DesignParameters:
             current = getattr(current, key, None)
             if current is None:
                 raise AttributeError(f"Parameter '{parameter_name}' not found.")
-        return current
-    
+        return current   
 
 class WeightParameters:
     """
