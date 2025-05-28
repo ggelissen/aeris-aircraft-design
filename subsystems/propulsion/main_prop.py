@@ -97,16 +97,46 @@ m_dot_ideal = (2*gamma/(gamma+1))**((gamma+1)/(2*(gamma-1)))*A_e*p_T*np.sqrt(gam
 #Inlet-Fan Cowl-Reverser-Core Nozzle-Pylon
 #Target type: slide 57
 
-Engines_W = ["FJ44-1AP","FJ44-3A","FJ44-3AP","FJ44-4A","FJ33-5A"] #Engine Type
+Engines_W = ["FJ44-1AP","FJ44-3AP","FJ44-4A","FJ33-5A"] #Engine Type
 Weight_W = [212.3,234.1,304,144.7] #Engine Weight (kg)
 m_dot_W = []
 Thrust_W = [9340,13340,16010,8230] #Engine Thrust (N)
 TSFC_W = [0.4332,0.46,0.4,0.486] #Engine SFC (g/KN/s) 
 Conversion_factor = 13.77/0.486
-Cost_W = []
 
-Engines_PW = []
-Weight_PW = []
-Thrust_PW = []
 
+#Create thrust ranges for which different engines are suitable (0-7500N, pick FJ33-5a; 7500-9000, pick 1AP; 9000-12000, pick 3A; 12000-15000, pick 3AP; 15000+, pick 4A)
+def get_engine_for_thrust(T_TO):
+    if T_TO < 7500:
+        return "FJ33-5A"
+    elif 7500 <= T_TO < 9000:
+        return "FJ44-1AP"
+    elif 9000 <= T_TO < 12000:
+        return "FJ44-3AP"
+    else:
+        return "FJ44-4A"
+#Engine selection based on thrust requirements
+def select_engine(T_TO):
+    engine = get_engine_for_thrust(T_TO)
+    index = Engines_W.index(engine)
+    return {
+        "engine": engine,
+        "weight": Weight_W[index],
+        "thrust": Thrust_W[index],
+        "tsfc": TSFC_W[index]
+    }
+
+#give prompt asking for take-off thrust adn then gives the engine selection
+def main():
+    try:
+        T_TO = float(input("Enter the required take-off thrust (N): "))
+        engine_selection = select_engine(T_TO)
+        print(f"Selected Engine: {engine_selection['engine']}")
+        print(f"Weight: {engine_selection['weight']} kg")
+        print(f"Thrust: {engine_selection['thrust']} N")
+        print(f"TSFC: {engine_selection['tsfc']} g/KN/s")
+    except ValueError:
+        print("Invalid input. Please enter a numeric value for thrust.")
 #Take-off thrust -> required thrust engine -> required engines -> compare cruise efficiency (Either lower setting higher performance or full setting lower performance)
+if __name__ == "__main__":
+    main()
