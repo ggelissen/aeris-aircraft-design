@@ -1,0 +1,13 @@
+-e subsystems/structures/packages/vsp_airfoils
+-e subsystems/structures/packages/utilities
+-e subsystems/structures/packages/degen_geom
+-e subsystems/structures/packages/openvsp_config
+-e subsystems/structures/packages/openvsp
+-e subsystems/structures/packages/CHARM
+-e subsystems/structures/packages/AvlPy
+-e subsystems/structures/packages/pyPMARC
+pytest
+numpy-stl
+matplotlib
+pyqt5
+pyvista

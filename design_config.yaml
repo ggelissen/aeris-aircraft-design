@@ -13,10 +13,10 @@ max_load_factor: 2.5            # Maximum Load Factor
 
 # Performance Parameters
 performance: 
-  climb_rate: 20                  # Climb Rate in m/s
+  climb_rate: 12                  # Climb Rate in m/s
   climb_rate_alt: 0               # Climb Rate Altitude in m
-  climb_gradient_AEO: 0.2         # Climb Gradient AEO
-  climb_gradient_OEI: 0.024       # Climb Gradient OEI
+  climb_gradient_AEO: 0.04         # Climb Gradient AEO
+  climb_gradient_OEI: 0.04       # Climb Gradient OEI
   climb_gradient_AEO_alt: 0       # Climb Gradient AEO Altitude in ft
   climb_gradient_OEI_alt: 35      # Climb Gradient OEI Altitude in ft
   delta_CD0_OEI: 0.005            # Zero-Lift Drag Coefficient Differential AEO
