@@ -31,31 +31,65 @@ import loading
 # Step 3: Create a VSP model using the imported geometric variables
 vsp.ClearVSPModel()
 
-# Add fuselage
+#### Add fuselage and change fuselage shape to make room for payload. This is done by changing the cross-sections of the fuselage.
 fuse_id = vsp.AddGeom("FUSELAGE", "")
+vsp.SetParmVal(fuse_id, "Length", "Design", 15.0)
 
-# Add wing
+# Tip of the fuselage
+vsp.SetXSecTanAngles(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0), 0), vsp.XSEC_BOTH_SIDES, 21.32, 45, 21.32, 45)
+
+# Fuselage cross section 1
+vsp.ChangeXSecShape(vsp.GetXSecSurf(fuse_id, 0), 1, vsp.XS_ROUNDED_RECTANGLE)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),1), "RoundedRect_Width"), 2.24490)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),1), "RoundedRect_Height"), 1.85714)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),1), "RoundRect_Keystone"), 0.57143)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),1), "RoundedRect_RadiusSymmetryType"), 1.0)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),1), "RoundRectXSec_Radius"), 0.71812)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),1), "RoundRectXSec_RadiusBR"), 0.18898)
+vsp.SetXSecTanAngles(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0), 1), vsp.XSEC_BOTH_SIDES, 7.11, 0, 7.11, 0)
+
+# Fuselage cross section 2
+vsp.ChangeXSecShape(vsp.GetXSecSurf(fuse_id, 0), 2, vsp.XS_ROUNDED_RECTANGLE)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),2), "RoundedRect_Width"), 2.50000)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),2), "RoundedRect_Height"), 2.17551)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),2), "RoundRect_Keystone"), 0.58929)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),2), "RoundedRect_RadiusSymmetryType"), 3.0)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),2), "RoundRectXSec_Radius"), 0.76500)
+vsp.SetXSecTanAngles(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0), 2), vsp.XSEC_BOTH_SIDES, 0, 0, 0, 0)
+
+# Fuselage cross section 3
+vsp.ChangeXSecShape(vsp.GetXSecSurf(fuse_id, 0), 3, vsp.XS_ROUNDED_RECTANGLE)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),3), "RoundedRect_Width"), 2.50000)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),3), "RoundedRect_Height"), 1.96327)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),3), "RoundRect_Keystone"), 0.60357)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),3), "RoundedRect_RadiusSymmetryType"), 3.0)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0),3), "RoundRectXSec_Radius"), 0.76500)
+vsp.SetXSecTanAngles(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0), 3), vsp.XSEC_BOTH_SIDES, 0, 0, 0, 0)
+
+# Fuselage end tip
+vsp.SetXSecTanAngles(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0), 4), vsp.XSEC_BOTH_SIDES, -26.05, -45, -26.05, -45)
+
+
+
+### Add wing
 wing_id = vsp.AddGeom("WING", "")
 wing_model = vsp.AddFeaStruct(wing_id)
 
-# Set fuselage length
-vsp.SetParmVal(fuse_id, "Length", "Design", 15.0)
-
-# Find all wing parameters and print them. You can do this for other geometric objects as well.
-print_all_params(wing_id)
-
-# Set wing parameters like this:
-# vsp.SetParmVal(geometric_object, "name_of_parameter", "group_name", new_value)
+# Wing sizing
 vsp.SetParmVal(wing_id, "Span", "XSec_1", 10.0)
 vsp.SetParmVal(wing_id, "Root_Chord", "XSec_1", 3.0)
 vsp.SetParmVal(wing_id, "Tip_Chord", "XSec_1", 1.5)
 vsp.SetParmVal(wing_id, "Sweep", "XSec_1", 30.0)
 
-# Set airfoil
-vsp.InsertXSec(wing_id, 0, vsp.XS_FOUR_SERIES)  # Insert a four-series airfoil at the first cross-section
-vsp.SetParmVal(wing_id, "Camber", "XSecCurve_0", 0.02)    # 2% camber
-vsp.SetParmVal(wing_id, "CamberLoc", "XSecCurve_0", 0.4)  # at 40% chord
-vsp.SetParmVal(wing_id, "ThickChord", "XSecCurve_0", 0.12)  # 12% thickness
+# Set airfoil (both at root and tip)
+vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 0, vsp.XS_FOUR_SERIES)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), "Camber"), 0.02)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), "CamberLoc"), 0.4)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), "ThickChord"), 0.12)
+vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 1, vsp.XS_FOUR_SERIES)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "Camber"), 0.02)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "CamberLoc"), 0.4)
+vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "ThickChord"), 0.12)
 
 # Position wing on fuselage
 vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", 5.0)
@@ -67,7 +101,9 @@ ribs = []
 for i in range(num_wingribs):
     ribs.append(vsp.AddFeaPart(wing_id, wing_model, vsp.FEA_RIB))
 
-# add v_tail
+
+
+### Add v_tail
 hstab_id = vsp.AddGeom("WING")
 vsp.SetGeomName(hstab_id, "Horizontal_Stabilizer")
 
@@ -81,12 +117,14 @@ vsp.SetParmVal(hstab_id, "Dihedral", "XSec_1", 40.0)
 # Symmetry around XZ plane (so it spans both sides)
 vsp.SetParmVal(hstab_id, "Sym_Planar_Flag", "Sym", vsp.SYM_XZ)
 
-# Size stabilizers
+# Size V-Tail
 vsp.SetParmVal(hstab_id, "Span", "XSec_1", 5.0)
 vsp.SetParmVal(hstab_id, "Tip_Chord", "XSec_1", 1.0)
 vsp.SetParmVal(hstab_id, "Root_Chord", "XSec_0", 1.5)
 
-# Add engines
+
+
+### Add engines
 pod_id = vsp.AddGeom("POD")
 #print_all_params(pod_id)  # Print all parameters for the engine pod
 vsp.SetGeomName(pod_id, "Fuselage_Engine")
@@ -94,7 +132,7 @@ vsp.SetParmVal(pod_id, "Length", "Design", 4.0)     # Length of the engine pod
 vsp.SetParmVal(pod_id, "FineRatio", "Design", 6)     # Radius to Length ratio
 vsp.SetParmVal(pod_id, "X_Rel_Location", "XForm", 8.50)   # Longitudinal position
 vsp.SetParmVal(pod_id, "Y_Rel_Location", "XForm", 0.0)    # Side offset (0 = centerline)
-vsp.SetParmVal(pod_id, "Z_Rel_Location", "XForm", 2)   # Vertical offset (on top of fuselage)
+vsp.SetParmVal(pod_id, "Z_Rel_Location", "XForm", 1.5)   # Vertical offset (on top of fuselage)
 
 
 
