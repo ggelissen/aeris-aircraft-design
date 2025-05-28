@@ -102,8 +102,7 @@ class DesignParameters:
             current = getattr(current, key, None)
             if current is None:
                 raise AttributeError(f"Parameter '{parameter_name}' not found.")
-        return current
-    
+        return current   
 
 class WeightParameters:
     """
