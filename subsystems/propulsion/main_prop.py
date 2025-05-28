@@ -36,12 +36,12 @@ import numpy as np
 
 m_dot = 0
 T_T = 0
-p_T = 0
+p_T = 1
 M_TH = 0
 gamma = 1.4
 R = 287
 A_INF = 0
-A_HL = 0
+A_HL = 1
 
 MFR = A_INF / A_HL
 A_TH = m_dot * np.sqrt(T_T) / p_T * (M_TH*(1+(gamma-1)/2*M_TH**2)**((gamma+1)/(2*(1-gamma)))*np.sqrt(gamma/R))**(-1)
@@ -61,10 +61,10 @@ T = m_e_dot * (V_e - V_INF) + A_e * (p_e - p_0)
 
 #Exhaust efficiency coefficients:
 F_actual = 0
-m_dot_actual = 0
+m_dot_actual = 1
 V_actual = F_actual / m_dot_actual
-V_ideal = 0
-m_dot_ideal = 0
+V_ideal = 1
+m_dot_ideal = 1
 C_V = V_actual / V_ideal
 C_D = m_dot_actual / m_dot_ideal
 
@@ -73,17 +73,17 @@ C_T = C_V * C_D
 #Turbofan:
 F_actual_fancore = 0
 F_ideal_fan = 0
-F_ideal_core = 0
+F_ideal_core = 1
 C_T_tf = F_actual_fancore / (F_ideal_fan + F_ideal_core)
 
 #Case: un-choked nozzle, p_0/p_T > 0.528 (cold flow) or p_T / p_0 < 1.89
-p_T = 0 # stagnation pressure
+p_T = 1 # stagnation pressure
 V_ideal = np.sqrt(2*gamma*R*T_T/(gamma-1)*(1-(p_0/p_T)**((gamma-1)/gamma)))
-m_dot_ideal = A_e * p_T * np.sqrt(2*gamma/(gamma-1)*1/(R*T_T)*((p_0/p_T)**(2/gamma)-(p_0/p_T)**((gamma+1)/gamma)))
+#m_dot_ideal = A_e * p_T * np.sqrt(2*gamma/(gamma-1)*1/(R*T_T)*((p_0/p_T)**(2/gamma)-(p_0/p_T)**((gamma+1)/gamma)))
 
 #Case: choked nozzle, p_0/p_T < 0.528 (cold flow) or
 V_ideal = np.sqrt(2*gamma*R*T_T/(gamma-1))
-m_dot_ideal = (2*gamma/(gamma+1))**((gamma+1)/(2*(gamma-1)))*A_e*p_T*np.sqrt(gamma/(R*T_T))
+#m_dot_ideal = (2*gamma/(gamma+1))**((gamma+1)/(2*(gamma-1)))*A_e*p_T*np.sqrt(gamma/(R*T_T))
 
 #Lower nozzle area results in lower discharge coefficient/higher NPR for same thrust requirement.
 #Shorter core exhaust -> reduced total press. drop & reduced scrubbing drag
