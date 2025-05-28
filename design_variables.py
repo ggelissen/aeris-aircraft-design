@@ -19,6 +19,8 @@ class DesignParameters:
         self.diversion_distance = None
         self.loiter_time = None
         self.max_eq_velocity = None
+        self.max_load_factor = None 
+        
 
         # Subsystem Parameters
         self.weight = WeightParameters()
@@ -28,6 +30,7 @@ class DesignParameters:
         self.engine = EngineParameters(W_TO=self.weight.W_TO, T_W=self.weight.T_W)
         self.empennage = EmpennageParameters()
         self.landing_gear = LandingGearParameters()
+        self.control_surface = ControlSurfaceParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -53,6 +56,8 @@ class DesignParameters:
         self.landing_distance = config.get('landing_distance')
         self.diversion_distance = config.get('diversion_distance')
         self.loiter_time = config.get('loiter_time')
+        self.max_eq_velocity = config.get('max_eq_velocity') 
+        self.max_load_factor = config.get('max_load_factor')
 
         # Load subsystem parameters
         if 'wing'in config:
@@ -67,6 +72,8 @@ class DesignParameters:
             self.empennage.load_from_dict(config.get('empennage', {}))
         if 'landing_gear' in config:
             self.landing_gear.load_from_dict(config.get('landing_gear', {}))
+        if 'control_surface' in config:
+            self.control_surface.load_from_dict(config.get('control_surface', {}))
 
     def update_parameter(self, parameter_name, value):
         """
@@ -110,6 +117,7 @@ class WeightParameters:
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_S = 2563                             # Wing Loading in N/m^2
         self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
+        self.M_ff = 0.5793                        # Maximum Fuel Fraction
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -123,20 +131,24 @@ class WingParameters:
     """
     def __init__(self, W_TO: float = None, W_S: float = None):
         self.S_w = W_TO / W_S                       # Wing Area in m^2
-        self.A_w = None                             # Aspect Ratio
+        self.A_w = 9.0                             # Aspect Ratio
         if self.S_w is not None and self.A_w is not None:
             self.b_w = m.sqrt(self.A_w * self.S_w)  # Wing Span in m
             self.mac = self.S_w / self.b_w          # Mean Aerodynamic Chord in m
-        self.lambda_w = None                        # Wing Taper Ratio
+        self.lambda_w = 0.4                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.t_c_w_r = None                         # Wing Thickness-to-Chord Ratio at Root
-        self.t_c_w_t = None                         # Wing Thickness-to-Chord Ratio at Tip
+        self.Lambda_w_quarter = 40*np.pi/180      #PLACEHOLDER            # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_w_semi = 35*np.pi/180   #PLACEHOLDER               # Wing semi-Chord Sweep Angle in radians
+        self.t_c_w_r = 0.12        #PLACEHOLDER                 # Wing Thickness-to-Chord Ratio at Root
+        self.t_c_w_t = None                     # Wing Thickness-to-Chord Ratio at Tip
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
         self.airfoil_w = None                       # Wing Airfoil Type
         self.i_w = None                             # Wing Incidence Angle in degrees
         self.epsilon_t = None                       # Wing Twist Angle in degrees
         self.Gamma_w = None                         # Wing Dihedral Angle in degrees
+        self.root_chord = (2* self.S_w / self.b_w) / (1 + self.lambda_w)  # Wing Root Chord in m
+        self.t_r = self.t_c_w_r * self.root_chord                           # Wing Root Thickness in m
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -172,11 +184,11 @@ class FuselageParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.D_f = None                             # Fuselage Diameter in m
-        self.l_f = None                             # Fuselage Length in m
+        self.D_f = 1.5 #placeholder                             # Fuselage Diameter in m
+        self.l_f = 10 #PLACEHOLDER!!!!!                             # Fuselage Length in m
         if self.D_f is not None and self.l_f is not None:
             self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
-        self.l_n = None                             # Nose Length in m
+        self.l_n = 2 #placeholder                             # Nose Length in m
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -192,7 +204,7 @@ class EngineParameters:
         self.N_engines = 1                          # Number of Engines
         self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
         self.cruise_thrust_setting = None           # Thrust setting for cruise
-        self.engine_weight = None                   # Engine Weight in N
+        self.engine_weight =   None                 # Engine Weight in N
         self.engine_max_thrust = None               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
@@ -210,8 +222,8 @@ class EmpennageParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.S_h = None                             # Horizontal Stabilizer Area in m^2
-        self.S_v = None                             # Vertical Stabilizer Area in m^2
+        self.S_h =    3 #placeholder                          # Horizontal Stabilizer Area in m^2
+        self.S_v =   3#placeholder                           # Vertical Stabilizer Area in m^2
         self.S_t = None                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h) # Butterfly Angle in radians
@@ -223,6 +235,7 @@ class EmpennageParameters:
         self.lambda_t = None                        # V-Tail Taper Ratio
         self.t_c_t = None                           # V-Tail Thickness-to-Chord Ratio
         self.airfoil_t = None                       # V-Tail Airfoil Type
+        self.vtail_dihedral = 110 #placeholder                  # V-Tail Dihedral Angle in radians
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -245,6 +258,22 @@ class LandingGearParameters:
         self.l_nlg = None                           # Nose Landing Gear Length in m
         self.psi_mlg = None                         # Main Landing Gear Pressure in psi
         self.psi_nlg = None                         # Nose Landing Gear Pressure in psi
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+class ControlSurfaceParameters:
+    """
+    Class to hold control surface-related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
+    def __init__(self):
+        self.S_a = 2 #placeholder!!                             # Control Surface Area in m^2
+        self.x_a = None                             # Control Surface Position in m
+        self.delta_a = None                         # Control Surface Deflection Angle in degrees
+        self.C_m_a = None                           # Control Surface Moment Coefficient
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
