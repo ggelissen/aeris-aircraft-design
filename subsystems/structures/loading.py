@@ -64,28 +64,32 @@ n_gust_neg = 1 - (rho * CL_alpha * S * speeds * U_gust) / (2 * W_N)
 
 
 # ____ MANEUVERING LOADS ____
-n_pos = np.piecewise(speeds,
-    [speeds <= VC, speeds > VC],
-    [lambda v: n_pos_limit,
-     lambda v: n_pos_limit * (VD - v) / (VD - VC)]
+n_maneuver_pos = np.piecewise(
+    speeds,
+    [speeds <= VA, speeds > VA],
+    [lambda V: (V / VS) ** 2,
+     lambda V: n_pos_limit]
 )
-n_neg = np.piecewise(speeds,
-    [speeds <= VC, speeds > VC],
-    [lambda v: n_neg_limit,
-     lambda v: n_neg_limit * (VD - v) / (VD - VC)]
-)
+
+
+n_neg_limit = -0.4 * n_pos_limit
+
+n_maneuver_neg_parabola = -((speeds / VS) ** 2)
+
+# Apply minimum clamp to enforce the limit (select the lesser value)
+n_maneuver_neg = np.maximum(n_maneuver_neg_parabola, n_neg_limit)
 
 
 # ____ PLOTTING ____
 plt.figure(figsize=(10, 6))
 
 # Maneuver limits
-plt.plot(speeds, n_pos, label='Positive Maneuver Limit', color='blue')
-plt.plot(speeds, n_neg, label='Negative Maneuver Limit', color='blue')
+plt.plot(speeds, n_maneuver_pos, label='Positive Maneuver Limit', color='blue')
+plt.plot(speeds, n_maneuver_neg, label='Negative Maneuver Limit', color='blue')
 
 # Gust loads
 plt.plot(speeds, n_gust_pos, '--', label='Positive Gust Load', color='orange')
-plt.plot(speeds, n_gust_neg, '---', label='Negative Gust Load', color='orange')
+plt.plot(speeds, n_gust_neg, '--', label='Negative Gust Load', color='orange')
 
 # Key speeds
 # Custom color map for specific speeds
