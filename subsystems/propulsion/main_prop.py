@@ -82,3 +82,25 @@ V_ideal = np.sqrt(2*gamma*R*T_T/(gamma-1)*(1-(p_0/p_T)**((gamma-1)/gamma)))
 m_dot_ideal = A_e * p_T * np.sqrt(2*gamma/(gamma-1)*1/(R*T_T)*((p_0/p_T)**(2/gamma)-(p_0/p_T)**((gamma+1)/gamma)))
 
 #Case: choked nozzle, p_0/p_T < 0.528 (cold flow) or
+V_ideal = np.sqrt(2*gamma*R*T_T/(gamma-1))
+m_dot_ideal = (2*gamma/(gamma+1))**((gamma+1)/(2*(gamma-1)))*A_e*p_T*np.sqrt(gamma/(R*T_T))
+
+#Lower nozzle area results in lower discharge coefficient/higher NPR for same thrust requirement.
+#Shorter core exhaust -> reduced total press. drop & reduced scrubbing drag
+
+#Noise damping:
+#   - Chevrons (no thrust loss, smaller cowling, mixing fan with external flow)
+#   - Mixing core flow with fan flow
+#   - Convoluted mixers
+
+#Thrust reversing: reduce brake wear/decrease ground roll distance under special circumstances.
+#Inlet-Fan Cowl-Reverser-Core Nozzle-Pylon
+#Target type: slide 57
+
+Engines_W = ["FJ44-1AP","FJ44-1A","FJ44-2C","FJ44-3A","FJ44-3AP","FJ44-4A","FJ33-5A"]
+Weight_W = [212.3,208.7,235.9,242.7,234.1,304,144.7]
+Thrust_W = []
+
+Engines_PW = []
+Weight_PW = []
+Thrust_PW = []
