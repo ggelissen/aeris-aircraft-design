@@ -97,10 +97,16 @@ m_dot_ideal = (2*gamma/(gamma+1))**((gamma+1)/(2*(gamma-1)))*A_e*p_T*np.sqrt(gam
 #Inlet-Fan Cowl-Reverser-Core Nozzle-Pylon
 #Target type: slide 57
 
-Engines_W = ["FJ44-1AP","FJ44-1A","FJ44-2C","FJ44-3A","FJ44-3AP","FJ44-4A","FJ33-5A"]
-Weight_W = [212.3,208.7,235.9,242.7,234.1,304,144.7]
-Thrust_W = []
+Engines_W = ["FJ44-1AP","FJ44-3A","FJ44-3AP","FJ44-4A","FJ33-5A"] #Engine Type
+Weight_W = [212.3,234.1,304,144.7] #Engine Weight (kg)
+m_dot_W = []
+Thrust_W = [9340,13340,16010,8230] #Engine Thrust (N)
+TSFC_W = [0.4332,0.46,0.4,0.486] #Engine SFC (g/KN/s) 
+Conversion_factor = 13.77/0.486
+Cost_W = []
 
 Engines_PW = []
 Weight_PW = []
 Thrust_PW = []
+
+#Take-off thrust -> required thrust engine -> required engines -> compare cruise efficiency (Either lower setting higher performance or full setting lower performance)
