@@ -1,12 +1,12 @@
-# Make V-n diagram, taking into account loads from the wake of the previous aircraft
-# make use of https://ntrs.nasa.gov/api/citations/20140000839/downloads/20140000839.pdf page 280 and further
-# as well as https://ntrs.nasa.gov/api/citations/20160010341/downloads/20160010341.pdf
 
 # _____ IMPORTS _____
 import sys
 import os
 import yaml
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -18,129 +18,95 @@ params = DesignParameters()
 params.load_from_yaml('design_config.yaml')
 
 
+# Constants
+CL_max_values = {
+    "CLEAN": 1.3,
+    "TAKE-OFF": 1.6,
+    "LAND": 1.8
+}
+S = params.wing.S_w  # wing area (m²)
 
-# UAV Paramenters
-W_N = params.weight.W_TO
-W_kg = W_N / 9.81
-S = params.wing.S_w
-VS = params.stall_speed_clean # kts
-VS = kts_to_ms(VS) # Convert speeds to m/s
-VC = params.cruise_speed # m/s
-rho = 1.225
-CL_alpha = 5.0
+# Atmospheric densities
+rho_table = {
+    "sea_level": 1.225,
+    "12100m":  0.305965 # using ISA standard atmosphere values
+    } 
 
+# Weight Scenarios
+# in [N]
+weight_1 = params.weight.W_OE # Operational Empty Weight (OEW) in N
+weight_2 = params.weight.W_TO # Maximum Take-Off Weight (MTOW) in N
+weight_3 = params.weight.W_OE + params.weight.W_PL # OEW + Payload in N
 
-# Load Factor Limts - USAR.333
-n_pos_limit = min(2.1 + (10900 / (W_kg + 4536)), 3.8)
-n_neg_limit = -0.4 * n_pos_limit
-
-
-# Design maneuvering speed
-VA = VS * np.sqrt(n_pos_limit)  
-# Design dive speed (min 1.25*VC)
-VD = 1.25 * VC   
-
-if VA > VC:
-    print("Warning: VA is greater than VC, which is not allowed. Check your design parameters.")
-
-speeds = np.linspace(0, VD, 1000)
+# in [kg]
+weight_1_kg = N_to_kg(weight_1)
+weight_2_kg = N_to_kg(weight_2)
+weight_3_kg = N_to_kg(weight_3)
 
 
-def gust_velocity_at_altitude_VC(altitude_m):
-    """Gust velocity at VC as a function of altitude based on STANAG 4671."""
-    if altitude_m <= 6096:
-        return 15.2
-    elif 6096 < altitude_m <= 15240:
-        return 15.2 - ((15.2 - 7.6) / (15240 - 6096)) * (altitude_m - 6096)
-    else:
-        return 7.6
-
-def gust_velocity_at_altitude_VD(altitude_m):
-    """Gust velocity at VD as a function of altitude based on STANAG 4671."""
-    if altitude_m <= 6096:
-        return 7.6
-    elif 6096 < altitude_m <= 15240:
-        return 7.6 - ((7.6 - 3.8) / (15240 - 6096)) * (altitude_m - 6096)
-    else:
-        return 3.8
+# Positive load factor formula (STANAG 4671 USAR.337)
+def calc_positive_limit_load_factor(weight_kg):
+    n_pos = min(2.1 + (10900 / (weight_kg + 4536)), 3.8)
+    return n_pos
 
 
+# Stall speed (clean)
+def calc_stall_speed(weight_N, rho,CL_max):
+    return np.sqrt((2 * weight_N) / (rho * S * CL_max))
 
-# ____ GUST LOADS ____
-# gust velocity -> USAR 333-c-(i)
-altitude_m = params.cruise_altitude or 0
-U_VC = gust_velocity_at_altitude_VC(altitude_m)
-U_VD = gust_velocity_at_altitude_VD(altitude_m)
+# Maneuvering speed
+def calc_maneuver_speed(VS, n_pos):
+    return VS * np.sqrt(n_pos)
 
-# Compute gust velocity as a function of V
-U_gust = np.piecewise(speeds,
-    [speeds <= VC, speeds > VC],
-    [U_VC,
-     lambda V: U_VC - ((U_VC - U_VD) / (VD - VC)) * (V - VC)]
-)  
+# Dive speed
+def calc_dive_speed(VC):
+    VD = 1.25 * VC 
+    return VD
 
-# gust load factors -> from STANAG 4671 / EASA CS-23
-n_gust_pos = 1 + (rho * CL_alpha * S * speeds * U_gust) / (2 * W_N)
-n_gust_neg = 1 - (rho * CL_alpha * S * speeds * U_gust) / (2 * W_N)
+# Compute all speeds for one case
+def compute_speed_profile(weight_N, VC, rho, CL_max):
+    VS = calc_stall_speed(weight_N, rho, CL_max)
+    n_pos = calc_positive_limit_load_factor(weight_N)
+    VA = calc_maneuver_speed(VS, n_pos)
+    VD = calc_dive_speed(VC)
+    return {"VS": VS, "VA": VA, "VC": VC, "VD": VD}
 
+# Compute all scenarios
+def compute_all_profiles(weights_N, VC, CL_max_dict):
+    results = []
+    for cl_label, cl_value in CL_max_dict.items():
+        for weight_label, weight in weights_N.items():
+            for alt_label, rho in rho_table.items():
+                speeds = compute_speed_profile(weight, VC, rho, cl_value)
+                results.append({
+                    "CL_max type": cl_label,
+                    "CL_max": cl_value,
+                    "Weight": weight_label,
+                    "Altitude": alt_label,
+                    "VS [m/s]": round(speeds["VS"], 2),
+                    "VA [m/s]": round(speeds["VA"], 2),
+                    "VC [m/s]": round(speeds["VC"], 2),
+                    "VD [m/s]": round(speeds["VD"], 2)
+                })
+    return results
+            
 
-# ____ MANEUVERING LOADS ____
-n_maneuver_pos = np.piecewise(
-    speeds,
-    [speeds <= VA, speeds > VA],
-    [lambda V: (V / VS) ** 2,
-     lambda V: n_pos_limit]
-)
-
-
-# Compute point where parabola reaches n_neg_limit
-V_break = VS * np.sqrt(abs(n_neg_limit))
-
-n_maneuver_neg = np.piecewise(
-    speeds,
-    [speeds <= V_break,
-     (speeds > V_break) & (speeds <= VC),
-     (speeds > VC)],
-    [
-        lambda V: -((V / VS) ** 2),                         # Parabola (until it hits n_neg_limit)
-        lambda V: n_neg_limit,                              # Flat line (from V_break to VC)
-        lambda V: n_neg_limit * (VD - V) / (VD - VC)        # Linearly back to 0
-    ]
-)
-
-
-# ____ PLOTTING ____
-plt.figure(figsize=(10, 6))
-
-# Maneuver limits
-plt.plot(speeds, n_maneuver_pos, label='Positive Maneuver Limit', color='blue')
-plt.plot(speeds, n_maneuver_neg, label='Negative Maneuver Limit', color='blue')
-
-# Gust loads
-plt.plot(speeds, n_gust_pos, '--', label='Positive Gust Load', color='orange')
-plt.plot(speeds, n_gust_neg, '--', label='Negative Gust Load', color='orange')
-
-# Key speeds
-# Custom color map for specific speeds
-speed_labels = ['VS', 'VA', 'VC', 'VD']
-speed_values = [VS, VA, VC, VD]
-color_map = {
-    'VS': 'green',
-    'VA': 'gray',
-    'VC': 'gray',
-    'VD': 'red'
+# Example weights (in N)
+weights_N = {
+    "OEW": 11973.3,
+    "MTOW": 30787.8,
+    "OEW+Payload": 11973.3 + 5884
 }
 
-for v, label in zip(speed_values, speed_labels):
-    plt.axvline(x=v, color=color_map[label], linestyle=':', label=label)
+# Example cruise speed (mission-defined)
+VC = 75  # m/s
 
-# Labels and aesthetics
-plt.title('V-n Diagram (Flight Envelope)')
-plt.xlabel('Equivalent Airspeed (m/s)')
-plt.ylabel('Load Factor (n)')
-plt.grid(True)
-plt.legend(loc='upper right')
-plt.ylim(-4, 5)
-plt.xlim(0, VD + 10)
-plt.tight_layout()
-plt.show()
+# Compute all profiles
+all_profiles = compute_all_profiles(weights_N, VC, CL_max_values)
+df = pd.DataFrame(all_profiles)
+
+# Optional: sort for readability
+df = df.sort_values(by=["CL_max type", "Weight", "Altitude"])
+
+# Print the table
+print(df.to_string(index=False))
