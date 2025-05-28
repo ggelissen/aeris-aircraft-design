@@ -10,22 +10,22 @@ from utils.unit_conversions import *
 
 
 
-def calculate_Lambda_025c_rad(M_cr: float, M_cross: float = 0.935) -> float:
+def calculate_sweep_angle_025c_rad(Mach_cruise: float, Mach_cross: float = 0.935) -> float:
     """
-    Calculate the sweep angle based on the critical Mach number.
+    Calculate the sweep angle based on the cruise Mach number.
     Source: Torenbeek, "Advanced Aircraft Design: Conceptual Design, Analysis and Optimization of Subsonic Civil Airplanes"
     
     Parameters:
-    M_cr (float): Critical Mach number
+    Mach_cruise (float): Cruise Mach number
     
     Returns:
     float: Sweep angle in radians
     """
-    M_dd = M_cr + 0.03
-    if M_cr < 0.7:
+    Mach_dd = Mach_cruise + 0.03
+    if Mach_cruise < 0.7:
         return np.arccos(1)
     else:
-        return np.arccos(0.75 * (M_cross / M_dd))
+        return np.arccos(0.75 * (Mach_cross / Mach_dd))
     
 
 def calculate_taper_ratio(Lambda_025c: float) -> float:
@@ -79,18 +79,18 @@ def calculate_MAC_and_y_LEMAC(c_root: float, c_tip: float, b: float) -> tuple:
     return MAC, y_LEMAC
 
 
-def calculate_thickness_ratio(h: float, M_cr: float, W_TO: float, S: float, Lambda_05c: float, M_cross: float = 0.935) -> float:
+def calculate_thickness_ratio(h: float, Mach_cruise: float, W_TO: float, S: float, Lambda_05c: float, Mach_cross: float = 0.935) -> float:
     """
     Calculate the thickness-to-chord ratio based on the altitude, critical Mach number, takeoff weight, wing area,
     and sweep angle at 0.5c.
     
     Parameters:
     h (float): Altitude in meters
-    M_cr (float): Critical Mach number
+    Mach_cruise (float): Cruise Mach number
     W_TO (float): Takeoff weight in Newtons
     S (float): Wing area in square meters
     Lambda_05c (float): Sweep angle at 0.5c in radians
-    M_cross (float): Cross-over Mach number (default is 0.935)
+    Mach_cross (float): Cross-over Mach number (default is 0.935)
     
     Returns:
     float: Thickness-to-chord ratio
@@ -102,13 +102,13 @@ def calculate_thickness_ratio(h: float, M_cr: float, W_TO: float, S: float, Lamb
         p = constants['p0'] * (1 - constants['lambda'] * h / constants['T0']) ** (constants['g0'] / (constants['R'] * constants['lambda']))
     # Calculate pressure if altitude is above 11 km
     elif h > 11000:
-        p = constants_11km['p'] * np.exp(-constants['g0'] * (h - 11000) / (constants['R'] * constants_11km['T']))
+        p = constants_11km['p'] * np.exp(-constants['g0'] * (h/1000 - 11) / (constants['R'] * constants_11km['T']))
     
-    q = 0.5 * constants['gamma'] * p * M_cr ** 2
+    q = 0.5 * constants['gamma'] * p * Mach_cruise ** 2
     C_L = W_TO / (q * S)
-    M_dd = M_cr + 0.03
+    Mach_dd = Mach_cruise + 0.03
 
-    t_c = min(((np.cos(Lambda_05c))**3 * (M_cross - M_dd * np.cos(Lambda_05c)) - 0.115 * C_L**1.5)/((np.cos(Lambda_05c))**2), 0.18)
+    t_c = min(((np.cos(Lambda_05c))**3 * (Mach_cross - Mach_dd * np.cos(Lambda_05c)) - 0.115 * C_L**(1.5))/((np.cos(Lambda_05c))**2), 0.18)
     return t_c
 
 
@@ -131,34 +131,65 @@ def calculate_dihedral_angle_rad(Lambda_025c: float) -> float:
     return np.deg2rad(Gamma_deg)
 
 
+def calculate_sweep_angle_LE(Lambda_025c: float, c_root: float, b: float, taper_ratio: float) -> float:
+    """
+    Calculate the sweep angle at LE based on the sweep angle at 0.25c.
+    
+    Parameters:
+    Lambda_025c (float): Sweep angle at 0.25c in radians
+    
+    Returns:
+    float: Sweep angle at LE in radians
+    """
+    return np.arctan2(np.tan(Lambda_025c) + 0.25 * 2 * c_root / b * (1 - taper_ratio), 1)
+
+
+def calculate_sweep_angle_x_c(Lambda_LE: float, c_root: float, b: float, x_c: float, taper_ratio: float) -> float:
+    """
+    Calculate the sweep angle at a specific x/c location based on the sweep angle at LE.
+    
+    Parameters:
+    Lambda_LE (float): Sweep angle at LE in radians
+    c_root (float): Root chord length
+    b (float): Wing span
+    x_c (float): x/c location
+    taper_ratio (float): Taper ratio
+    
+    Returns:
+    float: Sweep angle at x/c in radians
+    """
+    return np.arctan2(np.tan(Lambda_LE) - x_c * 2 * c_root / b * (1 - taper_ratio), 1)
+
+
 
 if __name__ == "__main__":
 
     params = DesignParameters()
     params.load_from_yaml('design_config.yaml')
 
-    M_cr = 0.85
-    M_cross = 0.935
-    Lambda_025c = calculate_Lambda_025c_rad(M_cr, M_cross)
+    Mach_cruise = params.cruise_mach
+    Mach_cross = 0.935
+    Lambda_025c = calculate_sweep_angle_025c_rad(Mach_cruise, Mach_cross)
     taper_ratio = calculate_taper_ratio(Lambda_025c)
     
-    S = 100  # Wing area in square meters
-    b = 30   # Wing span in meters
+    S = params.wing.S_w     # Wing area in square meters
+    b = params.wing.b_w     # Wing span in meters
     
     c_root, c_tip = calculate_chord_lengths(S, b, taper_ratio)
     MAC, y_LEMAC = calculate_MAC_and_y_LEMAC(c_root, c_tip, b)
     
-    h = 10000  # Altitude in meters
-    W_TO = 500000  # Takeoff weight in Newtons
+    h = params.cruise_altitude  # Altitude in meters
+    W_TO = params.weight.W_TO  # Takeoff weight in Newtons
     
-    Lambda_05c = np.deg2rad(5)  # Example sweep angle at 0.5c in radians
-    t_c = calculate_thickness_ratio(h, M_cr, W_TO, S, Lambda_05c, M_cross)
+    Lambda_LE = calculate_sweep_angle_LE(Lambda_025c, c_root, b, taper_ratio)
+    Lambda_05c = calculate_sweep_angle_x_c(Lambda_025c, c_root, b, 0.5, taper_ratio)
+    t_c = calculate_thickness_ratio(h, Mach_cruise, W_TO, S, Lambda_05c, Mach_cross)
     
     dihedral_angle_rad = calculate_dihedral_angle_rad(Lambda_025c)
     
-    print(f"Lambda_025c: {np.rad2deg(Lambda_025c)} degrees")
-    print(f"Taper Ratio: {taper_ratio}")
-    print(f"Root Chord: {c_root} m, Tip Chord: {c_tip} m")
-    print(f"MAC: {MAC} m, y_LEMAC: {y_LEMAC} m")
-    print(f"Thickness-to-Chord Ratio: {t_c}")
-    print(f"Dihedral Angle: {np.rad2deg(dihedral_angle_rad)} degrees")
+    print(f"Lambda_025c: {np.round(np.rad2deg(Lambda_025c),4)} degrees")
+    print(f"Taper Ratio: {np.round(taper_ratio,4)}")
+    print(f"Root Chord: {np.round(c_root,4)} m, Tip Chord: {np.round(c_tip,4)} m")
+    print(f"MAC: {np.round(MAC,4)} m, y_LEMAC: {np.round(y_LEMAC,4)} m")
+    print(f"Thickness-to-Chord Ratio: {np.round(t_c,4)}")
+    print(f"Dihedral Angle: {np.round(np.rad2deg(dihedral_angle_rad),4)} degrees")

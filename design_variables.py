@@ -11,6 +11,7 @@ class DesignParameters:
         # Top-level Parameters
         self.range = None
         self.cruise_speed = None
+        self.cruise_mach = None
         self.stall_speed_clean = None
         self.stall_speed_land = None
         self.cruise_altitude = None
@@ -49,6 +50,7 @@ class DesignParameters:
         # Load top-level parameters
         self.range = config.get('range')
         self.cruise_speed = config.get('cruise_speed')
+        self.cruise_mach = config.get('cruise_mach')
         self.stall_speed_clean = config.get('stall_speed_clean')
         self.stall_speed_land = config.get('stall_speed_land')
         self.max_eq_velocity = config.get('max_eq_velocity')
