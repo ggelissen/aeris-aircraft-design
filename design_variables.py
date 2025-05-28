@@ -11,6 +11,7 @@ class DesignParameters:
         # Top-level Parameters
         self.range = None
         self.cruise_speed = None
+        self.cruise_mach = None
         self.stall_speed_clean = None
         self.stall_speed_land = None
         self.cruise_altitude = None
@@ -19,7 +20,9 @@ class DesignParameters:
         self.diversion_distance = None
         self.loiter_time = None
         self.max_eq_velocity = None
-        self.max_load_factor = None
+        self.max_load_factor = None 
+        self.crit_mach = None
+        
 
         # Subsystem Parameters
         self.cg = CGParameters()  # Center of Gravity Parameters
@@ -48,6 +51,7 @@ class DesignParameters:
         # Load top-level parameters
         self.range = config.get('range')
         self.cruise_speed = config.get('cruise_speed')
+        self.cruise_mach = config.get('cruise_mach')
         self.stall_speed_clean = config.get('stall_speed_clean')
         self.stall_speed_land = config.get('stall_speed_land')
         self.max_eq_velocity = config.get('max_eq_velocity')
@@ -58,6 +62,7 @@ class DesignParameters:
         self.loiter_time = config.get('loiter_time')
         self.max_eq_velocity = config.get('max_eq_velocity') 
         self.max_load_factor = config.get('max_load_factor')
+        self.crit_mach = config.get('crit_mach')
 
         # Load subsystem parameters
         if 'wing'in config:
@@ -102,8 +107,7 @@ class DesignParameters:
             current = getattr(current, key, None)
             if current is None:
                 raise AttributeError(f"Parameter '{parameter_name}' not found.")
-        return current
-    
+        return current   
 
 class WeightParameters:
     """
@@ -135,20 +139,22 @@ class WingParameters:
         self.A_w = 9.0                             # Aspect Ratio
         if self.S_w is not None and self.A_w is not None:
             self.b_w = m.sqrt(self.A_w * self.S_w)  # Wing Span in m
-            self.mac = self.S_w / self.b_w          # Mean Aerodynamic Chord in m
-        self.lambda_w = 0.4                        # Wing Taper Ratio
+        self.mac = 1.2824                            # Mean Aerodynamic Chord in m
+        self.y_LEMAC = 2.1016                       # y-position of Leading Edge of MAC in m
+        self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.Lambda_w_quarter = 40*np.pi/180      #PLACEHOLDER            # Wing quarter-Chord Sweep Angle in radians
-        self.Lambda_w_semi = 35*np.pi/180   #PLACEHOLDER               # Wing semi-Chord Sweep Angle in radians
+        self.Lambda_w_quarter = 0.6487 # 37.1673 degrees        # Wing quarter-Chord Sweep Angle in radians
+        self.max_t_c_w = 0.1438
         self.t_c_w_r = 0.12        #PLACEHOLDER                 # Wing Thickness-to-Chord Ratio at Root
-        self.t_c_w_t = None                     # Wing Thickness-to-Chord Ratio at Tip
+        self.t_c_w_t = 0.12        #PLACEHOLDER             # Wing Thickness-to-Chord Ratio at Tip
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
         self.airfoil_w = None                       # Wing Airfoil Type
         self.i_w = None                             # Wing Incidence Angle in degrees
         self.epsilon_t = None                       # Wing Twist Angle in degrees
-        self.Gamma_w = None                         # Wing Dihedral Angle in degrees
-        self.root_chord = (2* self.S_w / self.b_w) / (1 + self.lambda_w)  # Wing Root Chord in m
+        self.Gamma_w = 0.0175                         # Wing Dihedral Angle in radians
+        self.root_chord = 1.819  # Wing Root Chord in m
+        self.tip_chord = 0.4916  # Wing Tip Chord in m
         self.t_r = self.t_c_w_r * self.root_chord                           # Wing Root Thickness in m
 
     def load_from_dict(self, param_dict):
