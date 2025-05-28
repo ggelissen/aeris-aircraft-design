@@ -22,12 +22,13 @@ class DesignParameters:
         self.max_load_factor = None
 
         # Subsystem Parameters
+        self.cg = CGParameters()  # Center of Gravity Parameters
         self.weight = WeightParameters()
         self.wing = WingParameters(W_TO=self.weight.W_TO, W_S=self.weight.W_S)
         self.performance = PerformanceParameters()
         self.fuselage = FuselageParameters()
         self.engine = EngineParameters(W_TO=self.weight.W_TO, T_W=self.weight.T_W)
-        self.empennage = EmpennageParameters()
+        self.empennage = EmpennageParameters(l_f=self.fuselage.l_f)
         self.landing_gear = LandingGearParameters()
         self.control_surface = ControlSurfaceParameters()
 
@@ -122,6 +123,7 @@ class WeightParameters:
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
 
 class WingParameters:
     """
@@ -220,14 +222,15 @@ class EmpennageParameters:
     Class to hold empennage-related parameters for the aircraft design.
     Append more parameters as needed.
     """
-    def __init__(self):
-        self.S_h =    3 #placeholder                          # Horizontal Stabilizer Area in m^2
-        self.S_v =   3#placeholder                           # Vertical Stabilizer Area in m^2
+    def __init__(self, l_f: float = None):
+        self.S_h =    1.39                          # Horizontal Stabilizer Area in m^2
+        self.S_v =   2.16                          # Vertical Stabilizer Area in m^2
         self.S_t = None                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h) # Butterfly Angle in radians
         self.x_t = None                             # V-Tail Position in m
-        self.V_t = None                             # V-Tail Volume Coefficient
+        self.V_h = 0.7 #estimation                             # V-Tail Volume Coefficient
+        self.V_v = 0.05 #estimation                             # Horizontal Stabilizer Volume Coefficient
         self.i_t = None                             # V-Tail Incidence Angle in degrees
         self.A_t = None                             # V-Tail Aspect Ratio
         self.Lambda_t_025c = None                   # V-Tail Quarter-Chord Sweep Angle in degrees
@@ -235,6 +238,8 @@ class EmpennageParameters:
         self.t_c_t = None                           # V-Tail Thickness-to-Chord Ratio
         self.airfoil_t = None                       # V-Tail Airfoil Type
         self.vtail_dihedral = 110 #placeholder                  # V-Tail Dihedral Angle in radians
+        self.L_v = 0.45* l_f                         #Moment arm vertical stabilizer                               
+        self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -273,6 +278,27 @@ class ControlSurfaceParameters:
         self.x_a = None                             # Control Surface Position in m
         self.delta_a = None                         # Control Surface Deflection Angle in degrees
         self.C_m_a = None                           # Control Surface Moment Coefficient
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+class CGParameters:
+    """
+    Class to hold center of gravity (CG) related parameters for the aircraft design.
+    Append more parameters as needed.
+    """
+    def __init__(self):
+        self.x_cg_wing = 5                       # CG Position of the Wing in m
+        self.x_cg_fuselage = 4                   # CG Position of the Fuselage in m
+        self.x_cg_landing_gear = 5               # CG Position of the Landing Gear in m
+        self.x_cg_empennage = 9                  # CG Position of the Empennage in m
+        self.x_cg_fixed_equipment = 3            # CG Position of the Fixed Equipment in m
+        self.x_cg_propulsion = 7                 # CG Position of the Propulsion System in m
+        self.x_cg_payload = 3                    # CG Position of the Payload in m
+        self.x_cg_fuel = 5                       # CG Position of the Fuel in m
+
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
