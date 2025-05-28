@@ -19,8 +19,7 @@ class DesignParameters:
         self.diversion_distance = None
         self.loiter_time = None
         self.max_eq_velocity = None
-        self.max_load_factor = None 
-        
+        self.max_load_factor = None
 
         # Subsystem Parameters
         self.weight = WeightParameters()
