@@ -238,7 +238,7 @@ class EmpennageParameters:
         self.V_h = 0.7 #estimation                             # V-Tail Volume Coefficient
         self.V_v = 0.05 #estimation                             # Horizontal Stabilizer Volume Coefficient
         self.i_t = None                             # V-Tail Incidence Angle in degrees
-        self.A_t = None                             # V-Tail Aspect Ratio
+        self.A_t = 9                             # V-Tail Aspect Ratio
         self.Lambda_t_025c = None                   # V-Tail Quarter-Chord Sweep Angle in degrees
         self.lambda_t = None                        # V-Tail Taper Ratio
         self.t_c_t = None                           # V-Tail Thickness-to-Chord Ratio
