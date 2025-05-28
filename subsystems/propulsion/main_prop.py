@@ -126,12 +126,11 @@ Conversion_factor = 13.77/0.486 # This implies 0.486 in original units equals 13
 TSFC_W = [tsfc * Conversion_factor for tsfc in _TSFC_W_original_units] # TSFC in g/kN/s
 
 
-
 #Create thrust ranges for which different engines are suitable
 def get_engine_for_thrust(T_req): # Renamed T_TO to T_req for general use
-    if T_req < 7000:
+    if T_req < 7000: # User modified this from 7500
         return "FJ33-5A"
-    elif 7000 <= T_req < 9000:
+    elif 7000 <= T_req < 9000: # User modified this from 7500
         return "FJ44-1AP"
     elif 9000 <= T_req < 12000:
         return "FJ44-3AP"
@@ -147,7 +146,7 @@ def select_engine(T_req): # Renamed T_TO to T_req
             "engine": engine_name,
             "weight": Weight_W[index],
             "thrust": Thrust_W[index], # Max thrust of the engine
-            "tsfc": TSFC_W[index]      # TSFC in g/kN/s
+            "tsfc": TSFC_W[index]      # Reference TSFC in g/kN/s (used for take-off)
         }
     except ValueError:
         print(f"Error: Engine {engine_name} not found in the database.")
@@ -173,7 +172,7 @@ def main():
             print(f"Recommended Engine for Take-off: {selected_take_off_engine_details['engine']}")
             print(f"  Weight: {selected_take_off_engine_details['weight']} kg")
             print(f"  Max Thrust: {selected_take_off_engine_details['thrust']} N")
-            print(f"  TSFC (reference): {selected_take_off_engine_details['tsfc']:.3f} g/kN/s")
+            print(f"  Take-off TSFC: {selected_take_off_engine_details['tsfc']:.3f} g/kN/s") # Clarified this is Take-off TSFC
 
             if selected_take_off_engine_details['thrust'] >= T_take_off:
                 fuel_burn_take_off = calculate_fuel_burn_kghr(selected_take_off_engine_details['tsfc'], T_take_off)
@@ -190,13 +189,13 @@ def main():
         for i in range(len(Engines_W)):
             engine_name = Engines_W[i]
             max_thrust_N = Thrust_W[i]
-            tsfc_val = TSFC_W[i]
+            tsfc_val = TSFC_W[i] # This is the reference/take-off TSFC
             weight_kg = Weight_W[i]
 
             print(f"Engine: {engine_name}")
             print(f"  Max Thrust: {max_thrust_N} N")
             print(f"  Weight: {weight_kg} kg")
-            print(f"  TSFC (reference): {tsfc_val:.3f} g/kN/s")
+            print(f"  Take-off TSFC: {tsfc_val:.3f} g/kN/s") # Clarified this is Take-off TSFC
 
             if max_thrust_N >= T_take_off:
                 fuel_burn_comparison = calculate_fuel_burn_kghr(tsfc_val, T_take_off)
@@ -213,7 +212,14 @@ def main():
         if selected_take_off_engine_details and selected_take_off_engine_details['thrust'] >= T_take_off:
             # Only proceed if an engine was successfully selected and is suitable for take-off
             print("\n\n--- Cruise Fuel Consumption for Selected Take-off Engine ---")
-            print(f"Using engine: {selected_take_off_engine_details['engine']} (Max Thrust: {selected_take_off_engine_details['thrust']} N, TSFC: {selected_take_off_engine_details['tsfc']:.3f} g/kN/s)")
+            take_off_tsfc = selected_take_off_engine_details['tsfc']
+            cruise_tsfc_multiplier = 1.68
+            cruise_tsfc = take_off_tsfc * cruise_tsfc_multiplier
+
+            print(f"Using engine: {selected_take_off_engine_details['engine']}")
+            print(f"  Max Thrust: {selected_take_off_engine_details['thrust']} N")
+            print(f"  Take-off TSFC: {take_off_tsfc:.3f} g/kN/s")
+            print(f"  Estimated Cruise TSFC: {cruise_tsfc:.3f} g/kN/s (Take-off TSFC * {cruise_tsfc_multiplier})")
             
             try:
                 T_cruise = float(input("Enter the required cruise thrust (N): "))
@@ -222,14 +228,21 @@ def main():
                 elif T_cruise > selected_take_off_engine_details['thrust']:
                     print(f"Error: Cruise thrust ({T_cruise:.0f} N) exceeds the max thrust ({selected_take_off_engine_details['thrust']:.0f} N) of the selected engine ({selected_take_off_engine_details['engine']}).")
                 else:
-                    cruise_fuel_burn = calculate_fuel_burn_kghr(selected_take_off_engine_details['tsfc'], T_cruise)
+                    cruise_fuel_burn = calculate_fuel_burn_kghr(cruise_tsfc, T_cruise)
                     print(f"  Calculated cruise fuel burn at {T_cruise:.0f} N: {cruise_fuel_burn:.2f} kg/hr")
-                    print("  Note: This calculation uses the engine's reference TSFC. Actual cruise TSFC can vary with altitude, speed, and throttle.")
+                    print(f"  Note: This calculation uses an estimated cruise TSFC ({cruise_tsfc_multiplier} times the take-off TSFC). Actual cruise TSFC can still vary with specific altitude, speed, and throttle.")
             except ValueError:
                 print("Invalid input for cruise thrust. Please enter a numeric value.")
         elif selected_take_off_engine_details and selected_take_off_engine_details['thrust'] < T_take_off:
-            print("\nNo suitable engine was selected for take-off, so cruise fuel consumption cannot be calculated.")
+            # This message has been slightly updated from your provided code for clarity
+            print("\n\n--- Cruise Fuel Consumption ---")
+            print("Skipping cruise calculation as the recommended take-off engine is not powerful enough for the specified take-off thrust.")
+        else: # Catches if selected_take_off_engine_details is None
+            print("\n\n--- Cruise Fuel Consumption ---")
+            print("Skipping cruise calculation as no engine was initially selected for take-off.")
+
     except ValueError:
         print("Invalid input for take-off thrust. Please enter a numeric value.")
+
 if __name__ == "__main__":
     main()
