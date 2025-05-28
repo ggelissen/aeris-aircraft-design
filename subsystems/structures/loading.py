@@ -46,10 +46,31 @@ if VA > VC:
 speeds = np.linspace(0, VD, 1000)
 
 
+def gust_velocity_at_altitude_VC(altitude_m):
+    """Gust velocity at VC as a function of altitude based on STANAG 4671."""
+    if altitude_m <= 6096:
+        return 15.2
+    elif 6096 < altitude_m <= 15240:
+        return 15.2 - ((15.2 - 7.6) / (15240 - 6096)) * (altitude_m - 6096)
+    else:
+        return 7.6
+
+def gust_velocity_at_altitude_VD(altitude_m):
+    """Gust velocity at VD as a function of altitude based on STANAG 4671."""
+    if altitude_m <= 6096:
+        return 7.6
+    elif 6096 < altitude_m <= 15240:
+        return 7.6 - ((7.6 - 3.8) / (15240 - 6096)) * (altitude_m - 6096)
+    else:
+        return 3.8
+
+
+
 # ____ GUST LOADS ____
 # gust velocity -> USAR 333-c-(i)
-U_VC = 15.2  # gust speed at VC in m/s
-U_VD = 7.6   # gust speed at VD in m/s
+altitude_m = params.cruise_altitude or 0
+U_VC = gust_velocity_at_altitude_VC(altitude_m)
+U_VD = gust_velocity_at_altitude_VD(altitude_m)
 
 # Compute gust velocity as a function of V
 U_gust = np.piecewise(speeds,
@@ -72,12 +93,20 @@ n_maneuver_pos = np.piecewise(
 )
 
 
-n_neg_limit = -0.4 * n_pos_limit
+# Compute point where parabola reaches n_neg_limit
+V_break = VS * np.sqrt(abs(n_neg_limit))
 
-n_maneuver_neg_parabola = -((speeds / VS) ** 2)
-
-# Apply minimum clamp to enforce the limit (select the lesser value)
-n_maneuver_neg = np.maximum(n_maneuver_neg_parabola, n_neg_limit)
+n_maneuver_neg = np.piecewise(
+    speeds,
+    [speeds <= V_break,
+     (speeds > V_break) & (speeds <= VC),
+     (speeds > VC)],
+    [
+        lambda V: -((V / VS) ** 2),                         # Parabola (until it hits n_neg_limit)
+        lambda V: n_neg_limit,                              # Flat line (from V_break to VC)
+        lambda V: n_neg_limit * (VD - V) / (VD - VC)        # Linearly back to 0
+    ]
+)
 
 
 # ____ PLOTTING ____
