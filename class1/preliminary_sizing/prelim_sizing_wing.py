@@ -187,9 +187,10 @@ if __name__ == "__main__":
     
     dihedral_angle_rad = calculate_dihedral_angle_rad(Lambda_025c)
     
-    print(f"Lambda_025c: {np.round(np.rad2deg(Lambda_025c),4)} degrees")
+    print(f"Sweep Angle at 0.25c: {np.round(Lambda_025c,4)} radians")
+
     print(f"Taper Ratio: {np.round(taper_ratio,4)}")
     print(f"Root Chord: {np.round(c_root,4)} m, Tip Chord: {np.round(c_tip,4)} m")
     print(f"MAC: {np.round(MAC,4)} m, y_LEMAC: {np.round(y_LEMAC,4)} m")
     print(f"Thickness-to-Chord Ratio: {np.round(t_c,4)}")
-    print(f"Dihedral Angle: {np.round(np.rad2deg(dihedral_angle_rad),4)} degrees")
+    print(f"Dihedral Angle: {np.round(dihedral_angle_rad,4)} radians")

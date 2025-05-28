@@ -137,20 +137,22 @@ class WingParameters:
         self.A_w = 9.0                             # Aspect Ratio
         if self.S_w is not None and self.A_w is not None:
             self.b_w = m.sqrt(self.A_w * self.S_w)  # Wing Span in m
-            self.mac = self.S_w / self.b_w          # Mean Aerodynamic Chord in m
-        self.lambda_w = 0.4                        # Wing Taper Ratio
+        self.mac = 1.2824                            # Mean Aerodynamic Chord in m
+        self.y_LEMAC = 2.1016                       # y-position of Leading Edge of MAC in m
+        self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.Lambda_w_quarter = 40*np.pi/180      #PLACEHOLDER            # Wing quarter-Chord Sweep Angle in radians
-        self.Lambda_w_semi = 35*np.pi/180   #PLACEHOLDER               # Wing semi-Chord Sweep Angle in radians
+        self.Lambda_w_quarter = 0.6487 # 37.1673 degrees        # Wing quarter-Chord Sweep Angle in radians
+        self.max_t_c_w = 0.1438
         self.t_c_w_r = 0.12        #PLACEHOLDER                 # Wing Thickness-to-Chord Ratio at Root
-        self.t_c_w_t = None                     # Wing Thickness-to-Chord Ratio at Tip
+        self.t_c_w_t = 0.12        #PLACEHOLDER             # Wing Thickness-to-Chord Ratio at Tip
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
         self.airfoil_w = None                       # Wing Airfoil Type
         self.i_w = None                             # Wing Incidence Angle in degrees
         self.epsilon_t = None                       # Wing Twist Angle in degrees
-        self.Gamma_w = None                         # Wing Dihedral Angle in degrees
-        self.root_chord = (2* self.S_w / self.b_w) / (1 + self.lambda_w)  # Wing Root Chord in m
+        self.Gamma_w = 0.0175                         # Wing Dihedral Angle in radians
+        self.root_chord = 1.819  # Wing Root Chord in m
+        self.tip_chord = 0.4916  # Wing Tip Chord in m
         self.t_r = self.t_c_w_r * self.root_chord                           # Wing Root Thickness in m
 
     def load_from_dict(self, param_dict):
