@@ -20,6 +20,7 @@ class DesignParameters:
         self.loiter_time = None
         self.max_eq_velocity = None
         self.max_load_factor = None 
+        self.crit_mach = None
         
 
         # Subsystem Parameters
@@ -58,6 +59,7 @@ class DesignParameters:
         self.loiter_time = config.get('loiter_time')
         self.max_eq_velocity = config.get('max_eq_velocity') 
         self.max_load_factor = config.get('max_load_factor')
+        self.crit_mach = config.get('crit_mach')
 
         # Load subsystem parameters
         if 'wing'in config:
