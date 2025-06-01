@@ -1,6 +1,8 @@
 ## Requirments:
 # python=3.11
 # numpy!=1.19.4
+import os
+
 
 # Before running, make sure to run:
 # pip install -r requirements.txt
@@ -55,14 +57,21 @@ def struct_main(designvars: DesignParameters = None):
     vsp.Update()
 
     # Save as VSP3 file
+    prev_cwd = os.getcwd()
+    os.chdir(os.getcwd() + "/data")
     vsp.WriteVSPFile("aircraft_model.vsp3")
+    os.chdir(prev_cwd)
 
     # Export to STL or other formats
+    prev_cwd = os.getcwd()
+    os.chdir(os.getcwd() + "/data")
     vsp.ExportFile("aircraft_model.stl", vsp.SET_ALL, vsp.EXPORT_STL)
+    os.chdir(prev_cwd)
 
     # PLOTTING
-    plotSTL('aircraft_model.stl')
+    plotSTL(os.getcwd() + '/data/aircraft_model.stl')
 
 if __name__ == "__main__":
     AERIS = DesignParameters()
+    AERIS.load_from_yaml("design_config.yaml")
     struct_main(AERIS)
