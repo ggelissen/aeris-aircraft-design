@@ -137,6 +137,15 @@ def create_wing(designvars: DesignParameters = None):
     for i in range(num_wingribs):
         ribs.append(vsp.AddFeaPart(wing_id, wing_model, vsp.FEA_RIB))
 
+    planform_points = []
+    for thing in vsp.GetFeatureLinePnts(wing_id):
+        if thing.z() == 0.0:
+            planform_points.append(np.array([thing.x(), thing.y()]))
+    # Convert to NumPy array
+    wingpars.planform_points = np.array(planform_points)
+
+
+
 
 def create_V_tail(designvars: DesignParameters = None):
     hstab_id = vsp.AddGeom("WING")
@@ -184,3 +193,76 @@ def create_engines(designvars: DesignParameters = None):
     vsp.SetParmVal(pod_id, "X_Rel_Location", "XForm", -proppars.engine_x_pos)  # Longitudinal position
     vsp.SetParmVal(pod_id, "Y_Rel_Location", "XForm", proppars.engine_y_pos)  # Side offset (0 = centerline)
     vsp.SetParmVal(pod_id, "Z_Rel_Location", "XForm", -proppars.engine_z_pos)  # Vertical offset (on top of fuselage)
+
+def calculate_cg(designvars: DesignParameters = None):
+    """
+    Calculate the center of gravity (CG) of the aircraft based on the design parameters.
+    This function assumes that the CG is calculated based on the fuselage, wing, empennage, and engines.
+    OpenVSP options for analysis 'MassProp' are:
+    [input_name]                  [type]       	[doc]
+   DegenSet                      integer      	Degenerate geometry Set for analysis.
+   MassSliceDir                  integer      	Direction for mass property slicing.
+   ModeID                        string       	ID for Mode to use for analysis.
+   NumMassSlices                 integer      	Number of slices.
+   Set                           integer      	Geometry Set for analysis.
+   UseModeFlag                   integer      	Flag to control whether Modes are used instead of Sets.
+    """
+    # Execute Mass Analysis
+    result = vsp.ExecAnalysis("MassProp")
+    #vsp.PrintResults(result)
+
+    # CG Coordinates:
+    CG_Coords_Vec = vsp.GetVec3dResults(result, "Total_CG")[0]
+    CG_Coords = np.array([CG_Coords_Vec.x(), CG_Coords_Vec.y(), CG_Coords_Vec.z()])
+
+    # Inertia:
+    I = {}
+    for sub in ["xx", "xy", "xz", "yy", "yz", "zz"]:
+        I[sub] = vsp.GetDoubleResults(result, f"Total_I{sub}")
+
+    # Total Mass:
+    total_mass = vsp.GetDoubleResults(result, "Total_Mass")[0]
+
+    designvars.inertia_matrix = np.array([[I["xx"], I["xy"], I["xz"]],
+                                             [I["xy"], I["yy"], I["yz"]],
+                                             [I["xz"], I["yz"], I["zz"]]])
+    designvars.cg.cg_vector_from_3Dmodel = CG_Coords
+    designvars.cg.total_mass_from_3Dmodel = total_mass
+    vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0)) # Delete slices
+    for geom in vsp.FindGeoms():
+        vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown") , True)
+
+def calculate_wet_areas(designvars: DesignParameters = None):
+    """
+    Calculate the wetted areas of the aircraft components, taking into account parts of the aircraft being partly inside of other
+    aircraft components, and therefore not being exposed.
+    This function assumes that the wetted areas are calculated based on the fuselage, wing, empennage, and engines.
+    OpenVSP options for analysis 'CompGeom' are:
+       [input_name]                  [type]       	[doc]
+   DegenSet                      integer      	Degenerate geometry Set for analysis.
+   HalfMeshFlag                  integer      	Flag to control whether Y >= 0 half mesh is generated.
+   ModeID                        string       	ID for Mode to use for analysis.
+   Set                           integer      	Normal geometry Set for analysis.
+   SubSurfFlag                   integer      	Flag to control whether subsurfaces are used in analysis.
+   UseModeFlag                   integer      	Flag to control whether Modes are used instead of Sets.
+   WriteCSVFlag                  integer      	Flag to control whether CSV file is written.
+    """
+    vsp.SetAnalysisInputDefaults("CompGeom")
+    #result = vsp.ExecAnalysis("CompGeom")
+    output_mesh = vsp.ComputeCompGeom(vsp.SET_SHOWN, False, 0)
+    result = vsp.FindLatestResultsID("Comp_Geom")
+    vsp.PrintResults(result)
+
+
+    wet_areas = {}
+    wet_areas["fuselage"] = vsp.GetDoubleResults(result, "Wet_Area")[0]
+    wet_areas["wing"] = vsp.GetDoubleResults(result, "Wet_Area")[1]
+    wet_areas["empennage"] = vsp.GetDoubleResults(result, "Wet_Area")[2]
+    wet_areas["engines"] = vsp.GetDoubleResults(result, "Wet_Area")[3]
+    wet_areas["total"] = vsp.GetDoubleResults(result, "Total_Wet_Area")[0]
+    designvars.wing.wetted_area = wet_areas
+
+    vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete slices
+    for geom in vsp.FindGeoms():
+        vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
+

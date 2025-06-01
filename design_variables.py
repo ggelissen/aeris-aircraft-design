@@ -22,6 +22,7 @@ class DesignParameters:
         self.max_eq_velocity = None
         self.max_load_factor = None
         self.crit_mach = None
+        self.inertia_matrix = None
 
 
         # Subsystem Parameters
@@ -34,6 +35,7 @@ class DesignParameters:
         self.empennage = EmpennageParameters(l_f=self.fuselage.l_f)
         self.landing_gear = LandingGearParameters()
         self.control_surface = ControlSurfaceParameters()
+        self.cg = CGParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -135,7 +137,7 @@ class WingParameters:
     Append more parameters as needed.
     """
     def __init__(self, W_TO: float = None, W_S: float = None):
-        self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by the OpenVSP CompGeom function, taking into account part of wing inside fuselage
+        self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
         self.A_w = 9.0                             # Aspect Ratio
         if self.S_w is not None and self.A_w is not None:
@@ -167,7 +169,8 @@ class WingParameters:
         self.Gamma_w = 0.0175                         # Wing Dihedral Angle in radians
         self.root_chord = 1.819  # Wing Root Chord in m
         self.tip_chord = 0.4916  # Wing Tip Chord in m
-        self.t_r = self.t_c_w_r * self.root_chord                           # Wing Root Thickness in m
+        self.t_r = self.t_c_w_r * self.root_chord   # Wing Root Thickness in m
+        self.planform_points = None  # 2D Numpy array with points forming the planform, is calculated by create_wing()
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -343,8 +346,8 @@ class ControlSurfaceParameters:
 class CGParameters:
     """
     Class to hold center of gravity (CG) related parameters for the aircraft design.
-    Append more parameters as needed. OpenVSP can also automatically calculate CG from the 3D model, but for this exact
-    more precise weights and geometries of the aircraft need to be known.
+    Append more parameters as needed. subsystems.structures.vspfunctions.calculate_cg() can also automatically
+    calculate CG from the 3D model, but for this more precise weights and geometries of the aircraft need to be known.
     """
     def __init__(self):
         self.x_cg_wing = 5                       # CG Position of the Wing in m
@@ -355,7 +358,8 @@ class CGParameters:
         self.x_cg_propulsion = 7                 # CG Position of the Propulsion System in m
         self.x_cg_payload = 3                    # CG Position of the Payload in m
         self.x_cg_fuel = 5                       # CG Position of the Fuel in m
-
+        self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
+        self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
