@@ -343,7 +343,8 @@ class ControlSurfaceParameters:
 class CGParameters:
     """
     Class to hold center of gravity (CG) related parameters for the aircraft design.
-    Append more parameters as needed.
+    Append more parameters as needed. OpenVSP can also automatically calculate CG from the 3D model, but for this exact
+    more precise weights and geometries of the aircraft need to be known.
     """
     def __init__(self):
         self.x_cg_wing = 5                       # CG Position of the Wing in m
