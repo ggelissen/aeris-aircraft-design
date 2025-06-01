@@ -18,7 +18,7 @@ from vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing
 matplotlib.use('Qt5Agg')
 import openvsp as vsp
 import vspfunctions
-import loading
+import subsystems.structures.stanag as stanag
 from design_variables import *
 
 def struct_main(designvars: DesignParameters = None):

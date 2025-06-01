@@ -182,7 +182,7 @@ if __name__ == "__main__":
     W_TO = params.weight.W_TO  # Takeoff weight in Newtons
     
     Lambda_LE = calculate_sweep_angle_LE(Lambda_025c, c_root, b, taper_ratio)
-    Lambda_05c = calculate_sweep_angle_x_c(Lambda_025c, c_root, b, 0.5, taper_ratio)
+    Lambda_05c = calculate_sweep_angle_x_c(Lambda_LE, c_root, b, 0.5, taper_ratio)
     t_c = calculate_thickness_ratio(h, Mach_cruise, W_TO, S, Lambda_05c, Mach_cross)
     
     dihedral_angle_rad = calculate_dihedral_angle_rad(Lambda_025c)
