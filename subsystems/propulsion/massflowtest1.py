@@ -177,14 +177,20 @@ class Thrust:
 
 if __name__ == "__main__":
     target_thrust = 1400
-    mfi = Thrust.compute_mass_flow(2131, 0.41, -20, target_thrust)
+    h = 12192
+    M = 0.8
+    DT = 0
+
+    mfi = Thrust.compute_mass_flow(h, M, DT, target_thrust)
     if mfi is not None:
         print(f"Required fuel mass flow: {mfi:.6f} kg/s")
-        thrust = Thrust._Thrust__stuw(12192, 0.8, 0, mfi)
-        print(f"Back-computed thrust at 12192 m: {thrust:.2f} N")
+        thrust = Thrust._Thrust__stuw(h, M, DT, mfi)
+        print(f"Back-computed thrust at {h} m: {thrust:.2f} N")
+
+        if thrust and thrust > 0:
+            sfc = (mfi / thrust)*10e5
+            print(f"Specific Fuel Consumption (SFC): {sfc:.8f} mg/N·s")
+        else:
+            print("Invalid thrust value, cannot compute SFC.")
     else:
         print("Could not compute fuel mass flow for the given thrust.")
-
-    # Optional plot
-    # Thrust.plot_thrust_vs_mass_flow(2131, 0.41, -20)
-    # Thrust.plot_thrust_vs_mass_flow(12192, 0.8, 0)
