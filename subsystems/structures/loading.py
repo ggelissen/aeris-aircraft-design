@@ -49,7 +49,6 @@ def calc_positive_limit_load_factor(weight_kg):
     n_pos = min(2.1 + (10900 / (weight_kg + 4536)), 3.8)
     return n_pos
 
-
 # Stall speed (clean)
 def calc_stall_speed(weight_N, rho,CL_max):
     return np.sqrt((2 * weight_N) / (rho * S * CL_max))

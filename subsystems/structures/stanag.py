@@ -18,8 +18,11 @@ params = DesignParameters()
 params.load_from_yaml('design_config.yaml')
 
 
+# This code generates a V-n diagram (Flight Envelope) for a UAV based on the STANAG 4671 and EASA CS-23 standards.
 
-# UAV Paramenters
+
+
+# 1 - UAV Paramenters
 W_N = params.weight.W_TO
 W_kg = W_N / 9.81
 S = params.wing.S_w
@@ -30,22 +33,26 @@ rho = 1.225
 CL_alpha = 5.0
 
 
-# Load Factor Limts - USAR.333
+# 2 - Load Factor Limits USAR.333
 n_pos_limit = min(2.1 + (10900 / (W_kg + 4536)), 3.8)
 n_neg_limit = -0.4 * n_pos_limit
 
 
+# 3 - Required Speeds for the Diagram
+
 # Design maneuvering speed
-VA = VS * np.sqrt(n_pos_limit)  
+#VA = VS * np.sqrt(n_pos_limit) 
+
+ 
 # Design dive speed (min 1.25*VC)
 VD = 1.25 * VC   
 
-if VA > VC:
-    print("Warning: VA is greater than VC, which is not allowed. Check your design parameters.")
-
-speeds = np.linspace(0, VD, 1000)
+# Create an array of speeds for the V-n diagram
+velocity_aixs = np.linspace(0, VD, 1000)
 
 
+
+# 4. Gust Velocity Calculation
 def gust_velocity_at_altitude_VC(altitude_m):
     """Gust velocity at VC as a function of altitude based on STANAG 4671."""
     if altitude_m <= 6096:
@@ -64,43 +71,47 @@ def gust_velocity_at_altitude_VD(altitude_m):
     else:
         return 3.8
 
-
-
-# ____ GUST LOADS ____
 # gust velocity -> USAR 333-c-(i)
 altitude_m = params.cruise_altitude or 0
 U_VC = gust_velocity_at_altitude_VC(altitude_m)
 U_VD = gust_velocity_at_altitude_VD(altitude_m)
 
 # Compute gust velocity as a function of V
-U_gust = np.piecewise(speeds,
-    [speeds <= VC, speeds > VC],
+U_gust = np.piecewise(velocity_aixs,
+    [velocity_aixs <= VC, velocity_aixs > VC],
     [U_VC,
      lambda V: U_VC - ((U_VC - U_VD) / (VD - VC)) * (V - VC)]
 )  
 
-# gust load factors -> from STANAG 4671 / EASA CS-23
-n_gust_pos = 1 + (rho * CL_alpha * S * speeds * U_gust) / (2 * W_N)
-n_gust_neg = 1 - (rho * CL_alpha * S * speeds * U_gust) / (2 * W_N)
+
+# 5. Load Factors Calculation
 
 
-# ____ MANEUVERING LOADS ____
-n_maneuver_pos = np.piecewise(
-    speeds,
-    [speeds <= VA, speeds > VA],
-    [lambda V: (V / VS) ** 2,
-     lambda V: n_pos_limit]
-)
+# 5.A Gust Loads
+n_gust_pos = 1 + (rho * CL_alpha * S * velocity_aixs * U_gust) / (2 * W_N)
+n_gust_neg = 1 - (rho * CL_alpha * S * velocity_aixs * U_gust) / (2 * W_N)
+
+
+
+# 5.B Maneuver Loads
+n_parabola = (velocity_aixs / VS) ** 2              # CLmax limit (stall speed parabola)
+n_flat = np.full_like(velocity_aixs, n_pos_limit)   # Maximum positive load factor (flat line)
+
+n_maneuver_pos = np.minimum(n_parabola, n_flat)     # --> Postive maneuver load factor (minimum of parabola and flat line)
+
+# Determine VA as the point where parabola == flat line (intersection)
+VA_index = np.argmax(n_parabola >= n_pos_limit)
+VA = velocity_aixs[VA_index]
 
 
 # Compute point where parabola reaches n_neg_limit
 V_break = VS * np.sqrt(abs(n_neg_limit))
 
-n_maneuver_neg = np.piecewise(
-    speeds,
-    [speeds <= V_break,
-     (speeds > V_break) & (speeds <= VC),
-     (speeds > VC)],
+n_maneuver_neg = np.piecewise(          # --> Negative maneuver load factor
+    velocity_aixs,
+    [velocity_aixs <= V_break,
+     (velocity_aixs > V_break) & (velocity_aixs <= VC),
+     (velocity_aixs > VC)],
     [
         lambda V: -((V / VS) ** 2),                         # Parabola (until it hits n_neg_limit)
         lambda V: n_neg_limit,                              # Flat line (from V_break to VC)
@@ -108,17 +119,17 @@ n_maneuver_neg = np.piecewise(
     ]
 )
 
-
+# 6. Plotting the V-n Diagram
 # ____ PLOTTING ____
 plt.figure(figsize=(10, 6))
 
 # Maneuver limits
-plt.plot(speeds, n_maneuver_pos, label='Positive Maneuver Limit', color='blue')
-plt.plot(speeds, n_maneuver_neg, label='Negative Maneuver Limit', color='blue')
+plt.plot(velocity_aixs, n_maneuver_pos, label='Positive Maneuver Limit', color='blue')
+plt.plot(velocity_aixs, n_maneuver_neg, label='Negative Maneuver Limit', color='blue')
 
 # Gust loads
-plt.plot(speeds, n_gust_pos, '--', label='Positive Gust Load', color='orange')
-plt.plot(speeds, n_gust_neg, '--', label='Negative Gust Load', color='orange')
+plt.plot(velocity_aixs, n_gust_pos, '--', label='Positive Gust Load', color='orange')
+plt.plot(velocity_aixs, n_gust_neg, '--', label='Negative Gust Load', color='orange')
 
 # Key speeds
 # Custom color map for specific speeds
