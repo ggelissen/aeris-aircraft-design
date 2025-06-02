@@ -45,10 +45,11 @@ def perform_undercarriage_sizing(params: DesignParameters) -> dict:
         'W_nose':          W_nose,
         'W_main_total':    W_main_total
     }
+
 # with these values check torenbeek plot for wheel sizing
 
 
-def perform_undercarriage_positioning(params: DesignParameters, W_main_total: float) -> tuple:
+def perform_undercarriage_positioning(params: DesignParameters, static_load_nlg:float, W_main_total:float ) -> tuple:
     """
     Calculate the undercarriage positioning based on design parameters.
 
@@ -57,19 +58,18 @@ def perform_undercarriage_positioning(params: DesignParameters, W_main_total: fl
 
 
     """
+    #LONGITUDINAL GEAR POSITIONING
+    x_mlg = 4.7 # X position of MLG in meters, this is a guess, should be done with a drawing
+    l_n = 0.1 #needs to be imported as (x_cg_aft - x_mlg = 0.1)
+    x_nlg = (params.weight.W_TO/static_load_nlg - 1) * l_n  
+    #TRANSVERSE GEAR POSITIONING
+    #transverse location from drawing
 
-    tipback_rad = params.landing_gear.tipback_angle* math.pi / 180  # Convert degrees to radians
-    x_cg = 4.6
-    x_nlg = x_cg - params.cg.z_cg / math.tan(tipback_rad)  # X position of NLG in meters
-    wheelbase = (params.weight.W_TO *(x_cg - x_nlg)) / W_main_total
-    x_mlg = x_nlg + wheelbase
+    #LATERAL GEAR POSITIONING
+    y_mlg = (x_mlg+x_nlg)/(math.sqrt(((x_nlg**2) * (math.tan(params.landing_gear.overturn_angle)**2))/(params.cg.z_cg**2) -1))
 
-    # #track
-    # track = 2* (params.cg.z_cg) / math.tan(math.radians(params.landing_gear.lat_tipover_angle))
 
-    # y_mlg = track / 2  # Y position of NLG in meters
-    
-    return x_nlg, x_mlg
+    return x_nlg, x_mlg, y_mlg
 
 
 if __name__ == "__main__":
@@ -91,10 +91,11 @@ if __name__ == "__main__":
     print(f"Total Main Gear Load (W_main_total): {undercarriage_sizing['W_main_total']:.2f} N")
 
     # Perform undercarriage positioning
-    undercarriage_positioning = perform_undercarriage_positioning(params, W_main_total=undercarriage_sizing['W_main_total'])
+    undercarriage_positioning = perform_undercarriage_positioning(params, static_load_nlg=undercarriage_sizing['static_load_nlg'],
+                                                                 W_main_total=undercarriage_sizing['W_main_total'])
 
     # Print the undercarriage positioning results
     print("\nUndercarriage Positioning Results:")
     print(f"Nose Gear X Position (x_nlg): {undercarriage_positioning[0]:.2f} m")
     print(f"Main Gear X Position (x_mlg): {undercarriage_positioning[1]:.2f} m")
-    # print(f"Track Width: {undercarriage_positioning[3]:.2f} m")
+    print(f"Main Gear Y Position (y_mlg): {undercarriage_positioning[2]:.2f} m")
