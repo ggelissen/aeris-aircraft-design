@@ -9,12 +9,12 @@ class Control:
         self.lh = lh
         self.mac = mac
         self.Vh_V = Vh_V
-        #x_cg = 5
         self.x_ac = x_ac
         self.CLh = CLh
         self.CLA_h = CLA_h
         self.C_m_ac = C_m_ac
         self.X = np.arange(0,1,0.01)
+        
         
         
     def __plot_result__(self, x, y, legend, x_label="x", y_label='y',y_limit = [None, None]):

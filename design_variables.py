@@ -271,3 +271,17 @@ class ControlSurfaceParameters:
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+class Control:
+    def __init__(self, CLah, CLaA_h, de_da, lh, mac, Vh_V, x_ac, CLh, CLA_h, C_m_ac):
+        self.CLah = CLah # from airfoil characteristics
+        self.CLaA_h = CLaA_h # from airfoil characteristics
+        self.de_da = 0.1 #estimated  
+        self.lh =  
+        self.mac = mac
+        self.Vh_V = Vh_V
+        self.x_ac = x_ac
+        self.CLh = CLh
+        self.CLA_h = CLA_h
+        self.C_m_ac = C_m_ac
+        self.X = np.arange(0,1,0.01)
