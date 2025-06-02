@@ -47,6 +47,39 @@ def plot_wing_loading(lift_dist, drag_dist, moment_dist):
     plt.tight_layout()
     plt.show()
 
+def plot_wing_weight(weight_dist):
+    """
+    Plot wing weight distribution along the span and compute total weight.
+    
+    Parameters:
+    - weight_dist: 1D np.array of weight per unit span (N/m), length 200
+    """
+    y = np.linspace(-1, 1, 200)
+
+    # Total weight via trapezoidal integration
+    total_weight = np.trapz(weight_dist, y)
+
+    # Plotting
+    plt.figure(figsize=(8, 4))
+    plt.plot(y, weight_dist, label='Weight Distribution')
+    plt.title("Wing Weight Distribution")
+    plt.xlabel("Spanwise Location (y)")
+    plt.ylabel("Weight (N/m)")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+    print(f"Total Wing Weight: {total_weight:.2f} N")
+
+# Example usage with dummy elliptical weight distribution
+y = np.linspace(-1, 1, 200)
+weight = 500 * (1 - y**2)  # Example: elliptical distribution, symmetric
+
+plot_wing_weight(weight)
+
+
+
 # Example usage with dummy sinusoidal data
 y = np.linspace(-1, 1, 200)
 lift = 1000 * (1 - y**2)  # Parabolic lift distribution
