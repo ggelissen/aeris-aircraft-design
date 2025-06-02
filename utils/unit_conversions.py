@@ -84,3 +84,17 @@ def m2_to_ft2(area_m2):
     Convert square meters to square feet.
     """
     return area_m2 * 10.7639
+
+def true_to_equivalent_air_speed(V_t: float, rho: float, rho_0: float) -> float:
+    """
+    Convert true airspeed to equivalent airspeed.
+    
+    Parameters:
+    V_t (float): True airspeed in m/s
+    rho (float): Air density at altitude in kg/m^3
+    rho_0 (float): Sea level air density in kg/m^3
+    
+    Returns:
+    float: Equivalent airspeed in m/s
+    """
+    return V_t * np.sqrt(rho / rho_0)

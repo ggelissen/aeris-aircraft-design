@@ -14,7 +14,11 @@ from mpl_toolkits import mplot3d
 import matplotlib
 import pyvista as pv
 import numpy as np
+import sys
+import os
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas
 from vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing, create_V_tail, create_engines
 matplotlib.use('Qt5Agg')
