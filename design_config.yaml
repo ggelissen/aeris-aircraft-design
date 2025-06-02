@@ -1,6 +1,7 @@
 # Top-Level Parameters
 range: 6500000                  # Range in meters
 cruise_speed: 240               # Cruise speed in m/s
+cruise_mach: 0.85               # Cruise Mach Number
 stall_speed_clean: 100          # Stall speed clean configuration in kts
 stall_speed_land: 85            # Stall speed landing configuration in kts
 cruise_altitude: 121000         # Cruise altitude in meters
@@ -10,6 +11,7 @@ diversion_distance: 460000      # Diversion distance in meters
 loiter_time: 7200               # Loiter time in seconds
 max_eq_velocity: 207.549        # Maximum Equivalent Velocity in kts
 max_load_factor: 2.5            # Maximum Load Factor
+crit_mach: 0.75                 # Critical Mach Number
 
 # Performance Parameters
 performance: 
@@ -34,6 +36,3 @@ engine:
   cruise_tsfc: 0.685              # Cruise TSFC in lb/h/lbf
 
 
-# Wing Parameters
-wing:
-  A_w: 9.0
