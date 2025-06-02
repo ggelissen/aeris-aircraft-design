@@ -1,6 +1,8 @@
 ## Requirments:
 # python=3.11
 # numpy!=1.19.4
+import os
+
 
 # Before running, make sure to run:
 # pip install -r requirements.txt
@@ -12,6 +14,8 @@ from mpl_toolkits import mplot3d
 import matplotlib
 import pyvista as pv
 import numpy as np
+
+from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas
 from vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing, create_V_tail, create_engines
 matplotlib.use('Qt5Agg')
 import openvsp as vsp
@@ -19,7 +23,7 @@ import vspfunctions
 import subsystems.structures.stanag as stanag
 from design_variables import *
 
-def struct_main(designvars: DesignParameters = None):
+def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
     # Step 1: Loading analysis
 
@@ -33,6 +37,7 @@ def struct_main(designvars: DesignParameters = None):
     # Step 3: Create a VSP model using the imported geometric variables
     vsp.ClearVSPModel()
 
+
     #### Add fuselage and change fuselage shape to make room for payload. This is done by changing the cross-sections of the fuselage.
     create_fuselage(designvars)
 
@@ -45,6 +50,9 @@ def struct_main(designvars: DesignParameters = None):
     ### Add engines
     create_engines(designvars)
 
+    ### Calculate specifications
+    calculate_cg(designvars)
+    calculate_wet_areas(designvars)
 
     # Step 4: Simulate aircraft with loads
 
@@ -55,14 +63,25 @@ def struct_main(designvars: DesignParameters = None):
     vsp.Update()
 
     # Save as VSP3 file
+    prev_cwd = os.getcwd()
+    os.chdir(os.getcwd() + "/data")
     vsp.WriteVSPFile("aircraft_model.vsp3")
+    os.chdir(prev_cwd)
 
-    # Export to STL or other formats
-    vsp.ExportFile("aircraft_model.stl", vsp.SET_ALL, vsp.EXPORT_STL)
+    if show_3d:
+        # Export to STL or other formats
+        prev_cwd = os.getcwd()
+        os.chdir(os.getcwd() + "/data")
+        vsp.ExportFile("aircraft_model.stl", vsp.SET_ALL, vsp.EXPORT_STL)
+        os.chdir(prev_cwd)
 
-    # PLOTTING
-    plotSTL('aircraft_model.stl')
+
+
+        # PLOTTING
+        plotSTL(os.getcwd() + '/data/aircraft_model.stl')
+
 
 if __name__ == "__main__":
     AERIS = DesignParameters()
-    struct_main(AERIS)
+    AERIS.load_from_yaml("design_config.yaml")
+    struct_main(AERIS, show_3d=True)

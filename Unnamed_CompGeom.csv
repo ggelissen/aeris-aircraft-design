@@ -1,0 +1,14 @@
+Name, Theo_Area, Wet_Area, Theo_Vol, Wet_Vol
+FuselageGeom,31.454067,30.716056,8.014776,7.902996
+WingGeom,24.746538,20.308696,1.192564,0.988236
+Horizontal_Stabilizer,7.729441,6.462337,0.262409,0.221529
+Fuselage_Engine,17.006658,17.006658,0.874519,0.874519
+Totals,80.936704,74.493747,10.344266,9.987286
+
+Tag_Name, Tag_Theo_Area, Tag_Wet_Area
+FuselageGeom_S_Surf0,31.454067,30.716056
+WingGeom_S_Surf0,12.373269,10.154348
+WingGeom_S_Surf1,12.373269,10.154348
+Horizontal_Stabilizer_S_Surf0,3.864721,3.231169
+Horizontal_Stabilizer_S_Surf1,3.864721,3.231169
+Fuselage_Engine_S_Surf0,17.006658,17.006658

@@ -36,6 +36,3 @@ engine:
   cruise_tsfc: 0.685              # Cruise TSFC in lb/h/lbf
 
 
-# Wing Parameters
-wing:
-  A_w: 9.0
