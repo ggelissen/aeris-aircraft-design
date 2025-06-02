@@ -1,5 +1,7 @@
 import math
 from scipy.optimize import bisect
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Thrust:
 
@@ -139,12 +141,44 @@ class Thrust:
                 return float('inf')
 
         try:
+            low = Thrust.__stuw(pressure_altitude, M, DT, 0.001)
+            high = Thrust.__stuw(pressure_altitude, M, DT, 0.2)
+            print(f"Thrust range: {low:.2f} N to {high:.2f} N")
+
+            if low is None or high is None or not (low <= target_thrust <= high):
+                print("Target thrust out of bounds or model failure.")
+                return None
+
             mfi = bisect(thrust_diff, 0.001, 0.2, xtol=1e-5)
         except ValueError:
             mfi = None
 
         return mfi
 
+    @staticmethod
+    def plot_thrust_vs_mass_flow(pressure_altitude, M, DT):
+        mf_values = np.linspace(0.001, 0.2, 100)
+        thrust_values = [Thrust.__stuw(pressure_altitude, M, DT, mfi) or 0 for mfi in mf_values]
+
+        plt.figure(figsize=(8, 5))
+        plt.plot(mf_values, thrust_values, label="Thrust vs Fuel Flow")
+        plt.xlabel("Fuel Mass Flow (kg/s)")
+        plt.ylabel("Thrust (N)")
+        plt.title("Thrust Output vs Fuel Mass Flow")
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
 if __name__ == "__main__":
-    mfi = Thrust.compute_mass_flow(2131, 0.41, -20, 800)
-    print(f"Required fuel mass flow: {mfi} kg/s")
+    target_thrust = 800
+    mfi = Thrust.compute_mass_flow(2131, 0.41, -20, target_thrust)
+    if mfi is not None:
+        print(f"Required fuel mass flow: {mfi:.6f} kg/s")
+        thrust = Thrust._Thrust__stuw(2131, 0.41, -20, mfi)
+        print(f"Back-computed thrust: {thrust:.2f} N")
+    else:
+        print("Could not compute fuel mass flow for the given thrust.")
+
+    # Plot dynamic thrust vs mass flow
+    Thrust.plot_thrust_vs_mass_flow(2131, 0.41, -20)
