@@ -19,17 +19,17 @@ class Thrust:
             a_s = math.sqrt(1.4 * 287.05 * t_o)
 
             elpc1 = 0
-            nr = 0.989
-            nf = 0.7
-            nc = 0.73
-            nb = 0.972
-            dpt = 0.95
-            nt = 0.86
-            nm = 0.985
-            nnc = 0.925
-            nnh = 0.96
-            Ac = 0.0779
-            Ah = 0.05244
+            nr = 0.98  # Inlet (diffuser) efficiency
+            nf = 0.91   # Fan efficiency (estimated for FJ44)
+            nc = 0.90   # Compressor efficiency (estimated for FJ44)
+            nb = 0.995  # Combustor efficiency (high for modern engines)
+            dpt = 0.97  # Turbine pressure loss factor
+            nt = 0.90   # Turbine efficiency
+            nm = 0.985  # Mechanical efficiency
+            nnc = 0.975  # Core nozzle efficiency
+            nnh = 0.975  # Bypass nozzle efficiency
+            Ac = 0.0505  # Core nozzle area (m^2)
+            Ah = 0.1665  # Bypass nozzle area (m^2)    # all values are estimates for FJ44
             vo = M * a_s
             pt2 = nr * pto
             tt2 = tto
@@ -140,7 +140,7 @@ class Thrust:
             Tn = Thrust.__stuw(pressure_altitude, M, DT, mfi)
             return float('inf') if Tn is None else Tn - target_thrust
 
-        mf_values = np.linspace(0.001, 0.2, 200)
+        mf_values = np.linspace(0.001, 0.5, 600)
         valid_range = [(mfi, Thrust.__stuw(pressure_altitude, M, DT, mfi)) for mfi in mf_values]
         valid_range = [(mfi, Tn) for mfi, Tn in valid_range if Tn is not None]
 
@@ -162,7 +162,7 @@ class Thrust:
 
     @staticmethod
     def plot_thrust_vs_mass_flow(pressure_altitude, M, DT):
-        mf_values = np.linspace(0.001, 0.2, 100)
+        mf_values = np.linspace(0.001, 0.5, 600)
         thrust_values = [Thrust.__stuw(pressure_altitude, M, DT, mfi) or np.nan for mfi in mf_values]
 
         plt.figure(figsize=(8, 5))
