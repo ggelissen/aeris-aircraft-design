@@ -21,7 +21,8 @@ def calculate_undercarriage_loading(W_TO: float, n_mlg: int = 2, n_nlg: int = 1,
     tuple: Tire pressure in kPa, static load on nose wheel in N, static load on main wheels in N.
     """
 
-    tire_pressure = (430*math.log(LCN) -680) * 10e6 # in Pa
+    tire_pressure = (430*math.log(LCN) -680) * 10e3 # in Pa
+    tire_pressure_kg_cm2 = tire_pressure / 10  # Convert Pa to kg/cm^2
 
     static_frac_nlg = 0.08
     static_frac_mlg = 1 - static_frac_nlg
@@ -32,7 +33,11 @@ def calculate_undercarriage_loading(W_TO: float, n_mlg: int = 2, n_nlg: int = 1,
     static_load_mlg = W_main_total / n_mlg
     static_load_nlg = W_nose / n_nlg
 
-    return tire_pressure, static_load_nlg, static_load_mlg
+    # Convert static loads to kg
+    static_load_nlg = static_load_nlg / 9.80665  # Convert N to kg
+    static_load_mlg = static_load_mlg / 9.80665  # Convert N to kg
+
+    return tire_pressure_kg_cm2, static_load_nlg, static_load_mlg
 
 
 def estimate_tire_diameter(load_N: float, pressure_Pa: float) -> float:
@@ -74,7 +79,7 @@ def perform_undercarriage_sizing(params: DesignParameters) -> dict:
     main_diameter_m = estimate_tire_diameter(static_load_mlg, tire_pressure)
 
     return {
-        'tire_pressure': tire_pressure / 1000,  # Convert to kPa
+        'tire_pressure': tire_pressure / 101325,  # Convert to bar
         'F_nlg': static_load_nlg,
         'F_mlg': static_load_mlg,
         'D_mlg': main_diameter_m,
@@ -92,5 +97,8 @@ if __name__ == "__main__":
 
     # Print the results
     print("Undercarriage Sizing Results:")
-    for key, value in undercarriage_specs.items():
-        print(f"{key}: {value:.2f}" if isinstance(value, float) else f"{key}: {value}")
+    print(f"Tire Pressure: {undercarriage_specs['tire_pressure']:.2f} kg/cm2")
+    print(f"Static Load on Nose Wheel (F_nlg): {undercarriage_specs['F_nlg']:.2f} kg")
+    print(f"Static Load on Main Wheels (F_mlg): {undercarriage_specs['F_mlg']:.2f} kg")
+    print(f"Main Tire Diameter (D_mlg): {undercarriage_specs['D_mlg']:.2f} m")
+    print(f"Nose Tire Diameter (D_nlg): {undercarriage_specs['D_nlg']:.2f} m")

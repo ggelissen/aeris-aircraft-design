@@ -268,7 +268,7 @@ class LandingGearParameters:
         self.l_nlg = None                           # Nose Landing Gear Length in m
         self.psi_mlg = None                         # Main Landing Gear Pressure in psi
         self.psi_nlg = None                         # Nose Landing Gear Pressure in psi
-        self.LCN = 40                               # Load Classification Number
+        self.LCN = 11                               # Load Classification Number
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
