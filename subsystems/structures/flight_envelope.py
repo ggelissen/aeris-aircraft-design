@@ -42,20 +42,19 @@ density_at_altitude = {
     } 
 VC = true_to_equivalent_air_speed(VC_TAS, density_at_altitude['cruise'], density_at_altitude['sea_level'])  # Convert True Airspeed (TAS) to Equivalent Airspeed (EAS) at sea level
 
-altitude = {
+flight_altitude = {
     "sea_level": 0, # m
     "cruise":  params.cruise_altitude # m
     }
 # Weight Scenarios
 # in [N]
-weight_1 = params.weight.W_OE # Operational Empty Weight (OEW) in N
-weight_2 = params.weight.W_TO # Maximum Take-Off Weight (MTOW) in N
-weight_3 = params.weight.W_OE + params.weight.W_PL # OEW + Payload in N
+weight_configuration = {
+    "OEW": params.weight.W_OE,  # Operational Empty Weight (OEW) in N
+    "MTOW": params.weight.W_TO,  # Maximum Take-Off Weight (MTOW) in N
+    "OEW_PL": params.weight.W_OE + params.weight.W_PL  # OEW + Payload in N
 
-# in [kg]
-weight_1_kg = N_to_kg(weight_1)
-weight_2_kg = N_to_kg(weight_2)
-weight_3_kg = N_to_kg(weight_3)
+}
+
 
 
 
@@ -71,7 +70,7 @@ def calc_diagram_speed(weight_N, density, CL_max, VC):
     velocity_aixs = np.linspace(0, VD, 1000)
     return VS, VD, velocity_aixs
 
-def calc_gust_velocity(altitude_m, velocity_aixs):
+def calc_gust_velocity(altitude_m, velocity_aixs, VC, VD):
     #Gust velocity at VC as a function of altitude based on STANAG 4671.
     if altitude_m <= 6096:
         U_VC = 15.2
@@ -141,7 +140,7 @@ def calc_maneuver_loads(velocity_aixs, n_pos_limit, n_neg_limit, VS, VD):
 
     return n_maneuver_pos, n_maneuver_neg
 
-def plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, weight_label, VS, VC, VD):
+def plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, VC, VD, weight_config, altitude_level, ac_configuration):
 
     plt.figure(figsize=(10, 6))
 
@@ -172,7 +171,7 @@ def plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuv
         plt.axvline(x=v, color=color_map[label], linestyle=':', label=label)
 
     # Labels and aesthetics
-    plt.title('V-n Diagram (Flight Envelope)')
+    plt.title(f'V-n Diagram (Flight Envelope)\nWeight: {weight_config}, Altitude: {altitude_level}, CL config: {ac_configuration}')
     plt.xlabel('Equivalent Airspeed (m/s)')
     plt.ylabel('Load Factor (n)')
     plt.grid(True)
@@ -183,13 +182,35 @@ def plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuv
     plt.show()
 
 
+def generate_flight_envelope(weight_config: str, altitude_level: str, ac_configuration: str):
+    """
+    Generates a V-n diagram based on selected weight and altitude.
+
+    Parameters:
+        weight_config: str, e.g., 'MTOW', 'MLW', 'OEW'
+        altitude_level: str, e.g., 'sea_level', 'cruise'
+    """
+    weight_N = weight_configuration[weight_config]
+    weight_kg = N_to_kg(weight_N)  # Convert weight from N to kg
+    density = density_at_altitude[altitude_level]  # Get density based on altitude level
+    altitude = flight_altitude[altitude_level]
+    CL_max = CL_max_values[ac_configuration]  # Get CL_max based on aircraft configuration
+
+    # 1. Calculate load factor limits
+    n_pos_limit, n_neg_limit = calc_load_factor_limits(weight_kg)
+    # 2. Calculate speeds
+    VS, VD, velocity_aixs = calc_diagram_speed(weight_N, density, CL_max, VC)
+    # 3. Calculate gust velocity
+    U_gust = calc_gust_velocity(altitude, velocity_aixs, VC, VD) 
+    # 4. Calculate gust loads
+    n_gust_pos, n_gust_neg = calc_gust_loads(velocity_aixs, U_gust, weight_N, density, chord)
+    # 5. Calculate maneuver loads
+    n_maneuver_pos, n_maneuver_neg = calc_maneuver_loads(velocity_aixs, n_pos_limit, n_neg_limit, VS, VD)
+    # 6. Plot the V-n diagram
+    plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, VC, VD, weight_config, altitude_level, ac_configuration)
 
 
 
-n_pos_limit, n_neg_limit = calc_load_factor_limits(weight_2_kg)
-VS, VD, velocity_aixs = calc_diagram_speed(weight_2, density_at_altitude["cruise"], CL_max_values["CLEAN"], VC)
-U_gust = calc_gust_velocity(altitude['cruise'], velocity_aixs)  # Assuming sea level altitude for gust calculations
-n_gust_pos, n_gust_neg = calc_gust_loads(velocity_aixs, U_gust, weight_2, density_at_altitude["cruise"],chord)
-n_maneuver_pos, n_maneuver_neg = calc_maneuver_loads(velocity_aixs, n_pos_limit, n_neg_limit, VS, VD)
-# Plot the V-n diagram
-plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, "MTOW", VS, VC, VD)
+
+
+generate_flight_envelope('MTOW', 'cruise', 'CLEAN')
