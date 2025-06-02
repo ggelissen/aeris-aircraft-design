@@ -55,11 +55,8 @@ weight_configuration = {
 
 }
 
-
-
-
-def calc_load_factor_limits(weight_kg):
-    n_pos_limit = min(2.1 + (10900 / (weight_kg + 4536)), 3.8)
+def calc_load_factor_limits(MTOW_kg):
+    n_pos_limit = min(2.1 + (10900 / (MTOW_kg + 4536)), 3.8)
     n_neg_limit = -0.4 * n_pos_limit
     return n_pos_limit, n_neg_limit
 
@@ -181,7 +178,6 @@ def plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuv
     plt.tight_layout()
     plt.show()
 
-
 def generate_flight_envelope(weight_config: str, altitude_level: str, ac_configuration: str):
     """
     Generates a V-n diagram based on selected weight and altitude.
@@ -191,13 +187,13 @@ def generate_flight_envelope(weight_config: str, altitude_level: str, ac_configu
         altitude_level: str, e.g., 'sea_level', 'cruise'
     """
     weight_N = weight_configuration[weight_config]
-    weight_kg = N_to_kg(weight_N)  # Convert weight from N to kg
+    MTOW_kg = N_to_kg(weight_configuration['MTOW'])  # Convert weight from N to kg
     density = density_at_altitude[altitude_level]  # Get density based on altitude level
     altitude = flight_altitude[altitude_level]
     CL_max = CL_max_values[ac_configuration]  # Get CL_max based on aircraft configuration
 
     # 1. Calculate load factor limits
-    n_pos_limit, n_neg_limit = calc_load_factor_limits(weight_kg)
+    n_pos_limit, n_neg_limit = calc_load_factor_limits(MTOW_kg)
     # 2. Calculate speeds
     VS, VD, velocity_aixs = calc_diagram_speed(weight_N, density, CL_max, VC)
     # 3. Calculate gust velocity
@@ -213,4 +209,4 @@ def generate_flight_envelope(weight_config: str, altitude_level: str, ac_configu
 
 
 
-generate_flight_envelope('MTOW', 'cruise', 'CLEAN')
+generate_flight_envelope('OEW', 'sea_level', 'LAND')
