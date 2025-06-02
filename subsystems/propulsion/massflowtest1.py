@@ -18,18 +18,18 @@ class Thrust:
             pto = po * (1 + 0.2 * M ** 2) ** 3.5
             a_s = math.sqrt(1.4 * 287.05 * t_o)
 
-            elpc1 = 0
-            nr = 0.98  # Inlet (diffuser) efficiency
-            nf = 0.91   # Fan efficiency (estimated for FJ44)
-            nc = 0.90   # Compressor efficiency (estimated for FJ44)
-            nb = 0.995  # Combustor efficiency (high for modern engines)
-            dpt = 0.97  # Turbine pressure loss factor
-            nt = 0.90   # Turbine efficiency
-            nm = 0.985  # Mechanical efficiency
-            nnc = 0.975  # Core nozzle efficiency
-            nnh = 0.975  # Bypass nozzle efficiency
-            Ac = 0.0505  # Core nozzle area (m^2)
-            Ah = 0.1665  # Bypass nozzle area (m^2)    # all values are estimates for FJ44
+            nr = 0.98
+            nf = 0.91
+            nc = 0.90
+            nb = 0.995
+            dpt = 0.97
+            nt = 0.90
+            nm = 0.985
+            nnc = 0.975
+            nnh = 0.975
+            Ac = 0.0505
+            Ah = 0.1665
+
             vo = M * a_s
             pt2 = nr * pto
             tt2 = tto
@@ -140,7 +140,7 @@ class Thrust:
             Tn = Thrust.__stuw(pressure_altitude, M, DT, mfi)
             return float('inf') if Tn is None else Tn - target_thrust
 
-        mf_values = np.linspace(0.001, 0.5, 600)
+        mf_values = np.linspace(0.001, 0.2, 300)
         valid_range = [(mfi, Thrust.__stuw(pressure_altitude, M, DT, mfi)) for mfi in mf_values]
         valid_range = [(mfi, Tn) for mfi, Tn in valid_range if Tn is not None]
 
@@ -161,12 +161,19 @@ class Thrust:
         return None
 
     @staticmethod
-    def plot_thrust_vs_mass_flow(pressure_altitude, M, DT):
-        mf_values = np.linspace(0.001, 0.5, 600)
+    def plot_thrust_vs_mass_flow(pressure_altitude, M, DT, target_thrust=None):
+        mf_values = np.linspace(0.001, 0.2, 300)
         thrust_values = [Thrust.__stuw(pressure_altitude, M, DT, mfi) or np.nan for mfi in mf_values]
+
+        # Optional: print sample values for inspection
+        for mfi, thrust in zip(mf_values, thrust_values):
+            if not np.isnan(thrust):
+                print(f"mfi = {mfi:.5f}, Thrust = {thrust:.2f} N")
 
         plt.figure(figsize=(8, 5))
         plt.plot(mf_values, thrust_values, label="Thrust vs Fuel Flow")
+        if target_thrust:
+            plt.axhline(y=target_thrust, color='r', linestyle='--', label=f"Target Thrust = {target_thrust} N")
         plt.xlabel("Fuel Mass Flow (kg/s)")
         plt.ylabel("Thrust (N)")
         plt.title("Thrust Output vs Fuel Mass Flow")
@@ -176,10 +183,13 @@ class Thrust:
         plt.show()
 
 if __name__ == "__main__":
-    target_thrust = 1400
+    target_thrust = 1800
     h = 12192
     M = 0.8
     DT = 0
+
+    print("Plotting thrust vs fuel mass flow...")
+    Thrust.plot_thrust_vs_mass_flow(h, M, DT, target_thrust)
 
     mfi = Thrust.compute_mass_flow(h, M, DT, target_thrust)
     if mfi is not None:
@@ -188,8 +198,8 @@ if __name__ == "__main__":
         print(f"Back-computed thrust at {h} m: {thrust:.2f} N")
 
         if thrust and thrust > 0:
-            sfc = (mfi / thrust)*10e5
-            print(f"Specific Fuel Consumption (SFC): {sfc:.8f} mg/N·s")
+            sfc = (mfi / thrust) * 1e6  # mg/N·s
+            print(f"Specific Fuel Consumption (SFC): {sfc:.6f} mg/N·s")
         else:
             print("Invalid thrust value, cannot compute SFC.")
     else:
