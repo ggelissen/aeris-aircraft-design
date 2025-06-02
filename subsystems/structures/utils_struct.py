@@ -393,7 +393,6 @@ def plot_Mohrs_circle_complete(sigma_x: float, sigma_y: float, sigma_z: float, t
 
     ax.set_xlabel(r'Normal Stress $\sigma$ [MPa]')
     ax.set_ylabel(r'Shear Stress $\tau$ [MPa]')
-    ax.legend(['XY Plane', 'XZ Plane', 'YZ Plane'], loc='upper right')
     
     plt.grid()
     plt.gca().set_aspect('equal', adjustable='box')
@@ -413,15 +412,6 @@ if __name__ == "__main__":
     nu = 0.3
     alpha = 1.2e-5  # /K
     dT = 50  # K
-
-    # Print principal stresses and maximum shear stress
-    xy_sigma_1, xy_sigma_2, xy_tau_max = calculate_Mohrs_circle_stress(sigma_x, sigma_y, tau_xy)
-    xz_sigma_1, xz_sigma_2, xz_tau_max = calculate_Mohrs_circle_stress(sigma_x, sigma_z, tau_xz)
-    yz_sigma_1, yz_sigma_2, yz_tau_max = calculate_Mohrs_circle_stress(sigma_y, sigma_z, tau_yz)
-
-    print(f"XY Plane: Sigma_1 = {xy_sigma_1:.2f} MPa, Sigma_2 = {xy_sigma_2:.2f} MPa, Tau_max = {xy_tau_max:.2f} MPa")
-    print(f"XZ Plane: Sigma_1 = {xz_sigma_1:.2f} MPa, Sigma_2 = {xz_sigma_2:.2f} MPa, Tau_max = {xz_tau_max:.2f} MPa")
-    print(f"YZ Plane: Sigma_1 = {yz_sigma_1:.2f} MPa, Sigma_2 = {yz_sigma_2:.2f} MPa, Tau_max = {yz_tau_max:.2f} MPa")
 
     plot_Mohrs_circle_subplots(sigma_x, sigma_y, sigma_z, tau_xy, tau_xz, tau_yz)
     plot_Mohrs_circle_complete(sigma_x, sigma_y, sigma_z, tau_xy, tau_xz, tau_yz)

@@ -82,7 +82,8 @@ class DesignParameters:
             self.landing_gear.load_from_dict(config.get('landing_gear', {}))
         if 'control_surface' in config:
             self.control_surface.load_from_dict(config.get('control_surface', {}))
-        
+        if 'cg' in config:
+            self.cg.load_from_dict(config.get('cg', {}))
 
     def update_parameter(self, parameter_name, value):
         """
