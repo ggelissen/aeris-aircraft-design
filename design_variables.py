@@ -35,7 +35,6 @@ class DesignParameters:
         self.empennage = EmpennageParameters(l_f=self.fuselage.l_f)
         self.landing_gear = LandingGearParameters()
         self.control_surface = ControlSurfaceParameters()
-        self.cg = CGParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -67,6 +66,8 @@ class DesignParameters:
         self.crit_mach = config.get('crit_mach')
 
         # Load subsystem parameters
+        # if 'cg' in config:
+        #     self.cg.load_from_dict(config.get('cg', {}))
         if 'wing'in config:
             self.wing.load_from_dict(config.get('wing', {}))
         if 'performance' in config:
@@ -81,6 +82,7 @@ class DesignParameters:
             self.landing_gear.load_from_dict(config.get('landing_gear', {}))
         if 'control_surface' in config:
             self.control_surface.load_from_dict(config.get('control_surface', {}))
+        
 
     def update_parameter(self, parameter_name, value):
         """
@@ -321,6 +323,12 @@ class LandingGearParameters:
         self.psi_mlg = None                         # Main Landing Gear Pressure in psi
         self.psi_nlg = None                         # Nose Landing Gear Pressure in psi
         self.LCN = 11                               # Load Classification Number
+        self.scrape_angle  = 15                 # Scrape Angle in degrees, used for the nose wheel  
+        self.tipback_angle = 15                 # Tipback Angle in degrees, used for the nose wheel
+        self.lat_tipover_angle = 7                # Lateral Tipover Angle in degrees, used for the nose wheel
+        self.static_frac_nlg = 0.08                     # Static Load Fraction on Nose Landing Gear
+        self.static_frac_mlg = 1 - self.static_frac_nlg      # Static Load Fraction on Main Landing Gear
+
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -360,6 +368,7 @@ class CGParameters:
         self.x_cg_fuel = 5                       # CG Position of the Fuel in m
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
+        self.z_cg = 1.5                      # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
