@@ -2,6 +2,7 @@ import math as m
 import numpy as np
 import yaml
 
+
 class DesignParameters:
     def __init__(self, initial_config_path=None):
         """
@@ -15,6 +16,7 @@ class DesignParameters:
         self.stall_speed_clean = None
         self.stall_speed_land = None
         self.cruise_altitude = None
+        self.cruise_density = None
         self.take_off_distance = None
         self.landing_distance = None
         self.diversion_distance = None
@@ -23,6 +25,7 @@ class DesignParameters:
         self.max_load_factor = None
         self.crit_mach = None
         self.inertia_matrix = None
+
 
 
         # Subsystem Parameters
@@ -57,6 +60,7 @@ class DesignParameters:
         self.stall_speed_land = config.get('stall_speed_land')
         self.max_eq_velocity = config.get('max_eq_velocity')
         self.cruise_altitude = config.get('cruise_altitude')
+        self.cruise_density = config.get('cruise_density')
         self.take_off_distance = config.get('takeoff_distance')
         self.landing_distance = config.get('landing_distance')
         self.diversion_distance = config.get('diversion_distance')
@@ -82,7 +86,8 @@ class DesignParameters:
             self.landing_gear.load_from_dict(config.get('landing_gear', {}))
         if 'control_surface' in config:
             self.control_surface.load_from_dict(config.get('control_surface', {}))
-        
+        if 'cg' in config:
+            self.cg.load_from_dict(config.get('cg', {}))
 
     def update_parameter(self, parameter_name, value):
         """
@@ -174,6 +179,8 @@ class WingParameters:
         self.t_r = self.t_c_w_r * self.root_chord   # Wing Root Thickness in m
         self.planform_points = None  # 2D Numpy array with points forming the planform, is calculated by create_wing()
 
+        
+
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
             if hasattr(self, key):
@@ -193,9 +200,11 @@ class PerformanceParameters:
         self.climb_gradient_OEI_alt = None          # Climb Gradient OEI Altitude in ft
         self.delta_CD0_OEI = None                   # Zero-Lift Drag Coefficient Differential AEO
 
-        self.CL_max_TO = None                       # Maximum Lift Coefficient at Take-Off
-        self.CL_max_L = None                        # Maximum Lift Coefficient at Landing
-        self.CL_max_cruise = None                   # Maximum Lift Coefficient at Cruise
+        self.CL_max_TO = 1.3                       # Maximum Lift Coefficient at Take-Off
+        self.CL_max_LAND = 1.6                     # Maximum Lift Coefficient at Landing
+        self.CL_max_cruise = 1.8                   # Maximum Lift Coefficient at Cruise
+
+        self.CL_alpha = 5.0                  # Lift Curve Slope in 1/rad
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():

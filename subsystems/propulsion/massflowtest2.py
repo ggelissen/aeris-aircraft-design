@@ -32,17 +32,17 @@ class Thrust(object):
 
         # Initialize variables
         elpc1 = 0.0
-        nr = 0.989
-        nf = 0.7
-        nc = 0.73
-        nb = 0.972
-        dpt = 0.95
-        nt = 0.86
+        nr = 0.98
+        nf = 0.91
+        nc = 0.90
+        nb = 0.995
+        dpt = 0.97
+        nt = 0.90
         nm = 0.985
-        nnc = 0.925
-        nnh = 0.96
-        Ac = 0.0779
-        Ah = 0.05244
+        nnc = 0.975
+        nnh = 0.975
+        Ac = 0.0505
+        Ah = 0.1665
         vo = M * a_s
         pt2 = nr * pto
         tt2 = tto
