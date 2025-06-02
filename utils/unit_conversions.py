@@ -98,3 +98,17 @@ def true_to_equivalent_air_speed(V_t: float, rho: float, rho_0: float) -> float:
     float: Equivalent airspeed in m/s
     """
     return V_t * np.sqrt(rho / rho_0)
+
+def equivalent_to_true_air_speed(V_e: float, rho: float, rho_0: float) -> float:
+    """
+    Convert equivalent airspeed to true airspeed.
+    
+    Parameters:
+    V_e (float): Equivalent airspeed in m/s
+    rho (float): Air density at altitude in kg/m^3
+    rho_0 (float): Sea level air density in kg/m^3
+    
+    Returns:
+    float: True airspeed in m/s
+    """
+    return V_e * np.sqrt(rho_0 / rho)
