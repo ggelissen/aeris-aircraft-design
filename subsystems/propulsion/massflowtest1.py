@@ -183,7 +183,7 @@ class Thrust:
         plt.show()
 
 if __name__ == "__main__":
-    target_thrust = 1400
+    target_thrust = 1800
     h = 12192
     M = 0.8
     DT = 0
