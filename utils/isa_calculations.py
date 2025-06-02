@@ -17,7 +17,6 @@ R = 287.058       # Gas constant for air [J/(kg·K)]
 
 
 
-
 # Tropopause conditions (at 11,000 m)
 h_tropopause = 11000  # m
 T11 = T0 + a * h_tropopause  # Temperature at tropopause [K]

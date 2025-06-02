@@ -1,0 +1,56 @@
+# _____ IMPORTS _____
+import sys
+import os
+import yaml
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+
+
+def plot_wing_loading(lift_dist, drag_dist, moment_dist):
+    """
+    Plot wing loading diagrams given the lift, drag, and moment distributions.
+    
+    Parameters:
+    - lift_dist: 1D np.array of lift force per unit span (length 200)
+    - drag_dist: 1D np.array of drag force per unit span (length 200)
+    - moment_dist: 1D np.array of moment per unit span (length 200)
+    """
+    # Spanwise locations: from -1 (left tip) to 1 (right tip), 200 points total
+    y = np.linspace(-1, 1, 200)
+
+    # Plotting
+    plt.figure(figsize=(15, 8))
+
+    plt.subplot(3, 1, 1)
+    plt.plot(y, lift_dist)
+    plt.title("Lift Distribution Along the Span")
+    plt.xlabel("Spanwise Location (y)")
+    plt.ylabel("Lift (N/m)")
+    plt.grid(True)
+
+    plt.subplot(3, 1, 2)
+    plt.plot(y, drag_dist)
+    plt.title("Drag Distribution Along the Span")
+    plt.xlabel("Spanwise Location (y)")
+    plt.ylabel("Drag (N/m)")
+    plt.grid(True)
+
+    plt.subplot(3, 1, 3)
+    plt.plot(y, moment_dist)
+    plt.title("Moment Distribution Along the Span")
+    plt.xlabel("Spanwise Location (y)")
+    plt.ylabel("Moment (Nm/m)")
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.show()
+
+# Example usage with dummy sinusoidal data
+y = np.linspace(-1, 1, 200)
+lift = 1000 * (1 - y**2)  # Parabolic lift distribution
+drag = 50 + 10 * np.sin(np.pi * y)  # Slight sinusoidal variation
+moment = 20 * y  # Linear variation
+
+plot_wing_loading(lift, drag, moment)

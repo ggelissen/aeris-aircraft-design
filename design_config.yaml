@@ -4,7 +4,8 @@ cruise_speed: 240               # Cruise speed in m/s
 cruise_mach: 0.85               # Cruise Mach Number
 stall_speed_clean: 100          # Stall speed clean configuration in kts
 stall_speed_land: 85            # Stall speed landing configuration in kts
-cruise_altitude: 121000         # Cruise altitude in meters
+cruise_altitude: 12100         # Cruise altitude in meters
+cruise_density: 0.3059685       # Cruise density in kg/m^3
 takeoff_distance: 1500          # Takeoff distance in meters
 landing_distance: 1200          # Landing distance in meters
 diversion_distance: 460000      # Diversion distance in meters
@@ -22,8 +23,7 @@ performance:
   climb_gradient_AEO_alt: 0       # Climb Gradient AEO Altitude in ft
   climb_gradient_OEI_alt: 35      # Climb Gradient OEI Altitude in ft
   delta_CD0_OEI: 0.005            # Zero-Lift Drag Coefficient Differential AEO
-  CL_max_TO: 1.6                  # Maximum Lift Coefficient at Take-Off
-  CL_max_L: 1.8                    # Maximum Lift Coefficient at Landing
+
 
 
 # Engine Parameters
