@@ -226,7 +226,7 @@ class FlightSim:
         TSFC = 20
         aoc = 0 
         #aoc_vel = 0
-        aoa = 0 / 180 * math.pi
+        aoa = 5 / 180 * math.pi
         C_L = 1.1
         h = 0
         
@@ -266,7 +266,8 @@ class FlightSim:
         D_history = []
         density_history = []
         aoa_history = []
-        max_time = 600
+        C_L_history = []
+        max_time = 3600
         equaldrag =False
         
         while True:
@@ -285,6 +286,7 @@ class FlightSim:
             W_history.append(W)
             T_history.append(T)
             D_history.append(D)
+            C_L_history.append(C_L)
             density_history.append(density)
             aoa_history.append(aoa * 180 / math.pi)
 
@@ -302,7 +304,7 @@ class FlightSim:
             aoc_vel_history.append(aoc_vel*180/math.pi)
             aoc += aoc_vel * dt
             
-            if h>1000:
+            if h>12000:
                 if aoc_vel < 0:
                     if (aoa*180/math.pi < 10):
                         aoa += 0.1 * dt
@@ -310,7 +312,7 @@ class FlightSim:
                     if (aoa*180/math.pi > -10):
                         aoa -= 0.1 * dt
            
-            if h>1000:
+            if h>12000:
                 if aoc > 0:
                     if (aoa*180/math.pi < 10):
                         aoa -= 0.1 * dt
@@ -318,14 +320,16 @@ class FlightSim:
                     if (aoa*180/math.pi > -10):
                         aoa += 0.1 * dt
 
-            if h > 1000:
+            if h > 10 and h < 1000:
+                C_L = 0.3* aoa *180/math.pi
+            elif h > 1000:
                 C_L = 0.1* aoa *180/math.pi
             else:
                 C_L = 1.1
             
             C_D = Cd0 + C_L**2 / (math.pi * AR * oswald)
             
-            h += V * math.sin(aoc)
+            h += V * math.sin(aoc) * dt
             
             _,_,density,sos = self.__ISA__(h) # sea level
             
@@ -335,9 +339,10 @@ class FlightSim:
             #print(C_L)
             '''
             if h < 12000 and equaldrag == False:
-                T = T0 - 3000/max_time*t
+                T = T0 - 3000*t/max_time
+            #
             elif h >= 12000:
-                T = D*1.1
+                T = D*1.05
                 equaldrag = True
             '''
             
@@ -375,10 +380,13 @@ class FlightSim:
         print(mass)
         print('T',T_history[-1])
         print('D',D_history[-1])
+        print("L",L_history[-1])
+        print("W",W_history[-1])
         print(acc)
         print(aoc * 180 / math.pi)
         print(aoa * 180 / math.pi)
         
+        self.__plot_result__(t_history, C_L_history, "t [s]", "C_L [-]")
         self.__plot_result__(t_history, V_history, "t [s]", "V [m/s]")
         self.__plot_result__(t_history, M_history, "t [s]", "M [-]")
         self.__plot_result__(t_history, acc_history, "t [s]", "acc [m/s2]")
