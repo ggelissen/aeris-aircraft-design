@@ -4,17 +4,17 @@
 2688 Total Num Tris
 
 Theo_Area   Wet_Area   Theo_Vol    Wet_Vol  Name
-   31.454     30.067      8.015      7.887  FuselageGeom   
-   24.747     20.309      1.193      1.008  WingGeom       
+   31.454     30.107      8.015      7.903  FuselageGeom   
+   24.944     20.468      1.131      0.956  WingGeom       
     7.729      6.462      0.262      0.226  Horizontal_Stabilizer
     7.949      7.279      0.542      0.511  Fuselage_Engine
 -------------------------------------------------
-   71.879     64.117     10.012      9.631  Totals         
+   72.076     64.316      9.950      9.596  Totals         
 
 Tag_Theo_Area   Tag_Wet_Area    Tag_Name
-       31.454         30.067    FuselageGeom_S_Surf0
-       12.373         10.154    WingGeom_S_Surf0
-       12.373         10.154    WingGeom_S_Surf1
+       31.454         30.107    FuselageGeom_S_Surf0
+       12.472         10.234    WingGeom_S_Surf0
+       12.472         10.234    WingGeom_S_Surf1
         3.865          3.231    Horizontal_Stabilizer_S_Surf0
         3.865          3.231    Horizontal_Stabilizer_S_Surf1
         7.949          7.279    Fuselage_Engine_S_Surf0

@@ -20,12 +20,14 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas
+from vspfunctions import calculate_cg, calculate_wet_areas
 from vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing, create_V_tail, create_engines
 matplotlib.use('Qt5Agg')
 import openvsp as vsp
 import vspfunctions
-import subsystems.structures.stanag as stanag
+#import subsystems.structures.stanag as stanag
 from design_variables import *
+from wing_structure_generation import wing_structure_generation
 
 def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
@@ -57,6 +59,9 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     ### Calculate specifications
     calculate_cg(designvars)
     calculate_wet_areas(designvars)
+
+    ### Set up structure
+    wing_structure_generation(designvars)
 
     # Step 4: Simulate aircraft with loads
 
