@@ -161,36 +161,45 @@ def calculate_sweep_angle_x_c(Lambda_LE: float, c_root: float, b: float, x_c: fl
     return np.arctan2(np.tan(Lambda_LE) - x_c * 2 * c_root / b * (1 - taper_ratio), 1)
 
 
+def run_preliminary_sizing_wing(params: DesignParameters) -> dict:
+    """
+    Run preliminary sizing calculations for the wing based on design parameters.
 
-if __name__ == "__main__":
+    Parameters:
+    params (DesignParameters): An instance of DesignParameters containing the design variables.
 
-    params = DesignParameters()
-    params.load_from_yaml('design_config.yaml')
+    Returns:
+    dict: A dictionary containing the results of the preliminary sizing calculations.
+    """
 
     Mach_cruise = params.cruise_mach
     Mach_cross = 0.935
     Lambda_025c = calculate_sweep_angle_025c_rad(Mach_cruise, Mach_cross)
     taper_ratio = calculate_taper_ratio(Lambda_025c)
     
-    S = params.wing.S_w     # Wing area in square meters
-    b = params.wing.b_w     # Wing span in meters
+    S = params.wing.S_w 
+    b = params.wing.b_w   
     
     c_root, c_tip = calculate_chord_lengths(S, b, taper_ratio)
     MAC, y_LEMAC = calculate_MAC_and_y_LEMAC(c_root, c_tip, b)
     
-    h = params.cruise_altitude  # Altitude in meters
-    W_TO = params.weight.W_TO  # Takeoff weight in Newtons
+    h = params.cruise_altitude 
+    W_TO = params.weight.W_TO 
     
     Lambda_LE = calculate_sweep_angle_LE(Lambda_025c, c_root, b, taper_ratio)
     Lambda_05c = calculate_sweep_angle_x_c(Lambda_LE, c_root, b, 0.5, taper_ratio)
     t_c = calculate_thickness_ratio(h, Mach_cruise, W_TO, S, Lambda_05c, Mach_cross)
     
     dihedral_angle_rad = calculate_dihedral_angle_rad(Lambda_025c)
-    
-    print(f"Sweep Angle at 0.25c: {np.round(Lambda_025c,4)} radians")
 
-    print(f"Taper Ratio: {np.round(taper_ratio,4)}")
-    print(f"Root Chord: {np.round(c_root,4)} m, Tip Chord: {np.round(c_tip,4)} m")
-    print(f"MAC: {np.round(MAC,4)} m, y_LEMAC: {np.round(y_LEMAC,4)} m")
-    print(f"Thickness-to-Chord Ratio: {np.round(t_c,4)}")
-    print(f"Dihedral Angle: {np.round(dihedral_angle_rad,4)} radians")
+    results = {
+        'Lambda_025c_w': Lambda_025c,
+        'lambda_w': taper_ratio,
+        'root_chord': c_root,
+        'tip_chord': c_tip,
+        'mac': MAC,
+        'y_LEMAC': y_LEMAC,
+        't_c_w_max': t_c,
+        'Gamma_w': dihedral_angle_rad,
+    }
+    return results

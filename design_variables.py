@@ -125,13 +125,19 @@ class WeightParameters:
     """
     def __init__(self):
         self.W_TO = 30787.8                         # Maximum Take-Off Weight (MTOW) in N
+        self.W_E = None                             # Empty Weight in N
         self.W_OE = 11973.3                         # Operational Empty Weight (OEW) in N
         self.W_F = 12930.5                          # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
+        self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 2563                             # Wing Loading in N/m^2
         self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.5793                          # Maximum Fuel Fraction
         self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
+        self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
+        self.W_tfo = None                           # Trapped Fuel and Oil Fraction
+        self.W_F_used = None                        # Used Fuel Weight in N
+        self.W_F_res = None                         # Reserve Fuel Weight in N
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -155,7 +161,8 @@ class WingParameters:
         self.z_LEMAC = 0.0
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.Lambda_w_quarter = 32*np.pi/180               # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_025c_w = 32*np.pi/180               # Wing quarter-Chord Sweep Angle in radians
+        self.t_c_w_max = None                       # Maximum Wing Thickness-to-Chord Ratio
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"                       # Wing Airfoil Type
@@ -168,7 +175,6 @@ class WingParameters:
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
         self.CST_uppersurf = [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
         self.CST_lowersurf = [0.23723,    -0.05508,   -0.31490,   -0.01788,   -0.26995,   -0.19510,     0.13560,     0.27263] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
-        self.Lambda_w_quarter = 0.6487 # 37.1673 degrees        # Wing quarter-Chord Sweep Angle in radians
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
         self.i_w = 0.0                             # Wing Incidence Angle in degrees
@@ -206,11 +212,14 @@ class PerformanceParameters:
         self.climb_gradient_OEI_alt = None          # Climb Gradient OEI Altitude in ft
         self.delta_CD0_OEI = None                   # Zero-Lift Drag Coefficient Differential AEO
 
-        self.CL_max_TO = 1.3                       # Maximum Lift Coefficient at Take-Off
-        self.CL_max_LAND = 1.6                     # Maximum Lift Coefficient at Landing
-        self.CL_max_cruise = 1.8                   # Maximum Lift Coefficient at Cruise
+        self.CL_max_TO = 1.3                        # Maximum Lift Coefficient at Take-Off
+        self.CL_max_LAND = 1.6                      # Maximum Lift Coefficient at Landing
+        self.CL_max_cruise = 1.8                    # Maximum Lift Coefficient at Cruise
 
-        self.CL_alpha = 5.0                  # Lift Curve Slope in 1/rad
+        self.CL_alpha = 5.0                         # Lift Curve Slope in 1/rad
+
+        self.L_D_cruise = None                      # Lift-to-Drag Ratio at Cruise
+        self.L_D_loiter = None                      # Lift-to-Drag Ratio at Loiter
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
