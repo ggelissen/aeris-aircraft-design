@@ -550,7 +550,7 @@ def run_mission_simulation():
         },
         {
             "name": "Landing", "duration_minutes": 5,
-            "target_thrust_N": 1350, # Approx 18% of 7540N
+            "target_thrust_N": 900, # Approx 12% of 7540N
             "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, 
             "engine_params_override": {"tt_4": 1000},
             "ei_nox": 0.008
