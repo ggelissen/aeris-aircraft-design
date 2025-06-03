@@ -536,7 +536,7 @@ def run_mission_simulation():
         },
         {
             "name": "Cruise", "duration_minutes": 400,
-            "target_thrust_N": 2260, # Approx 30% of 7540N
+            "target_thrust_N": 1800, # Approx 30% of 7540N
             "flight_conditions": {"mach_0": 0.80, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
             "engine_params_override": {"tt_4": 1250}, 
             "ei_nox": 0.012
