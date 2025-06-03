@@ -5,8 +5,16 @@ import yaml
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.integrate import cumtrapz
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
+from utils.unit_conversions import *
+from design_variables import *
+
+params = DesignParameters()
+params.load_from_yaml('design_config.yaml')
 
 def plot_wing_loading(lift_dist, drag_dist, moment_dist):
     """
@@ -72,71 +80,104 @@ def plot_wing_weight(weight_dist):
 
     print(f"Total Wing Weight: {total_weight:.2f} N")
 
-def compute_internal_forces(y, lift, drag, weight):
+def compute_resultant_loads(y, lift, drag, moment_aero, weight):
     """
-    Compute shear, moment, and axial force distributions for a wing.
+    Compute net vertical load and torque along the span.
+    """
+    qz = lift - weight  # Net vertical load in z (positive downwards)
+    qx = - drag  # Load in negative x-direction (positive drag opposes flight)
+    torque = moment_aero  # Aerodynamic moment as distributed torque (about x)
+    return qz, qx, torque
+
+def compute_internal_distributions(y, qz, torque_dist):
+    """
+    Compute internal loads from distributed loading along y-axis (spanwise).
+    Inputs:
+        - qz: net vertical distributed load (lift - weight), N/m
+        - torque_dist: distributed pitching moment + drag-induced torque (Nm/m)
+    Output:
+        - Vz: shear in z-direction (N)
+        - Mx: bending moment about x-axis (Nm)
+        - Tx: torsion about x-axis (Nm)
+    """
+
+    y_tip_root = y[::-1]  # Reverse y for integration from tip to root
+
+
+    # Integrate from tip (right) to root (left)
+    print(qz)
+    Vz_tip_to_root = cumtrapz(qz[::-1], y_tip_root, initial=0)  # Shear force in z-direction
+    Mx_tip_to_root = cumtrapz(Vz_tip_to_root, y_tip_root, initial=0)
+    Tx_tip_to_root = cumtrapz(torque_dist[::-1], y_tip_root, initial=0)  # Torsion about x-axis
+
+    # Flip back
+    Vz = Vz_tip_to_root[::-1]
+    Mx = Mx_tip_to_root[::-1]
+    Tx = Tx_tip_to_root[::-1]
+
+    return Vz, Mx, Tx
+
+
+def plot_internal_loads(y, Vz, Mx, Tx, Ny=None, title_prefix=""):
+    """
+    Plot internal load distributions along the wing half-span.
     
     Parameters:
-    - y: Spanwise locations (numpy array, shape [N])
-    - lift: Lift distribution (N/m)
-    - drag: Drag distribution (N/m)
-    - weight: Weight distribution (N/m)
-    
-    Returns:
-    - V: Shear force distribution (N)
-    - M: Bending moment distribution (Nm)
-    - N: Axial force distribution (N)
+    - y: spanwise positions (m)
+    - Vz: shear force in z-direction (N)
+    - Mx: bending moment about x-axis (Nm)
+    - Tx: torsion about x-axis (Nm)
+    - Ny: (optional) axial force along y-axis (N), if applicable
+    - title_prefix: string to prepend to plot titles
     """
-    dy = np.abs(y[1] - y[0])
-    q_v = lift - weight  # Net vertical distributed load
+    num_plots = 3 + (Ny is not None)
+    fig, axes = plt.subplots(num_plots, 1, figsize=(12, 3.5 * num_plots), sharex=True)
 
-    V = np.cumsum(q_v[::-1]) * dy
-    V = V[::-1]  # Flip back so it corresponds to y
-    M = np.cumsum(V[::-1]) * dy
-    M = M[::-1]
+    ax_idx = 0
 
-    N_force = np.cumsum(drag[::-1]) * dy
-    N_force = N_force[::-1]
+    axes[ax_idx].plot(y, Vz)
+    axes[ax_idx].set_title(f"{title_prefix}Shear Force $V_z$")
+    axes[ax_idx].set_ylabel("Shear $V_z$ (N)")
+    axes[ax_idx].grid(True)
+    ax_idx += 1
 
-    return V, M, N_force
+    axes[ax_idx].plot(y, Mx)
+    axes[ax_idx].set_title(f"{title_prefix}Bending Moment $M_x$")
+    axes[ax_idx].set_ylabel("Moment $M_x$ (Nm)")
+    axes[ax_idx].grid(True)
+    ax_idx += 1
+
+    axes[ax_idx].plot(y, Tx)
+    axes[ax_idx].set_title(f"{title_prefix}Torque $T_x$")
+    axes[ax_idx].set_ylabel("Torque $T_x$ (Nm)")
+    axes[ax_idx].grid(True)
+    ax_idx += 1
+
+    if Ny is not None:
+        axes[ax_idx].plot(y, Ny)
+        axes[ax_idx].set_title(f"{title_prefix}Axial Force $N_y$")
+        axes[ax_idx].set_ylabel("Axial $N_y$ (N)")
+        axes[ax_idx].grid(True)
+
+    axes[-1].set_xlabel("Spanwise Location y (m)")
+    plt.tight_layout()
+    plt.show()
 
 
+# ==== Example Usage for One Load Case ====
+def run_analysis_for_case(y, lift, drag, moment, weight, label=""):
+    qz, qx, torque = compute_resultant_loads(y, lift, drag, moment, weight)
+    Vz, Mx, Tx = compute_internal_distributions(y, qz, torque)
+    plot_internal_loads(y, Vz, Mx, Tx, Ny=None, title_prefix="")
 
+# ==== Generate spanwise mesh (half-span) ====
+span = params.wing.b_w # Full wingspan = 40 m
+y_half = np.linspace(0, span / 2, 1000) 
 
-# Example usage with dummy sinusoidal data
-y = np.linspace(-1, 1, 200)
+# ==== Example Load Case ==== --> use 
+lift = 1000 * (1 - (2 * y_half / span)**2)  # Elliptic lift
+drag = 30 + 5 * np.sin(np.pi * y_half / (span / 2))  # Sinusoidal drag
+moment = 50 * np.cos(np.pi * y_half / (span / 2))  # Aerodynamic pitching moment
+weight = 600 * (1 - (2 * y_half / span)**2)  # Elliptic weight
 
-weight = 500 * (1 - y**2)  # Example: elliptical distribution, symmetric
-
-lift = 1000 * (1 - y**2)  # Parabolic lift distribution
-drag = 50 + 10 * np.sin(np.pi * y)  # Slight sinusoidal variation
-moment = 20 * y  # Linear variation
-
-plot_wing_weight(weight)
-plot_wing_loading(lift, drag, moment)
-
-
-
-
-V, M, N = compute_internal_forces(y, lift, drag, weight)
-
-# Plot
-plt.figure(figsize=(15, 8))
-plt.subplot(3, 1, 1)
-plt.plot(y, V)
-plt.title("Shear Force Distribution")
-plt.ylabel("Shear V (N)")
-
-plt.subplot(3, 1, 2)
-plt.plot(y, M)
-plt.title("Bending Moment Distribution")
-plt.ylabel("Moment M (Nm)")
-
-plt.subplot(3, 1, 3)
-plt.plot(y, N)
-plt.title("Axial Force Distribution (from Drag)")
-plt.ylabel("Axial Force N (N)")
-plt.xlabel("Spanwise location y")
-
-plt.tight_layout()
-plt.show()
+run_analysis_for_case(y_half, lift, drag, moment, weight, label="Load Case 1")

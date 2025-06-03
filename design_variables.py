@@ -138,7 +138,6 @@ class WeightParameters:
             if hasattr(self, key):
                 setattr(self, key, value)
 
-
 class WingParameters:
     """
     Class to hold wing-related parameters for the aircraft design.
