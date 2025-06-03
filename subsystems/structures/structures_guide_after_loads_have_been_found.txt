@@ -1,0 +1,41 @@
+Cruise Load factors		(Aerodynamics dept.)
+	|				|
+Aerodynamic Forces Distribution along span in Cruise			Conservative estimate of aerodynamic forces distribution along span in extreme operating condition
+			|													|
+			---------------------------------------------------------------------------------------------------------
+												|
+										Inertial loads	|
+											|	|
+Find Cut-Outs for Control Surfaces, HLDs						|	|					Select Material
+		|									|	|						|
+Determine Structural Components along span (make parametric for N-Cell wing section)	|	|				Find sigma_max, nu and E
+		|									|	|						|
+Create Cross-Section as function of spanwise position					|	|	Calculate: G using E & nu; tau_max using mohr's circle (unless composite)
+		|									|	|						|
+Create CS Aera and MoI as function of spanwise position					|	|						|
+	|				|						|	|						|
+	|	Determine Structural Weight as function of spanwise position		|	Determine external/reaction loads		|
+	|								|		|		|					|
+	|						Create lateral/longitudinal/torsional loading distributions				|
+	|									|								|
+	|					Create internal torsion, sheer, moment and normal force distributions				|
+	|									|								|
+	-------------------------------------------------------------------------								|
+		|																|
+Calculate local normal/sheer stresses (Like E23.4/.5/.6/.7 from Megson but then with wing ribs)							|
+		|																|
+		---------------------------------------------------------------------------------------------------------------------------------
+										|
+									Determine if structure breaks, calculate displacements
+
+
+
+
+
+
+
+Also: Web buckling (of spars), column buckling (of stringers), skin buckling (of wing skin), fatigue, crack propagation, payload capacity, fuel capacity, write optimisation loop.
+Also: Loading analysis of empennage, fuselage, landing gear.
+If time left: shear lag (ch27 of Megson), resonance frequencies. 
+If even more time left: Aeroelastic Effects, FEA.
+Last step: CATIA.
