@@ -3,6 +3,7 @@ import numpy as np
 from stl import mesh
 import pyvista as pv
 from design_variables import DesignParameters
+from scipy.interpolate import interp1d
 
 def print_all_params(obj_id):
     parm_ids = vsp.GetGeomParmIDs(obj_id)
@@ -97,20 +98,23 @@ def create_wing(designvars: DesignParameters = None):
     vsp.SetUpperCST(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), len(wingpars.CST_uppersurf), wingpars.CST_uppersurf)
     vsp.SetLowerCST(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), len(wingpars.CST_lowersurf), wingpars.CST_lowersurf)
     # Scale root airfoil to required thickness to chord ratio
+    vsp.UpdateGeom(wing_id)
     vsp.WriteSeligAirfoil("data/Airfoil.dat", wing_id, 0) # Write airfoil to file
+
     vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 0, vsp.XS_FILE_AIRFOIL)
     vsp.ReadFileAirfoil(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), "data/Airfoil.dat") # Read airfoil from file
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), "ThickChord"), wingpars.t_c_w_r) # After reimiport thickness can be set
 
     # Set tip airfoil, parametrised using Class-Shape Transformation (CST) coefficients, which are better for supercritical airfoils
     vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 1, vsp.XS_CST_AIRFOIL)
-    #vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "Camber"), wingpars.camber_t) # This is for NACA Four Series, not CST
-    #vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "CamberLoc"), wingpars.camber_loc_t) # This is for NACA Four Series, not CST
-    #vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "ThickChord"), wingpars.t_c_w_t) # This is for NACA Four Series, not CST
+    # vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "Camber"), 0.05) # This is for NACA Four Series, not CST
+    # vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "CamberLoc"), 0.2) # This is for NACA Four Series, not CST
+    # vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "ThickChord"), 0.1) # This is for NACA Four Series, not CST
     vsp.SetUpperCST(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), len(wingpars.CST_uppersurf), wingpars.CST_uppersurf)
     vsp.SetLowerCST(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), len(wingpars.CST_lowersurf), wingpars.CST_lowersurf)
     # Scale tip airfoil to required thickness to chord ratio
-    vsp.WriteSeligAirfoil("data/Airfoil.dat", wing_id, 0)  # Write airfoil to file
+    vsp.UpdateGeom(wing_id)
+    vsp.WriteSeligAirfoil("data/Airfoil.dat", wing_id, 1)  # Write airfoil to file
     vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 1, vsp.XS_FILE_AIRFOIL)
     vsp.ReadFileAirfoil(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "data/Airfoil.dat")  # Read airfoil from file
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 1), 0), "ThickChord"), wingpars.t_c_w_t)  # After reimiport thickness can be set
@@ -139,10 +143,14 @@ def create_wing(designvars: DesignParameters = None):
 
     planform_points = []
     for thing in vsp.GetFeatureLinePnts(wing_id):
-        if thing.z() == 0.0:
+        if np.isclose(thing.z(), 0.0, rtol=0, atol=1e-5):
             planform_points.append(np.array([thing.x(), thing.y()]))
-    # Convert to NumPy array
     wingpars.planform_points = np.array(planform_points)
+
+
+    wingpars.wingid = wing_id
+
+
 
 
 
@@ -251,7 +259,7 @@ def calculate_wet_areas(designvars: DesignParameters = None):
     #result = vsp.ExecAnalysis("CompGeom")
     output_mesh = vsp.ComputeCompGeom(vsp.SET_SHOWN, False, 0)
     result = vsp.FindLatestResultsID("Comp_Geom")
-    vsp.PrintResults(result)
+    #vsp.PrintResults(result)
 
 
     wet_areas = {}
@@ -265,4 +273,17 @@ def calculate_wet_areas(designvars: DesignParameters = None):
     vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete slices
     for geom in vsp.FindGeoms():
         vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
+
+def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0):
+    points = []
+    local_chord_length = designvars.wing.root_chord * (1 - np.abs(spanwise_pos_frac)) + designvars.wing.tip_chord * np.abs(spanwise_pos_frac)
+    for vec in vsp.GetAirfoilCoordinates(designvars.wing.wingid, abs(spanwise_pos_frac)):
+        points.append(np.array([vec.x(), vec.y()]))
+
+    points = np.array(points)
+    points[:, 0] *= local_chord_length  # Scale X coordinates by local chord length
+    points[:, 1] *= local_chord_length
+
+    return points, local_chord_length
+
 
