@@ -60,5 +60,5 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
     plt.plot(outline[:, 0], outline[:, 1])
     plt.show()
 
-def generate_wing_structure_3D(designvars: DesignParameters = None):
+#def generate_wing_structure_3D(designvars: DesignParameters = None):
 
