@@ -62,7 +62,7 @@ class FlightEnvelope:
         self.weight_configuration = {
             "OEW": params.weight.W_OE,  # Operational Empty Weight (OEW) in N
             "MTOW": params.weight.W_TO,  # Maximum Take-Off Weight (MTOW) in N
-            "OEW_PL": params.weight.W_OE + params.weight.W_PL  # OEW + Payload in N
+            "OEW_Payload_Fuselage_Fuel": params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction # OEW + Payload in N + Fuel in Fuselage
 
         }
 
@@ -120,6 +120,7 @@ class FlightEnvelope:
         #velocity_aixs_EAS
         n_gust_pos = 1 + kg * 1.225 * U_gust * velocity_aixs / (2 * W_S)
         n_gust_neg = 1 - kg * 1.225 * U_gust * velocity_aixs / (2 * W_S)
+        print(W_S)
 
         #n_gust_pos = 1 + (density * CL_alpha * S * velocity_aixs * U_gust) / (2 * weight_N)
         #n_gust_neg = 1 - (density * CL_alpha * S * velocity_aixs * U_gust) / (2 * weight_N)
@@ -223,6 +224,6 @@ class FlightEnvelope:
 
 if __name__ == "__main__":
     fe = FlightEnvelope()
-    fe.generate_flight_envelope(weight_config='OEW_PL', altitude_level='cruise', ac_configuration='CLEAN')
+    fe.generate_flight_envelope(weight_config='OEW_Payload_Fuselage_Fuel', altitude_level='cruise', ac_configuration='CLEAN')
 
 

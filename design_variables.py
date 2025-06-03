@@ -130,7 +130,8 @@ class WeightParameters:
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_S = 2563                             # Wing Loading in N/m^2
         self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
-        self.M_ff = 0.5793                        # Maximum Fuel Fraction
+        self.M_ff = 0.5793                          # Maximum Fuel Fraction
+        self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
