@@ -230,7 +230,7 @@ class FlightSim:
         C_L = 1.1
         h = 0
         
-        T = T0 * density/1.225
+        T = T0
         
         C_D = Cd0 + C_L**2 / (math.pi * AR * oswald)
         print(C_D)
@@ -267,7 +267,7 @@ class FlightSim:
         density_history = []
         aoa_history = []
         C_L_history = []
-        max_time = 7200
+        max_time = 3600
         equaldrag =False
         
         while True:
@@ -307,25 +307,30 @@ class FlightSim:
             if h>0:
                 if aoc_vel < 0:
                     if (aoa*180/math.pi < 10):
-                        aoa += 0.1 * dt
+                        aoa +=  dt
                 else:
                     if (aoa*180/math.pi > -10):
-                        aoa -= 0.1 * dt
+                        aoa -=  dt
            
-            if h>0:
+            if h<10000:
+                if aoc < 2:
+                    if (aoa*180/math.pi < 10):
+                        aoa += dt
+                else:
+                    if (aoa*180/math.pi > -10):
+                        aoa -=  dt
+            else:
                 if aoc < 0:
                     if (aoa*180/math.pi < 10):
-                        aoa += 0.1 * dt
+                        aoa +=  dt
                 else:
                     if (aoa*180/math.pi > -10):
-                        aoa -= 0.1 * dt
+                        aoa -=  dt
 
-            # if h > 10 and h < 1000:
-            #     C_L = 0.3* aoa *180/math.pi
-            # elif h > 1000:
-            #     C_L = 0.1* aoa *180/math.pi
+            # if h > 1000:
+            #     C_L = 0.1* aoa *180/math.pi + 0.3
             # else:
-                C_L = 0.5
+                C_L = 1.1
             
             C_D = Cd0 + C_L**2 / (math.pi * AR * oswald)
             
@@ -335,7 +340,25 @@ class FlightSim:
             
             #T = T0 - (t/600)*T0/18
             
-            T = T0 * (density/1.225)
+            #T = T0 * (density/1.225)
+
+            if V < 300:
+                if acc < 1:
+                    if (T < 7000):
+                        T += 1000* dt
+                else:
+                    if (T > 0):
+                        T -= 1000* dt
+            else:
+                if acc < 0:
+                    if (T < 7000):
+                        T += 1000* dt
+                else:
+                    if (T > 0):
+                        T -= 1000* dt
+
+            #print(acc)
+            #print(T)
             #print(C_L)
             '''
             if h < 12000 and equaldrag == False:
