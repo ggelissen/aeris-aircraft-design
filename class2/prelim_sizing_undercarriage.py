@@ -7,79 +7,69 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from design_variables import DesignParameters
 import component_weights as cw
 from utils.unit_conversions import * 
+from main_class_II import *
 
-def calculate_undercarriage_loading(W_TO: float, n_mlg: int = 2, n_nlg: int = 1, LCN: int = 40) -> tuple:
+def perform_undercarriage_sizing(params: DesignParameters) -> dict:
+     
     """
     Calculate the undercarriage loading based on the takeoff weight and number of wheels.
 
-    Parameters:
-    W_TO (float): Takeoff weight in Newtons.
-    n_mlg (int): Number of main landing gear wheels.
-    n_nlg (int): Number of nose landing gear wheels.
-
-    Returns:
-    tuple: Tire pressure in kPa, static load on nose wheel in N, static load on main wheels in N.
+    Returns a dict with keys:
+      'tire_pressure'   (kg/cm²),
+      'F_nlg'           (static load on each nose wheel in kg),
+      'F_mlg'           (static load on each main wheel in kg),
+      'static_load_nlg' (static load on nose wheel in N),
+      'static_load_mlg' (static load on each main wheel in N),
+      'W_nose'          (total nose‐gear load in N),
+      'W_main_total'    (total main‐gear load in N).
     """
+    tire_pressure = (430*math.log(params.landing_gear.LCN) -680) * 10e3 # in Pa
+    tire_pressure_kg_cm2 = tire_pressure / 10  # Convert Pa to kg/cm^2
 
-    tire_pressure = (430*math.log(LCN) -680) * 10e6 # in Pa
+    W_nose = params.landing_gear.static_frac_nlg * params.weight.W_TO
+    W_main_total = params.landing_gear.static_frac_mlg * params.weight.W_TO
 
-    static_frac_nlg = 0.08
-    static_frac_mlg = 1 - static_frac_nlg
+    static_load_mlg = W_main_total / params.landing_gear.n_mlg
+    static_load_nlg = W_nose / params.landing_gear.n_nlg
 
-    W_nose = static_frac_nlg * W_TO
-    W_main_total = static_frac_mlg * W_TO
-
-    static_load_mlg = W_main_total / n_mlg
-    static_load_nlg = W_nose / n_nlg
-
-    return tire_pressure, static_load_nlg, static_load_mlg
-
-
-def estimate_tire_diameter(load_N: float, pressure_Pa: float) -> float:
-    """
-    Estimate the tire diameter based on the load and pressure.
-
-    Parameters:
-    load_N (float): Load on the tire in Newtons.
-    pressure_Pa (float): Tire pressure in Pascals.
-
-    Returns:
-    float: Estimated tire diameter in meters.
-    """
-
-    load_kg = load_N / 9.80665
-    pressure_bar = pressure_Pa / 100000  # Convert Pa to bar
-
-    return 0.5* (load_kg / pressure_bar) ** (0.25)
-
-
-def perform_undercarriage_sizing(params: DesignParameters) -> dict:
-    """
-    Perform undercarriage sizing based on the design parameters.
-
-    Parameters:
-    params (DesignParameters): Design parameters containing undercarriage specifications.
-
-    Returns:
-    dict: Undercarriage specifications including tire pressure, static loads, and tire diameters.
-    """
-
-    tire_pressure, static_load_nlg, static_load_mlg = calculate_undercarriage_loading(
-        W_TO=params.weight.W_TO, 
-        n_mlg=params.landing_gear.n_mlg, 
-        n_nlg=params.landing_gear.n_nlg, 
-        LCN=params.landing_gear.LCN)
-    
-    nose_diameter_m = estimate_tire_diameter(static_load_nlg, tire_pressure) 
-    main_diameter_m = estimate_tire_diameter(static_load_mlg, tire_pressure)
+    # Convert static loads to kg
+    static_load_nlg_kg = static_load_nlg / 9.80665  # Convert N to kg
+    static_load_mlg_kg = static_load_mlg / 9.80665  # Convert N to kg
 
     return {
-        'tire_pressure': tire_pressure / 1000,  # Convert to kPa
-        'F_nlg': static_load_nlg,
-        'F_mlg': static_load_mlg,
-        'D_mlg': main_diameter_m,
-        'D_nlg': nose_diameter_m,
+        'tire_pressure':   tire_pressure_kg_cm2,
+        'F_nlg':           static_load_nlg_kg,
+        'F_mlg':           static_load_mlg_kg,
+        'static_load_nlg': static_load_nlg,
+        'static_load_mlg': static_load_mlg,
+        'W_nose':          W_nose,
+        'W_main_total':    W_main_total
     }
+
+# with these values check torenbeek plot for wheel sizing
+
+
+def perform_undercarriage_positioning(params: DesignParameters, static_load_nlg:float, W_main_total:float ) -> tuple:
+    """
+    Calculate the undercarriage positioning based on design parameters.
+
+    Parameters:
+    params (DesignParameters): Design parameters object containing aircraft specifications.
+
+
+    """
+    #LONGITUDINAL GEAR POSITIONING
+    x_mlg = 4.7 # X position of MLG in meters, this is a guess, should be done with a drawing
+    l_n = 0.1 #needs to be imported as (x_cg_aft - x_mlg = 0.1)
+    x_nlg = (params.weight.W_TO/static_load_nlg - 1) * l_n  
+    #TRANSVERSE GEAR POSITIONING
+    #transverse location from drawing
+
+    #LATERAL GEAR POSITIONING
+    y_mlg = (x_mlg+x_nlg)/(math.sqrt(((x_nlg**2) * (math.tan(params.landing_gear.overturn_angle)**2))/(params.cg.z_cg**2) -1))
+
+
+    return x_nlg, x_mlg, y_mlg
 
 
 if __name__ == "__main__":
@@ -88,9 +78,24 @@ if __name__ == "__main__":
     params.load_from_yaml('design_config.yaml')
 
     # Perform undercarriage sizing
-    undercarriage_specs = perform_undercarriage_sizing(params)
+    undercarriage_sizing = perform_undercarriage_sizing(params)
 
     # Print the results
     print("Undercarriage Sizing Results:")
-    for key, value in undercarriage_specs.items():
-        print(f"{key}: {value:.2f}" if isinstance(value, float) else f"{key}: {value}")
+    print(f"Tire Pressure: {undercarriage_sizing['tire_pressure']:.2f} kg/cm2")
+    print(f"Static Load on Nose Wheel (F_nlg): {undercarriage_sizing['F_nlg']:.2f} kg")
+    print(f"Static Load on Main Wheels (F_mlg): {undercarriage_sizing['F_mlg']:.2f} kg")
+    print(f"Static Load on Nose Wheel (N): {undercarriage_sizing['static_load_nlg']:.2f} N")
+    print(f"Static Load on Main Wheels (N): {undercarriage_sizing['static_load_mlg']:.2f} N")
+    print(f"Total Nose Gear Load (W_nose): {undercarriage_sizing['W_nose']:.2f} N")
+    print(f"Total Main Gear Load (W_main_total): {undercarriage_sizing['W_main_total']:.2f} N")
+
+    # Perform undercarriage positioning
+    undercarriage_positioning = perform_undercarriage_positioning(params, static_load_nlg=undercarriage_sizing['static_load_nlg'],
+                                                                 W_main_total=undercarriage_sizing['W_main_total'])
+
+    # Print the undercarriage positioning results
+    print("\nUndercarriage Positioning Results:")
+    print(f"Nose Gear X Position (x_nlg): {undercarriage_positioning[0]:.2f} m")
+    print(f"Main Gear X Position (x_mlg): {undercarriage_positioning[1]:.2f} m")
+    print(f"Main Gear Y Position (y_mlg): {undercarriage_positioning[2]:.2f} m")
