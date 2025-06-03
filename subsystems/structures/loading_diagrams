@@ -72,18 +72,71 @@ def plot_wing_weight(weight_dist):
 
     print(f"Total Wing Weight: {total_weight:.2f} N")
 
-# Example usage with dummy elliptical weight distribution
-y = np.linspace(-1, 1, 200)
-weight = 500 * (1 - y**2)  # Example: elliptical distribution, symmetric
+def compute_internal_forces(y, lift, drag, weight):
+    """
+    Compute shear, moment, and axial force distributions for a wing.
+    
+    Parameters:
+    - y: Spanwise locations (numpy array, shape [N])
+    - lift: Lift distribution (N/m)
+    - drag: Drag distribution (N/m)
+    - weight: Weight distribution (N/m)
+    
+    Returns:
+    - V: Shear force distribution (N)
+    - M: Bending moment distribution (Nm)
+    - N: Axial force distribution (N)
+    """
+    dy = np.abs(y[1] - y[0])
+    q_v = lift - weight  # Net vertical distributed load
 
-plot_wing_weight(weight)
+    V = np.cumsum(q_v[::-1]) * dy
+    V = V[::-1]  # Flip back so it corresponds to y
+    M = np.cumsum(V[::-1]) * dy
+    M = M[::-1]
+
+    N_force = np.cumsum(drag[::-1]) * dy
+    N_force = N_force[::-1]
+
+    return V, M, N_force
+
 
 
 
 # Example usage with dummy sinusoidal data
 y = np.linspace(-1, 1, 200)
+
+weight = 500 * (1 - y**2)  # Example: elliptical distribution, symmetric
+
 lift = 1000 * (1 - y**2)  # Parabolic lift distribution
 drag = 50 + 10 * np.sin(np.pi * y)  # Slight sinusoidal variation
 moment = 20 * y  # Linear variation
 
+plot_wing_weight(weight)
 plot_wing_loading(lift, drag, moment)
+
+
+
+
+V, M, N = compute_internal_forces(y, lift, drag, weight)
+
+# Plot
+plt.figure(figsize=(15, 8))
+plt.subplot(3, 1, 1)
+plt.plot(y, V)
+plt.title("Shear Force Distribution")
+plt.ylabel("Shear V (N)")
+
+plt.subplot(3, 1, 2)
+plt.plot(y, M)
+plt.title("Bending Moment Distribution")
+plt.ylabel("Moment M (Nm)")
+
+plt.subplot(3, 1, 3)
+plt.plot(y, N)
+plt.title("Axial Force Distribution (from Drag)")
+plt.ylabel("Axial Force N (N)")
+plt.xlabel("Spanwise location y")
+
+plt.tight_layout()
+plt.show()
