@@ -25,7 +25,7 @@ from vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing
 matplotlib.use('Qt5Agg')
 import openvsp as vsp
 import vspfunctions
-import subsystems.structures.stanag as stanag
+#import subsystems.structures.stanag as stanag
 from design_variables import *
 from wing_structure_generation import wing_structure_generation
 
