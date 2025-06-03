@@ -13,7 +13,7 @@ class Control:
         self.CLh = CLh
         self.CLA_h = CLA_h
         self.C_m_ac = C_m_ac
-        self.X = np.arange(0,1,0.01)
+        self.X = np.arange(0,1,0.0001)
         
         
         
@@ -124,7 +124,7 @@ class Control:
         ax1.plot(Y2, X, label="max", color = 'tab:red')
         #l, b, w, h = ax1.get_position().bounds
         #ax1.set_position([l, b, w*0.5, h])
-        ax1.set_ylim(x_lemac*0.9,x_lemac*1.1)
+        ax1.set_ylim(x_lemac*0.99999,x_lemac*1.00001)
         
         ax2 = ax1.twinx()
         
@@ -156,14 +156,17 @@ class Control:
         for i in range(len(Y1)):
             Sh_S = self.__control_curve__(Y1[i])
             X_stability = self.__calculate_X_stability__(Sh_S)
-            if (X_stability - Y1[i]) > (Y2[i] - Y1[i]):
+            if ((X_stability - Y1[i]) > (Y2[i] - Y1[i])):
                 continue
             else:
                 print('cg range',Y2[i] - Y1[i])
+                #Sh_S = self.__control_curve__(Y1[i])
                 print("Sh/S", Sh_S)
                 x_lemac = control.X[i]
                 print("x_lemac/lh",x_lemac)
+                
                 break
+            
             
         control.__overlay_graphs__(control.X, Y1, Y2, stability, controllability, Sh_S, x_lemac)
 

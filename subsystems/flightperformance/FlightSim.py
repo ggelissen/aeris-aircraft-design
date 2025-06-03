@@ -268,7 +268,7 @@ class FlightSim:
         aoa_history = []
         
         while True:
-            if (t >= 3600):
+            if (t >= 300):
                 break
             
             V_history.append(V)
