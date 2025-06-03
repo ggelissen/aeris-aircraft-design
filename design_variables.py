@@ -371,7 +371,7 @@ class CGParameters:
     def __init__(self):
         self.x_cg_wing = 5                       # CG Position of the Wing in m
         self.x_cg_fuselage = 4                   # CG Position of the Fuselage in m
-        self.x_cg_landing_gear = 5               # CG Position of the Landing Gear in m
+        self.x_cg_landing_gear = 4.7               # CG Position of the Landing Gear in m
         self.x_cg_empennage = 9                  # CG Position of the Empennage in m
         self.x_cg_fixed_equipment = 3            # CG Position of the Fixed Equipment in m
         self.x_cg_propulsion = 7                 # CG Position of the Propulsion System in m
