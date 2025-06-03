@@ -220,8 +220,6 @@ class FlightEnvelope:
         self.plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, self.VC, VD, weight_config, altitude_level, ac_configuration)
 
 
-
-
 if __name__ == "__main__":
     fe = FlightEnvelope()
     fe.generate_flight_envelope(weight_config='OEW_Payload_Fuselage_Fuel', altitude_level='cruise', ac_configuration='CLEAN')
