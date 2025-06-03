@@ -384,3 +384,21 @@ class CGParameters:
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+class Control:
+    def __init__(self, x_mlg, x_cg):
+        self.CLah = None                       
+        self.CLaA_h = None                     
+        self.de_da = 0.1                    # Control Surface Effectiveness
+        self.lh = abs(x_mlg - x_cg)
+        self.Vh_V = 1
+        self.x_ac = None
+        self.CLh = None
+        self.CLA_h = None
+        self.C_m_ac = None
+        self.X = np.arange(0,1,0.01)
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
