@@ -536,7 +536,7 @@ def run_mission_simulation():
         },
         {
             "name": "Cruise", "duration_minutes": 400,
-            "target_thrust_N": 1800, # Approx 30% of 7540N
+            "target_thrust_N": 2260, # Approx 30% of 7540N
             "flight_conditions": {"mach_0": 0.80, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
             "engine_params_override": {"tt_4": 1250}, 
             "ei_nox": 0.012
@@ -581,6 +581,7 @@ def run_mission_simulation():
     total_mission_emissions = {
         "m_co2": 0.0, "m_h2o": 0.0, "m_nox": 0.0, "m_so4": 0.0, "m_soot": 0.0
     }
+    total_fuel_used_kg = 0.0 # Initialize total fuel used
     
     print("Attempting to use the external 'subsystems.propulsion.gas_property_relations' module.")
     print("If this script fails with a ModuleNotFoundError, ensure the module is correctly placed and accessible.\n")
@@ -598,6 +599,8 @@ def run_mission_simulation():
         analysis_params = {k: v for k, v in current_engine_params.items() if k not in ['mach_0', 'ts_0', 'ps_0']}
         
         tf_results = None # Initialize tf_results to None
+        segment_fuel_kg = nan # Initialize segment fuel to NaN
+
         try:
             tf_results = turbofan_parametric_analysis(
                 mach_0=current_engine_params["mach_0"],
@@ -625,29 +628,42 @@ def run_mission_simulation():
 
             mdot_f = nan
             segment_emissions_data = emissions(mdot_f, segment["ei_nox"], dt=dt_seconds)
+            # segment_fuel_kg remains nan
         else:
             mdot_f = segment["target_thrust_N"] * tsfc
+            segment_fuel_kg = mdot_f * dt_seconds # Calculate fuel for this segment
             print(f"  Flight Conditions: M0={current_engine_params['mach_0']}, Ts0={current_engine_params['ts_0']:.2f}K, Ps0={current_engine_params['ps_0']:.0f}Pa")
             print(f"  Calculated TSFC: {tsfc:.4e} (kg_fuel/s)/N")
             print(f"  Target Thrust: {segment['target_thrust_N']:.0f} N")
             print(f"  Calculated Fuel Flow (mdot_f): {mdot_f:.4f} kg/s")
+            print(f"  Fuel used this segment: {segment_fuel_kg:.2f} kg" if not isnan(segment_fuel_kg) else "  Fuel used this segment: NaN kg")
+
 
             segment_emissions_data = emissions(mdot_f, segment["ei_nox"], dt=dt_seconds)
             print(f"  Emissions for this segment (kg):")
             for species, mass in segment_emissions_data.items():
                 if species.startswith("m_"): 
                     print(f"    {species}: {mass:.4f}" if not isnan(mass) else f"    {species}: NaN")
+        
+        # Accumulate total fuel
+        if not isnan(segment_fuel_kg):
+            if not isnan(total_fuel_used_kg): # Only add if total is not already NaN
+                 total_fuel_used_kg += segment_fuel_kg
+        else:
+            total_fuel_used_kg = nan # If any segment fuel is NaN, total becomes NaN
 
 
         for species_mass_key in total_mission_emissions.keys():
             if not isnan(segment_emissions_data.get(species_mass_key, nan)): 
-                 total_mission_emissions[species_mass_key] += segment_emissions_data[species_mass_key]
+                 if not isnan(total_mission_emissions[species_mass_key]): # Only add if total for this species is not already NaN
+                    total_mission_emissions[species_mass_key] += segment_emissions_data[species_mass_key]
             else: 
                  total_mission_emissions[species_mass_key] = nan 
         print("-" * 40)
         # Removed del locals()['tf_results'] as it's better to let it be redefined or go out of scope naturally
 
-    print("\n--- Total Mission Emissions ---")
+    print("\n--- Total Mission Summary ---")
+    print(f"  Total Fuel Used: {total_fuel_used_kg:.2f} kg" if not isnan(total_fuel_used_kg) else "  Total Fuel Used: NaN kg")
     for species, total_mass in total_mission_emissions.items():
         print(f"  Total {species}: {total_mass:.2f} kg" if not isnan(total_mass) else f"  Total {species}: NaN kg")
 
