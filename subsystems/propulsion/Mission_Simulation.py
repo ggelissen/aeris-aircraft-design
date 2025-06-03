@@ -2,7 +2,14 @@
 # -*- coding: utf-8 -*-
 import pprint
 from math import sqrt, nan, isnan # Added nan, isnan for handling potential NaN values
+import sys # For potential path debugging
+import os  # For potential path debugging
 
+# Attempt to import the actual gpr module.
+# Ensure 'gas_property_relations.py' is located in a subdirectory path like:
+# your_project_root/subsystems/propulsion/gas_property_relations.py
+# And that your_project_root is in Python's sys.path or your PYTHONPATH,
+# or that the 'subsystems' directory is in the same directory as this script.
 import gas_property_relations as gpr
 
 # --- The placeholder gpr class is removed, as we are attempting to use the import above. ---
@@ -487,7 +494,7 @@ def run_mission_simulation():
     print("Starting Aircraft Mission Emissions Simulation...\n")
 
     baseline_engine_config = {
-        "bpr": 2.65, "pr_fan": 1.9, "pr_lpc": 1.5, "pr_hpc": 5.65, "tt_4": 1400.,
+        "bpr": 2.65, "pr_fan": 1.9, "pr_lpc": 1.5, "pr_hpc": 5.65, "tt_4": 1400., # tt_4 is max design TIT
         "eta_fan": 0.915, "eta_lpc": 0.9, "eta_hpc": 0.9,
         "eta_hpt": 0.93, "eta_lpt": 0.93,
         "eta_com": 0.99, "eta_mech_l": 0.99, "eta_mech_h": 0.99,
@@ -501,59 +508,59 @@ def run_mission_simulation():
     mission_segments = [
         {
             "name": "Engine Start & Warm-Up", "duration_minutes": 10,
-            "target_thrust_N": 5000, 
+            "target_thrust_N": 530, # Approx 7% of 7540N
             "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, 
-            "engine_params_override": {"tt_4": 900}, # Lower TIT for idle
-            "ei_nox": 0.005 
+            "engine_params_override": {"tt_4": 850}, 
+            "ei_nox": 0.004 
         },
         {
             "name": "Taxi", "duration_minutes": 10,
-            "target_thrust_N": 7000, 
+            "target_thrust_N": 900, # Approx 12% of 7540N
             "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, 
-            "engine_params_override": {"tt_4": 950},
-            "ei_nox": 0.006
+            "engine_params_override": {"tt_4": 900},
+            "ei_nox": 0.005
         },
         {
             "name": "Take-off", "duration_minutes": 5,
-            "target_thrust_N": 70000, 
+            "target_thrust_N": 7540, # Given
             "flight_conditions": {"mach_0": 0.25, "ts_0": 288.15, "ps_0": 101325}, 
-            "engine_params_override": {"tt_4": 1500, "pr_fan": 2.0, "pr_hpc": 6.0}, 
-            "ei_nox": 0.025 
+            "engine_params_override": {"tt_4": 1450, "pr_fan": 2.0, "pr_hpc": 6.0}, # Max TIT, slightly increased PRs
+            "ei_nox": 0.020 
         },
         {
             "name": "Climb", "duration_minutes": 30,
-            "target_thrust_N": 55000, 
-            "flight_conditions": {"mach_0": 0.70, "ts_0": 240.0, "ps_0": 40000}, 
-            "engine_params_override": {"tt_4": 1450},
-            "ei_nox": 0.020
+            "target_thrust_N": 6400, # Approx 85% of 7540N
+            "flight_conditions": {"mach_0": 0.65, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
+            "engine_params_override": {"tt_4": 1350},
+            "ei_nox": 0.018
         },
         {
             "name": "Cruise", "duration_minutes": 400,
-            "target_thrust_N": 25000, 
-            "flight_conditions": {"mach_0": 0.80, "ts_0": 216.65, "ps_0": 18753.9}, 
-            "engine_params_override": {}, 
-            "ei_nox": 0.015
+            "target_thrust_N": 2260, # Approx 30% of 7540N
+            "flight_conditions": {"mach_0": 0.80, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
+            "engine_params_override": {"tt_4": 1250}, 
+            "ei_nox": 0.012
         },
         {
             "name": "Descent", "duration_minutes": 15,
-            "target_thrust_N": 8000, 
-            "flight_conditions": {"mach_0": 0.50, "ts_0": 250.0, "ps_0": 50000}, 
+            "target_thrust_N": 600, # Approx 8% of 7540N
+            "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
+            "engine_params_override": {"tt_4": 900},
+            "ei_nox": 0.006
+        },
+        {
+            "name": "Landing", "duration_minutes": 5,
+            "target_thrust_N": 1350, # Approx 18% of 7540N
+            "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, 
             "engine_params_override": {"tt_4": 1000},
             "ei_nox": 0.008
         },
         {
-            "name": "Landing", "duration_minutes": 5,
-            "target_thrust_N": 10000, 
-            "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, 
-            "engine_params_override": {"tt_4": 1050},
-            "ei_nox": 0.010
-        },
-        {
             "name": "Taxi & Shutdown", "duration_minutes": 5,
-            "target_thrust_N": 5000, 
+            "target_thrust_N": 530, # Approx 7% of 7540N
             "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, 
-            "engine_params_override": {"tt_4": 900},
-            "ei_nox": 0.005
+            "engine_params_override": {"tt_4": 850},
+            "ei_nox": 0.004
         },
     ]
 
@@ -576,6 +583,7 @@ def run_mission_simulation():
         
         analysis_params = {k: v for k, v in current_engine_params.items() if k not in ['mach_0', 'ts_0', 'ps_0']}
         
+        tf_results = None # Initialize tf_results to None
         try:
             tf_results = turbofan_parametric_analysis(
                 mach_0=current_engine_params["mach_0"],
@@ -587,22 +595,18 @@ def run_mission_simulation():
             print(f"  ERROR during turbofan_parametric_analysis for segment {segment['name']}: {e}")
             print(f"  Problematic inputs might be: M0={current_engine_params['mach_0']}, Ts0={current_engine_params['ts_0']}, Ps0={current_engine_params['ps_0']}")
             print(f"  Engine params: {analysis_params}")
-            # print_detailed_results(None, f"Failed Analysis for {segment['name']}") # Optional: print what was calculated
-            tsfc = nan # Ensure tsfc is nan to skip emissions
-            # Continue to next segment or handle error as preferred
-            # For now, we'll get NaN emissions for this segment and continue
+            tsfc = nan 
             segment_emissions_data = emissions(nan, segment["ei_nox"], dt=dt_seconds)
 
-        if 'tf_results' in locals() and tf_results is not None and len(tf_results) > 1:
+        if tf_results is not None and len(tf_results) > 1: # Check if tf_results was successfully assigned
             tsfc = tf_results[1]
-        else: # tf_results might not be defined if an exception occurred before its assignment
+        else: 
             tsfc = nan
 
 
         if isnan(tsfc) or tsfc <= 0: 
             print(f"  Warning: Invalid or zero TSFC ({tsfc}) calculated for segment {segment['name']}. Emissions will be NaN.")
-            # If tf_results exists and has details, print them
-            if 'tf_results' in locals() and tf_results is not None and len(tf_results) > 5:
+            if tf_results is not None and len(tf_results) > 5:
                  print_detailed_results(tf_results, f"Details for {segment['name']} (Invalid TSFC)")
 
             mdot_f = nan
@@ -619,18 +623,15 @@ def run_mission_simulation():
             for species, mass in segment_emissions_data.items():
                 if species.startswith("m_"): 
                     print(f"    {species}: {mass:.4f}" if not isnan(mass) else f"    {species}: NaN")
-            # Optionally print full TF results for successful segments
-            # if len(tf_results) > 5:
-            #    print_detailed_results(tf_results, f"Details for {segment['name']}")
 
 
         for species_mass_key in total_mission_emissions.keys():
-            if not isnan(segment_emissions_data.get(species_mass_key, nan)): # Use .get for safety
+            if not isnan(segment_emissions_data.get(species_mass_key, nan)): 
                  total_mission_emissions[species_mass_key] += segment_emissions_data[species_mass_key]
             else: 
-                 total_mission_emissions[species_mass_key] = nan # Propagate NaN
+                 total_mission_emissions[species_mass_key] = nan 
         print("-" * 40)
-        del locals()['tf_results'] # Clean up for next iteration, ensure it's fresh
+        # Removed del locals()['tf_results'] as it's better to let it be redefined or go out of scope naturally
 
     print("\n--- Total Mission Emissions ---")
     for species, total_mass in total_mission_emissions.items():
