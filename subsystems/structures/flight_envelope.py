@@ -15,11 +15,20 @@ from utils.unit_conversions import *
 from design_variables import *
 
 
-
-
-
-
+# ==== Flight Envelope for UAV ====
+#
+#
 # This code generates a V-n diagram (Flight Envelope) for a UAV based on the STANAG 4671 and EASA CS-23 standards.
+# Inputs:
+# - Weight configuration (e.g., MTOW, MZFW)
+# - Altitude level (e.g., sea level, cruise altitude)
+# - Aircraft configuration (e.g., clean, take-off, landing)
+# Outputs:
+# - V-n diagram showing velocity vs. load factor limits
+# - Gust loads and maneuver loads
+# - Gust velocity calculations based on altitude
+#
+# =================================================================
 
 
 class FlightEnvelope:
@@ -219,9 +228,30 @@ class FlightEnvelope:
         # 6. Plot the V-n diagram
         self.plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, self.VC, VD, weight_config, altitude_level, ac_configuration)
 
+    def run_all_configurations(self):
+        """
+        Runs the flight envelope generation for all valid combinations of
+        weight configuration, altitude level, and aircraft configuration.
+        Skips incompatible configurations (e.g., landing config at cruise altitude).
+        """
+        for weight_key in self.weight_configuration.keys():
+            for altitude_key in self.density_at_altitude.keys():
+                for ac_config_key in self.CL_max_values.keys():
+
+                    # === Skip incompatible scenarios ===
+                    if altitude_key == 'cruise' and ac_config_key == 'LAND':
+                        continue  # Skip landing config at cruise altitude
+                    if altitude_key == 'cruise' and ac_config_key == 'TAKE-OFF':
+                        continue  # Clean config usually not relevant on ground
+
+                    print(f"\nRunning: Weight = {weight_key}, Altitude = {altitude_key}, Config = {ac_config_key}")
+                    self.generate_flight_envelope(weight_key, altitude_key, ac_config_key)
+
+
+
 
 if __name__ == "__main__":
     fe = FlightEnvelope()
-    fe.generate_flight_envelope(weight_config='OEW_Payload_Fuselage_Fuel', altitude_level='cruise', ac_configuration='CLEAN')
+    fe.run_all_configurations()
 
 
