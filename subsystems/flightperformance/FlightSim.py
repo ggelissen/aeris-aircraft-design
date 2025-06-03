@@ -215,7 +215,6 @@ class FlightSim:
         g0 = 9.80665
         W = mass * g0
         V = 0 
-        C_L = 1.1
         S = 12
         friction = 0.014
         Cd0 = 0.0145
@@ -228,6 +227,7 @@ class FlightSim:
         aoc = 0 
         #aoc_vel = 0
         aoa = 0 / 180 * math.pi
+        C_L = 1.1
         h = 0
         
         T = T0 * density/1.225
@@ -266,9 +266,11 @@ class FlightSim:
         D_history = []
         density_history = []
         aoa_history = []
+        max_time = 600
+        equaldrag =False
         
         while True:
-            if (t >= 300):
+            if (t >= max_time):
                 break
             
             V_history.append(V)
@@ -299,33 +301,48 @@ class FlightSim:
                 #print('vel',aoc_vel)
             aoc_vel_history.append(aoc_vel*180/math.pi)
             aoc += aoc_vel * dt
+            
             if h>1000:
                 if aoc_vel < 0:
-                    if (aoa*180/math.pi > 5):
+                    if (aoa*180/math.pi < 10):
                         aoa += 0.1 * dt
                 else:
-                    if (aoa*180/math.pi < -5):
+                    if (aoa*180/math.pi > -10):
                         aoa -= 0.1 * dt
            
             if h>1000:
                 if aoc > 0:
-                    if (aoa*180/math.pi > 5):
+                    if (aoa*180/math.pi < 10):
                         aoa -= 0.1 * dt
                 else:
-                    if (aoa*180/math.pi < -5):
+                    if (aoa*180/math.pi > -10):
                         aoa += 0.1 * dt
 
+            if h > 1000:
+                C_L = 0.1* aoa *180/math.pi
+            else:
+                C_L = 1.1
+            
+            C_D = Cd0 + C_L**2 / (math.pi * AR * oswald)
             
             h += V * math.sin(aoc)
             
             _,_,density,sos = self.__ISA__(h) # sea level
             
             #T = T0 - (t/600)*T0/18
-            T = T0*(density/1.225)
             
+            T = T0 #* (density/1.225)
+            #print(C_L)
+            '''
+            if h < 12000 and equaldrag == False:
+                T = T0 - 3000/max_time*t
+            elif h >= 12000:
+                T = D*1.1
+                equaldrag = True
+            '''
             
-            FF = TSFC * T * 0.001
-            mass -= (FF * dt * 0.001)
+            FF = TSFC * T * 0.000001
+            mass -= (FF * dt)
             W = mass * g0
             
             M = V/sos
