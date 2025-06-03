@@ -228,6 +228,7 @@ if __name__ == "__main__":
     drag = 30 + 5 * np.sin(np.pi * y_half / (span / 2))  # Sinusoidal drag
     moment = 50 * np.cos(np.pi * y_half / (span / 2))  # Aerodynamic pitching moment
     weight = 600 * (1 - (2 * y_half / span)**2)  # Elliptic weight
+    # TODO: Apply safety factor to load factor
 
     loading_diagrams.run_analysis_for_case(y_half, lift, drag, moment, weight, label="Load Case 1 - ")
 
