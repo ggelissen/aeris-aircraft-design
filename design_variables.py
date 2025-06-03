@@ -166,8 +166,8 @@ class WingParameters:
         # self.camber_loc_t = 0.5                      # Airfoil Camber Location at Tip
 
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
-        self.CST_uppersurf = [0.20381,   0.06938,   0.27684,   0.03295,   0.27372,   0.15792,  0.25104,   0.26618] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
-        self.CST_lowersurf = [0.20381,   -0.04872,  -0.26790,  -0.01847,  -0.23031,  -0.16747,   0.11595,   0.23459] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
+        self.CST_uppersurf = [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
+        self.CST_lowersurf = [0.23723,    -0.05508,   -0.31490,   -0.01788,   -0.26995,   -0.19510,     0.13560,     0.27263] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
         self.Lambda_w_quarter = 0.6487 # 37.1673 degrees        # Wing quarter-Chord Sweep Angle in radians
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
@@ -178,6 +178,12 @@ class WingParameters:
         self.tip_chord = 0.4916  # Wing Tip Chord in m
         self.t_r = self.t_c_w_r * self.root_chord   # Wing Root Thickness in m
         self.planform_points = None  # 2D Numpy array with points forming the planform, is calculated by create_wing()
+        self.threeDpoints = None # 3D Numpy array with points forming the wing, is calculated by create_wing()
+        self.threeDairfoil1 = None
+        self.threeDairfoil2 = None
+        self.threeDairfoil3 = None
+        self.wingid = None # Will contain the object ID of the wing in VSP, is set by create_wing()
+        self.wingsection = wing_section_pars()  # Wing section parameters, such as spars, are stored here
 
         
 
@@ -379,6 +385,49 @@ class CGParameters:
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.z_cg = 1.5                      # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+class wing_section_pars:
+    def __init__(self):
+        self.spars = {
+            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50},
+            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50},
+        }
+        self.num_spars = len(self.spars)
+        self.stringers = {
+            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200 },
+            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200 },
+            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200 },
+            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200 },
+            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200},
+            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200},
+            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200},
+            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200},
+            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200},
+            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200},
+            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200},
+            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200},
+            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200},
+            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200},
+        }
+        self.num_stringers = len(self.stringers)
+
+class Control:
+    def __init__(self, x_mlg, x_cg):
+        self.CLah = None                       
+        self.CLaA_h = None                     
+        self.de_da = 0.1                    # Control Surface Effectiveness
+        self.lh = abs(x_mlg - x_cg)
+        self.Vh_V = 1
+        self.x_ac = None
+        self.CLh = None
+        self.CLA_h = None
+        self.C_m_ac = None
+        self.X = np.arange(0,1,0.01)
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
