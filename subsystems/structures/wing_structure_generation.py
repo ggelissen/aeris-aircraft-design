@@ -1,5 +1,4 @@
 import numpy as np
-from ezdxf.addons.r12writer import dxf_attribs
 
 import openvsp as vsp
 import os
@@ -25,8 +24,7 @@ def wing_structure_generation(designvars: DesignParameters = None):
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
-
-def cross_sectional_structure_along_span(designvars: DesignParameters = None, spanwise_position: float = 0.0, plot: bool = True):
+def cross_sectional_structure_along_span(designvars: DesignParameters = None, spanwise_position: float = 0.0):
     """
     Generates the cross-sectional structure along the span of the wing.
 

@@ -226,7 +226,7 @@ class FlightSim:
         TSFC = 20
         aoc = 0 
         #aoc_vel = 0
-        aoa = 10 / 180 * math.pi
+        aoa = 0 / 180 * math.pi
         C_L = 1.1
         h = 0
         
@@ -267,11 +267,8 @@ class FlightSim:
         density_history = []
         aoa_history = []
         C_L_history = []
-        hvel_history = []
         max_time = 3600
         equaldrag =False
-        hvel = 0
-        hacc = 0 
         
         while True:
             if (t >= max_time):
@@ -290,7 +287,6 @@ class FlightSim:
             T_history.append(T)
             D_history.append(D)
             C_L_history.append(C_L)
-            hvel_history.append(hvel)
             density_history.append(density)
             aoa_history.append(aoa * 180 / math.pi)
 
@@ -307,77 +303,17 @@ class FlightSim:
                 #print('vel',aoc_vel)
             aoc_vel_history.append(aoc_vel*180/math.pi)
             aoc += aoc_vel * dt
-            '''
-            if aoc<1:
+            
+            if h>0:
                 if aoc_vel < 0:
                     if (aoa*180/math.pi < 10):
                         aoa +=  dt
                 else:
                     if (aoa*180/math.pi > -10):
                         aoa -=  dt
-            '''
-            #des = (((12000 - h) - hvel) - hacc)
-            if h < 12000:
-                des = ((4 - aoc*180/math.pi) - aoc_vel*180/math.pi)
-                if aoa >= 10/180*math.pi:
-                    if des > 0:
-                        aoa += 0
-                    else:
-                        aoa += des * dt
-                elif aoa <= -10/180*math.pi:
-                    if des < 0:
-                        aoa += 0
-                    else:
-                        aoa += des * dt
-                else:
-                    aoa += des * dt
-            else:
-                des = ((0 - aoc*180/math.pi) - aoc_vel*180/math.pi)
-                if aoa >= 10/180*math.pi:
-                    if des > 0:
-                        aoa += 0
-                    else:
-                        aoa += des * dt
-                elif aoa <= -10/180*math.pi:
-                    if des < 0:
-                        aoa += 0
-                    else:
-                        aoa += des * dt
-                else:
-                    aoa += des * dt
-            
-            #print(des)
-            #T += (((12000 - h) - aoc*180/math.pi) - aoc_vel*180/math.pi)
-            #if h<11000:
-            # if aoa >= 10/180*math.pi:
-            #     if des > 0:
-            #         aoa += 0
-            #     else:
-            #         aoa += des * dt *0.0001
-            # elif aoa <= -10/180*math.pi:
-            #     if des < 0:
-            #         aoa += 0
-            #     else:
-            #         aoa += des * dt * 0.0001
-            # else:
-            #     aoa += des * dt * 0.0001
-            # else:
-            #     if aoa >= 10/180*math.pi:
-            #         if ((0 - aoc*180/math.pi) - aoc_vel*180/math.pi) > 0:
-            #             aoa += 0
-            #         else:
-            #             aoa += ((0 - aoc*180/math.pi) - aoc_vel*180/math.pi) * dt
-            #     elif aoa <= -10/180*math.pi:
-            #         if ((0 - aoc*180/math.pi) - aoc_vel*180/math.pi) < 0:
-            #             aoa += 0
-            #         else:
-            #             aoa += ((0 - aoc*180/math.pi) - aoc_vel*180/math.pi) * dt
-            #     else:
-            #         aoa += ((0 - aoc*180/math.pi) - aoc_vel*180/math.pi) * dt
-            
-                
-                '''
-                if aoc < 1:
+           
+            if h<10000:
+                if aoc < 2:
                     if (aoa*180/math.pi < 10):
                         aoa += dt
                 else:
@@ -390,49 +326,23 @@ class FlightSim:
                 else:
                     if (aoa*180/math.pi > -10):
                         aoa -=  dt
-                '''
 
             # if h > 1000:
             #     C_L = 0.1* aoa *180/math.pi + 0.3
             # else:
-            C_L = 0.1* aoa *180/math.pi + 0.3
+                C_L = 1.1
             
             C_D = Cd0 + C_L**2 / (math.pi * AR * oswald)
-            hvel = V * math.sin(aoc)
-            #hacc = (hvel_history[-1] - hvel) / dt
             
-            h += hvel * dt
+            h += V * math.sin(aoc) * dt
             
             _,_,density,sos = self.__ISA__(h) # sea level
             
             #T = T0 - (t/600)*T0/18
             
             #T = T0 * (density/1.225)
-            if T >= 7000:
-                if ((0.95 - M) - acc) > 0:
-                    T += 0
-                else:
-                    T += ((0.85 - M) - acc) * 10 * dt
-            elif T <= 0:
-                if ((0.95 - M) - acc) < 0:
-                    T += 0
-                else:
-                    T += ((0.85 - M) - acc) * 10 * dt
-            else:
-                T += ((0.95 - M) - acc) * 10 * dt
-            '''
-            if M < 0.85:
-                if (T < 7000):
-                    T += 10* dt
-                elif (T > 0):
-                    T -= 10* dt
-            else:
-                if (0 < T < 7000):
-                    T -= 10* dt
-            '''
-                
-            '''
-            if M < 0.85:
+
+            if V < 300:
                 if acc < 1:
                     if (T < 7000):
                         T += 1000* dt
@@ -446,7 +356,7 @@ class FlightSim:
                 else:
                     if (T > 0):
                         T -= 1000* dt
-            '''
+
             #print(acc)
             #print(T)
             #print(C_L)
@@ -489,19 +399,16 @@ class FlightSim:
             
             t += dt
 
-        print('time',t)
+        print('time',t_history[-1])
         print("length",length)
-        print('mass',mass)
-        print('T',T)
-        print('D',D)
-        print("L",L)
-        print("W",W)
-        print('acc',acc)
-        print('aoc',aoc * 180 / math.pi)
-        print('aoa',aoa * 180 / math.pi)
-        print("CL",C_L)
-        print("C_D",C_D)
-        print("X",X)
+        print(mass)
+        print('T',T_history[-1])
+        print('D',D_history[-1])
+        print("L",L_history[-1])
+        print("W",W_history[-1])
+        print(acc)
+        print(aoc * 180 / math.pi)
+        print(aoa * 180 / math.pi)
         
         self.__plot_result__(t_history, C_L_history, "t [s]", "C_L [-]")
         self.__plot_result__(t_history, V_history, "t [s]", "V [m/s]")
@@ -513,7 +420,7 @@ class FlightSim:
         self.__plot_result__(t_history, h_history, "t [s]", "h [m]")
         self.__plot_result__(t_history, aoc_vel_history, "t [s]", "gammadot [degrees/s]")
         self.__plot_result__(t_history, density_history, "t [s]", "density [kg/m3]")
-        self.__plot_result__(t_history, DF_history, "t [s]", "friction [N]")
+        #self.__plot_result__(t_history, DF_history, "t [s]", "friction [N]")
         self.__plot_result__(X_history, h_history, "x [m]", "h [m]")
         self.__plot_result__(t_history, L_history, "t [s]", "L [N]")
         self.__plot_result__(t_history, W_history, "t [s]", "W [N]")
