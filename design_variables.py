@@ -147,9 +147,10 @@ class WingParameters:
     def __init__(self, W_TO: float = None, W_S: float = None):
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
-        self.A_w = 9.0                             # Aspect Ratio
-        if self.S_w is not None and self.A_w is not None:
-            self.b_w = m.sqrt(self.A_w * self.S_w)  # Wing Span in m
+        self.A_w_target = 9.0                             # Aspect Ratio (INITIAL)
+        self.A_w_actual = None                      # Because addition of yehudi and winglets change aspect ratio. During iteration, optimise such that target=actual
+        if self.S_w is not None and self.A_w_target is not None:
+            self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
         self.mac = 1.2824                            # Mean Aerodynamic Chord in m
         self.y_LEMAC = 2.1016                       # y-position of Leading Edge of MAC in m
         self.x_LEMAC = 5.0                            # Position of Leading Edge of MAC in m
@@ -184,7 +185,11 @@ class WingParameters:
         self.threeDairfoil2 = None
         self.threeDairfoil3 = None
         self.wingid = None # Will contain the object ID of the wing in VSP, is set by create_wing()
-        self.wingsection = wing_section_pars()  # Wing section parameters, such as spars, are stored here
+        self.wingsection = WingSectionPars()  # Wing section parameters, such as spars, are stored here
+        self.wingribs = Wingribs()  # Wing ribs parameters, such as thickness, are stored here
+        self.yehudi = True
+        self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
+        self.yehud_area = 6.0 # Yehudi area m2
 
         
 
@@ -392,7 +397,7 @@ class CGParameters:
             if hasattr(self, key):
                 setattr(self, key, value)
 
-class wing_section_pars:
+class WingSectionPars:
     def __init__(self):
         self.spars = {
             "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50},
@@ -416,3 +421,13 @@ class wing_section_pars:
             "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200},
         }
         self.num_stringers = len(self.stringers)
+
+class Wingribs:
+    def __init__(self):
+        self.ribs = {
+            "Rib1": {"x_pos_frac": 0.2, "t_mm": 2},
+            "Rib2": {"x_pos_frac": 0.4, "t_mm": 2},
+            "Rib3": {"x_pos_frac": 0.6, "t_mm": 2},
+            "Rib4": {"x_pos_frac": 0.8, "t_mm": 2},
+        }
+        self.num_ribs = len(self.ribs)
