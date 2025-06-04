@@ -19,9 +19,9 @@ def wing_structure_generation(designvars: DesignParameters = None):
     - designvars: DesignParameters object containing design variables.
     - NCell: Number of cells for the wing structure.
     """
-    cross_sectional_structure_along_span(designvars, 0.871)
-    cross_sectional_structure_along_span(designvars, 0.9)
-    cross_sectional_structure_along_span(designvars, 0.95)
+    #cross_sectional_structure_along_span(designvars, 0.871)
+    #cross_sectional_structure_along_span(designvars, 0.9)
+    #cross_sectional_structure_along_span(designvars, 0.95)
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
@@ -69,8 +69,6 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
 
     # make room for ailerons:
     if spanwise_position*designvars.wing.b_w/2 - designvars.control_surface.x_a_inboard > 0.0 and spanwise_position*designvars.wing.b_w/2 - designvars.control_surface.x_a_outboard < 0.0:
-        print("inside aileron")
-        print(spanwise_position)
         trailing_edge_position = outline[np.argmax(outline[:, 0])][0]
         cut_out_length_from_trailing_edge = designvars.control_surface.aileron_width
         cut_out_position_x = trailing_edge_position -  cut_out_length_from_trailing_edge
@@ -109,6 +107,48 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
                 stringer_removal_array.append(i)
         for indexx in reversed(stringer_removal_array):
             stringer_array.pop(indexx)
+
+    # make room for flaps:
+    for flapgroup in designvars.wing.flapgroups:
+        if spanwise_position*designvars.wing.b_w/2 - flapgroup.spanwise_pos_frac_inbound > 0.0 and spanwise_position*designvars.wing.b_w/2 - flapgroup.spanwise_pos_frac_outbound < 0.0:
+            trailing_edge_position = outline[np.argmax(outline[:, 0])][0]
+            cut_out_length_from_trailing_edge = flapgroup.flapwidth
+            cut_out_position_x = trailing_edge_position -  cut_out_length_from_trailing_edge
+            # Filter out all elements with x positions behind cut_out_position_x
+            # wingskin:
+            wingskin_removal_array = []
+            for indexx, point in enumerate(outline):
+                if point[0] > cut_out_position_x:
+                    wingskin_removal_array.append(indexx)
+            outline2 = outline.copy()
+            for indexx in reversed(wingskin_removal_array):
+                outline2 = np.delete(outline2, indexx, axis=0)
+            split_index2 = np.argmin(outline2[:, 0])
+            xmax = np.maximum(np.max(outline2[:split_index2], axis=0)[0], np.max(outline2[split_index2:], axis=0)[0])
+            lower_airfoil_sticks_out = ( np.max(outline2[:split_index2], axis=0)[0] <  np.max(outline2[split_index2:], axis=0)[0])
+            if lower_airfoil_sticks_out:
+                y_xmax = np.float64((scipy.interpolate.interp1d(upper_airfoil[:,0], upper_airfoil[:,1], kind='linear')(xmax)))
+            else:
+                y_xmax = np.float64((scipy.interpolate.interp1d(lower_airfoil[:,0], lower_airfoil[:,1], kind='linear')(xmax)))
+            outline2 = np.vstack((outline2, np.array([xmax, y_xmax])))
+            outline = outline2.copy()
+            split_index3 = np.argmin(outline[:, 0])
+            upper_airfoil = outline[:split_index3]
+            lower_airfoil = outline[split_index3:]
+            # spars:
+            spar_removal_array = []
+            for i in range(len(spar_points_array)):
+                if spar_points_array[i][0, 0] > cut_out_position_x:
+                    spar_removal_array.append(i)
+            for indexx in reversed(spar_removal_array):
+                spar_points_array.pop(indexx)
+            # stringers:
+            stringer_removal_array = []
+            for i in range(len(stringer_array)):
+                if stringer_array[i][0] > cut_out_position_x:
+                    stringer_removal_array.append(i)
+            for indexx in reversed(stringer_removal_array):
+                stringer_array.pop(indexx)
 
 
     if plot:
@@ -256,6 +296,15 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         rib_mesh = pv.PolyData(rib_points, faces_pv)
 
         plotter.add_mesh(rib_mesh, color='skyblue', show_edges=False)
+    # Draw fuselage
+    vsp.SetSetFlag(designvars.fuselage.fuseid, 6, True)
+    vsp.ExportFile('data/fuselage.stl', 6 , vsp.EXPORT_STL)
+    vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete NewGeom which gets added after an export
+    for geom in vsp.FindGeoms():
+        vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
+    fuselage_mesh = pv.read('data/fuselage.stl')
+    fuselage_mesh.translate([designvars.wing.x_LEMAC, 0, 0], inplace=True)
+    plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
 
 
 

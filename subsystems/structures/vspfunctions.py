@@ -87,6 +87,7 @@ def create_fuselage(designvars: DesignParameters = None):
     # Fuselage end tip
     fuselage_tip2 = crosssections["fuselagetip2"]["Tan_Angles"]
     vsp.SetXSecTanAngles(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0), 4), vsp.XSEC_BOTH_SIDES, fuselage_tip2['top'], fuselage_tip2["right"], fuselage_tip2["bottom"], fuselage_tip2["left"])
+    designvars.fuselage.fuseid = fuse_id
 
 def create_wing(designvars: DesignParameters = None):
     wing_id = vsp.AddGeom("WING", "")
@@ -130,6 +131,10 @@ def create_wing(designvars: DesignParameters = None):
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 1), 0), "ThickChord"), wingpars.t_c_w_t)  # After reimiport thickness can be set
 
     # Position wing on fuselage
+    wingpars.mac = vsp.GetParmVal(wing_id, "MAC", "WingGeom")  # Mean Aerodynamic Chord)
+    tip_chord = vsp.GetParmVal(wing_id, "Tip_Chord", "XSec_0")
+    root_chord = vsp.GetParmVal(wing_id, "Root_Chord", "XSec_0")
+    wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * vsp.GetParmVal(wing_id, "Span", "XSec_1") / (tip_chord - root_chord)
     x_pos = wingpars.x_LEMAC - (np.tan(wingpars.Lambda_025c_w) * wingpars.y_LEMAC - 0.25 * wingpars.mac)
     vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", x_pos)
     vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
@@ -215,6 +220,24 @@ def create_wing(designvars: DesignParameters = None):
         wingpars.yehudi_pos_frac = vsp.GetParmVal(wing_id, "Span", "XSec_1")/new_halfspan
         wingpars.Lambda_0_w = np.deg2rad(vsp.GetParmVal(wing_id, "Sec_Sweep", "XSec_1"))
         wingpars.Lambda_025c_w = np.arctan(np.tan(wingpars.Lambda_0_w)-2*0.25*vsp.GetParmVal(wing_id, "Tip_Chord", "XSec_2")*(-1+vsp.GetParmVal(wing_id, "Taper", "XSec_2"))/vsp.GetParmVal(wing_id, "Span", "XSec_2"))
+
+        # Reposition wing with updated planform:
+        # Position wing on fuselage
+        wingpars.mac = vsp.GetParmVal(wing_id, "MAC", "WingGeom")  # Mean Aerodynamic Chord)
+
+        if wingpars.mac < vsp.GetParmVal(wing_id, "Root_Chord", "XSec_2"):
+            tip_chord = vsp.GetParmVal(wing_id, "Tip_Chord", "XSec_2")
+            root_chord = vsp.GetParmVal(wing_id, "Root_Chord", "XSec_2")
+            wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * (vsp.GetParmVal(wing_id, "Span", "XSec_2")) / (tip_chord - root_chord) + vsp.GetParmVal(wing_id, "Span", "XSec_1")
+        else:
+            tip_chord = vsp.GetParmVal(wing_id, "Tip_Chord", "XSec_1")
+            root_chord = vsp.GetParmVal(wing_id, "Root_Chord", "XSec_1")
+            wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * (vsp.GetParmVal(wing_id, "Span", "XSec_1")) / (tip_chord - root_chord)
+
+        x_pos = wingpars.x_LEMAC - (np.tan(wingpars.Lambda_0_w) * wingpars.y_LEMAC)
+        vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", x_pos)
+        vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
+        vsp.UpdateGeom(wing_id)
 
 
 
