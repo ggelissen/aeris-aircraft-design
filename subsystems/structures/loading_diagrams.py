@@ -71,7 +71,9 @@ class LoadingDiagrams:
 
         y_tip_root = y[::-1]  # Reverse y for integration from tip to root
 
+
         # Integrate from tip (right) to root (left)
+        print(qz)
         Vz_tip_to_root = cumtrapz(qz[::-1], y_tip_root, initial=0)  # Shear force in z-direction
         Mx_tip_to_root = cumtrapz(Vz_tip_to_root, y_tip_root, initial=0)   # Bending moment about x-axis
         Tx_tip_to_root = cumtrapz(torque_dist[::-1], y_tip_root, initial=0)  # Torsion about x-axis
