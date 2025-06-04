@@ -98,7 +98,7 @@ def create_wing(designvars: DesignParameters = None):
     vsp.SetParmVal(wing_id, "Root_Chord", "XSec_1", wingpars.root_chord)
     vsp.SetParmVal(wing_id, "Tip_Chord", "XSec_1", wingpars.tip_chord)
     vsp.SetParmVal(wing_id, "Sweep_Location", "XSec_1", 0.25)
-    vsp.SetParmVal(wing_id, "Sweep", "XSec_1", np.rad2deg(wingpars.Lambda_w_quarter))
+    vsp.SetParmVal(wing_id, "Sweep", "XSec_1", np.rad2deg(wingpars.Lambda_025c_w))
 
     # Set root airfoil, parametrised using Class-Shape Transformation (CST) coefficients, which are better for supercritical airfoils
     vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 0, vsp.XS_CST_AIRFOIL)
@@ -130,7 +130,7 @@ def create_wing(designvars: DesignParameters = None):
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 1), 0), "ThickChord"), wingpars.t_c_w_t)  # After reimiport thickness can be set
 
     # Position wing on fuselage
-    x_pos = wingpars.x_LEMAC - (np.tan(wingpars.Lambda_w_quarter) * wingpars.y_LEMAC - 0.25 * wingpars.mac)
+    x_pos = wingpars.x_LEMAC - (np.tan(wingpars.Lambda_025c_w) * wingpars.y_LEMAC - 0.25 * wingpars.mac)
     vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", x_pos)
     vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
 
