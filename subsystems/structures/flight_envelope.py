@@ -200,6 +200,7 @@ class FlightEnvelope:
         plt.xlim(0, VD + 10)
         plt.tight_layout()
         plt.show()
+        plt.savefig(f'data/vn_diagram_{weight_config}_{altitude_level}_{ac_configuration}.png')
 
     def generate_flight_envelope(self, weight_config: str, altitude_level: str, ac_configuration: str):
         """

@@ -152,17 +152,19 @@ class WingParameters:
     def __init__(self, W_TO: float = None, W_S: float = None):
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
-        self.A_w = 9.0                             # Aspect Ratio
-        if self.S_w is not None and self.A_w is not None:
-            self.b_w = m.sqrt(self.A_w * self.S_w)  # Wing Span in m
+        self.A_w_target = 9.0                             # Aspect Ratio (INITIAL)
+        self.A_w_actual = None                      # Because addition of yehudi and winglets change aspect ratio. During iteration, optimise such that target=actual
+        if self.S_w is not None and self.A_w_target is not None:
+            self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
         self.mac = 1.2824                            # Mean Aerodynamic Chord in m
         self.y_LEMAC = 2.1016                       # y-position of Leading Edge of MAC in m
         self.x_LEMAC = 5.0                            # Position of Leading Edge of MAC in m
         self.z_LEMAC = 0.0
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.Lambda_025c_w = 32*np.pi/180               # Wing quarter-Chord Sweep Angle in radians
-        self.t_c_w_max = None                       # Maximum Wing Thickness-to-Chord Ratio
+        self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_0_w = None                          # Will be calculated in the code in rad
+        self.t_c_w_max = None
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"                       # Wing Airfoil Type
@@ -189,7 +191,11 @@ class WingParameters:
         self.threeDairfoil2 = None
         self.threeDairfoil3 = None
         self.wingid = None # Will contain the object ID of the wing in VSP, is set by create_wing()
-        self.wingsection = wing_section_pars()  # Wing section parameters, such as spars, are stored here
+        self.wingsection = WingSectionPars()  # Wing section parameters, such as spars, are stored here
+        self.wingribs = Wingribs()  # Wing ribs parameters, such as thickness, are stored here
+        self.yehudi = True
+        self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
+        self.yehudi_area = 6.0 # Yehudi area m2
 
         
 
@@ -216,7 +222,7 @@ class PerformanceParameters:
         self.CL_max_LAND = 1.6                      # Maximum Lift Coefficient at Landing
         self.CL_max_cruise = 1.8                    # Maximum Lift Coefficient at Cruise
 
-        self.CL_alpha = 5.0                         # Lift Curve Slope in 1/rad
+        self.CL_alpha = 5.0                  # Lift Curve Slope in 1/rad
 
         self.L_D_cruise = None                      # Lift-to-Drag Ratio at Cruise
         self.L_D_loiter = None                      # Lift-to-Drag Ratio at Loiter
@@ -277,6 +283,7 @@ class EngineParameters:
         self.engine_max_thrust = None               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
+        self.nacelle_diameter = None
         self.cruise_tsfc = None                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
         self.nacelle_blend_par = -0.4               # Parameter specifying the blend of the nacelle with the fuselage
@@ -306,7 +313,6 @@ class EmpennageParameters:
         self.S_t = None                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
-        self.type = 'fixed'
 
         # V_Tail:
         self.b_v = 3.0                            # V_Tail Span in m
@@ -367,8 +373,10 @@ class ControlSurfaceParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.S_a = 2 #placeholder!!                             # Control Surface Area in m^2
-        self.x_a = None                             # Control Surface Position in m
+        self.x_a_inboard = 3.8                             # Control Surface Position in m
+        self.x_a_outboard = 4.2
+        self.aileron_width = 0.5                        # Aileron Length in m
+        self.S_a = (self.x_a_outboard-self.x_a_inboard)*self.aileron_width                          # Control Surface Area in m^2
         self.delta_a = None                         # Control Surface Deflection Angle in degrees
         self.C_m_a = None                           # Control Surface Moment Coefficient
 
@@ -401,7 +409,7 @@ class CGParameters:
             if hasattr(self, key):
                 setattr(self, key, value)
 
-class wing_section_pars:
+class WingSectionPars:
     def __init__(self):
         self.spars = {
             "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50},
@@ -426,10 +434,19 @@ class wing_section_pars:
         }
         self.num_stringers = len(self.stringers)
 
+class Wingribs:
+    def __init__(self):
+        self.ribs = {
+            "Rib1": {"x_pos_frac": 0.2, "t_mm": 2},
+            "Rib2": {"x_pos_frac": 0.4, "t_mm": 2},
+            "Rib3": {"x_pos_frac": 0.6, "t_mm": 2},
+            "Rib4": {"x_pos_frac": 0.8, "t_mm": 2},
+        }
+        self.num_ribs = len(self.ribs)
 class Control:
     def __init__(self, x_mlg, x_cg):
-        self.CLah = None                       
-        self.CLaA_h = None                     
+        self.CLah = None
+        self.CLaA_h = None
         self.de_da = 0.1                    # Control Surface Effectiveness
         self.lh = abs(x_mlg - x_cg)
         self.Vh_V = 1
