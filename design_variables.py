@@ -162,6 +162,7 @@ class WingParameters:
         self.mac = 1.2824                            # Mean Aerodynamic Chord in m
         self.y_LEMAC = None                       # y-position of Leading Edge of MAC in m, recalculated by the programme
         self.x_LEMAC = 5.0                            # Position of Leading Edge of MAC in m
+        self.xpos = None                                # calculated in the code in m. relative to the root
         self.z_LEMAC = 0.0
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees

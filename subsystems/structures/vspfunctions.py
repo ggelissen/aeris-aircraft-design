@@ -129,12 +129,14 @@ def create_wing(designvars: DesignParameters = None):
     vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 1, vsp.XS_FILE_AIRFOIL)
     vsp.ReadFileAirfoil(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "data/Airfoil.dat")  # Read airfoil from file
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 1), 0), "ThickChord"), wingpars.t_c_w_t)  # After reimiport thickness can be set
+    vsp.UpdateGeom(wing_id)
 
     # Position wing on fuselage
+    vsp.WriteVSPFile('data/special.vsp3')
     wingpars.mac = vsp.GetParmVal(wing_id, "MAC", "WingGeom")  # Mean Aerodynamic Chord)
-    tip_chord = vsp.GetParmVal(wing_id, "Tip_Chord", "XSec_0")
-    root_chord = vsp.GetParmVal(wing_id, "Root_Chord", "XSec_0")
-    wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * vsp.GetParmVal(wing_id, "Span", "XSec_1") / (tip_chord - root_chord)
+    tip_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Tip_Chord"))
+    root_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Root_Chord"))
+    wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Span")) / (tip_chord - root_chord)
     x_pos = wingpars.x_LEMAC - (np.tan(wingpars.Lambda_025c_w) * wingpars.y_LEMAC - 0.25 * wingpars.mac)
     vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", x_pos)
     vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
@@ -225,16 +227,17 @@ def create_wing(designvars: DesignParameters = None):
         # Position wing on fuselage
         wingpars.mac = vsp.GetParmVal(wing_id, "MAC", "WingGeom")  # Mean Aerodynamic Chord)
 
-        if wingpars.mac < vsp.GetParmVal(wing_id, "Root_Chord", "XSec_2"):
-            tip_chord = vsp.GetParmVal(wing_id, "Tip_Chord", "XSec_2")
-            root_chord = vsp.GetParmVal(wing_id, "Root_Chord", "XSec_2")
-            wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * (vsp.GetParmVal(wing_id, "Span", "XSec_2")) / (tip_chord - root_chord) + vsp.GetParmVal(wing_id, "Span", "XSec_1")
+        if wingpars.mac < vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),2), "Root_Chord")):
+            tip_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),2), "Tip_Chord"))
+            root_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),2), "Root_Chord"))
+            wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * (vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),2), "Span"))) / (tip_chord - root_chord) + vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Span"))
         else:
-            tip_chord = vsp.GetParmVal(wing_id, "Tip_Chord", "XSec_1")
-            root_chord = vsp.GetParmVal(wing_id, "Root_Chord", "XSec_1")
-            wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * (vsp.GetParmVal(wing_id, "Span", "XSec_1")) / (tip_chord - root_chord)
+            tip_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Tip_Chord"))
+            root_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Root_Chord"))
+            wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * (vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Span"))) / (tip_chord - root_chord)
 
         x_pos = wingpars.x_LEMAC - (np.tan(wingpars.Lambda_0_w) * wingpars.y_LEMAC)
+        wingpars.xpos = x_pos
         vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", x_pos)
         vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
         vsp.UpdateGeom(wing_id)
