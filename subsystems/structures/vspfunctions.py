@@ -154,7 +154,7 @@ def create_wing(designvars: DesignParameters = None):
 
     wingpars.wingid = wing_id
 
-
+    vsp.SetParmVal(wing_id, "Tess_W", "Shape", 200)
     # Add yehudi
     if wingpars.yehudi:
         vsp.SplitWingXSec(wing_id, 1)
@@ -250,7 +250,7 @@ def create_engines(designvars: DesignParameters = None):
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 0), "Super_MaxWidthLoc"), proppars.nacelle_blend_par)  # Deform the superellipse
     vsp.CutXSec(pod_id, 3)
     vsp.CutXSec(pod_id, 3)
-    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 1), "XDelta"), proppars.engine_length) # Length of the engine pod
+    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 1), "XDelta"), proppars.nacelle_length) # Length of the engine pod
     vsp.ChangeXSecShape(vsp.GetXSecSurf(pod_id, 0), 1, vsp.XS_SUPER_ELLIPSE)
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 1), "Super_Width"), proppars.engine_diameter)  # Width of the engine pod
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 1), "Super_Height"), proppars.engine_diameter)  # Height of the engine pod
