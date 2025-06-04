@@ -26,6 +26,8 @@ class DesignParameters:
         self.crit_mach = None
         self.inertia_matrix = None
 
+
+
         # Subsystem Parameters
         self.cg = CGParameters()  # Center of Gravity Parameters
         self.weight = WeightParameters()
@@ -160,8 +162,9 @@ class WingParameters:
         if self.S_w is not None and self.A_w_target is not None:
             self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
         self.mac = 1.2824                            # Mean Aerodynamic Chord in m
-        self.y_LEMAC = 2.1016                       # y-position of Leading Edge of MAC in m
+        self.y_LEMAC = None                       # y-position of Leading Edge of MAC in m, recalculated by the programme
         self.x_LEMAC = 5.0                            # Position of Leading Edge of MAC in m
+        self.xpos = None                                # calculated in the code in m. relative to the root
         self.z_LEMAC = 0.0
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
@@ -194,6 +197,9 @@ class WingParameters:
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
         self.yehudi_area = 6.0 # Yehudi area m2
+        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.11, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
+        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
+        self.flapgroups = [self.yehudi_flaps, self.main_flaps]
 
         
 
@@ -263,6 +269,8 @@ class FuselageParameters:
         if self.D_f is not None and self.l_f is not None:
             self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
         self.l_n = 2.0                              # Nose Length in m
+        self.fuseid = None # Will contain the object ID of the wing in VSP, is set by create_fuselage()
+
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -314,6 +322,7 @@ class EmpennageParameters:
         self.S_t = None                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
+        self.type = 'fixed'
 
         # V_Tail:
         self.b_v = 3.0                            # V_Tail Span in m
@@ -523,3 +532,10 @@ class StabilityAerodynamicParameters:
             if hasattr(self, key):
                 setattr(self, key, value)
 
+class FlapGroup:
+    def __init__(self, spanwise_pos_frac_inbound: float = None, spanwise_pos_frac_outbound: float = None,
+                 flapwidth: float = None):
+
+        self.spanwise_pos_frac_inbound = spanwise_pos_frac_inbound
+        self.spanwise_pos_frac_outbound = spanwise_pos_frac_outbound
+        self.flapwidth = flapwidth # meter
