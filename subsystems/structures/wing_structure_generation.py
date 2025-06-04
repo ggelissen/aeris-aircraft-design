@@ -19,7 +19,7 @@ def wing_structure_generation(designvars: DesignParameters = None):
     - designvars: DesignParameters object containing design variables.
     - NCell: Number of cells for the wing structure.
     """
-    cross_sectional_structure_along_span(designvars, 0.5)
+    cross_sectional_structure_along_span(designvars, 0.2)
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
 
@@ -32,14 +32,14 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
     - NCell: Number of cells for the wing structure.
     - spanwise_position: Position along the span where the cross-section is generated as a fraction of the total span (0.0 to 1.0).
     """
-    outline, chord_length = cross_section(designvars, spanwise_position)
+    outline, chord_length, x_displacement = cross_section(designvars, spanwise_position)
     split_index = np.argmin(outline[:, 0])
     upper_airfoil = outline[:split_index]
     lower_airfoil = outline[split_index:]
 
     spar_points_array = []
     for i in range(designvars.wing.wingsection.num_spars):
-        spar_pos = designvars.wing.wingsection.spars[f"Spar{i+1}"]["x_pos_frac"] * chord_length
+        spar_pos = designvars.wing.wingsection.spars[f"Spar{i+1}"]["x_pos_frac"] * chord_length + x_displacement
         y_0 = scipy.interpolate.interp1d(upper_airfoil[:, 0], upper_airfoil[:, 1], kind='linear')(spar_pos)
         y_1 = scipy.interpolate.interp1d(lower_airfoil[:, 0], lower_airfoil[:, 1], kind='linear')(spar_pos)
         spar_points = np.array([[spar_pos, y_0], [spar_pos, y_1]])
@@ -56,10 +56,10 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
         top_or_bottom = designvars.wing.wingsection.stringers[f"Stringer{i+1}"]['top_or_bottom_side']
         string_CS_area = designvars.wing.wingsection.stringers[f"Stringer{i+1}"]['crosssectionalarea_mm2']
         if top_or_bottom == "top":
-            string_x = upper_airfoil[np.argmin(np.abs(upper_airfoil[:, 0]-string_pos*chord_length))][0]
+            string_x = upper_airfoil[np.argmin(np.abs(upper_airfoil[:, 0]-string_pos*chord_length-x_displacement))][0]
             string_y = scipy.interpolate.interp1d(upper_airfoil[:, 0], upper_airfoil[:, 1], kind='linear')(string_x)
         elif top_or_bottom == "bottom":
-            string_x = lower_airfoil[np.argmin(np.abs(lower_airfoil[:, 0] - string_pos * chord_length))][0]
+            string_x = lower_airfoil[np.argmin(np.abs(lower_airfoil[:, 0] - string_pos * chord_length-x_displacement))][0]
             string_y = scipy.interpolate.interp1d(lower_airfoil[:, 0], lower_airfoil[:, 1], kind='linear')(string_x)
         stringer_array.append(np.array([string_x, string_y]))
         if plot:
@@ -196,7 +196,7 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     # Draw ribs
     for rib in range(len(designvars.wing.wingribs.ribs)):
         spanwise_pos = designvars.wing.wingribs.ribs[f"Rib{rib+1}"]["x_pos_frac"]
-        outline, chord_length = cross_section(designvars, spanwise_pos)
+        outline, chord_length, x_displacement = cross_section(designvars, spanwise_pos)
         tri = Delaunay(outline)
         faces = tri.simplices
         faces_pv = np.hstack([[3, *face] for face in faces])

@@ -4,20 +4,20 @@
 3328 Total Num Tris
 
 Theo_Area   Wet_Area   Theo_Vol    Wet_Vol  Name
-   31.454     29.883      8.015      7.829  FuselageGeom   
-   24.969     19.151      1.405      1.108  WingGeom       
-    7.729      6.462      0.262      0.226  Horizontal_Stabilizer
-    7.949      7.279      0.542      0.510  Fuselage_Engine
+   31.454     30.502      8.015      7.846  FuselageGeom   
+   24.969     19.151      1.405      1.088  WingGeom       
+    7.729      6.462      0.262      0.221  Horizontal_Stabilizer
+    5.800      5.770      0.391      0.391  Fuselage_Engine
 -------------------------------------------------
-   72.101     62.776     10.224      9.673  Totals         
+   69.953     61.886     10.073      9.546  Totals         
 
 Tag_Theo_Area   Tag_Wet_Area    Tag_Name
-       31.454         29.883    FuselageGeom_S_Surf0
+       31.454         30.502    FuselageGeom_S_Surf0
        12.484          9.576    WingGeom_S_Surf0
        12.484          9.576    WingGeom_S_Surf1
         3.865          3.231    Horizontal_Stabilizer_S_Surf0
         3.865          3.231    Horizontal_Stabilizer_S_Surf1
-        7.949          7.279    Fuselage_Engine_S_Surf0
+        5.800          5.770    Fuselage_Engine_S_Surf0
 WARNING: 2 open meshes merged
      Merged: WingGeom
      Merged: Horizontal_Stabilizer

@@ -163,6 +163,7 @@ class WingParameters:
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
         self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_0_w = None                          # Will be calculated in the code in rad
         self.t_c_w_max = None
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
@@ -194,7 +195,7 @@ class WingParameters:
         self.wingribs = Wingribs()  # Wing ribs parameters, such as thickness, are stored here
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
-        self.yehud_area = 6.0 # Yehudi area m2
+        self.yehudi_area = 6.0 # Yehudi area m2
 
         
 
@@ -282,6 +283,7 @@ class EngineParameters:
         self.engine_max_thrust = None               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
+        self.nacelle_diameter = None
         self.cruise_tsfc = None                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
         self.nacelle_blend_par = -0.4               # Parameter specifying the blend of the nacelle with the fuselage
@@ -371,8 +373,10 @@ class ControlSurfaceParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.S_a = 2 #placeholder!!                             # Control Surface Area in m^2
-        self.x_a = None                             # Control Surface Position in m
+        self.x_a_inboard = 3.8                             # Control Surface Position in m
+        self.x_a_outboard = 4.2
+        self.aileron_width = 0.5                        # Aileron Length in m
+        self.S_a = (self.x_a_outboard-self.x_a_inboard)*self.aileron_width                          # Control Surface Area in m^2
         self.delta_a = None                         # Control Surface Deflection Angle in degrees
         self.C_m_a = None                           # Control Surface Moment Coefficient
 
