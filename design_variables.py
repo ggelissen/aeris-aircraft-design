@@ -2,6 +2,7 @@ import math as m
 import numpy as np
 import yaml
 
+
 class DesignParameters:
     def __init__(self, initial_config_path=None):
         """
@@ -15,6 +16,7 @@ class DesignParameters:
         self.stall_speed_clean = None
         self.stall_speed_land = None
         self.cruise_altitude = None
+        self.cruise_density = None
         self.take_off_distance = None
         self.landing_distance = None
         self.diversion_distance = None
@@ -23,6 +25,7 @@ class DesignParameters:
         self.max_load_factor = None
         self.crit_mach = None
         self.inertia_matrix = None
+
 
 
         # Subsystem Parameters
@@ -35,7 +38,6 @@ class DesignParameters:
         self.empennage = EmpennageParameters(l_f=self.fuselage.l_f)
         self.landing_gear = LandingGearParameters()
         self.control_surface = ControlSurfaceParameters()
-        self.cg = CGParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -58,6 +60,7 @@ class DesignParameters:
         self.stall_speed_land = config.get('stall_speed_land')
         self.max_eq_velocity = config.get('max_eq_velocity')
         self.cruise_altitude = config.get('cruise_altitude')
+        self.cruise_density = config.get('cruise_density')
         self.take_off_distance = config.get('takeoff_distance')
         self.landing_distance = config.get('landing_distance')
         self.diversion_distance = config.get('diversion_distance')
@@ -67,6 +70,8 @@ class DesignParameters:
         self.crit_mach = config.get('crit_mach')
 
         # Load subsystem parameters
+        # if 'cg' in config:
+        #     self.cg.load_from_dict(config.get('cg', {}))
         if 'wing'in config:
             self.wing.load_from_dict(config.get('wing', {}))
         if 'performance' in config:
@@ -81,6 +86,8 @@ class DesignParameters:
             self.landing_gear.load_from_dict(config.get('landing_gear', {}))
         if 'control_surface' in config:
             self.control_surface.load_from_dict(config.get('control_surface', {}))
+        if 'cg' in config:
+            self.cg.load_from_dict(config.get('cg', {}))
 
     def update_parameter(self, parameter_name, value):
         """
@@ -118,18 +125,24 @@ class WeightParameters:
     """
     def __init__(self):
         self.W_TO = 30787.8                         # Maximum Take-Off Weight (MTOW) in N
+        self.W_E = None                             # Empty Weight in N
         self.W_OE = 11973.3                         # Operational Empty Weight (OEW) in N
         self.W_F = 12930.5                          # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
+        self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 2563                             # Wing Loading in N/m^2
         self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
-        self.M_ff = 0.5793                        # Maximum Fuel Fraction
+        self.M_ff = 0.5793                          # Maximum Fuel Fraction
+        self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
+        self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
+        self.W_tfo = None                           # Trapped Fuel and Oil Fraction
+        self.W_F_used = None                        # Used Fuel Weight in N
+        self.W_F_res = None                         # Reserve Fuel Weight in N
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-
 
 class WingParameters:
     """
@@ -139,16 +152,18 @@ class WingParameters:
     def __init__(self, W_TO: float = None, W_S: float = None):
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
-        self.A_w = 9.0                             # Aspect Ratio
-        if self.S_w is not None and self.A_w is not None:
-            self.b_w = m.sqrt(self.A_w * self.S_w)  # Wing Span in m
+        self.A_w_target = 9.0                             # Aspect Ratio (INITIAL)
+        self.A_w_actual = None                      # Because addition of yehudi and winglets change aspect ratio. During iteration, optimise such that target=actual
+        if self.S_w is not None and self.A_w_target is not None:
+            self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
         self.mac = 1.2824                            # Mean Aerodynamic Chord in m
         self.y_LEMAC = 2.1016                       # y-position of Leading Edge of MAC in m
         self.x_LEMAC = 5.0                            # Position of Leading Edge of MAC in m
         self.z_LEMAC = 0.0
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.Lambda_w_quarter = 32*np.pi/180               # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
+        self.t_c_w_max = None
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"                       # Wing Airfoil Type
@@ -159,9 +174,8 @@ class WingParameters:
         # self.camber_loc_t = 0.5                      # Airfoil Camber Location at Tip
 
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
-        self.CST_uppersurf = [0.20381,   0.06938,   0.27684,   0.03295,   0.27372,   0.15792,  0.25104,   0.26618] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
-        self.CST_lowersurf = [0.20381,   -0.04872,  -0.26790,  -0.01847,  -0.23031,  -0.16747,   0.11595,   0.23459] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
-        self.Lambda_w_quarter = 0.6487 # 37.1673 degrees        # Wing quarter-Chord Sweep Angle in radians
+        self.CST_uppersurf = [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
+        self.CST_lowersurf = [0.23723,    -0.05508,   -0.31490,   -0.01788,   -0.26995,   -0.19510,     0.13560,     0.27263] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
         self.i_w = 0.0                             # Wing Incidence Angle in degrees
@@ -171,6 +185,18 @@ class WingParameters:
         self.tip_chord = 0.4916  # Wing Tip Chord in m
         self.t_r = self.t_c_w_r * self.root_chord   # Wing Root Thickness in m
         self.planform_points = None  # 2D Numpy array with points forming the planform, is calculated by create_wing()
+        self.threeDpoints = None # 3D Numpy array with points forming the wing, is calculated by create_wing()
+        self.threeDairfoil1 = None
+        self.threeDairfoil2 = None
+        self.threeDairfoil3 = None
+        self.wingid = None # Will contain the object ID of the wing in VSP, is set by create_wing()
+        self.wingsection = WingSectionPars()  # Wing section parameters, such as spars, are stored here
+        self.wingribs = Wingribs()  # Wing ribs parameters, such as thickness, are stored here
+        self.yehudi = True
+        self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
+        self.yehud_area = 6.0 # Yehudi area m2
+
+        
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -191,9 +217,14 @@ class PerformanceParameters:
         self.climb_gradient_OEI_alt = None          # Climb Gradient OEI Altitude in ft
         self.delta_CD0_OEI = None                   # Zero-Lift Drag Coefficient Differential AEO
 
-        self.CL_max_TO = None                       # Maximum Lift Coefficient at Take-Off
-        self.CL_max_L = None                        # Maximum Lift Coefficient at Landing
-        self.CL_max_cruise = None                   # Maximum Lift Coefficient at Cruise
+        self.CL_max_TO = 1.3                        # Maximum Lift Coefficient at Take-Off
+        self.CL_max_LAND = 1.6                      # Maximum Lift Coefficient at Landing
+        self.CL_max_cruise = 1.8                    # Maximum Lift Coefficient at Cruise
+
+        self.CL_alpha = 5.0                  # Lift Curve Slope in 1/rad
+
+        self.L_D_cruise = None                      # Lift-to-Drag Ratio at Cruise
+        self.L_D_loiter = None                      # Lift-to-Drag Ratio at Loiter
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -320,7 +351,14 @@ class LandingGearParameters:
         self.l_nlg = None                           # Nose Landing Gear Length in m
         self.psi_mlg = None                         # Main Landing Gear Pressure in psi
         self.psi_nlg = None                         # Nose Landing Gear Pressure in psi
-        self.LCN = 40                               # Load Classification Number
+        self.LCN = 11                               # Load Classification Number
+        self.scrape_angle  = 15                 # Scrape Angle in degrees, used for the nose wheel  
+        self.tipback_angle = 15                 # Tipback Angle in degrees, used for the nose wheel
+        self.lat_tipover_angle = 7                # Lateral Tipover Angle in degrees, used for the nose wheel
+        self.overturn_angle = 55
+        self.static_frac_nlg = 0.08                     # Static Load Fraction on Nose Landing Gear
+        self.static_frac_mlg = 1 - self.static_frac_nlg      # Static Load Fraction on Main Landing Gear
+
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -352,7 +390,7 @@ class CGParameters:
     def __init__(self):
         self.x_cg_wing = 5                       # CG Position of the Wing in m
         self.x_cg_fuselage = 4                   # CG Position of the Fuselage in m
-        self.x_cg_landing_gear = 5               # CG Position of the Landing Gear in m
+        self.x_cg_landing_gear = 4.7               # CG Position of the Landing Gear in m
         self.x_cg_empennage = 9                  # CG Position of the Empennage in m
         self.x_cg_fixed_equipment = 3            # CG Position of the Fixed Equipment in m
         self.x_cg_propulsion = 7                 # CG Position of the Propulsion System in m
@@ -360,6 +398,59 @@ class CGParameters:
         self.x_cg_fuel = 5                       # CG Position of the Fuel in m
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
+        self.z_cg = 1.5                      # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+class WingSectionPars:
+    def __init__(self):
+        self.spars = {
+            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50},
+            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50},
+        }
+        self.num_spars = len(self.spars)
+        self.stringers = {
+            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200 },
+            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200 },
+            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200 },
+            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200 },
+            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200},
+            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200},
+            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200},
+            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200},
+            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200},
+            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200},
+            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200},
+            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200},
+            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200},
+            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200},
+        }
+        self.num_stringers = len(self.stringers)
+
+class Wingribs:
+    def __init__(self):
+        self.ribs = {
+            "Rib1": {"x_pos_frac": 0.2, "t_mm": 2},
+            "Rib2": {"x_pos_frac": 0.4, "t_mm": 2},
+            "Rib3": {"x_pos_frac": 0.6, "t_mm": 2},
+            "Rib4": {"x_pos_frac": 0.8, "t_mm": 2},
+        }
+        self.num_ribs = len(self.ribs)
+class Control:
+    def __init__(self, x_mlg, x_cg):
+        self.CLah = None
+        self.CLaA_h = None
+        self.de_da = 0.1                    # Control Surface Effectiveness
+        self.lh = abs(x_mlg - x_cg)
+        self.Vh_V = 1
+        self.x_ac = None
+        self.CLh = None
+        self.CLA_h = None
+        self.C_m_ac = None
+        self.X = np.arange(0,1,0.01)
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():

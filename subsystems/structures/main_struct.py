@@ -14,14 +14,23 @@ from mpl_toolkits import mplot3d
 import matplotlib
 import pyvista as pv
 import numpy as np
+import sys
+import os
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas
+from vspfunctions import calculate_cg, calculate_wet_areas
 from vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing, create_V_tail, create_engines
-matplotlib.use('Qt5Agg')
+try:
+    matplotlib.use('Qt5Agg')
+except:
+    matplotlib.use('Agg')
 import openvsp as vsp
 import vspfunctions
-import subsystems.structures.stanag as stanag
+#import subsystems.structures.stanag as stanag
 from design_variables import *
+from wing_structure_generation import wing_structure_generation
 
 def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
@@ -54,12 +63,14 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     calculate_cg(designvars)
     calculate_wet_areas(designvars)
 
+    ### Set up structure
+    wing_structure_generation(designvars)
+
     # Step 4: Simulate aircraft with loads
 
     # Step 5: Change Structural variables to optimise for mass
 
     # Step 6: Save progress and share optimised variables to other subsystems. Share aircraft 3D model to aerodynamics.
-
     vsp.Update()
 
     # Save as VSP3 file
@@ -73,6 +84,10 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
         prev_cwd = os.getcwd()
         os.chdir(os.getcwd() + "/data")
         vsp.ExportFile("aircraft_model.stl", vsp.SET_ALL, vsp.EXPORT_STL)
+        #vsp.ExportFile('aircraft_model.step', vsp.SET_ALL, vsp.EXPORT_STEP)
+        vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete NewGeom which gets added after an export
+        for geom in vsp.FindGeoms():
+            vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
         os.chdir(prev_cwd)
 
 
