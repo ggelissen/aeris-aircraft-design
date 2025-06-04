@@ -1,6 +1,6 @@
 # Top-Level Parameters
 range: 6500000                  # Range in meters
-cruise_speed: 240               # Cruise speed in m/s
+cruise_speed: 250               # Cruise speed in m/s
 cruise_mach: 0.85               # Cruise Mach Number
 stall_speed_clean: 100          # Stall speed clean configuration in kts
 stall_speed_land: 85            # Stall speed landing configuration in kts
