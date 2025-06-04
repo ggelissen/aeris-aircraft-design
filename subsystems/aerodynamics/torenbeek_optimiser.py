@@ -2,79 +2,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-def calculate_isa_properties(h):
-    """
-    Calculate International Standard Atmosphere (ISA) properties at a given altitude.
-    
-    Parameters:
-        h (float): Altitude in meters
-        
-    Returns:
-        tuple: (temperature in K, pressure in Pa, density in kg/m^3)
-    """
-    # ISA constants
-    T_0 = 288.15  # Sea level temperature [K]
-    p_0 = 101325  # Sea level pressure [Pa]
-    rho_0 = 1.225  # Sea level density [kg/m^3]
-    g_0 = 9.80665  # Gravitational acceleration [m/s^2]
-    R = 287.05  # Gas constant for air [J/(kg·K)]
-    a = -0.0065  # Temperature lapse rate [K/m]
-    
-    if h <= 11000:  # Troposphere
-        T = T_0 + a * h
-        p = p_0 * (T / T_0) ** (-g_0 / (a * R))
-        rho = p / (R * T)
-    else:  # Tropopause and above (simplified)
-        T = 216.65  # Temperature is constant in tropopause
-        p = 22632 * np.exp(-g_0 * (h - 11000) / (R * T))
-        rho = p / (R * T)
-    
-    return T, p, rho
-
-def calculate_dynamic_pressure(M, h):
-    """
-    Calculate dynamic pressure for given Mach number and altitude.
-    
-    Parameters:
-        M (float): Mach number
-        h (float): Altitude in meters
-        
-    Returns:
-        float: Dynamic pressure in Pa
-    """
-    gamma = 1.4  # Ratio of specific heats for air
-    T, p, rho = calculate_isa_properties(h)
-    a = np.sqrt(gamma * R * T)  # Speed of sound
-    V = M * a  # True airspeed
-    q = 0.5 * rho * V**2  # Dynamic pressure
-    return q
-
 # --- Constants and Assumptions (Values are illustrative and based on typical transonic transports) ---
-# The following parameters must be updated based on the specific aircraft design and mission profile.
 # Aerodynamic Parameters
-M_DES = 0.85  # Design cruise Mach number
-H_CRUISE = 11000  # Cruise altitude in meters
-R = 287.05  # Gas constant for air [J/(kg·K)]
+M_DES = 0.82  # Design cruise Mach number
+Q_CRUISE_PA = 20000  # Dynamic pressure at cruise (Pa), e.g., at 11km altitude, M 0.82 -> q approx 20-25 kPa
+RHO_CRUISE = 0.364 # Air density at cruise altitude (kg/m^3) e.g. 11km
+V_CRUISE = M_DES * np.sqrt(1.4 * 287 * 216.65) # Cruise speed (m/s) for q calculation if needed
+GAMMA_AIR = 1.4 # Ratio of specific heats
+P_STATIC_CRUISE = 22632 # Static pressure at 11km (Pa)
+# Q_CRUISE_PA = 0.5 * RHO_CRUISE * V_CRUISE**2 # More accurate q
 
-# Calculate cruise conditions using ISA
-T_CRUISE, P_STATIC_CRUISE, RHO_CRUISE = calculate_isa_properties(H_CRUISE)
-V_CRUISE = M_DES * np.sqrt(1.4 * R * T_CRUISE)  # Cruise speed (m/s)
-GAMMA_AIR = 1.4  # Ratio of specific heats
-Q_CRUISE_PA = calculate_dynamic_pressure(M_DES, H_CRUISE)  # Dynamic pressure at cruise
-
-# Compressibility Technology Assumptions
 M_PRIME = 0.935  # Aerodynamic technology factor for Korn's equation (e.g., 0.935 for supercritical)
 DELTA_M_DD = 0.03 # Margin for M_dd over M_des (M_dd = M_des + DELTA_M_DD)
 M_DD_TARGET = M_DES + DELTA_M_DD
 
-# Aerodynamic Design Parameters (Update this from DATCOM methods)
 C_F_SKIN = 0.0028  # Skin friction coefficient (turbulent, representative)
 D_W_H_FACTOR = 1.25  # Factor for horizontal tail profile drag relative to wing
 R_T_FACTOR = 3.0  # Shape factor for thickness drag
 OSWALD_EFF_MODIFIED = 0.92  # Modified Oswald efficiency factor (e_tilde) for wing design
 CD_COMPRESSIBILITY_TARGET = 0.0008  # Target compressibility drag at M_des
 
-# Propulsion Parameters (Update this from design_variables.py)
+# Propulsion Parameters
 R_EQ_KM = 6000  # Equivalent range (km)
 ETA_O_ENGINE = 0.35  # Overall engine efficiency
 H_G_FUEL_KM = 4350  # Fuel specific energy (km)
@@ -82,7 +30,7 @@ MU_T_PROP_WEIGHT = 0.28  # Power plant weight per unit take-off thrust (kg/N or 
 TAU_THRUST_LAPSE = 0.25  # Cruise thrust / Take-off thrust at cruise altitude
 DELTA_PRESSURE_RATIO = P_STATIC_CRUISE / 101325 # Pressure ratio at cruise altitude
 
-# Structural Parameters (Update this from design_variables.py)
+# Structural Parameters (Illustrative - these are complex to derive)
 # From Eq 10.35 for Lambda_3
 R_H_TAIL_WEIGHT = 0.10 # Horizontal tail weight as fraction of wing weight
 ETA_CP_WING = 0.45    # Spanwise center of pressure
@@ -95,7 +43,7 @@ LAMBDA_3_BASE = 0.0013 * (1 + R_H_TAIL_WEIGHT) * ETA_CP_WING * N_ULT_LOAD_FACTOR
 SIGMA_S_SECONDARY_STRUCT_PA = 2100 # Secondary structure specific weight (N/m^2 or Pa)
 LAMBDA_2_BASE = (1 + R_H_TAIL_WEIGHT) * SIGMA_S_SECONDARY_STRUCT_PA / Q_CRUISE_PA
 
-# Weight Parameters for MTOW ((Update this from design_variables.py))
+# Weight Parameters for MTOW (Illustrative)
 W_PAY_N = 25000 * 9.81  # Payload weight (N)
 DELTA_W_FIX_N = 60000 * 9.81  # Fixed weight components (N) (fuselage, systems etc.)
 CD_FIXED_DRAG_AREA_M2 = 2.0  # Fixed parasite drag area (m^2) (fuselage, vert tail)
