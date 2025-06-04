@@ -24,8 +24,6 @@ performance:
   climb_gradient_OEI_alt: 35      # Climb Gradient OEI Altitude in ft
   delta_CD0_OEI: 0.005            # Zero-Lift Drag Coefficient Differential AEO
 
-
-
 # Engine Parameters
 engine:
   cruise_thrust_setting: 0.9      # Thrust setting for cruise
@@ -36,5 +34,3 @@ engine:
   nacelle_diameter: 0.83            # Nacelle Diameter in m
   nacelle_length: 2.2          # Nacelle Length in m
   cruise_tsfc: 0.685              # Cruise TSFC in lb/h/lbf
-
-

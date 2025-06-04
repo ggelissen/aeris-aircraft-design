@@ -85,12 +85,12 @@ def spiral_eigenvalues(params: DesignParameters):
 
     mub = params.weight.M_TO / (params.cruise_density * params.wing.S_w * params.wing.b_w)
 
-    eigenvalues = 2*params.stability_aero.CL * (params.stability_aero.Clb*params.stability_aero.Cnr - params.stability_aero.Cnb*params.stability_aero.Clr) / (params.stability_aero.Clp * (params.stability_aero.CYb * params.stability_aero.Cnr + 4 * mub * params.stability_aero.Cnb) - params.stability_aero.Cnp * (params.stability_aero.CYb * params.stability_aero.Clr + 4 * mub * params.stability_aero.Clb))
-    dimensioned_eigenvalues = eigenvalues * params.cruise_speed/c
+    eigenvalues = 2*params.performance.CL_cruise * (params.stability_aero.Clb*params.stability_aero.Cnr - params.stability_aero.Cnb*params.stability_aero.Clr) / (params.stability_aero.Clp * (params.stability_aero.CYb * params.stability_aero.Cnr + 4 * mub * params.stability_aero.Cnb) - params.stability_aero.Cnp * (params.stability_aero.CYb * params.stability_aero.Clr + 4 * mub * params.stability_aero.Clb))
+    dimensioned_eigenvalues = eigenvalues * params.cruise_speed/ params.wing.mac #is this mac correct or should it be b_w?
 
-    half_period = - np.log(0.5) / np.real(eigenvalues) * b / params.cruise_speed
+    half_period = - np.log(0.5) / np.real(eigenvalues) * params.wing.b_w / params.cruise_speed
     period = np.NaN
-    time_constant = - 1 / np.real(eigenvalues) * b / params.cruise_speed
+    time_constant = - 1 / np.real(eigenvalues) * params.wing.b_w / params.cruise_speed
 
     dict = {"eigenvalues": eigenvalues, "half_period": half_period, "period": period, "time_constant": time_constant, "dimensioned_eigenvalues": dimensioned_eigenvalues}
     
@@ -110,7 +110,7 @@ def dutch_roll_eigenvalues(params: DesignParameters):
     D = (params.stability_aero.Clb * params.stability_aero.Cnp - params.stability_aero.Cnb * params.stability_aero.Clp) / 2
 
     eigenvalues = np.roots([A, B, C, D])
-    dimensioned_eigenvalues = eigenvalues * params.cruise_speed/b
+    dimensioned_eigenvalues = eigenvalues * params.cruise_speed/ params.wing.b_w
 
     half_period = - np.log(0.5) / np.real(eigenvalues) * params.wing.b_w / params.cruise_speed
     period = 2*np.pi/ np.imag(eigenvalues) * params.wing.b_w / params.cruise_speed
@@ -169,7 +169,7 @@ def symmetric_eigenvalues(params: DesignParameters):
     E = -params.stability_aero.Cmu * (params.stability_aero.CX0 * params.stability_aero.CXa + params.stability_aero.CZ0 * params.stability_aero.CZa) + params.stability_aero.Cma * (params.stability_aero.CX0 * params.stability_aero.CXu + params.stability_aero.CZ0 * params.stability_aero.CZu)
     # Eigenvalues
     eigenvalues = np.roots([A, B, C, D, E])
-    dimensioned_eigenvalues = eigenvalues * params.cruise_speed/c
+    dimensioned_eigenvalues = eigenvalues * params.cruise_speed/ params.wing.mac
 
     # Half-period
     half_period =  np.log(0.5) / np.real(eigenvalues) * params.wing.mac / params.cruise_speed
