@@ -289,6 +289,7 @@ class EngineParameters:
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
         self.nacelle_diameter = None
+        self.nacelle_length = None
         self.cruise_tsfc = None                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
         self.nacelle_blend_par = -0.4               # Parameter specifying the blend of the nacelle with the fuselage
@@ -378,9 +379,9 @@ class ControlSurfaceParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.x_a_inboard = 3.8                             # Control Surface Position in m
-        self.x_a_outboard = 4.2
-        self.aileron_width = 0.5                        # Aileron Length in m
+        self.x_a_inboard = 3.6                             # Control Surface Position in m
+        self.x_a_outboard = 4.5
+        self.aileron_width = 0.17                        # Aileron Width in m
         self.S_a = (self.x_a_outboard-self.x_a_inboard)*self.aileron_width                          # Control Surface Area in m^2
         self.delta_a = None                         # Control Surface Deflection Angle in degrees
         self.C_m_a = None                           # Control Surface Moment Coefficient
