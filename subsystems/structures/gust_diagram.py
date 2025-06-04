@@ -28,18 +28,17 @@ Cl_alpha = params.performance.CL_alpha  # Lift curve slope in per radian
 W_S_revised =  (params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction)/params.wing.S_w
 print(f"W_S_revised: {W_S_revised}")
 
-
 mu_g = (W_S_revised) / (9.80665*0.5 * rho_cruise * mac * Cl_alpha)
 K_g_var = (0.88 * mu_g) / (5.3 + mu_g)
 
 knot_to_mps = 0.514444  # Conversion factor from knots to m/s
-VB = equivalent_to_true_air_speed(80, params.cruise_density, 1.225)  #TAS in m/s 
+VB = equivalent_to_true_air_speed(70, params.cruise_density, 1.225)  #TAS in m/s 
 VC = params.cruise_speed  # Cruise speed TAS in m/s
 VD = VD = 1.25 * VC   # Dive speed (VD) TAS [m/s]
 print(f"VB: {VB}, VC: {VC}, VD: {VD}")
 
 V_values_var = [VB, VC, VD]  # Airspeeds TAS in m/s
-u_values_var = [15.2, 35, 10.21/2]  # Gust intensities in m/s STANAG 4671
+u_values_var = [15.2, 10.21, 10.21/2]  # Gust intensities in m/s STANAG 4671
 #u_values_var = [u*0.3048 for u in [66, 50, 25]]
 # Convert TAS to EAS:
 V_values_var = [v*(rho_cruise/rho)**0.5 for v in V_values_var] # EAS [m/s]
@@ -50,6 +49,8 @@ n_values_negative_revised = [1 - (rho * V * Cl_alpha * K_g_var * u) / (2 * W_S_r
 V_values_extended = [0] + V_values_var
 n_values_positive_extended = [1] + n_values_positive_revised
 n_values_negative_extended = [1] + n_values_negative_revised
+print(f"n_values_positive_extended: {n_values_positive_extended}")
+print(f"n_values_negative_extended: {n_values_negative_extended}")
 
 # Plotting
 plt.figure(figsize=(10, 6))
