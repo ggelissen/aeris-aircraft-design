@@ -165,7 +165,10 @@ class WingParameters:
         self.t_c_w_max = None                       # Maximum Wing Thickness-to-Chord Ratio
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
-        self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"                       # Wing Airfoil Type
+        self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"    
+        self.airfoil_clalpha = 1.5
+        self.airfoil_cd0 = 0.06
+        # Wing Airfoil Type
         # Airfoil parameters for NACA four-series:
         # self.camber_r = 0.022                        # Airfoil Camber at Root
         # self.camber_t = 0.022                        # Airfoil Camber at Tip
