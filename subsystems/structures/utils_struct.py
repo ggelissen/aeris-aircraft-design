@@ -403,10 +403,10 @@ if __name__ == "__main__":
     # Example usage
     sigma_x = 100e6     # Pa
     sigma_y = 0         # Pa
-    sigma_z = 30e6      # Pa
+    sigma_z = 50e6      # Pa
     tau_xy = 10e6          # Pa
-    tau_xz = 25e6          # Pa
-    tau_yz = 10e6          # Pa
+    tau_xz = 10e6          # Pa
+    tau_yz = 0          # Pa
 
     E = 200e9  # Pa
     nu = 0.3
