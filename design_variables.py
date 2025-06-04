@@ -195,8 +195,8 @@ class WingParameters:
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
         self.yehudi_area = 6.0 # Yehudi area m2
-        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.1, spanwise_pos_frac_outbound=0.2, flapwidth=0.4)
-        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.25, spanwise_pos_frac_outbound=0.5, flapwidth=0.4)
+        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.11, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
+        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
 
         

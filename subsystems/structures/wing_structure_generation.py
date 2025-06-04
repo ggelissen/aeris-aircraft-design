@@ -110,7 +110,7 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
 
     # make room for flaps:
     for flapgroup in designvars.wing.flapgroups:
-        if spanwise_position*designvars.wing.b_w/2 - flapgroup.spanwise_pos_frac_inbound > 0.0 and spanwise_position*designvars.wing.b_w/2 - flapgroup.spanwise_pos_frac_outbound < 0.0:
+        if spanwise_position - flapgroup.spanwise_pos_frac_inbound > 0.0 and spanwise_position - flapgroup.spanwise_pos_frac_outbound < 0.0:
             trailing_edge_position = outline[np.argmax(outline[:, 0])][0]
             cut_out_length_from_trailing_edge = flapgroup.flapwidth
             cut_out_position_x = trailing_edge_position -  cut_out_length_from_trailing_edge
