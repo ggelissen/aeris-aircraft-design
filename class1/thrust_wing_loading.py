@@ -270,14 +270,10 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
     print("\nPerformance Diagram saved as TW_WS_Diagram.pdf")
 
 
-# --- Main Execution for Performance Diagram ---
-if __name__ == "__main__":
-
-    print("--- Generating T/W vs W/S Diagram for Business uav (Performance Module) ---")
-
-    params = DesignParameters()
-    params.load_from_yaml("design_config.yaml")
-
+def run_performance_diagram(params: DesignParameters):
+    """
+    Generates the T/W vs W/S diagram for the UAV based on performance constraints.
+    """
     uav_A_perf = params.wing.A_w
     num_engines_uav_perf = params.engine.N_engines
 
@@ -370,4 +366,5 @@ if __name__ == "__main__":
 
     plot_TW_WS_diagram_pd(W_S_range_Npm2_pd, constraints_list_pd, title=f"T/W vs W/S Diagram - Business uav (A={uav_A_perf})", design_point=design_point_example)
 
-    print("Design Point: W/S = {:.0f} N/m^2, T/W = {:.3f}".format(ws_intersect, tw_intersect))
+    return {"T_W": tw_intersect, "W_S": ws_intersect}
+

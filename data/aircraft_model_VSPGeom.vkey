@@ -1,0 +1,11 @@
+# VSPGEOM Tag Key File
+C:\Users\lhuir\PycharmProjects\DSEGroup17b\data\aircraft_model_VSPGeom.vspgeom
+6
+
+# tag#,geom#,surf#,gname,gid,ssname1,ssname2,...,ssid1,ssid2,...
+1,2,0,FuselageGeom_S,QPQPMXJFFJ
+2,3,0,WingGeom_S,FWAKEKEJIQ
+3,3,1,WingGeom_S,FWAKEKEJIQ
+4,0,0,Horizontal_Stabilizer_S,XOTGZODBJF
+5,0,1,Horizontal_Stabilizer_S,XOTGZODBJF
+6,1,0,Fuselage_Engine_S,VWXZYNBVNS

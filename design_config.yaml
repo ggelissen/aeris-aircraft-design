@@ -1,6 +1,6 @@
 # Top-Level Parameters
 range: 6500000                  # Range in meters
-cruise_speed: 240               # Cruise speed in m/s
+cruise_speed: 250               # Cruise speed in m/s
 cruise_mach: 0.85               # Cruise Mach Number
 stall_speed_clean: 100          # Stall speed clean configuration in kts
 stall_speed_land: 85            # Stall speed landing configuration in kts
@@ -31,8 +31,9 @@ engine:
   cruise_thrust_setting: 0.9      # Thrust setting for cruise
   engine_weight: 2296.521         # Engine Weight in N
   engine_max_thrust: 13340        # Engine Maximum Thrust in N
-  engine_length: 1.58             # Engine Length in m
-  engine_diameter: 0.80           # Engine Diameter in m
+  engine_length: 1.47             # Engine Length in m
+  engine_diameter: 0.53           # Engine Diameter in m
+  nacelle_diameter: 0.73            # Nacelle Diameter in m
   cruise_tsfc: 0.685              # Cruise TSFC in lb/h/lbf
 
 

@@ -15,11 +15,20 @@ from utils.unit_conversions import *
 from design_variables import *
 
 
-
-
-
-
+# ==== Flight Envelope for UAV ====
+#
+#
 # This code generates a V-n diagram (Flight Envelope) for a UAV based on the STANAG 4671 and EASA CS-23 standards.
+# Inputs:
+# - Weight configuration (e.g., MTOW, MZFW)
+# - Altitude level (e.g., sea level, cruise altitude)
+# - Aircraft configuration (e.g., clean, take-off, landing)
+# Outputs:
+# - V-n diagram showing velocity vs. load factor limits
+# - Gust loads and maneuver loads
+# - Gust velocity calculations based on altitude
+#
+# =================================================================
 
 
 class FlightEnvelope:
@@ -34,57 +43,113 @@ class FlightEnvelope:
         # Load design parameters from a YAML file
         params = DesignParameters()
         params.load_from_yaml('design_config.yaml')
+
         # 1 - UAV Paramenters
-        # Constants
+
+        #   -> Aerodynamic Constants
         self.CL_alpha =  params.performance.CL_alpha # Lift curve slope (1/rad)
-        self.chord = params.wing.mac # Mean Aerodynamic Chord (MAC) in m
         self.CL_max_values = {
             "CLEAN": params.performance.CL_max_cruise,  # Clean configuration
             "TAKE-OFF":  params.performance.CL_max_TO,  # Take-off configuration
             "LAND":  params.performance.CL_max_LAND  # Landing configuration
         }
-        self.S = params.wing.S_w  # wing area (m²)
-        VC_TAS = params.cruise_speed # m/s
-        # Atmospheric densities
+
+        #   -> Atmospheric densities 
         self.density_at_altitude = {
             "sea_level": 1.225,
             "cruise":  params.cruise_density # cruise (design) using ISA standard atmosphere values
             } 
-        print(self.density_at_altitude['cruise'])
-        self.VC = true_to_equivalent_air_speed(VC_TAS, self.density_at_altitude['cruise'], self.density_at_altitude['sea_level'])  # Convert True Airspeed (TAS) to Equivalent Airspeed (EAS) at sea level
+        
+        #   -> Aircraft Geometry
+        self.S = params.wing.S_w  # wing area (m²)
+        self.chord = params.wing.mac # Mean Aerodynamic Chord (MAC) in m
 
+        #   -> Cruise Speed TAS 
+        VC_TAS = params.cruise_speed # TAS in m/s
+        self.VC = true_to_equivalent_air_speed(VC_TAS, self.density_at_altitude['cruise'], 
+                                               self.density_at_altitude['sea_level'])  # Convert TAS to EAS [m/s]
+        
+        #   -> Flight Altitude 
         self.flight_altitude = {
             "sea_level": 0, # m
             "cruise":  params.cruise_altitude # m
             }
-        # Weight Scenarios
-        # in [N]
+        
+        #   -> Weight Configuration Scenarios
         self.weight_configuration = {
-            "OEW": params.weight.W_OE,  # Operational Empty Weight (OEW) in N
-            "MTOW": params.weight.W_TO,  # Maximum Take-Off Weight (MTOW) in N
-            "OEW_Payload_Fuselage_Fuel": params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction # OEW + Payload in N + Fuel in Fuselage
+            "OEW": params.weight.W_OE,  # Operational Empty Weight (OEW) [N] 
+            "MTOW": params.weight.W_TO,  # Maximum Take-Off Weight (MTOW) [N] 
+            "OEW_Payload_Fuselage_Fuel": params.weight.W_OE + params.weight.W_PL + 
+                                            params.weight.W_F * params.weight.Fuel_Fuselage_Fraction # OEW + Payload + Fuselage_Fuel [N] 
 
         }
 
     def calc_load_factor_limits(self, MTOW_kg):
+        """
+        Calculate the positive and negative load factor limits based on MTOW.
+        The limits are based on the NATO SATNAG 4671.
+
+        :param MTOW_kg: Maximum Take-Off Weight in kg
+
+        :return: Tuple of positive and negative load factor limits
+        """
         n_pos_limit = min(2.1 + (10900 / (MTOW_kg + 4536)), 3.8)
         n_neg_limit = -0.4 * n_pos_limit
         return n_pos_limit, n_neg_limit
 
-    def calc_diagram_speed(self, weight_N, density, CL_max, VC):
-        VS_TAS = np.sqrt((2 * weight_N) / (density * self.S * CL_max))
-        VS = true_to_equivalent_air_speed(VS_TAS, density, self.density_at_altitude['sea_level'])  # Convert TAS to EAS at sea level
-        VD = 1.25 * VC
-        velocity_aixs = np.linspace(0, VD, 1000)
+    def calc_diagram_speed(self, weight_N, density_altitude, CL_max, VC):
+        """
+        Calculate the stall speed (VS), dive speed (VD), and velocity axis for the V-n diagram.
+
+        :param weight_N: Weight in Newtons
+        :param density: Air density at the given altitude in kg/m³
+        :param CL_max: Maximum lift coefficient for the aircraft configuration
+        :param VC: Cruise speed in m/s
+
+        :return: Tuple of stall speed (VS), dive speed (VD), and velocity axis (velocity_aixs)
+        """
+        # Stall speed (VS)
+        VS_TAS = np.sqrt((2 * weight_N) / (density_altitude * self.S * CL_max)) # Stall speed in TAS [m/s]
+        VS = true_to_equivalent_air_speed(VS_TAS, density_altitude, self.density_at_altitude['sea_level'])  # Convert TAS to EAS [m/s]
+        # Dive speed (VD)
+        VD = 1.25 * VC   # Dive speed (VD) EAS [m/s]
+        # Velocity axis for the V-n diagram (EAS) [m/s]
+        velocity_aixs = np.linspace(0, VD, 1000) 
+
         return VS, VD, velocity_aixs
 
+    def compute_gust_loads(self, V_range, Ude):
+        """
+        Compute gust load factors over a range of velocities.
+        
+        Args:
+            params: DesignParameters object containing aircraft specs.
+            V_range: Numpy array of velocities [m/s].
+            Ude: Design gust velocity [m/s].
+        
+        Returns:
+            Tuple of (n_gust_positive, n_gust_negative) arrays.
+        """
+        rho = self.density_at_altitude['cruise']
+        mac = self.chord
+        Cl_alpha = self.CL_alpha
+        W_S = self.weight_configuration['OEW_Payload_Fuselage_Fuel']/ self.S  # Wing loading in N/m²
+        
+        mu_g = W_S / (0.5 * rho * mac * Cl_alpha * 9.80665)
+        K_g = (0.88 * mu_g) / (5.3 + mu_g)
+        
+        n_gust_positive = 1 + (K_g * rho * V_range * Ude * Cl_alpha) / (2 * W_S)
+        n_gust_negative = 1 - (K_g * rho * V_range * Ude * Cl_alpha) / (2 * W_S)
+        
+        return n_gust_positive, n_gust_negative
+
     def calc_gust_velocity(self, altitude_m, velocity_aixs, VC, VD):
+
         #Gust velocity at VC as a function of altitude based on STANAG 4671.
         if altitude_m <= 6096:
             U_VC = 15.2
         elif 6096 < altitude_m <= 15240:
-            U_VC = 35
-            #15.2 - ((15.2 - 7.6) / (15240 - 6096)) * (altitude_m - 6096)
+            U_VC = 15.2 - ((15.2 - 7.6) / (15240 - 6096)) * (altitude_m - 6096)
         else:
             U_VC = 7.6
 
@@ -92,8 +157,7 @@ class FlightEnvelope:
         if altitude_m <= 6096:
             U_VD = 7.6
         elif 6096 < altitude_m <= 15240:
-            U_VD = 35/2
-            #7.6 - ((7.6 - 3.8) / (15240 - 6096)) * (altitude_m - 6096)
+            U_VD = 7.6 - ((7.6 - 3.8) / (15240 - 6096)) * (altitude_m - 6096)
         else:
             U_VD = 3.8
 
@@ -128,6 +192,18 @@ class FlightEnvelope:
         return n_gust_pos, n_gust_neg
 
     def calc_maneuver_loads(self, velocity_aixs, n_pos_limit, n_neg_limit, VS, VD):
+        """
+        Calculate the maneuver load factors for positive and negative loads.
+
+        :param velocity_aixs: Array of velocities for the V-n diagram
+        :param n_pos_limit: Positive load factor limit
+        :param n_neg_limit: Negative load factor limit
+        :param VS: Stall speed in m/s
+        :param VD: Dive speed in m/s
+
+        :return: Tuple of positive and negative maneuver load factors
+        """
+
         # I. Compute positive maneuver load factor
         n_parabola = (velocity_aixs / VS) ** 2              # CLmax limit (stall speed parabola)
         n_flat = np.full_like(velocity_aixs, n_pos_limit)   # Maximum positive load factor (flat line)
@@ -191,6 +267,7 @@ class FlightEnvelope:
         plt.xlim(0, VD + 10)
         plt.tight_layout()
         plt.show()
+        plt.savefig(f'data/vn_diagram_{weight_config}_{altitude_level}_{ac_configuration}.png')
 
     def generate_flight_envelope(self, weight_config: str, altitude_level: str, ac_configuration: str):
         """
@@ -213,15 +290,41 @@ class FlightEnvelope:
         # 3. Calculate gust velocity
         U_gust = self.calc_gust_velocity(altitude, velocity_aixs, self.VC, VD) 
         # 4. Calculate gust loads
-        n_gust_pos, n_gust_neg = self.calc_gust_loads(velocity_aixs, U_gust, weight_N, density, self.chord)
+        #n_gust_pos, n_gust_neg = self.calc_gust_loads(velocity_aixs, U_gust, weight_N, density, self.chord)
+
+
+        n_gust_pos, n_gust_neg = self.compute_gust_loads(velocity_aixs, U_gust)
+        print(f"n_gust_pos: {n_gust_pos}")
         # 5. Calculate maneuver loads
         n_maneuver_pos, n_maneuver_neg = self.calc_maneuver_loads(velocity_aixs, n_pos_limit, n_neg_limit, VS, VD)
         # 6. Plot the V-n diagram
         self.plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, self.VC, VD, weight_config, altitude_level, ac_configuration)
 
+    def run_all_configurations(self):
+        """
+        Runs the flight envelope generation for all valid combinations of
+        weight configuration, altitude level, and aircraft configuration.
+        Skips incompatible configurations (e.g., landing config at cruise altitude).
+        """
+        for weight_key in self.weight_configuration.keys():
+            for altitude_key in self.density_at_altitude.keys():
+                for ac_config_key in self.CL_max_values.keys():
+
+                    # === Skip incompatible scenarios ===
+                    if altitude_key == 'cruise' and ac_config_key == 'LAND':
+                        continue  # Skip landing config at cruise altitude
+                    if altitude_key == 'cruise' and ac_config_key == 'TAKE-OFF':
+                        continue  # Clean config usually not relevant on ground
+
+                    print(f"\nRunning: Weight = {weight_key}, Altitude = {altitude_key}, Config = {ac_config_key}")
+                    self.generate_flight_envelope(weight_key, altitude_key, ac_config_key)
+
+
+
 
 if __name__ == "__main__":
     fe = FlightEnvelope()
-    fe.generate_flight_envelope(weight_config='OEW_Payload_Fuselage_Fuel', altitude_level='cruise', ac_configuration='CLEAN')
+    fe.generate_flight_envelope("OEW_Payload_Fuselage_Fuel", "cruise", "CLEAN")
+    #fe.run_all_configurations()
 
 
