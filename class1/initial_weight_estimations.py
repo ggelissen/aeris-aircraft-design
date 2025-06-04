@@ -254,18 +254,17 @@ def class1_weight_estimation(
 
 
     results = {
-        "W_TO_N": W_TO_N, "W_TO_kg": N_to_kg(W_TO_N),
-        "W_E_N": W_E_N, "W_E_kg": N_to_kg(W_E_N),
-        "W_F_total_N": W_F_total_N, "W_F_total_kg": N_to_kg(W_F_total_N),
-        "W_OE_N": W_OE_N, "W_OE_kg": N_to_kg(W_OE_N),
-        "W_PL_N": W_PL_N, "W_crew_N": W_crew_N,
-        "W_tfo_N": W_tfo_N,
-        "M_ff_total_overall_mission": M_ff_total, # Product of all segment fractions
-        "L_D_cruise1": L_D_cruise1,
+        "W_TO": W_TO_N,
+        "W_E": W_E_N,
+        "W_F": W_F_total_N,
+        "W_OE": W_OE_N,
+        "W_PL": W_PL_N, "W_crew": W_crew_N,
+        "W_tfo": W_tfo_N,
+        "M_ff": M_ff_total,
+        "L_D_cruise": L_D_cruise1,
         "L_D_loiter": L_D_loiter,
-        "mission_segments_detailed_ff": mission_segments_ff,
-        "W_F_used_N": W_F_used_N,
-        "W_F_res_N": W_F_res_N,
+        "W_F_used": W_F_used_N,
+        "W_F_res": W_F_res_N,
     }
 
     if verbose:
@@ -458,60 +457,63 @@ def plot_payload_range_diagram(pr_data, export_path=None):
     if export_path:
         os.makedirs(os.path.dirname(export_path), exist_ok=True)
         plt.savefig(export_path)
-    plt.show()
 
 
-
-# --- Main Example Usage ---
-if __name__ == "__main__":
-
-    params = DesignParameters()
-    params.load_from_yaml("design_config.yaml")
+def run_initial_weight_estimations(params: DesignParameters) -> dict:
+    """
+    Runs the initial weight estimation.
+    """
 
     uav_aircraft_params = {
-        "type": "uav", # Used for specific mission profile and L/D example values
-        "type_for_coeffs": "uav", # Used for W_E = a*W_TO + b
+        "type": "uav",
+        "type_for_coeffs": "uav",
         "A": params.wing.A_w,
-        "c_j_kg_Ns": lb_hr_lbf_to_kg_Ns(params.engine.cruise_tsfc), # 0.685 lb/hr/lb -> kg/Ns
-        "M_tfo": 0.005 # As per example calculation on page 42 of ADSEE I Lecture 2 (Weight Estimation)
+        "c_j_kg_Ns": lb_hr_lbf_to_kg_Ns(params.engine.cruise_tsfc),
+        "M_tfo": params.weight.M_tfo
     }
     uav_mission_params = {
-        "W_PL_N": params.weight.W_PL, # 600 kg payload
-        "W_crew_N": 0, # 0 kg crew
-        "R_cruise1_m": params.range, # 6500 km design range
-        "V_cruise_ms": params.cruise_speed # 864 km/hr cruise speed
+        "W_PL_N": params.weight.W_PL,
+        "W_crew_N": params.weight.W_crew,
+        "R_cruise1_m": params.range,
+        "V_cruise_ms": params.cruise_speed
     }
-    uav_reserve_params = { # Mission extension type reserves
+    uav_reserve_params = {
         "type": "mission_extension",
-        "R_cruise2_m": params.diversion_distance, # 460 km alternate range
-        "E_loiter_s": params.loiter_time # 120 min loiter
+        "R_cruise2_m": params.diversion_distance,
+        "E_loiter_s": params.loiter_time
     }
 
-    uav_results = class1_weight_estimation(
-        uav_aircraft_params, uav_mission_params, uav_reserve_params
-    )
+    results = class1_weight_estimation(uav_aircraft_params, uav_mission_params, uav_reserve_params, verbose=False)
 
-    if uav_results:
-        W_P_max = uav_mission_params["W_PL_N"] 
-        W_F_max = uav_results["W_F_total_N"] 
+    # if uav_results:
+    #     W_P_max = uav_mission_params["W_PL_N"] 
+    #     W_F_max = uav_results["W_F_total_N"] 
 
-        pr_mission_config = {"V_cruise_ms": uav_mission_params["V_cruise_ms"],
-                             "R_cruise1_m": uav_mission_params["R_cruise1_m"]}
+    #     pr_mission_config = {"V_cruise_ms": uav_mission_params["V_cruise_ms"],
+    #                          "R_cruise1_m": uav_mission_params["R_cruise1_m"]}
 
-        pr_data = calculate_payload_range_points(
-            uav_results,
-            uav_aircraft_params,
-            pr_mission_config,
-            W_P_max_structural_N = W_P_max,
-            W_F_max_capacity_N = W_F_max,
-        )
-        plot_payload_range_diagram(pr_data, export_path="Figures/Performance Diagrams/payload_range_diagram.pdf")
+    #     pr_data = calculate_payload_range_points(
+    #         uav_results,
+    #         uav_aircraft_params,
+    #         pr_mission_config,
+    #         W_P_max_structural_N = W_P_max,
+    #         W_F_max_capacity_N = W_F_max,
+    #     )
+    #     plot_payload_range_diagram(pr_data, export_path="Figures/Performance Diagrams/payload_range_diagram.pdf")
 
-        ranges_to_test_km = [6000, 6500, 7000, 7500, 8000, 8500]
-        ranges_to_test_m = [km_to_m(r) for r in ranges_to_test_km]
+        # ranges_to_test_km = [6000, 6500, 7000, 7500, 8000, 8500]
+        # ranges_to_test_m = [km_to_m(r) for r in ranges_to_test_km]
         
-        sensitivity_results = perform_sensitivity_study(
-            uav_aircraft_params, uav_mission_params, uav_reserve_params,
-            param_to_vary="mission_params.R_cruise1_m",
-            values_to_test=ranges_to_test_m
-        )
+        # sensitivity_results = perform_sensitivity_study(
+        #     uav_aircraft_params, uav_mission_params, uav_reserve_params,
+        #     param_to_vary="mission_params.R_cruise1_m",
+        #     values_to_test=ranges_to_test_m
+        # )
+
+    return results
+
+
+if __name__ == "__main__":
+    params = DesignParameters()
+    params.load_from_yaml("design_config.yaml")
+    run_initial_weight_estimations(params)
