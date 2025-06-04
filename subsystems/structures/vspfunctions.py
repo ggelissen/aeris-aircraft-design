@@ -87,6 +87,7 @@ def create_fuselage(designvars: DesignParameters = None):
     # Fuselage end tip
     fuselage_tip2 = crosssections["fuselagetip2"]["Tan_Angles"]
     vsp.SetXSecTanAngles(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0), 4), vsp.XSEC_BOTH_SIDES, fuselage_tip2['top'], fuselage_tip2["right"], fuselage_tip2["bottom"], fuselage_tip2["left"])
+    designvars.fuselage.fuseid = fuse_id
 
 def create_wing(designvars: DesignParameters = None):
     wing_id = vsp.AddGeom("WING", "")
@@ -128,8 +129,14 @@ def create_wing(designvars: DesignParameters = None):
     vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 1, vsp.XS_FILE_AIRFOIL)
     vsp.ReadFileAirfoil(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "data/Airfoil.dat")  # Read airfoil from file
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 1), 0), "ThickChord"), wingpars.t_c_w_t)  # After reimiport thickness can be set
+    vsp.UpdateGeom(wing_id)
 
     # Position wing on fuselage
+    vsp.WriteVSPFile('data/special.vsp3')
+    wingpars.mac = vsp.GetParmVal(wing_id, "MAC", "WingGeom")  # Mean Aerodynamic Chord)
+    tip_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Tip_Chord"))
+    root_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Root_Chord"))
+    wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Span")) / (tip_chord - root_chord)
     x_pos = wingpars.x_LEMAC - (np.tan(wingpars.Lambda_025c_w) * wingpars.y_LEMAC - 0.25 * wingpars.mac)
     vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", x_pos)
     vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
@@ -153,9 +160,8 @@ def create_wing(designvars: DesignParameters = None):
 
 
     wingpars.wingid = wing_id
-    vsp.WriteVSPFile("aircraft_model2.vsp3")
 
-
+    vsp.SetParmVal(wing_id, "Tess_W", "Shape", 200)
     # Add yehudi
     if wingpars.yehudi:
         vsp.SplitWingXSec(wing_id, 1)
@@ -168,9 +174,9 @@ def create_wing(designvars: DesignParameters = None):
         vsp.UpdateGeom(wing_id)
         vsp.SetParmVal(wing_id, "Span", "XSec_1", wingpars.b_w/2 * wingpars.yehudi_pos_frac)  # Set span again after split
         vsp.UpdateGeom(wing_id)
-        vsp.SetParmVal(wing_id, "Area", "XSec_1", wingpars.yehud_area/2)
+        vsp.SetParmVal(wing_id, "Area", "XSec_1", wingpars.yehudi_area / 2)
         vsp.UpdateGeom(wing_id)
-        vsp.SetParmVal(wing_id, "Area", "XSec_2", wingpars.S_w / 2 - wingpars.yehud_area / 2)
+        vsp.SetParmVal(wing_id, "Area", "XSec_2", wingpars.S_w / 2 - wingpars.yehudi_area / 2)
         vsp.UpdateGeom(wing_id)
         taper_second_part_of_wing = vsp.GetParmVal(wing_id, "Taper", "XSec_2")
         LEsweep = np.rad2deg(np.arctan(((
@@ -184,10 +190,10 @@ def create_wing(designvars: DesignParameters = None):
         vsp.UpdateGeom(wing_id)
         vsp.SetParmVal(wing_id, "Sweep", "XSec_1", 0.0)
         vsp.UpdateGeom(wing_id)
-        vsp.SetParmVal(wing_id, "Area", "XSec_1",  wingpars.yehud_area/2)
+        vsp.SetParmVal(wing_id, "Area", "XSec_1", wingpars.yehudi_area / 2)
         vsp.UpdateGeom(wing_id)
 
-        vsp.SetParmVal(wing_id, "Area", "XSec_2", wingpars.S_w/2 - wingpars.yehud_area/2)
+        vsp.SetParmVal(wing_id, "Area", "XSec_2", wingpars.S_w / 2 - wingpars.yehudi_area / 2)
         vsp.UpdateGeom(wing_id)
         taper_second_part_of_wing = vsp.GetParmVal(wing_id, "Taper", "XSec_2")
         LEsweep = np.rad2deg(np.arctan(((
@@ -202,8 +208,39 @@ def create_wing(designvars: DesignParameters = None):
         vsp.UpdateGeom(wing_id)
         vsp.SetParmVal(wing_id, "Sweep", "XSec_1", 0.0)
         vsp.UpdateGeom(wing_id)
-        new_span = vsp.GetParmVal(wing_id, "Span", "XSec_1") + vsp.GetParmVal(wing_id, "Span", "XSec_2")
+        vsp.SetParmVal(wing_id, "Area", "XSec_2", wingpars.S_w / 2 - wingpars.yehudi_area / 2)
+        for i in range(5):
+            vsp.SetParmVal(wing_id, "Area", "XSec_1", wingpars.yehudi_area / 2)
+            vsp.UpdateGeom(wing_id)
+            vsp.SetParmVal(wing_id, "Area", "XSec_2", wingpars.S_w / 2 - wingpars.yehudi_area / 2)
+            vsp.UpdateGeom(wing_id)
+        new_halfspan = vsp.GetParmVal(wing_id, "Span", "XSec_1") + vsp.GetParmVal(wing_id, "Span", "XSec_2")
         print(vsp.GetParmVal(wing_id, "Area", "XSec_1"), vsp.GetParmVal(wing_id, "Area", "XSec_2"), wingpars.S_w/2)
+        wingpars.b_w = new_halfspan * 2
+        mac = vsp.GetParmVal(wing_id, "MAC", "WingGeom")
+        wingpars.mac = mac
+        wingpars.yehudi_pos_frac = vsp.GetParmVal(wing_id, "Span", "XSec_1")/new_halfspan
+        wingpars.Lambda_0_w = np.deg2rad(vsp.GetParmVal(wing_id, "Sec_Sweep", "XSec_1"))
+        wingpars.Lambda_025c_w = np.arctan(np.tan(wingpars.Lambda_0_w)-2*0.25*vsp.GetParmVal(wing_id, "Tip_Chord", "XSec_2")*(-1+vsp.GetParmVal(wing_id, "Taper", "XSec_2"))/vsp.GetParmVal(wing_id, "Span", "XSec_2"))
+
+        # Reposition wing with updated planform:
+        # Position wing on fuselage
+        wingpars.mac = vsp.GetParmVal(wing_id, "MAC", "WingGeom")  # Mean Aerodynamic Chord)
+
+        if wingpars.mac < vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),2), "Root_Chord")):
+            tip_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),2), "Tip_Chord"))
+            root_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),2), "Root_Chord"))
+            wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * (vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),2), "Span"))) / (tip_chord - root_chord) + vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Span"))
+        else:
+            tip_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Tip_Chord"))
+            root_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Root_Chord"))
+            wingpars.y_LEMAC = 0.5 * (wingpars.mac - root_chord) * (vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id,0),1), "Span"))) / (tip_chord - root_chord)
+
+        x_pos = wingpars.x_LEMAC - (np.tan(wingpars.Lambda_0_w) * wingpars.y_LEMAC)
+        wingpars.xpos = x_pos
+        vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", x_pos)
+        vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
+        vsp.UpdateGeom(wing_id)
 
 
 
@@ -234,12 +271,12 @@ def create_engines(designvars: DesignParameters = None):
     vsp.SetGeomName(pod_id, "Fuselage_Engine")
     vsp.SetParmVal(pod_id, "OrderPolicy", "Design", 1)  # Set order policy to "Loop" for engine pod to enable flowthrough
     vsp.ChangeXSecShape(vsp.GetXSecSurf(pod_id, 0), 0, vsp.XS_SUPER_ELLIPSE)
-    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 0), "Super_Width"), proppars.engine_diameter)  # Width of the engine pod
-    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 0), "Super_Height"), proppars.engine_diameter)  # Height of the engine pod
+    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 0), "Super_Width"), proppars.nacelle_diameter)  # Width of the engine pod
+    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 0), "Super_Height"), proppars.nacelle_diameter)  # Height of the engine pod
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 0), "Super_MaxWidthLoc"), proppars.nacelle_blend_par)  # Deform the superellipse
     vsp.CutXSec(pod_id, 3)
     vsp.CutXSec(pod_id, 3)
-    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 1), "XDelta"), proppars.engine_length) # Length of the engine pod
+    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 1), "XDelta"), proppars.nacelle_length) # Length of the engine pod
     vsp.ChangeXSecShape(vsp.GetXSecSurf(pod_id, 0), 1, vsp.XS_SUPER_ELLIPSE)
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 1), "Super_Width"), proppars.engine_diameter)  # Width of the engine pod
     vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(pod_id, 0), 1), "Super_Height"), proppars.engine_diameter)  # Height of the engine pod
@@ -329,15 +366,22 @@ def calculate_wet_areas(designvars: DesignParameters = None):
 
 def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0):
     points = []
-    local_chord_length = designvars.wing.root_chord * (1 - np.abs(spanwise_pos_frac)) + designvars.wing.tip_chord * np.abs(spanwise_pos_frac)
+    wingid = designvars.wing.wingid
+    yehudi_frac = designvars.wing.yehudi_pos_frac
+    if spanwise_pos_frac < yehudi_frac:
+        local_chord_length = vsp.GetParmVal(wingid, "Root_Chord", "XSec_1") * (1 - np.abs(spanwise_pos_frac/yehudi_frac)) + vsp.GetParmVal(wingid, "Tip_Chord", "XSec_1") * np.abs(spanwise_pos_frac/yehudi_frac)
+    else:
+        local_chord_length = vsp.GetParmVal(wingid, "Root_Chord", "XSec_2") * (1 - np.abs((spanwise_pos_frac-yehudi_frac)/(1-yehudi_frac))) + vsp.GetParmVal(wingid, "Tip_Chord", "XSec_2") * np.abs((spanwise_pos_frac-yehudi_frac)/(1-yehudi_frac))
     for vec in vsp.GetAirfoilCoordinates(designvars.wing.wingid, abs(spanwise_pos_frac)):
         points.append(np.array([vec.x(), vec.y()]))
 
     points = np.array(points)
+    x_displacement = np.tan(designvars.wing.Lambda_0_w) * spanwise_pos_frac * designvars.wing.b_w/2
     points[:, 0] *= local_chord_length  # Scale X coordinates by local chord length
+    points[:, 0] += x_displacement
     points[:, 1] *= local_chord_length
 
-    return points, local_chord_length
+    return points, local_chord_length, x_displacement
 
 def is_headless():
     return os.environ.get("DISPLAY", "") == ""

@@ -1,0 +1,346 @@
+ THIS SOFTWARE AND ANY ACCOMPANYING DOCUMENTATION
+ IS RELEASED "AS IS".  THE U.S. GOVERNMENT MAKES NO
+ WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, CONCERNING
+ THIS SOFTWARE AND ANY ACCOMPANYING DOCUMENTATION,
+ INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OF
+ MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ IN NO EVENT WILL THE U.S. GOVERNMENT BE LIABLE FOR ANY
+ DAMAGES, INCLUDING LOST PROFITS, LOST SAVINGS OR OTHER
+ INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE 
+ USE, OR INABILITY TO USE, THIS SOFTWARE OR ANY
+ ACCOMPANYING DOCUMENTATION, EVEN IF INFORMED IN ADVANCE
+ OF THE POSSIBILITY OF SUCH DAMAGES.
+  ****************************************************
+  *    USAF STABILITY AND CONTROL  DIGITAL DATCOM    *
+  *    PROGRAM REV. JAN 96   DIRECT INQUIRIES TO:    *
+  *    WRIGHT LABORATORY  (WL/FIGC)  ATTN: W. BLAKE  *
+  *      WRIGHT PATTERSON AFB, OHIO  45433           *
+  *    PHONE (513) 255-6764,   FAX (513) 258-4054    *
+  ****************************************************
+ Preparing to start the big loop
+ At 1000
+1                         CONERR - INPUT ERROR CHECKING
+0 ERROR CODES - N* DENOTES THE NUMBER OF OCCURENCES OF EACH ERROR
+0 A - UNKNOWN VARIABLE NAME
+0 B - MISSING EQUAL SIGN FOLLOWING VARIABLE NAME
+0 C - NON-ARRAY VARIABLE HAS AN ARRAY ELEMENT DESIGNATION - (N)
+0 D - NON-ARRAY VARIABLE HAS MULTIPLE VALUES ASSIGNED
+0 E - ASSIGNED VALUES EXCEED ARRAY DIMENSION
+0 F - SYNTAX ERROR
+
+0******************************  INPUT DATA CARDS  ******************************
+
+ CASEID ----- AERIS -----                                                        
+  $FLTCON NMACH=1.0,MACH(1)=0.6,NALPHA=10.0,                                     
+   ALSCHD(1)=-4.0,-2.0,0.0,2.0,4.0,6.0,8.0,10.0,12.0,14.0,                       
+   NALT=1.0,ALT(1)=5000.0,WT=12716.0,LOOP=1.$                                    
+  $SYNTHS XCG=11.17,ZCG=0.0,XW=3.63,ZW=0.42,                                     
+   ALIW=1.0,XH=28.73,ZH=5.24,ALIH=0.0,XV=18.3,ZV=0.0$                            
+  $OPTINS SREF=243.0$                                                            
+  $BODY NX=8.0,X(1)=0.0,0.74,8.35,13.14,19.35,24.41,28.41,30.77,                 
+   S(1)=5.19,9.32,16.89,16.89,15.94,11.12,5.85,2.5$                              
+  $WGSCHR CLMAXL=1.0$                                                            
+  $WGPLNF CHRDTP=7.02,SSPNOP=11.32,SSPNE=13.41,SSPN=15.71,                       
+   CHRDBP=8.4,CHRDR=14.0,SAVSI=45.0,SAVSO=45.0,CHSTAT=0.25,                      
+   TWISTA=0.0,DHDADI=-3.0,DHDADO=-3.0,TYPE=1.0$                                  
+  $HTSCHR CLAMO=1.0$                                                             
+  $HTPLNF CHRDTP=1.86,SSPNE=5.42,SSPN=5.43,CHRDR=4.69,                           
+   SAVSI=45.0,CHSTAT=0.25,TYPE=1.0$                                              
+  $VTPLNF CHRDTP=3.76,SSPNE=6.05,SSPN=8.18,                                      
+   CHRDR=12.47,SAVSI=55.0,CHSTAT=0.25,TYPE=1.0$                                  
+ DIM FT                                                                          
+ BUILD                                                                           
+ PLOT                                                                            
+ NEXT CASE                                                                       
+1          THE FOLLOWING IS A LIST OF ALL INPUT CARDS FOR THIS CASE.
+0
+ CASEID ----- AERIS -----                                                        
+  $FLTCON NMACH=1.0,MACH(1)=0.6,NALPHA=10.0,                                     
+   ALSCHD(1)=-4.0,-2.0,0.0,2.0,4.0,6.0,8.0,10.0,12.0,14.0,                       
+   NALT=1.0,ALT(1)=5000.0,WT=12716.0,LOOP=1.$                                    
+  $SYNTHS XCG=11.17,ZCG=0.0,XW=3.63,ZW=0.42,                                     
+   ALIW=1.0,XH=28.73,ZH=5.24,ALIH=0.0,XV=18.3,ZV=0.0$                            
+  $OPTINS SREF=243.0$                                                            
+  $BODY NX=8.0,X(1)=0.0,0.74,8.35,13.14,19.35,24.41,28.41,30.77,                 
+   S(1)=5.19,9.32,16.89,16.89,15.94,11.12,5.85,2.5$                              
+  $WGSCHR CLMAXL=1.0$                                                            
+  $WGPLNF CHRDTP=7.02,SSPNOP=11.32,SSPNE=13.41,SSPN=15.71,                       
+   CHRDBP=8.4,CHRDR=14.0,SAVSI=45.0,SAVSO=45.0,CHSTAT=0.25,                      
+   TWISTA=0.0,DHDADI=-3.0,DHDADO=-3.0,TYPE=1.0$                                  
+  $HTSCHR CLAMO=1.0$                                                             
+  $HTPLNF CHRDTP=1.86,SSPNE=5.42,SSPN=5.43,CHRDR=4.69,                           
+   SAVSI=45.0,CHSTAT=0.25,TYPE=1.0$                                              
+  $VTPLNF CHRDTP=3.76,SSPNE=6.05,SSPN=8.18,                                      
+   CHRDR=12.47,SAVSI=55.0,CHSTAT=0.25,TYPE=1.0$                                  
+ DIM FT                                                                          
+ BUILD                                                                           
+ PLOT                                                                            
+ NEXT CASE                                                                       
+0 INPUT DIMENSIONS ARE IN FT, SCALE FACTOR IS 1.0000
+
+ Return to main program from M01O01
+ Return to main program from M50O62
+ Return to main program from M02O02
+ Return to main program from M51O63
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                                   DATCOM BODY ALONE CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0    0.006   -0.003   -0.0151  -0.004    0.005    3.976    8.326E-04    3.835E-03   -8.326E-04   -1.106E-03    0.000E+00
+   -2.0    0.005   -0.002   -0.0076  -0.002    0.005    4.063    8.580E-04    3.784E-03   -8.580E-04   -1.092E-03    0.000E+00
+    0.0    0.005    0.000    0.0000   0.000    0.005   ******    8.453E-04    3.810E-03   -8.453E-04   -1.099E-03    0.000E+00
+    2.0    0.005    0.002    0.0076   0.002    0.005    4.063    8.580E-04    3.784E-03   -8.580E-04   -1.092E-03    0.000E+00
+    4.0    0.006    0.003    0.0151   0.004    0.005    3.976    8.832E-04    3.734E-03   -8.832E-04   -1.077E-03    0.000E+00
+    6.0    0.006    0.005    0.0226   0.006    0.005    3.887    9.082E-04    3.685E-03   -9.082E-04   -1.063E-03    0.000E+00
+    8.0    0.006    0.007    0.0299   0.008    0.005    3.798    9.328E-04    3.636E-03   -9.328E-04   -1.049E-03    0.000E+00
+   10.0    0.007    0.009    0.0371   0.010    0.005    3.709    9.569E-04    3.588E-03   -9.569E-04   -1.035E-03    0.000E+00
+   12.0    0.008    0.011    0.0442   0.012    0.005    3.619    9.804E-04    3.541E-03   -9.804E-04   -1.022E-03    0.000E+00
+   14.0    0.008    0.013    0.0513   0.015    0.005    3.530    1.004E-03    3.495E-03   -1.004E-03   -1.008E-03    0.000E+00
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                                      WING ALONE CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0      Inf   -0.010    0.0058    -Inf      Inf   -0.000    0.000E+00   -0.000E+00   -3.515E-04    1.122E-07    5.461E-04
+   -2.0      NaN    0.000    0.0000     NaN      NaN      NaN    4.874E-03   -2.954E-03    0.000E+00          NaN    5.003E-04
+    0.0      Inf    0.010   -0.0060     NaN      Inf      NaN    9.730E-03   -6.186E-03   -3.515E-04          NaN    4.546E-04
+    2.0      Inf    0.039   -0.0247     Inf      Inf   -0.000    1.936E-02   -1.327E-02   -3.502E-04    1.791E-06    3.177E-04
+    4.0      Inf    0.087   -0.0591     Inf      Inf   -0.000    2.877E-02   -2.163E-02   -3.443E-04    8.986E-06    9.134E-05
+    6.0      Inf    0.154   -0.1113     Inf      Inf   -0.000    3.774E-02   -2.948E-02   -3.288E-04    2.803E-05   -2.221E-04
+    8.0      Inf    0.238   -0.1770     Inf      Inf   -0.000    4.464E-02   -3.471E-02   -2.964E-04    6.704E-05   -6.168E-04
+   10.0      Inf    0.333   -0.2501     Inf      Inf   -0.000    4.866E-02   -3.718E-02   -2.402E-04    1.307E-04   -1.060E-03
+   12.0      Inf    0.433   -0.3257     Inf      Inf   -0.000    5.148E-02   -4.103E-02   -1.618E-04    2.214E-04   -1.530E-03
+   14.0      Inf    0.538   -0.4142     Inf      Inf   -0.000    5.422E-02   -4.750E-02   -5.679E-05    3.428E-04   -2.026E-03
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                                    HORIZONTAL TAIL CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0      Inf   -0.004    0.0089    -Inf      Inf   -0.000    2.338E-03   -5.450E-03    1.573E-08    3.646E-08    7.120E-06
+   -2.0      Inf   -0.000    0.0010    -Inf      Inf   -0.000    1.064E-03   -2.482E-03    1.953E-10    4.524E-10    7.932E-07
+    0.0      Inf    0.000   -0.0010     NaN      Inf      NaN    1.066E-03   -2.506E-03    1.955E-10          NaN   -7.936E-07
+    2.0      Inf    0.004   -0.0090     Inf      Inf   -0.000    2.548E-03   -6.030E-03    1.579E-08    3.659E-08   -7.133E-06
+    4.0      Inf    0.011   -0.0251     Inf      Inf   -0.000    4.215E-03   -1.007E-02    1.210E-07    2.804E-07   -1.974E-05
+    6.0      Inf    0.021   -0.0493     Inf      Inf   -0.000    5.835E-03   -1.410E-02    4.598E-07    1.065E-06   -3.849E-05
+    8.0      Inf    0.034   -0.0815     Inf      Inf   -0.000    7.386E-03   -1.811E-02    1.238E-06    2.868E-06   -6.314E-05
+   10.0      Inf    0.050   -0.1217     Inf      Inf   -0.000    8.470E-03   -2.117E-02    2.709E-06    6.277E-06   -9.343E-05
+   12.0      Inf    0.068   -0.1662     Inf      Inf   -0.000    8.788E-03   -2.254E-02    5.032E-06    1.144E-05   -1.261E-04
+   14.0      Inf    0.085   -0.2119     Inf      Inf   -0.000    8.767E-03   -2.314E-02    8.044E-06    1.813E-05   -1.588E-04
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                                     VERTICAL TAIL CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0    0.001    0.000    0.0000   0.000    NDM     ******    0.000E+00    0.000E+00   -0.000E+00    0.000E+00   -0.000E+00
+   -2.0                                                                                                             -0.000E+00
+    0.0                                                                                                             -0.000E+00
+    2.0                                                                                                             -0.000E+00
+    4.0                                                                                                             -0.000E+00
+    6.0                                                                                                             -0.000E+00
+    8.0                                                                                                             -0.000E+00
+   10.0                                                                                                             -0.000E+00
+   12.0                                                                                                             -0.000E+00
+   14.0                                                                                                              0.000E+00
+0*** NDM PRINTED WHEN NO DATCOM METHODS EXIST
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                                       WING-BODY CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0      Inf   -0.017       NaN    -Inf      Inf      NaN    7.316E-03          NaN   -1.194E-03   -1.190E-03    5.004E-04
+   -2.0      NaN   -0.003       NaN     NaN      NaN      NaN    7.298E-03          NaN                              4.320E-04
+    0.0      Inf    0.012       NaN     NaN      Inf      NaN    1.321E-02          NaN                              3.637E-04
+    2.0      Inf    0.050       NaN     Inf      Inf      NaN    2.545E-02          NaN                              1.845E-04
+    4.0      Inf    0.114       NaN     Inf      Inf      NaN    3.793E-02          NaN                             -1.133E-04
+    6.0      Inf    0.202       NaN     Inf      Inf      NaN    4.986E-02          NaN                             -5.264E-04
+    8.0      Inf    0.313       NaN     Inf      Inf      NaN    5.922E-02          NaN                             -1.048E-03
+   10.0      Inf    0.439       NaN     Inf      Inf      NaN    6.485E-02          NaN                             -1.636E-03
+   12.0      Inf    0.573       NaN     Inf      Inf      NaN    6.872E-02          NaN                             -2.263E-03
+   14.0      Inf    0.714       NaN     Inf      Inf      NaN    7.237E-02          NaN                             -2.924E-03
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                                 BODY-HORIZONTAL TAIL CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0      Inf   -0.007       NaN    -Inf      Inf      NaN    3.231E-03          NaN   -3.717E-01   -1.190E-03    6.437E-06
+   -2.0      Inf   -0.002       NaN    -Inf      Inf      NaN    1.926E-03          NaN                             -5.556E-07
+    0.0      Inf    0.000       NaN     NaN      Inf      NaN    1.915E-03          NaN                             -4.010E-06
+    2.0      Inf    0.006       NaN     Inf      Inf      NaN    3.416E-03          NaN                             -1.094E-05
+    4.0      Inf    0.014       NaN     Inf      Inf      NaN    5.115E-03          NaN                             -2.254E-05
+    6.0      Inf    0.026       NaN     Inf      Inf      NaN    6.766E-03          NaN                             -3.869E-05
+    8.0      Inf    0.041       NaN     Inf      Inf      NaN    8.347E-03          NaN                             -5.923E-05
+   10.0      Inf    0.059       NaN     Inf      Inf      NaN    9.459E-03          NaN                             -8.397E-05
+   12.0      Inf    0.079       NaN     Inf      Inf      NaN    9.801E-03          NaN                             -1.105E-04
+   14.0      Inf    0.099       NaN     Inf      Inf      NaN    9.803E-03          NaN                             -1.371E-04
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                                  BODY-VERTICAL TAIL CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0    0.006   -0.003   -0.0151  -0.004    0.006    3.921    8.326E-04    3.835E-03   -8.326E-04   -1.106E-03      NDM 
+   -2.0    0.006   -0.002   -0.0076  -0.002    0.006    4.006    8.580E-04    3.784E-03                                NDM 
+    0.0    0.006    0.000    0.0000   0.000    0.006   ******    8.453E-04    3.810E-03                                NDM 
+    2.0    0.006    0.002    0.0076   0.002    0.006    4.006    8.580E-04    3.784E-03                                NDM 
+    4.0    0.006    0.003    0.0151   0.004    0.006    3.921    8.832E-04    3.734E-03                                NDM 
+    6.0    0.007    0.005    0.0226   0.006    0.006    3.835    9.082E-04    3.685E-03                                NDM 
+    8.0    0.007    0.007    0.0299   0.008    0.006    3.748    9.328E-04    3.636E-03                                NDM 
+   10.0    0.008    0.009    0.0371   0.010    0.006    3.660    9.569E-04    3.588E-03                                NDM 
+   12.0    0.008    0.011    0.0442   0.012    0.006    3.573    9.804E-04    3.541E-03                                NDM 
+   14.0    0.009    0.013    0.0513   0.015    0.006    3.486    1.004E-03    3.495E-03                                NDM 
+0*** NDM PRINTED WHEN NO DATCOM METHODS EXIST
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                               WING-BODY-HORIZONTAL TAIL CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0      NaN   -0.021       NaN     NaN      NaN      NaN    9.278E-03          NaN   -1.194E-03   -1.190E-03    5.076E-04
+   -2.0      NaN   -0.003       NaN     NaN      NaN      NaN    8.184E-03          NaN                              4.328E-04
+    0.0      NaN    0.012       NaN     NaN      NaN      NaN    1.390E-02          NaN                              3.629E-04
+    2.0      NaN    0.052       NaN     NaN      NaN      NaN    2.667E-02          NaN                              1.773E-04
+    4.0      NaN    0.119       NaN     NaN      NaN      NaN    3.955E-02          NaN                             -1.331E-04
+    6.0      NaN    0.211       NaN     NaN      NaN      NaN    5.166E-02          NaN                             -5.649E-04
+    8.0      NaN    0.326       NaN     NaN      NaN      NaN    6.105E-02          NaN                             -1.111E-03
+   10.0      NaN    0.455       NaN     NaN      NaN      NaN    6.652E-02          NaN                             -1.730E-03
+   12.0      NaN    0.592       NaN     NaN      NaN      NaN    7.016E-02          NaN                             -2.389E-03
+   14.0      NaN    0.736       NaN     NaN      NaN      NaN    7.375E-02          NaN                             -3.083E-03
+0                                    ALPHA     Q/QINF    EPSLON  D(EPSLON)/D(ALPHA)
+0
+                                     -4.0      1.000     -0.328        0.164
+                                     -2.0      1.000      0.000        0.179
+                                      0.0      1.000      0.389        0.223
+                                      2.0      1.000      0.890        0.308
+                                      4.0      1.000      1.619        0.413
+                                      6.0      1.000      2.544        0.510
+                                      8.0      1.000      3.661        0.592
+                                     10.0      1.000      4.913        0.648
+                                     12.0      1.000      6.254        0.699
+                                     14.0      1.000      7.708        0.727
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                                WING-BODY-VERTICAL TAIL CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0      Inf   -0.017       NaN    -Inf      Inf      NaN    7.316E-03          NaN   -1.194E-03   -1.190E-03    5.004E-04
+   -2.0      NaN   -0.003       NaN     NaN      NaN      NaN    7.298E-03          NaN                              4.320E-04
+    0.0      Inf    0.012       NaN     NaN      Inf      NaN    1.321E-02          NaN                              3.637E-04
+    2.0      Inf    0.050       NaN     Inf      Inf      NaN    2.545E-02          NaN                              1.845E-04
+    4.0      Inf    0.114       NaN     Inf      Inf      NaN    3.793E-02          NaN                             -1.133E-04
+    6.0      Inf    0.202       NaN     Inf      Inf      NaN    4.986E-02          NaN                             -5.264E-04
+    8.0      Inf    0.313       NaN     Inf      Inf      NaN    5.922E-02          NaN                             -1.048E-03
+   10.0      Inf    0.439       NaN     Inf      Inf      NaN    6.485E-02          NaN                             -1.636E-03
+   12.0      Inf    0.573       NaN     Inf      Inf      NaN    6.872E-02          NaN                             -2.263E-03
+   14.0      Inf    0.714       NaN     Inf      Inf      NaN    7.237E-02          NaN                             -2.924E-03
+1                               AUTOMATED STABILITY AND CONTROL METHODS PER APRIL 1976 VERSION OF DATCOM
+                                         CHARACTERISTICS AT ANGLE OF ATTACK AND IN SIDESLIP
+                                        WING-BODY-VERTICAL TAIL-HORIZONTAL TAIL CONFIGURATION
+                                                         ----- AERIS -----
+ 
+ -----------------------  FLIGHT CONDITIONS  ------------------------           --------------  REFERENCE DIMENSIONS  ------------
+  MACH    ALTITUDE   VELOCITY    PRESSURE    TEMPERATURE     REYNOLDS             REF.      REFERENCE LENGTH   MOMENT REF. CENTER
+ NUMBER                                                       NUMBER              AREA       LONG.     LAT.     HORIZ      VERT
+             FT       FT/SEC     LB/FT**2       DEG R         1/FT               FT**2        FT        FT        FT        FT
+0 0.600    5000.00     658.18   1.7609E+03     500.843     3.6904E+06           243.000      9.065    31.420    11.170     0.000
+0                                                               -------------------DERIVATIVE (PER DEGREE)-------------------
+0 ALPHA     CD       CL       CM       CN       CA       XCP        CLA          CMA          CYB          CNB          CLB
+0
+   -4.0      NaN   -0.021       NaN     NaN      NaN      NaN    9.278E-03          NaN   -1.194E-03   -1.190E-03    5.076E-04
+   -2.0      NaN   -0.003       NaN     NaN      NaN      NaN    8.184E-03          NaN                              4.328E-04
+    0.0      NaN    0.012       NaN     NaN      NaN      NaN    1.390E-02          NaN                              3.629E-04
+    2.0      NaN    0.052       NaN     NaN      NaN      NaN    2.667E-02          NaN                              1.773E-04
+    4.0      NaN    0.119       NaN     NaN      NaN      NaN    3.955E-02          NaN                             -1.331E-04
+    6.0      NaN    0.211       NaN     NaN      NaN      NaN    5.166E-02          NaN                             -5.649E-04
+    8.0      NaN    0.326       NaN     NaN      NaN      NaN    6.105E-02          NaN                             -1.111E-03
+   10.0      NaN    0.455       NaN     NaN      NaN      NaN    6.652E-02          NaN                             -1.730E-03
+   12.0      NaN    0.592       NaN     NaN      NaN      NaN    7.016E-02          NaN                             -2.389E-03
+   14.0      NaN    0.736       NaN     NaN      NaN      NaN    7.375E-02          NaN                             -3.083E-03
+0                                    ALPHA     Q/QINF    EPSLON  D(EPSLON)/D(ALPHA)
+0
+                                     -4.0      1.000     -0.328        0.164
+                                     -2.0      1.000      0.000        0.179
+                                      0.0      1.000      0.389        0.223
+                                      2.0      1.000      0.890        0.308
+                                      4.0      1.000      1.619        0.413
+                                      6.0      1.000      2.544        0.510
+                                      8.0      1.000      3.661        0.592
+                                     10.0      1.000      4.913        0.648
+                                     12.0      1.000      6.254        0.699
+                                     14.0      1.000      7.708        0.727
+0*** VEHICLE WEIGHT =  12716.00 LB.
+0*** LEVEL FLIGHT LIFT COEFFICIENT = 0.11793
+ Return to main program from M57O71
+1          THE FOLLOWING IS A LIST OF ALL INPUT CARDS FOR THIS CASE.
+0
+1 END OF JOB.

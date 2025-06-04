@@ -26,8 +26,6 @@ class DesignParameters:
         self.crit_mach = None
         self.inertia_matrix = None
 
-
-
         # Subsystem Parameters
         self.cg = CGParameters()  # Center of Gravity Parameters
         self.weight = WeightParameters()
@@ -38,6 +36,8 @@ class DesignParameters:
         self.empennage = EmpennageParameters(l_f=self.fuselage.l_f)
         self.landing_gear = LandingGearParameters()
         self.control_surface = ControlSurfaceParameters()
+        self.stability_aero = StabilityAerodynamicParameters()
+        self.inertia = IntertiaParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -88,6 +88,8 @@ class DesignParameters:
             self.control_surface.load_from_dict(config.get('control_surface', {}))
         if 'cg' in config:
             self.cg.load_from_dict(config.get('cg', {}))
+        if 'stability_aero' in config:
+            self.stability_aero.load_from_dict(config.get('stability_aero', {}))
 
     def update_parameter(self, parameter_name, value):
         """
@@ -138,6 +140,7 @@ class WeightParameters:
         self.W_tfo = None                           # Trapped Fuel and Oil Fraction
         self.W_F_used = None                        # Used Fuel Weight in N
         self.W_F_res = None                         # Reserve Fuel Weight in N
+        self.M_TO = self.W_TO / 9.80665                # Maximum Take-Off Mass in kg
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -157,25 +160,22 @@ class WingParameters:
         if self.S_w is not None and self.A_w_target is not None:
             self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
         self.mac = 1.2824                            # Mean Aerodynamic Chord in m
-        self.y_LEMAC = 2.1016                       # y-position of Leading Edge of MAC in m
+        self.y_LEMAC = None                       # y-position of Leading Edge of MAC in m, recalculated by the programme
         self.x_LEMAC = 5.0                            # Position of Leading Edge of MAC in m
+        self.xpos = None                                # calculated in the code in m. relative to the root
         self.z_LEMAC = 0.0
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
         self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_0_w = None                          # Will be calculated in the code in rad
         self.t_c_w_max = None
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
-        self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"                       # Wing Airfoil Type
-        # Airfoil parameters for NACA four-series:
-        # self.camber_r = 0.022                        # Airfoil Camber at Root
-        # self.camber_t = 0.022                        # Airfoil Camber at Tip
-        # self.camber_loc_r = 0.5                      # Airfoil Camber Location at Root
-        # self.camber_loc_t = 0.5                      # Airfoil Camber Location at Tip
-
+        self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
         self.CST_uppersurf = [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
         self.CST_lowersurf = [0.23723,    -0.05508,   -0.31490,   -0.01788,   -0.26995,   -0.19510,     0.13560,     0.27263] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
+        self.x_c_m = 0.37                           # Location along chord of max thickness
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
         self.i_w = 0.0                             # Wing Incidence Angle in degrees
@@ -194,7 +194,10 @@ class WingParameters:
         self.wingribs = Wingribs()  # Wing ribs parameters, such as thickness, are stored here
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
-        self.yehud_area = 6.0 # Yehudi area m2
+        self.yehudi_area = 6.0 # Yehudi area m2
+        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.1, spanwise_pos_frac_outbound=0.2, flapwidth=0.4)
+        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.25, spanwise_pos_frac_outbound=0.5, flapwidth=0.4)
+        self.flapgroups = [self.yehudi_flaps, self.main_flaps]
 
         
 
@@ -225,6 +228,8 @@ class PerformanceParameters:
 
         self.L_D_cruise = None                      # Lift-to-Drag Ratio at Cruise
         self.L_D_loiter = None                      # Lift-to-Drag Ratio at Loiter
+
+        self.CL_cruise = None                  # Lift Coefficient at Cruise	
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -262,6 +267,8 @@ class FuselageParameters:
         if self.D_f is not None and self.l_f is not None:
             self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
         self.l_n = 2.0                              # Nose Length in m
+        self.fuseid = None # Will contain the object ID of the wing in VSP, is set by create_fuselage()
+
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -282,6 +289,8 @@ class EngineParameters:
         self.engine_max_thrust = None               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
+        self.nacelle_diameter = None
+        self.nacelle_length = None
         self.cruise_tsfc = None                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
         self.nacelle_blend_par = -0.4               # Parameter specifying the blend of the nacelle with the fuselage
@@ -371,8 +380,10 @@ class ControlSurfaceParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.S_a = 2 #placeholder!!                             # Control Surface Area in m^2
-        self.x_a = None                             # Control Surface Position in m
+        self.x_a_inboard = 3.6                             # Control Surface Position in m
+        self.x_a_outboard = 4.5
+        self.aileron_width = 0.17                        # Aileron Width in m
+        self.S_a = (self.x_a_outboard-self.x_a_inboard)*self.aileron_width                          # Control Surface Area in m^2
         self.delta_a = None                         # Control Surface Deflection Angle in degrees
         self.C_m_a = None                           # Control Surface Moment Coefficient
 
@@ -398,7 +409,7 @@ class CGParameters:
         self.x_cg_fuel = 5                       # CG Position of the Fuel in m
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
-        self.z_cg = 1.5                      # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
+        self.z_cg = 1.5                          # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -456,3 +467,72 @@ class Control:
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+class IntertiaParameters:
+    def __init__(self, W_TO :float = None, g :float = None):
+        self.I_xx = None     # Moment of inertia about x-axis (kg*m^2)
+        self.I_yy = None     # Moment of inertia about y-axis (kg*m^2)
+        self.I_zz = None     # Moment of inertia about z-axis (kg*m^2)
+        self.I_xz = None     # Product of inertia xz-plane (kg*m^2)
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+class StabilityAerodynamicParameters:
+    def __init__(self):
+        self.CL0 = None       # Lift coefficient at alpha=0 (or CZ0 in body axes)
+        self.CD0 = None       # Zero-lift drag coefficient (or CX0 in body axes)
+        self.CLa = None       # Lift curve slope (dCL/dalpha or dCZ/dalpha)
+        self.Cma = None       # Pitching moment coefficient slope (dCm/dalpha)
+        self.alpha0_rad = None # Initial angle of attack (radians) for the reference flight condition
+        self.theta0_rad = None # Initial pitch angle (radians) for the reference flight condition
+
+        # Longitudinal Derivatives
+        self.CX0 = None       
+        self.CZ0 = None       
+        self.CXu = None
+        self.CZu = None
+        self.Cmu = None
+        self.CXa = None # Often dCX/dalpha
+        self.CZa = None         # = CLa (if using stability axes and thrust effects on Z are small)
+        self.CXq = None
+        self.CZq = None
+        self.Cmq = None
+        self.CXadot = None
+        self.CZadot = None
+        self.Cmadot = None
+        self.Cmde = None      # Pitch control effectiveness (elevator)
+
+        # Lateral-Directional Derivatives
+        self.CYb = None       # Side force due to sideslip
+        self.Clb = None       # Rolling moment due to sideslip (dihedral effect)
+        self.Cnb = None       # Yawing moment due to sideslip (weathercock stability)
+        self.CYp = None
+        self.Clp = None       # Rolling moment due to roll rate (roll damping)
+        self.Cnp = None       # Yawing moment due to roll rate
+        self.CYr = None
+        self.Clr = None       # Rolling moment due to yaw rate
+        self.Cnr = None       # Yawing moment due to yaw rate (yaw damping)
+        
+        # Lateral-Directional Control Derivatives (optional for basic stability, needed for control response)
+        self.CYda = None
+        self.Clda = None      # Aileron effectiveness
+        self.Cnda = None
+        self.CYdr = None
+        self.Cldr = None
+        self.Cndr = None      # Rudder effectiveness
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+class FlapGroup:
+    def __init__(self, spanwise_pos_frac_inbound: float = None, spanwise_pos_frac_outbound: float = None,
+                 flapwidth: float = None):
+
+        self.spanwise_pos_frac_inbound = spanwise_pos_frac_inbound
+        self.spanwise_pos_frac_outbound = spanwise_pos_frac_outbound
+        self.flapwidth = flapwidth # meter
