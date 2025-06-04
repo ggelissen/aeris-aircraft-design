@@ -26,8 +26,6 @@ class DesignParameters:
         self.crit_mach = None
         self.inertia_matrix = None
 
-
-
         # Subsystem Parameters
         self.cg = CGParameters()  # Center of Gravity Parameters
         self.weight = WeightParameters()
@@ -38,6 +36,8 @@ class DesignParameters:
         self.empennage = EmpennageParameters(l_f=self.fuselage.l_f)
         self.landing_gear = LandingGearParameters()
         self.control_surface = ControlSurfaceParameters()
+        self.stability_aero = StabilityAerodynamicParameters()
+        self.inertia = IntertiaParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -88,6 +88,8 @@ class DesignParameters:
             self.control_surface.load_from_dict(config.get('control_surface', {}))
         if 'cg' in config:
             self.cg.load_from_dict(config.get('cg', {}))
+        if 'stability_aero' in config:
+            self.stability_aero.load_from_dict(config.get('stability_aero', {}))
 
     def update_parameter(self, parameter_name, value):
         """
@@ -132,6 +134,7 @@ class WeightParameters:
         self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.5793                          # Maximum Fuel Fraction
         self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
+        self.M_TO = self.W_TO / 9.80665                # Maximum Take-Off Mass in kg
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -211,6 +214,8 @@ class PerformanceParameters:
         self.CL_max_cruise = 1.8                   # Maximum Lift Coefficient at Cruise
 
         self.CL_alpha = 5.0                  # Lift Curve Slope in 1/rad
+
+        self.CL_cruise = None                  # Lift Coefficient at Cruise	
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -384,7 +389,7 @@ class CGParameters:
         self.x_cg_fuel = 5                       # CG Position of the Fuel in m
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
-        self.z_cg = 1.5                      # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
+        self.z_cg = 1.5                          # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -433,3 +438,65 @@ class Control:
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+class IntertiaParameters:
+    def __init__(self, W_TO :float = None, g :float = None):
+        self.I_xx = None     # Moment of inertia about x-axis (kg*m^2)
+        self.I_yy = None     # Moment of inertia about y-axis (kg*m^2)
+        self.I_zz = None     # Moment of inertia about z-axis (kg*m^2)
+        self.I_xz = None     # Product of inertia xz-plane (kg*m^2)
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
+class StabilityAerodynamicParameters:
+    def __init__(self):
+        self.CL0 = None       # Lift coefficient at alpha=0 (or CZ0 in body axes)
+        self.CD0 = None       # Zero-lift drag coefficient (or CX0 in body axes)
+        self.CLa = None       # Lift curve slope (dCL/dalpha or dCZ/dalpha)
+        self.Cma = None       # Pitching moment coefficient slope (dCm/dalpha)
+        self.alpha0_rad = None # Initial angle of attack (radians) for the reference flight condition
+        self.theta0_rad = None # Initial pitch angle (radians) for the reference flight condition
+
+        # Longitudinal Derivatives
+        self.CX0 = None       
+        self.CZ0 = None       
+        self.CXu = None
+        self.CZu = None
+        self.Cmu = None
+        self.CXa = None # Often dCX/dalpha
+        self.CZa = None         # = CLa (if using stability axes and thrust effects on Z are small)
+        self.CXq = None
+        self.CZq = None
+        self.Cmq = None
+        self.CXadot = None
+        self.CZadot = None
+        self.Cmadot = None
+        self.Cmde = None      # Pitch control effectiveness (elevator)
+
+        # Lateral-Directional Derivatives
+        self.CYb = None       # Side force due to sideslip
+        self.Clb = None       # Rolling moment due to sideslip (dihedral effect)
+        self.Cnb = None       # Yawing moment due to sideslip (weathercock stability)
+        self.CYp = None
+        self.Clp = None       # Rolling moment due to roll rate (roll damping)
+        self.Cnp = None       # Yawing moment due to roll rate
+        self.CYr = None
+        self.Clr = None       # Rolling moment due to yaw rate
+        self.Cnr = None       # Yawing moment due to yaw rate (yaw damping)
+        
+        # Lateral-Directional Control Derivatives (optional for basic stability, needed for control response)
+        self.CYda = None
+        self.Clda = None      # Aileron effectiveness
+        self.Cnda = None
+        self.CYdr = None
+        self.Cldr = None
+        self.Cndr = None      # Rudder effectiveness
+
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+
