@@ -14,8 +14,6 @@ from design_variables import *
 
 
 
-
-
 # === 1. Buckling Calculation ===
 def calculate_critical_buckling_stress(E, I, A, L, K_col=1.0):
     """
@@ -37,7 +35,7 @@ def calculate_critical_buckling_stress(E, I, A, L, K_col=1.0):
     return sigma_cr
 
 # === 2. S-N Curve Function ===
-def sn_curve(stress_ampl, A=1e12, m=3.0):
+def sn_curve(stress_ampl, A=1e10, m=3.0):
     """
     Calculate the number of cycles to failure based on the S-N curve.
     Parameters:
@@ -86,7 +84,7 @@ def plot_sn_curve(A=1e12, m=3.0):
 # === Example Fatigue Analysis for Given Buckling Parameters ===
 if __name__ == "__main__":
     E = 70e9             # Pa (Aluminium)
-    I = 8e-6             # m^4
+    I = 8e-5            # m^4
     A = 0.004            # m^2
     L = 2.0              # m
     K_col = 1.0
@@ -94,8 +92,10 @@ if __name__ == "__main__":
     sigma_cr = calculate_critical_buckling_stress(E, I, A, L, K_col)
 
     # Define fatigue load spectrum as percentage of sigma_cr
-    stress_percentages = np.array([0.9, 0.8, 0.7, 0.6])  # load levels
+    stress_percentages = np.array([0.4, 0.35, 0.30, 0.25])  # load levels
     stress_amplitudes = stress_percentages * sigma_cr   # actual amplitudes
+    print(f"Critical Buckling Stress (σ_cr): {sigma_cr / 1e6:.2f} MPa")
+    print(f"Stress Amplitudes (MPa): {stress_amplitudes / 1e6}")
     cycle_counts = [1e4, 1e5, 2e5, 5e5]                  # typical cycles
 
     # Calculate fatigue damage

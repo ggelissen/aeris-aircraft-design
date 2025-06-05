@@ -274,7 +274,7 @@ def run_performance_diagram(params: DesignParameters):
     """
     Generates the T/W vs W/S diagram for the UAV based on performance constraints.
     """
-    uav_A_perf = params.wing.A_w
+    uav_A_perf = params.wing.A_w_target
     num_engines_uav_perf = params.engine.N_engines
 
     # Aerodynamic parameters (PDF2 P12 "uav" example data or specific configs)
@@ -366,4 +366,12 @@ def run_performance_diagram(params: DesignParameters):
 
     plot_TW_WS_diagram_pd(W_S_range_Npm2_pd, constraints_list_pd, title=f"T/W vs W/S Diagram - Business uav (A={uav_A_perf})", design_point=design_point_example)
 
-    return {"T_W": tw_intersect, "W_S": ws_intersect}
+    return {"T_W": float(tw_intersect), "W_S": float(ws_intersect)}
+
+if __name__ == "__main__":
+
+    params = DesignParameters()
+    params.load_from_yaml("design_config.yaml")
+
+    results = run_performance_diagram(params)
+    print(results)

@@ -467,7 +467,7 @@ def run_initial_weight_estimations(params: DesignParameters) -> dict:
     uav_aircraft_params = {
         "type": "uav",
         "type_for_coeffs": "uav",
-        "A": params.wing.A_w,
+        "A": params.wing.A_w_target,
         "c_j_kg_Ns": lb_hr_lbf_to_kg_Ns(params.engine.cruise_tsfc),
         "M_tfo": params.weight.M_tfo
     }
@@ -516,4 +516,5 @@ def run_initial_weight_estimations(params: DesignParameters) -> dict:
 if __name__ == "__main__":
     params = DesignParameters()
     params.load_from_yaml("design_config.yaml")
-    run_initial_weight_estimations(params)
+    results = run_initial_weight_estimations(params)
+    print(results)

@@ -11,7 +11,7 @@ landing_distance: 1200          # Landing distance in meters
 diversion_distance: 460000      # Diversion distance in meters
 loiter_time: 7200               # Loiter time in seconds
 max_eq_velocity: 207.549        # Maximum Equivalent Velocity in kts
-max_load_factor: 2.5            # Maximum Load Factor
+max_load_factor: 5            # Maximum Load Factor
 crit_mach: 0.75                 # Critical Mach Number
 
 # Performance Parameters

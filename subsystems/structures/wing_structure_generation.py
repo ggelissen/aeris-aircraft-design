@@ -8,6 +8,7 @@ import scipy
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
+from ideal_cross_section_analysis import run_cross_section_analysis
 
 
 def wing_structure_generation(designvars: DesignParameters = None):
@@ -32,6 +33,7 @@ def wing_structure_generation(designvars: DesignParameters = None):
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
     print("here")
+    #fuselage_cross_section(designvars, )
 
 
     # cross_sectional_structure_along_span(designvars, 0)
@@ -39,6 +41,10 @@ def wing_structure_generation(designvars: DesignParameters = None):
     # cross_sectional_structure_along_span(designvars, 0.9)
     # cross_sectional_structure_along_span(designvars, 0.95)
     #fuselage_cross_section(designvars, 0.5)
+
+    cross_section = cross_sectional_structure_along_span(designvars, 0.95)
+    run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
+                               1000, 1000, 1000, 1000, 0.01)
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
