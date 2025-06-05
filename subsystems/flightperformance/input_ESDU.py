@@ -258,29 +258,29 @@ combined_esdu_inputs = [
     "RCJ_per_unit_length",              # Reynolds number per unit length based on free-stream flow (used in 85010 for roll rate)
                                         # Note: R_global and RCJ_per_unit_length are related but defined differently.
                                         # One might be derivable from the other if mean chord is known.
-    "alpha_limits_deg",                 # Pair: Lower and upper limits of incidence (deg) (e.g., alpha_1, alpha_2)
+    "alpha_limits_deg": 0.0 0.0,                 # Pair: Lower and upper limits of incidence (deg) (e.g., alpha_1, alpha_2)
                                         # (00025/90010 define a range for calculation at 0.5deg intervals)
-    "ALPHA_single_deg",                 # Single Angle of attack (deg) (used in 85010 for roll rate)
+    "ALPHA_single_deg": 0.0,                 # Single Angle of attack (deg) (used in 85010 for roll rate)
                                         # Note: Choose one alpha definition based on program needs.
-    "NOP_output_format",                # Integer: 1 = full output, 0 = restricted output (from 00025/90010)
+    "NOP_output_format": 1,                # Integer: 1 = full output, 0 = restricted output (from 00025/90010)
 
     # === REFERENCE DIMENSIONS & POINTS ===
     # (Generally common, but specific definitions might vary slightly per ESDU item)
     "L0_moment_ref_from_nose",          # Longitudinal distance of moment reference point aft of body nose (ESDU 90010: L0)
                                         # (ESDU 00025: l_moment_ref, 'l')
-    "SREF_area",                        # Reference area for coefficients (ESDU 90010: SW for wing; ESDU 00025: S for wing; ESDU 85010: ST for tail, S for wing)
+    "SREF_area": 11,                        # Reference area for coefficients (ESDU 90010: SW for wing; ESDU 00025: S for wing; ESDU 85010: ST for tail, S for wing)
                                         # -> Need a clear, consistent SREF for the whole aircraft. Often gross wing area.
-    "CBAR_mean_aerodynamic_chord",      # Aerodynamic mean chord (ESDU 90010: CDBAR; ESDU 85010: CDBART for tail)
+    "CBAR_mean_aerodynamic_chord": 1.2824,      # Aerodynamic mean chord (ESDU 90010: CDBAR; ESDU 85010: CDBART for tail)
                                         # -> Need a consistent CBAR for the wing (often the primary reference length).
-    "BW_span",                          # Wing span (ESDU 90010: BW; ESDU 00025: b_wing; ESDU 85010: BW_wing_span, BT for tail)
+    "BW_span": ,                          # Wing span (ESDU 90010: BW; ESDU 00025: b_wing; ESDU 85010: BW_wing_span, BT for tail)
                                         # -> Need a consistent reference span (usually wing span).
     "XACB_wing_ac_from_yaw_axis",       # Longitudinal distance rearward from yawing axis (coord origin) to wing AC (fraction of wing span) (ESDU 85010 specific)
     "X0D_mrp_aft_wing_mac_le",          # Longitudinal distance of moment ref point, aft of LE of wing MAC (ESDU 90010)
 
     # === BODY (FUSELAGE) GEOMETRY ===
     # (Largely common definitions needed across programs)
-    "LB_body_length",                   # Overall body length (ESDU 90010: LB; ESDU 00025: l_b_body)
-    "SMOOTH_body_shape_marker",         # Marker for fuselage cross-sectional shape (ESDU 90010)
+    "LB_body_length": 10,                   # Overall body length (ESDU 90010: LB; ESDU 00025: l_b_body)
+    "SMOOTH_body_shape_marker": ,         # Marker for fuselage cross-sectional shape (ESDU 90010)
     "HBM_body_max_height_at_max_width", # Body height in plane of max body width (ESDU 90010)
     "LA_body_afterbody_length",         # Length of tapered afterbody (ESDU 90010)
     "SB_body_side_area",                # Planform area of body on Oxy plane / Area of side elevation (ESDU 90010 / 00025)
