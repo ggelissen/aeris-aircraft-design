@@ -205,6 +205,9 @@ class WingParameters:
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
         self.airfoil_clalpha = 1.5
         self.airfoil_cd0 = 0.06
+        self.C_D0 = 0.017196 
+        self.e = 0.9         #oswald efficiency factor
+        self.k2 = 1 / (np.pi * self.A_w_target * self.e)
 
         
 
