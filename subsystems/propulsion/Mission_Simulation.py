@@ -498,7 +498,7 @@ def run_mission_simulation(params: DesignParameters):
     print("Starting Aircraft Mission Emissions Simulation...\n")
 
     baseline_engine_config = {
-        "bpr": 2.65, "pr_fan": 1.9, "pr_lpc": 1.5, "pr_hpc": 5.65, "tt_4": 1400., # tt_4 is max design TIT
+        "bpr": 3.3, "pr_fan": 1.9, "pr_lpc": 1.5, "pr_hpc": 5.65, "tt_4": 1400., # tt_4 is max design TIT
         "eta_fan": 0.915, "eta_lpc": 0.9, "eta_hpc": 0.9,
         "eta_hpt": 0.93, "eta_lpt": 0.93,
         "eta_com": 0.99, "eta_mech_l": 0.99, "eta_mech_h": 0.99,
