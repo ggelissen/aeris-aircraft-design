@@ -273,6 +273,8 @@ class FuselageParameters:
             self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
         self.l_n = 2.0                              # Nose Length in m
         self.fuseid = None # Will contain the object ID of the wing in VSP, is set by create_fuselage()
+        self.coordinates_have_been_loaded = False
+        self.fuselage_coords = None
 
 
     def load_from_dict(self, param_dict):
