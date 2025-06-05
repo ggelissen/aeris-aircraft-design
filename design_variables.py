@@ -159,6 +159,7 @@ class WingParameters:
     def __init__(self, W_TO: float = None, W_S: float = None):
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
+        self.S_ref = self.S_w
         self.A_w_target = 9.0                             # Aspect Ratio (INITIAL)
         self.A_w_actual = None                      # Because addition of yehudi and winglets change aspect ratio. During iteration, optimise such that target=actual
         if self.S_w is not None and self.A_w_target is not None:
@@ -194,7 +195,7 @@ class WingParameters:
         self.threeDairfoil2 = None
         self.threeDairfoil3 = None
         self.wingid = None # Will contain the object ID of the wing in VSP, is set by create_wing()
-        self.wingsection = WingSectionPars()  # Wing section parameters, such as spars, are stored here
+        self.wingsection = WingSectionParameters()  # Wing section parameters, such as spars, are stored here
         self.wingribs = Wingribs()  # Wing ribs parameters, such as thickness, are stored here
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
@@ -326,7 +327,7 @@ class EmpennageParameters:
         self.S_v =   2.16                          # Vertical Stabilizer Area in m^2
         self.V_h = 0.7 #estimation                             # V-Tail Volume Coefficient
         self.V_v = 0.05 #estimation                             # Horizontal Stabilizer Volume Coefficient
-        self.S_t = None                             # Total Stabilizer Area in m^2
+        self.S_t = 2                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
         self.type = 'fixed'
@@ -342,8 +343,8 @@ class EmpennageParameters:
         self.i_t = None                             # V-Tail Incidence Angle in degrees
         self.A_t = 9                             # V-Tail Aspect Ratio
         self.Lambda_t_025c = None                   # V-Tail Quarter-Chord Sweep Angle in degrees
-        self.lambda_t = None                        # V-Tail Taper Ratio
-        self.t_c_t = None                           # V-Tail Thickness-to-Chord Ratio
+        self.lambda_t = 0.25                        # V-Tail Taper Ratio
+        self.t_c_t = 0.14                           # V-Tail Thickness-to-Chord Ratio
         self.airfoil_t = None                       # V-Tail Airfoil Type
         self.vtail_dihedral = np.deg2rad((110 - 180)/-2) #placeholder                  # V-Tail Dihedral Angle in radians
         self.L_v = 0.45* l_f                         #Moment arm vertical stabilizer
@@ -426,7 +427,7 @@ class CGParameters:
             if hasattr(self, key):
                 setattr(self, key, value)
 
-class WingSectionPars:
+class WingSectionParameters:
     def __init__(self):
         self.spars = {
             "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50},

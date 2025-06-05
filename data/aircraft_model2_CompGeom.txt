@@ -8,6 +8,7 @@ Theo_Area   Wet_Area   Theo_Vol    Wet_Vol  Name
    30.743     24.535      1.809      1.480  WingGeom       
     7.729      6.462      0.262      0.225  Horizontal_Stabilizer
     9.313      8.721      0.848      0.814  Fuselage_Engine
+    9.313      8.721      0.848      0.814  Fuselage_Engine
 -------------------------------------------------
    79.240     69.578     10.934     10.321  Totals         
 

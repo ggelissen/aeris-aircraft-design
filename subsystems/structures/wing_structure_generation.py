@@ -1,4 +1,5 @@
 import numpy as np
+#from ezdxf.addons.r12writer import dxf_attribs
 
 import openvsp as vsp
 import os
@@ -7,6 +8,7 @@ from vspfunctions import *
 import scipy
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
+from ideal_cross_section_analysis import run_cross_section_analysis
 
 
 
@@ -18,26 +20,11 @@ def wing_structure_generation(designvars: DesignParameters = None):
     - designvars: DesignParameters object containing design variables.
     - NCell: Number of cells for the wing structure.
     """
+    #cross_sectional_structure_along_span(designvars, 0.871)
+    #cross_sectional_structure_along_span(designvars, 0.9)
+    cross_section = cross_sectional_structure_along_span(designvars, 0.95)
+    run_cross_section_analysis(designvars, cross_section["spar_points_array"], cross_section["stringer_array"], 1000, 1000, 1000, 1000, 1000, 0.01)
 
-
-    # Freeze geometry:
-
-    vsp.UpdateGeom(designvars.wing.wingid)
-    designvars.wing.b_w = vsp.GetParmVal(designvars.wing.wingid, "TotalSpan", "WingGeom")
-    vsp.UpdateGeom(designvars.wing.wingid)
-    vsp.SetComputationFileName(vsp.DEGEN_GEOM_CSV_TYPE, "data/DegenGeom.csv")
-    vsp.SetSetFlag(designvars.wing.wingid, 8, True)
-    vsp.ComputeDegenGeom(8, vsp.DEGEN_GEOM_CSV_TYPE)
-    data = pd.read_csv("data/DegenGeom.csv", header=None, skiprows=10, nrows=2211)
-    datanp = data.to_numpy()
-    designvars.structurecoords = np.round(datanp, decimals=6)
-    print("here")
-
-
-    # cross_sectional_structure_along_span(designvars, 0)
-    # cross_sectional_structure_along_span(designvars, 0.871)
-    # cross_sectional_structure_along_span(designvars, 0.9)
-    # cross_sectional_structure_along_span(designvars, 0.95)
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
@@ -174,7 +161,16 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
             plt.plot(spar[:, 0], spar[:, 1])
         plt.show()
         plt.savefig('data/wing_structure.png', dpi=300, bbox_inches='tight')
-    return spar_points_array, stringer_array, outline, chord_length, lower_airfoil, upper_airfoil
+
+    return {
+        'spar_points_array': spar_points_array,
+        'stringer_array': stringer_array,
+        'outline': outline,
+        'chord_length': chord_length,
+        'lower_airfoil': lower_airfoil,
+        'upper_airfoil': upper_airfoil
+    }
+
 
 def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise_points: int = 1001):
     halfspan = designvars.wing.b_w / 2
@@ -327,7 +323,4 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     fuselage_mesh.translate([0, 0, 0], inplace=True)
     plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
 
-
-
     plotter.show()
-
