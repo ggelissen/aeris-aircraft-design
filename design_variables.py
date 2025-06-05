@@ -303,6 +303,9 @@ class EngineParameters:
         self.engine_y_pos = 0.0                     # Engine Y-Position in m
         self.engine_z_pos = -0.9                    # Engine Z-Position in m
         self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
+        self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
+        self.eta_fanturb = 0.9  
+        self.tt4to = 1450 #tt4 temp at takeoff               
 
 
     def load_from_dict(self, param_dict):
