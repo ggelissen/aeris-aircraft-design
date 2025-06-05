@@ -5,6 +5,7 @@ import pyvista as pv
 from design_variables import DesignParameters
 from scipy.interpolate import interp1d
 import os
+import pandas as pd
 
 def print_all_params(obj_id):
     parm_ids = vsp.GetGeomParmIDs(obj_id)
@@ -364,24 +365,53 @@ def calculate_wet_areas(designvars: DesignParameters = None):
     for geom in vsp.FindGeoms():
         vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
 
-def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0):
-    points = []
+def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, return_xdis = True):
+    # points = []
     wingid = designvars.wing.wingid
     yehudi_frac = designvars.wing.yehudi_pos_frac
     if spanwise_pos_frac < yehudi_frac:
         local_chord_length = vsp.GetParmVal(wingid, "Root_Chord", "XSec_1") * (1 - np.abs(spanwise_pos_frac/yehudi_frac)) + vsp.GetParmVal(wingid, "Tip_Chord", "XSec_1") * np.abs(spanwise_pos_frac/yehudi_frac)
     else:
         local_chord_length = vsp.GetParmVal(wingid, "Root_Chord", "XSec_2") * (1 - np.abs((spanwise_pos_frac-yehudi_frac)/(1-yehudi_frac))) + vsp.GetParmVal(wingid, "Tip_Chord", "XSec_2") * np.abs((spanwise_pos_frac-yehudi_frac)/(1-yehudi_frac))
-    for vec in vsp.GetAirfoilCoordinates(designvars.wing.wingid, abs(spanwise_pos_frac)):
-        points.append(np.array([vec.x(), vec.y()]))
 
-    points = np.array(points)
-    x_displacement = np.tan(designvars.wing.Lambda_0_w) * spanwise_pos_frac * designvars.wing.b_w/2
-    points[:, 0] *= local_chord_length  # Scale X coordinates by local chord length
-    points[:, 0] += x_displacement
-    points[:, 1] *= local_chord_length
 
-    return points, local_chord_length, x_displacement
+    # for vec in vsp.GetAirfoilCoordinates(designvars.wing.wingid, abs(spanwise_pos_frac)):
+    #     points.append(np.array([vec.x(), vec.y()]))
+
+    halfspann = vsp.GetParmVal(designvars.wing.wingid, "TotalSpan", "WingGeom")/2
+    pos_index = np.argmin(np.abs(designvars.structurecoords[:,1] - spanwise_pos_frac*halfspann))
+    if spanwise_pos_frac*halfspann < designvars.structurecoords[:,1][pos_index] :
+        ycoord = designvars.structurecoords[pos_index, 1]
+        indices = np.where(np.isclose(designvars.structurecoords[:, 1], ycoord))[0]
+        pos_index = indices[0] - 1
+
+
+    ycoord = designvars.structurecoords[pos_index, 1]
+    indices = np.where(np.isclose(designvars.structurecoords[:, 1] , ycoord))[0]
+    wing_points1 = designvars.structurecoords[indices][:,[0,2]]
+    try:
+        ycoordnew = designvars.structurecoords[indices[-1]+1, 1]
+        indices2 = np.where(np.isclose(designvars.structurecoords[:,1] , ycoordnew))[0]
+        wing_points2 = designvars.structurecoords[indices2][:,[0,2]]
+        interpolation_frac = (spanwise_pos_frac*halfspann - ycoord)/(ycoordnew - ycoord)
+        wing_points = (1-interpolation_frac) * wing_points1 + interpolation_frac * wing_points2
+    except:
+        wing_points = wing_points1
+
+
+
+
+    # points = np.array(points)
+    if return_xdis:
+        x_displacement =  np.min(wing_points[:,0]) # - np.min(cross_section(designvars, 0.0, return_xdis=False)[0][:,0])  #np.tan(designvars.wing.Lambda_0_w) * spanwise_pos_frac * designvars.wing.b_w/2
+    else:
+        x_displacement = 0
+    local_chord_length = np.max(wing_points[:,0]) - np.min(wing_points[:,0])
+    # points[:, 0] *= local_chord_length  # Scale X coordinates by local chord length
+    # points[:, 0] += x_displacement
+    # points[:, 1] *= local_chord_length
+
+    return wing_points , local_chord_length, x_displacement
 
 def is_headless():
     return os.environ.get("DISPLAY", "") == ""
