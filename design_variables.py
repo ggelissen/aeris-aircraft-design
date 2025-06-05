@@ -290,7 +290,7 @@ class EngineParameters:
         self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
         self.cruise_thrust_setting = None           # Thrust setting for cruise
         self.engine_weight =   None                 # Engine Weight in N
-        self.engine_max_thrust = None               # Engine Maximum Thrust in N
+        self.engine_max_thrust = 9340               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
         self.nacelle_diameter = None
