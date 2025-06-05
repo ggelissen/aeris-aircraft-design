@@ -126,14 +126,14 @@ class WeightParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.W_TO = 30787.8                         # Maximum Take-Off Weight (MTOW) in N
+        self.W_TO = 37807.7                         # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
         self.W_OE = 11973.3                         # Operational Empty Weight (OEW) in N
         self.W_F = 12930.5                          # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 2563                             # Wing Loading in N/m^2
-        self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
+        self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.5793                          # Maximum Fuel Fraction
         self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
