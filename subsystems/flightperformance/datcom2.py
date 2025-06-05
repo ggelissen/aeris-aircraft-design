@@ -6,5 +6,3 @@ path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 
 with open(f"{path}\\datcom.out", "r") as f:
     data = f.readlines()
-
-
