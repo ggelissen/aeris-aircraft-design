@@ -59,6 +59,11 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     ### Add engines
     create_engines(designvars)
 
+    prev_cwd = os.getcwd()
+    os.chdir(os.getcwd() + "/data")
+    vsp.WriteVSPFile("aircraft_model2.vsp3")
+    os.chdir(prev_cwd)
+
     ### Calculate specifications
     calculate_cg(designvars)
     calculate_wet_areas(designvars)
