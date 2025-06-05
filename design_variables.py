@@ -172,7 +172,7 @@ class WingParameters:
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
         self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
-        self.Lambda_0_w = None                          # Will be calculated in the code in rad
+        self.Lambda_05_w = 0.607                           # Wind half-chord sweep angle in rad
         self.t_c_w_max = None
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
@@ -203,6 +203,9 @@ class WingParameters:
         self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
+        self.C_D0 = 0.017196 
+        self.e = 0.9         #oswald efficiency factor
+        self.k2 = 1 / (np.pi * self.A_w_target * self.e)
 
         
 

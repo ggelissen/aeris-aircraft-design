@@ -1,3 +1,14 @@
+import sys
+import os
+import math
+
+sys.path.append(os.path.abspath(os.path.join(os.path.join(os.path.dirname(__file__), '..'), '..')))
+
+from design_variables import DesignParameters
+
+DP = DesignParameters()
+
+
 esdu_pitch_lift_derivatives_input = [
     # General
     "UNITS",        # (1 = SI, 2 = British)
@@ -246,41 +257,38 @@ esdu_roll_rate_derivatives_inputs = [
 ]
 
 
-combined_esdu_inputs = [
+combined_esdu_inputs = {
     # === GENERAL & FLIGHT CONDITIONS ===
     # (Common to most ESDU aero programs)
-    "TEXT_LINE_1",                      # Descriptive text
-    "TEXT_LINE_2",                      # Descriptive text
-    "TEXT_LINE_3",                      # Descriptive text
-    "UNITS",                            # Integer: 1 = SI units, 2 = British units
-    "M",                                # Mach number
-    "R_global",                         # Reynolds number based on aerodynamic mean chord of wing (used in 00025/90010)
+    "UNITS" = 1,                            # Integer: 1 = SI units, 2 = British units
+    "M" = 0.7,                                # Mach number
+    "R_global " ,                         # Reynolds number based on aerodynamic mean chord of wing (used in 00025/90010)
     "RCJ_per_unit_length",              # Reynolds number per unit length based on free-stream flow (used in 85010 for roll rate)
                                         # Note: R_global and RCJ_per_unit_length are related but defined differently.
                                         # One might be derivable from the other if mean chord is known.
-    "alpha_limits_deg": 0.0 0.0,                 # Pair: Lower and upper limits of incidence (deg) (e.g., alpha_1, alpha_2)
+    "alpha_limits_deg",                 # Pair: Lower and upper limits of incidence (deg) (e.g., alpha_1, alpha_2)
                                         # (00025/90010 define a range for calculation at 0.5deg intervals)
-    "ALPHA_single_deg": 0.0,                 # Single Angle of attack (deg) (used in 85010 for roll rate)
+    "ALPHA_single_deg",                 # Single Angle of attack (deg) (used in 85010 for roll rate)
                                         # Note: Choose one alpha definition based on program needs.
-    "NOP_output_format": 1,                # Integer: 1 = full output, 0 = restricted output (from 00025/90010)
+    "NOP_output_format",                # Integer: 1 = full output, 0 = restricted output (from 00025/90010)
 
     # === REFERENCE DIMENSIONS & POINTS ===
     # (Generally common, but specific definitions might vary slightly per ESDU item)
-    "L0_moment_ref_from_nose",          # Longitudinal distance of moment reference point aft of body nose (ESDU 90010: L0)
+    "L0_moment_ref_from_nose" = d,          # Longitudinal distance of moment reference point aft of body nose (ESDU 90010: L0)
                                         # (ESDU 00025: l_moment_ref, 'l')
-    "SREF_area": 11,                        # Reference area for coefficients (ESDU 90010: SW for wing; ESDU 00025: S for wing; ESDU 85010: ST for tail, S for wing)
+    "SREF_area" = DP.wing.S_w,                        # Reference area for coefficients (ESDU 90010: SW for wing; ESDU 00025: S for wing; ESDU 85010: ST for tail, S for wing)
                                         # -> Need a clear, consistent SREF for the whole aircraft. Often gross wing area.
-    "CBAR_mean_aerodynamic_chord": 1.2824,      # Aerodynamic mean chord (ESDU 90010: CDBAR; ESDU 85010: CDBART for tail)
+    "CBAR_mean_aerodynamic_chord" = DP.wing.mac,      # Aerodynamic mean chord (ESDU 90010: CDBAR; ESDU 85010: CDBART for tail)
                                         # -> Need a consistent CBAR for the wing (often the primary reference length).
-    "BW_span": ,                          # Wing span (ESDU 90010: BW; ESDU 00025: b_wing; ESDU 85010: BW_wing_span, BT for tail)
+    "BW_span" = DP.wing.b_w,                          # Wing span (ESDU 90010: BW; ESDU 00025: b_wing; ESDU 85010: BW_wing_span, BT for tail)
                                         # -> Need a consistent reference span (usually wing span).
     "XACB_wing_ac_from_yaw_axis",       # Longitudinal distance rearward from yawing axis (coord origin) to wing AC (fraction of wing span) (ESDU 85010 specific)
     "X0D_mrp_aft_wing_mac_le",          # Longitudinal distance of moment ref point, aft of LE of wing MAC (ESDU 90010)
 
     # === BODY (FUSELAGE) GEOMETRY ===
     # (Largely common definitions needed across programs)
-    "LB_body_length": 10,                   # Overall body length (ESDU 90010: LB; ESDU 00025: l_b_body)
-    "SMOOTH_body_shape_marker": ,         # Marker for fuselage cross-sectional shape (ESDU 90010)
+    "LB_body_length" = DP.fuselage.l_f,                   # Overall body length (ESDU 90010: LB; ESDU 00025: l_b_body)
+    "SMOOTH_body_shape_marker" ,         # Marker for fuselage cross-sectional shape (ESDU 90010)
     "HBM_body_max_height_at_max_width", # Body height in plane of max body width (ESDU 90010)
     "LA_body_afterbody_length",         # Length of tapered afterbody (ESDU 90010)
     "SB_body_side_area",                # Planform area of body on Oxy plane / Area of side elevation (ESDU 90010 / 00025)
@@ -302,15 +310,14 @@ combined_esdu_inputs = [
     # === WING GEOMETRY ===
     # (Many common parameters, panel method inputs are specific to some ESDU items)
     "DELTA_wing_type_marker",           # 1=delta, 0=straight-tapered (ESDU 90010)
-    "AR_wing_aspect_ratio",             # Wing aspect ratio (ESDU 90010 uses AR; others might use b & S to imply it)
+    "AR_wing_aspect_ratio" = DP.wing.A_w_target,             # Wing aspect ratio (ESDU 90010 uses AR; others might use b & S to imply it)
     # BW_span already listed under Reference Dimensions
     # CDBAR_mean_aerodynamic_chord already listed
     # X0D_mrp_aft_wing_mac_le already listed
     "SW_wing_gross_area",               # Planform area of gross wing (ESDU 90010)
     # Conditional on DELTA_wing_type_marker (ESDU 90010)
-    "LAMDA0_wing_le_sweep_delta",       # Wing LE sweep for delta wings
-    "LAMDAQ_wing_qc_sweep_straight",    # Wing quarter-chord sweep for straight-tapered
-    "LAMDAH_wing_hc_sweep_straight",    # Wing half-chord sweep for straight-tapered
+    "LAMDAQ_wing_qc_sweep_straight" = DP.wing.Lambda_025c_w,    # Wing quarter-chord sweep for straight-tapered
+    "LAMDAH_wing_hc_sweep_straight" = DP.wing.Lambda_05_w,    # Wing half-chord sweep for straight-tapered
     "LAMBDA_wing_taper_ratio_straight", # Wing taper ratio for straight-tapered
 
     # Wing Panel Definition (Used by ESDU 00025 & 85010 for more detailed wing shape)
@@ -368,29 +375,25 @@ combined_esdu_inputs = [
     "TPLANE_tailplane_presence_marker", # Marker for presence of tailplane (1=yes, 0=no) (ESDU 90010)
                                         # (ESDU 00025 uses N_F, ESDU 85010 uses TPTYPE for similar concept)
     # Conditional (IF tailplane is present)
-    "AT_tailplane_aspect_ratio",        # Tailplane aspect ratio (ESDU 90010)
+    "AT_tailplane_aspect_ratio" ,        # Tailplane aspect ratio (ESDU 90010)
     "ST_tailplane_area_val",            # Planform area of gross tailplane (ESDU 90010 & 85010)
     "XT_tailplane_qc_mac_pos_from_mrp", # Longitudinal distance of tailplane qc of MAC, aft of moment ref point (ESDU 90010)
     "LAMDHT_tailplane_hc_sweep",        # Sweepback of tailplane half-chord line (ESDU 90010)
-    "LAMDAT_tailplane_taper_ratio_val", # Taper ratio of tailplane (ESDU 90010 & 85010)
+    "LAMDAT_tailplane_taper_ratio_val" , # Taper ratio of tailplane (ESDU 90010 & 85010)
     "DEPDAT_downwash_gradient_at_tail", # Mean effective gradient of downwash at tailplane (ESDU 90010)
     
-    "BT_tailplane_span_val",            # Tailplane span (ESDU 00025 for fin-mounted tail & ESDU 85010)
-    "CDBART_tailplane_mac_val",         # Tailplane aerodynamic mean chord (ESDU 85010)
-    "LAMDQT_tailplane_qc_sweep_deg",    # Tailplane quarter-chord sweep angle (deg) (ESDU 85010)
+    "BT_tailplane_span_val" = DP.empennage.b_v,            # Tailplane span (ESDU 00025 for fin-mounted tail & ESDU 85010)
+    "CDBART_tailplane_mac_val" = DP.empennage.mac ,         # Tailplane aerodynamic mean chord (ESDU 85010)
+    "LAMDQT_tailplane_qc_sweep_deg" = DP.empennage.Lambda_t_025c,    # Tailplane quarter-chord sweep angle (deg) (ESDU 85010)
     
     # Tailplane Aerofoil Section Properties (ESDU 85010 specific)
-    "A1MRKT_tailplane_lift_slope_marker", # Integer: 1=user input for a10, 2=program calculates a10
-    "A10MT_tailplane_user_a10_at_M",    # User input: 2D lift-curve slope of tailplane section at M (IF A1MRKT=1)
-    "TBYCT_tailplane_max_tc_ratio_val", # Max t/c ratio of tailplane aerofoil (IF A1MRKT=2)
-    "Y90T_tailplane_tc_at_90_chord_val",# t/c at 90% chord of tailplane (IF A1MRKT=2)
-    "Y99T_tailplane_tc_at_99_chord_val",# t/c at 99% chord of tailplane (IF A1MRKT=2)
-    "TAUDGT_tailplane_te_angle_deg",    # Tailplane aerofoil trailing-edge angle (deg) (IF A1MRKT=2)
-    "XTRCT_tailplane_transition_loc",   # Chordwise BL transition location for tailplane (IF A1MRKT=2)
+    "A1MRKT_tailplane_lift_slope_marker" = 2, # Integer: 1=user input for a10, 2=program calculates a10
+    "TBYCT_tailplane_max_tc_ratio_val" = DP.empennage.t_c_t , # Max t/c ratio of tailplane aerofoil (IF A1MRKT=2)
+    "Y90T_tailplane_tc_at_90_chord_val" :0.003  ,# ESTIMATE t/c at 90% chord of tailplane (IF A1MRKT=2)
+    "Y99T_tailplane_tc_at_99_chord_val" : 0.001,# ESTIMATE t/c at 99% chord of tailplane (IF A1MRKT=2)
+    "TAUDGT_tailplane_te_angle_deg" : 3,    # ESTIMATE Tailplane aerofoil trailing-edge angle (deg) (IF A1MRKT=2)
+    "XTRCT_tailplane_transition_loc" : 0.05 ,   # ESTIMATE Chordwise BL transition location for tailplane (IF A1MRKT=2)
 
-    # Fin-Mounted Tailplane Specific (ESDU 00025 & 85010)
-    "h_T_tailplane_height_on_fin_val",  # Height of tailplane on fin above fin root chord (ESDU 00025, if N_F=2)
-    "ZT_tailplane_height_on_fin_alt",   # Alternate name (ESDU 85010, if TPTYPE=2)
 
     # === NACELLE GEOMETRY ===
     # (From ESDU 00025, assuming similar inputs might be needed if nacelles are considered for other programs)
@@ -410,19 +413,21 @@ combined_esdu_inputs = [
 
     # === FLAPS GEOMETRY ===
     # (From ESDU 00025 & ESDU 85010, detailed flap inputs)
-    "NF_num_flap_panels_deployed",      # Integer: Number of deployed flap panels on each half-wing (0=no flaps)
-    # Conditional (IF NF_num_flap_panels_deployed > 0)
-    # For each flap panel j:
-    "FTYPE_flap_calc_type_j",           # Integer: 0=user-defined increments, 1=plain, 2=split, 3=single-slotted
-    "SFI_SFO_flap_span_limits_j",       # Pair: Inboard & outboard spanwise limits of j'th panel
-    "LDH_flap_hinge_sweep_deg_j",       # Hinge-line sweep of j'th flap panel (deg)
-    "LH_flap_hinge_intersect_from_mrp_j",# Longitudinal distance aft from MRP to extended hinge line intersection with plane of symmetry
+    "NF_num_flap_panels_deployed" 0,      # Integer: Number of deployed flap panels on each half-wing (0=no flaps)
+
     # Conditional (IF FTYPE_flap_calc_type_j = 0)
     "DCLFL_user_flap_lift_incr_j",      # User-defined flap lift coefficient increment for j'th panel
-                                        # (ESDU 00025 also mentions Delta_CD0_flap,j - may need a pair)
-    # Conditional (IF FTYPE_flap_calc_type_j = 1, 2, or 3)
-    "CF_flap_chord_ratio_j",            # Flap chord / wing chord at mid-span of j'th panel
-    "DF_flap_deflection_deg_j",         # Flap deflection angle (deg) for j'th panel
-    # Conditional for Slotted flaps (IF FTYPE_flap_calc_type_j = 3, ESDU 85010 specific for CX)
-    "CX_slotted_flap_extended_chord_ratio_j" # Extended chord / wing chord at mid-span for slotted
-]
+
+}
+
+def derivatives_yaw(params: DesignParameters):
+    l_f_bar = params.empennage.L_v # yawing moment tail arm; distance from moment reference centre of pressure position of fin sideforce, measured parallel to longitudinal body axis
+    S_F = params.empennage.S_v # fin side area
+    z_F = # rolling moment tail arm; distance from moment reference centre of pressure position of fin sideforce, measured normal to longitudinal body axis
+    find_Y_r = l_f_bar * S_F / (params.wing.S_w * params.wing.b_w)
+    find_N_r = (l_f_bar**2 * S_F)/(params.wing.b_w **2 * params.wing.S_w)
+    find_variation_L_r = (l_f_bar * z_F * S_F) / (params.wing.S_w * params.wing.b_w ** 2)
+    aoa = 2 * math.pi / 180 # I have no idea bc what is cruise aoa?
+    L_rp = 0.06 #ESTIMATE change when known = rolling moment coefficient
+    L_r = (find_variation_L_r*(z_F*math.cos(aoa)- l_f_bar * math.sin(aoa))) / z_F + L_rp
+    return find_Y_r, find_N_r, find_variation_L_r, L_r
