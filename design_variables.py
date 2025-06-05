@@ -203,6 +203,8 @@ class WingParameters:
         self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
+        self.airfoil_clalpha = 1.5
+        self.airfoil_cd0 = 0.06
 
         
 
