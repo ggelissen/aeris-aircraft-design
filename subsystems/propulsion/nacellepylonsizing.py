@@ -15,7 +15,8 @@ a = (1.4 * 287.05 * 288.15) ** 0.5  # m/s, speed of sound at sea level at ISA + 
 T_to = params.engine.T_TO
 D_fan = 0.53 # m, fan diameter
 L_eng = 1.397 # m, engine length
-Bpr = 3.3
+Bpr = params.engine.Bpr
+print(f"Bypass Ratio: {Bpr}")
 
 
 
