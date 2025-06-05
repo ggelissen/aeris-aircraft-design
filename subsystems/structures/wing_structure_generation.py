@@ -36,7 +36,7 @@ def wing_structure_generation(designvars: DesignParameters = None):
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
-def cross_sectional_structure_along_span(designvars: DesignParameters = None, spanwise_position: float = 0.0):
+def cross_sectional_structure_along_span(designvars: DesignParameters = None, spanwise_position: float = 0.0, plot: bool = True):
     """
     Generates the cross-sectional structure along the span of the wing.
 
