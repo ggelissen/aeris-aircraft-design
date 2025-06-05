@@ -431,3 +431,6 @@ def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, 
 
 def is_headless():
     return os.environ.get("DISPLAY", "") == ""
+
+def fuselage_cross_section(designvars: DesignParameters = None, lengthwise_pos_frac = 0.0):
+
