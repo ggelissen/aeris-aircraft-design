@@ -431,3 +431,13 @@ def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, 
 
 def is_headless():
     return os.environ.get("DISPLAY", "") == ""
+#
+# def fuselage_cross_section(designvars: DesignParameters = None, lengthwise_pos_frac = 0.0):
+#     if designvars.fuselage.coordinates_have_been_loaded == False:
+#         vsp.UpdateGeom(designvars.fuselage.fuseid)
+#         vsp.SetComputationFileName(vsp.DEGEN_GEOM_CSV_TYPE, "data/DegenGeom2.csv")
+#         vsp.SetSetFlag(designvars.fuselage.fuseid, 9, True)
+#         vsp.ComputeDegenGeom(9, vsp.DEGEN_GEOM_CSV_TYPE)
+#         data = pd.read_csv("data/DegenGeom2.csv", header=None, skiprows=10, nrows=2211)
+#         datanp = data.to_numpy()
+#         designvars.fuselage.fuselage_coords = np.round(datanp, decimals=6)
