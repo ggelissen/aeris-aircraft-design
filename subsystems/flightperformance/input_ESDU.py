@@ -245,3 +245,184 @@ esdu_roll_rate_derivatives_inputs = [
     "CX_slotted_flap_extended_chord_ratio" # Extended chord / wing chord at mid-span of j'th flap panel (notation c'_j / c_j)
 ]
 
+
+combined_esdu_inputs = [
+    # === GENERAL & FLIGHT CONDITIONS ===
+    # (Common to most ESDU aero programs)
+    "TEXT_LINE_1",                      # Descriptive text
+    "TEXT_LINE_2",                      # Descriptive text
+    "TEXT_LINE_3",                      # Descriptive text
+    "UNITS",                            # Integer: 1 = SI units, 2 = British units
+    "M",                                # Mach number
+    "R_global",                         # Reynolds number based on aerodynamic mean chord of wing (used in 00025/90010)
+    "RCJ_per_unit_length",              # Reynolds number per unit length based on free-stream flow (used in 85010 for roll rate)
+                                        # Note: R_global and RCJ_per_unit_length are related but defined differently.
+                                        # One might be derivable from the other if mean chord is known.
+    "alpha_limits_deg",                 # Pair: Lower and upper limits of incidence (deg) (e.g., alpha_1, alpha_2)
+                                        # (00025/90010 define a range for calculation at 0.5deg intervals)
+    "ALPHA_single_deg",                 # Single Angle of attack (deg) (used in 85010 for roll rate)
+                                        # Note: Choose one alpha definition based on program needs.
+    "NOP_output_format",                # Integer: 1 = full output, 0 = restricted output (from 00025/90010)
+
+    # === REFERENCE DIMENSIONS & POINTS ===
+    # (Generally common, but specific definitions might vary slightly per ESDU item)
+    "L0_moment_ref_from_nose",          # Longitudinal distance of moment reference point aft of body nose (ESDU 90010: L0)
+                                        # (ESDU 00025: l_moment_ref, 'l')
+    "SREF_area",                        # Reference area for coefficients (ESDU 90010: SW for wing; ESDU 00025: S for wing; ESDU 85010: ST for tail, S for wing)
+                                        # -> Need a clear, consistent SREF for the whole aircraft. Often gross wing area.
+    "CBAR_mean_aerodynamic_chord",      # Aerodynamic mean chord (ESDU 90010: CDBAR; ESDU 85010: CDBART for tail)
+                                        # -> Need a consistent CBAR for the wing (often the primary reference length).
+    "BW_span",                          # Wing span (ESDU 90010: BW; ESDU 00025: b_wing; ESDU 85010: BW_wing_span, BT for tail)
+                                        # -> Need a consistent reference span (usually wing span).
+    "XACB_wing_ac_from_yaw_axis",       # Longitudinal distance rearward from yawing axis (coord origin) to wing AC (fraction of wing span) (ESDU 85010 specific)
+    "X0D_mrp_aft_wing_mac_le",          # Longitudinal distance of moment ref point, aft of LE of wing MAC (ESDU 90010)
+
+    # === BODY (FUSELAGE) GEOMETRY ===
+    # (Largely common definitions needed across programs)
+    "LB_body_length",                   # Overall body length (ESDU 90010: LB; ESDU 00025: l_b_body)
+    "SMOOTH_body_shape_marker",         # Marker for fuselage cross-sectional shape (ESDU 90010)
+    "HBM_body_max_height_at_max_width", # Body height in plane of max body width (ESDU 90010)
+    "LA_body_afterbody_length",         # Length of tapered afterbody (ESDU 90010)
+    "SB_body_side_area",                # Planform area of body on Oxy plane / Area of side elevation (ESDU 90010 / 00025)
+    "SM_body_max_cross_section_area",   # Max cross-sectional area of body (ESDU 90010)
+    # Conditional for SMOOTH=0 (ESDU 90010)
+    "SXTENT_body_smooth_to_angular_segments",
+    "S1_body_base_area",
+    "WBM_body_max_width",
+    "WB1_body_base_width",
+    "body_segments_width_height_array", # Represents WB(I), HB(I) pairs (ESDU 90010)
+    # From ESDU 00025 (may overlap or be more specific ways to define body for that program)
+    "hb1_body_height_at_025LB",         # Body cross-section height at 0.25 l_b
+    "hb2_body_height_at_075LB",         # Body cross-section height at 0.75 l_b
+    "W_body_width_at_wing_qc_loc",      # Width of body at wing quarter-chord location (ESDU 00025 & 85010)
+    "H_body_height_at_wing_qc_loc",     # Height of body at wing quarter-chord location (ESDU 00025)
+    "HBW_body_height_at_wing_qc_loc_alt", # Alternate name for similar concept (ESDU 85010 uses HBW)
+    "alpha0B_body_zero_lift_incidence_deg", # Incidence for zero body-alone lift (deg) (ESDU 00025)
+
+    # === WING GEOMETRY ===
+    # (Many common parameters, panel method inputs are specific to some ESDU items)
+    "DELTA_wing_type_marker",           # 1=delta, 0=straight-tapered (ESDU 90010)
+    "AR_wing_aspect_ratio",             # Wing aspect ratio (ESDU 90010 uses AR; others might use b & S to imply it)
+    # BW_span already listed under Reference Dimensions
+    # CDBAR_mean_aerodynamic_chord already listed
+    # X0D_mrp_aft_wing_mac_le already listed
+    "SW_wing_gross_area",               # Planform area of gross wing (ESDU 90010)
+    # Conditional on DELTA_wing_type_marker (ESDU 90010)
+    "LAMDA0_wing_le_sweep_delta",       # Wing LE sweep for delta wings
+    "LAMDAQ_wing_qc_sweep_straight",    # Wing quarter-chord sweep for straight-tapered
+    "LAMDAH_wing_hc_sweep_straight",    # Wing half-chord sweep for straight-tapered
+    "LAMBDA_wing_taper_ratio_straight", # Wing taper ratio for straight-tapered
+
+    # Wing Panel Definition (Used by ESDU 00025 & 85010 for more detailed wing shape)
+    "XBD_wing_exposed_root_le_from_nose", # Longitudinal distance from body nose to LE of exposed root chord (ESDU 00025 & 85010)
+    "CBD_wing_exposed_root_chord_val",  # Root chord of exposed half-wing (ESDU 00025 & 85010)
+    "NPAN_wing_num_panels",             # Integer: Number of trapezoidal panels per half-wing
+    # For each wing panel I (from 1 to NPAN_wing_num_panels):
+    "Y_I_wing_panel_inboard_span_coord",# Spanwise distance from plane of symmetry to inboard chord of I'th panel
+    "LDL_I_NDL_I_wing_panel_le_details",# Pair: LE sweep (deg) and sawtooth depth at LE of inboard chord
+    "LDT_I_NDT_I_wing_panel_te_details",# Pair: TE sweep (deg) and sawtooth depth at TE of inboard chord
+
+    # Additional Wing Geometry (Dihedral, Aerofoil, Thickness, Mounting)
+    "NG_wing_num_dihedral_segments",    # Integer: Number of wing spanwise dihedral segments
+    # For each dihedral segment I (from 1 to NG_wing_num_dihedral_segments):
+    "ETA1_I_GM_I_dihedral_segment_details", # Pair: Spanwise distance to outboard limit & Dihedral angle (deg)
+    "DT_wing_tip_deflection",           # Wing tip deflection due to load
+    
+    # Wing Aerofoil Section Properties (some conditional on DELTA or A1MRKW)
+    "A1MRKW_wing_lift_slope_marker",    # Integer: 1=user input for a10, 2=program calculates a10 from t/c etc. (ESDU 85010)
+    "A10MW_wing_user_a10_at_M",         # User input: 2D lift-curve slope of wing section at M (IF A1MRKW=1)
+    "TBYC_wing_max_tc_ratio",           # Max thickness/chord ratio (ESDU 90010: TBYC; ESDU 85010: T_wing_max_thickness_chord_ratio)
+    "Y90_wing_tc_at_90_chord_val",      # Thickness/chord ratio at 90% chord (ESDU 85010)
+    "Y99_wing_tc_at_99_chord_val",      # Thickness/chord ratio at 99% chord (ESDU 85010)
+    "TAUDEG_wing_trailing_edge_angle",  # Aerofoil trailing-edge angle in degrees (ESDU 90010: TAUDEG; ESDU 85010: TAU_wing_trailing_edge_angle_deg)
+    "XTRBYC_wing_transition_loc",       # Dimensionless chordwise location of boundary layer transition (ESDU 90010: XTRBYC; ESDU 85010: XT_wing_transition_point_chord_fraction)
+    
+    # Wing-Body Integration / Mounting
+    "z_W_wing_vertical_pos_rel_body",   # Distance of wing qc of C/L chord below body C/L (+ for low wing) (ESDU 00025)
+    "H0_wing_qc_height_rel_fuselage_cl",# Height of wing qc of C/L chord above fuselage C/L (+ for high wing) (ESDU 85010)
+                                        # Note: z_W and H0 represent similar concepts (vertical wing position) but with different sign conventions/definitions.
+    "alpha0_wing_body_zero_lift_inc",   # Incidence of body axis for zero wing-body lift (deg) (ESDU 00025 uses alpha0; ESDU 85010 uses AW)
+    
+    # Wing Moment Reference Parameters (ESDU 85010 specific)
+    "ZETA_wing_mrc_vertical_offset_frac_semispan", # Perp. dist of wing C/L chord below wing moment ref centre (frac of semi-span, + low)
+    "EXI_wing_mrc_longitudinal_offset_frac_semispan",# Dist of wing moment ref centre ahead of wing AC (frac of semi-span)
+    
+    "ATTACH_flow_attachment_marker_val",# Integer: 0=not fully attached, 1=fully attached (ESDU 85010)
+    # Conditional (IF ATTACH = 0)
+    "DCDDA_viscous_drag_slope_deg",     # Rate of change of viscous drag coeff with AoA (per deg) (ESDU 85010)
+
+    # === FIN (VERTICAL TAIL) GEOMETRY ===
+    # (Parameters common if a vertical surface is defined)
+    "TPTYPE_tailplane_pos_marker_fin",  # Integer denoting tailplane position (0=none, 1=body, 2=fin) (ESDU 85010, similar to N_F in 00025)
+    "MF_fin_moment_arm_val",            # Distance of fin root qc aft of CG (ESDU 00025 & 85010)
+    "h_BF_body_height_at_fin",          # Body cross-section height at fin root qc (ESDU 00025)
+    "w_BF_body_width_at_fin",           # Body cross-section width at fin root qc (ESDU 00025)
+    "ZCRF_fin_root_chord_height",       # Height of fin root chord from body axis (ESDU 00025 & 85010)
+    "HF_fin_height_val",                # Height of fin from fin root chord (ESDU 00025 & 85010)
+    "CRF_fin_root_chord_val",           # Fin root chord (ESDU 00025 & 85010)
+    "CTF_fin_tip_chord_val",            # Fin tip chord (ESDU 00025 & 85010)
+    "LD25F_fin_qc_sweep_deg",           # Fin quarter-chord sweep angle (deg) (ESDU 00025 & 85010)
+
+    # === TAILPLANE (HORIZONTAL TAIL) GEOMETRY ===
+    # (Parameters common if a horizontal surface is defined)
+    "TPLANE_tailplane_presence_marker", # Marker for presence of tailplane (1=yes, 0=no) (ESDU 90010)
+                                        # (ESDU 00025 uses N_F, ESDU 85010 uses TPTYPE for similar concept)
+    # Conditional (IF tailplane is present)
+    "AT_tailplane_aspect_ratio",        # Tailplane aspect ratio (ESDU 90010)
+    "ST_tailplane_area_val",            # Planform area of gross tailplane (ESDU 90010 & 85010)
+    "XT_tailplane_qc_mac_pos_from_mrp", # Longitudinal distance of tailplane qc of MAC, aft of moment ref point (ESDU 90010)
+    "LAMDHT_tailplane_hc_sweep",        # Sweepback of tailplane half-chord line (ESDU 90010)
+    "LAMDAT_tailplane_taper_ratio_val", # Taper ratio of tailplane (ESDU 90010 & 85010)
+    "DEPDAT_downwash_gradient_at_tail", # Mean effective gradient of downwash at tailplane (ESDU 90010)
+    
+    "BT_tailplane_span_val",            # Tailplane span (ESDU 00025 for fin-mounted tail & ESDU 85010)
+    "CDBART_tailplane_mac_val",         # Tailplane aerodynamic mean chord (ESDU 85010)
+    "LAMDQT_tailplane_qc_sweep_deg",    # Tailplane quarter-chord sweep angle (deg) (ESDU 85010)
+    
+    # Tailplane Aerofoil Section Properties (ESDU 85010 specific)
+    "A1MRKT_tailplane_lift_slope_marker", # Integer: 1=user input for a10, 2=program calculates a10
+    "A10MT_tailplane_user_a10_at_M",    # User input: 2D lift-curve slope of tailplane section at M (IF A1MRKT=1)
+    "TBYCT_tailplane_max_tc_ratio_val", # Max t/c ratio of tailplane aerofoil (IF A1MRKT=2)
+    "Y90T_tailplane_tc_at_90_chord_val",# t/c at 90% chord of tailplane (IF A1MRKT=2)
+    "Y99T_tailplane_tc_at_99_chord_val",# t/c at 99% chord of tailplane (IF A1MRKT=2)
+    "TAUDGT_tailplane_te_angle_deg",    # Tailplane aerofoil trailing-edge angle (deg) (IF A1MRKT=2)
+    "XTRCT_tailplane_transition_loc",   # Chordwise BL transition location for tailplane (IF A1MRKT=2)
+
+    # Fin-Mounted Tailplane Specific (ESDU 00025 & 85010)
+    "h_T_tailplane_height_on_fin_val",  # Height of tailplane on fin above fin root chord (ESDU 00025, if N_F=2)
+    "ZT_tailplane_height_on_fin_alt",   # Alternate name (ESDU 85010, if TPTYPE=2)
+
+    # === NACELLE GEOMETRY ===
+    # (From ESDU 00025, assuming similar inputs might be needed if nacelles are considered for other programs)
+    "N_T_nacelle_config_type",          # Integer: 0=no nacelles, 1=under-wing jet, 2=wing-mounted propeller
+    # Conditional (IF N_T = 1 or 2)
+    "N_n_num_nacelle_pairs",            # Integer: Number of nacelles on each half wing
+    # For each nacelle pair k:
+    "l_n_nacelle_length_jet_val",       # Overall length of nacelle (IF N_T = 1)
+    "delta_x_n_cowl_le_fwd_wing_le_prop",# Distance of cowl LE forward of wing LE (IF N_T = 2)
+    "s_n_nacelle_spanwise_pos_val",     # Spanwise distance from plane of symmetry to nacelle C/L
+    "h_n_nacelle_max_height_val",       # Maximum height of nacelle cross-section
+    "z_n_nacelle_below_wing_pylon_jet_val", # Vertical distance nacelle C/L below wing-pylon junction (IF N_T = 1)
+    "z_n_nacelle_from_wing_chord_prop_val", # Vertical distance nacelle C/L from local wing chord (IF N_T = 2)
+    "z_0_nacelle_from_mrp_val",         # Vertical distance nacelle C/L from moment reference point
+    "m_0_nacelle_le_fwd_mrp_val",       # Longitudinal distance nacelle LE forward of moment reference point
+    "h_ne_nacelle_exit_dia_jet_val",    # Nacelle exit diameter (IF N_T = 1)
+
+    # === FLAPS GEOMETRY ===
+    # (From ESDU 00025 & ESDU 85010, detailed flap inputs)
+    "NF_num_flap_panels_deployed",      # Integer: Number of deployed flap panels on each half-wing (0=no flaps)
+    # Conditional (IF NF_num_flap_panels_deployed > 0)
+    # For each flap panel j:
+    "FTYPE_flap_calc_type_j",           # Integer: 0=user-defined increments, 1=plain, 2=split, 3=single-slotted
+    "SFI_SFO_flap_span_limits_j",       # Pair: Inboard & outboard spanwise limits of j'th panel
+    "LDH_flap_hinge_sweep_deg_j",       # Hinge-line sweep of j'th flap panel (deg)
+    "LH_flap_hinge_intersect_from_mrp_j",# Longitudinal distance aft from MRP to extended hinge line intersection with plane of symmetry
+    # Conditional (IF FTYPE_flap_calc_type_j = 0)
+    "DCLFL_user_flap_lift_incr_j",      # User-defined flap lift coefficient increment for j'th panel
+                                        # (ESDU 00025 also mentions Delta_CD0_flap,j - may need a pair)
+    # Conditional (IF FTYPE_flap_calc_type_j = 1, 2, or 3)
+    "CF_flap_chord_ratio_j",            # Flap chord / wing chord at mid-span of j'th panel
+    "DF_flap_deflection_deg_j",         # Flap deflection angle (deg) for j'th panel
+    # Conditional for Slotted flaps (IF FTYPE_flap_calc_type_j = 3, ESDU 85010 specific for CX)
+    "CX_slotted_flap_extended_chord_ratio_j" # Extended chord / wing chord at mid-span for slotted
+]
