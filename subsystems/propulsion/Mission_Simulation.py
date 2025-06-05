@@ -528,7 +528,7 @@ def run_mission_simulation():
             "ei_nox": 0.020 
         },
         {
-            "name": "Climb", "duration_minutes": 30,
+            "name": "Climb", "duration_minutes": 20,
             "target_thrust_N": 6400, # Approx 85% of 7540N
             "flight_conditions": {"mach_0": 0.65, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
             "engine_params_override": {"tt_4": 1350},
