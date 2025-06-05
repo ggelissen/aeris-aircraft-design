@@ -367,6 +367,7 @@ def calculate_wet_areas(designvars: DesignParameters = None):
 
 def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, return_xdis = True):
     # points = []
+
     wingid = designvars.wing.wingid
     yehudi_frac = designvars.wing.yehudi_pos_frac
     if spanwise_pos_frac < yehudi_frac:
@@ -378,26 +379,41 @@ def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, 
     # for vec in vsp.GetAirfoilCoordinates(designvars.wing.wingid, abs(spanwise_pos_frac)):
     #     points.append(np.array([vec.x(), vec.y()]))
 
+    vsp.UpdateGeom(designvars.wing.wingid)
     halfspann = vsp.GetParmVal(designvars.wing.wingid, "TotalSpan", "WingGeom")/2
     pos_index = np.argmin(np.abs(designvars.structurecoords[:,1] - spanwise_pos_frac*halfspann))
-    if spanwise_pos_frac*halfspann < designvars.structurecoords[:,1][pos_index] :
+    if designvars.structurecoords[pos_index, 1] < spanwise_pos_frac*halfspann:
         ycoord = designvars.structurecoords[pos_index, 1]
+        uniquelist = np.unique(designvars.structurecoords[:,1])
+        pos_index_in_unique = np.where(np.isclose(uniquelist , ycoord))[0]
+        try:
+            ycoord2 = uniquelist[pos_index_in_unique+1]
+        except:
+            ycoord2 = ycoord
+
         indices = np.where(np.isclose(designvars.structurecoords[:, 1], ycoord))[0]
-        pos_index = indices[0] - 1
-
-
-    ycoord = designvars.structurecoords[pos_index, 1]
-    indices = np.where(np.isclose(designvars.structurecoords[:, 1] , ycoord))[0]
-    wing_points1 = designvars.structurecoords[indices][:,[0,2]]
-    try:
-        ycoordnew = designvars.structurecoords[indices[-1]+1, 1]
-        indices2 = np.where(np.isclose(designvars.structurecoords[:,1] , ycoordnew))[0]
+        indices2 = np.where(np.isclose(designvars.structurecoords[:,1] , ycoord2))[0]
+        wing_points = designvars.structurecoords[indices][:, [0, 2]]
         wing_points2 = designvars.structurecoords[indices2][:,[0,2]]
-        interpolation_frac = (spanwise_pos_frac*halfspann - ycoord)/(ycoordnew - ycoord)
-        wing_points = (1-interpolation_frac) * wing_points1 + interpolation_frac * wing_points2
-    except:
-        wing_points = wing_points1
+        if not np.equal(ycoord, ycoord2):
+            interpolation_frac = (spanwise_pos_frac * halfspann - ycoord) / (ycoord2 - ycoord)
+            wing_points = (1 - interpolation_frac) * wing_points + interpolation_frac * wing_points2
+    else:
+        ycoord2 = designvars.structurecoords[pos_index, 1]
+        uniquelist = np.unique(designvars.structurecoords[:, 1])
+        pos_index_in_unique = np.where(np.isclose(uniquelist, ycoord2))[0]
+        try:
+            ycoord = uniquelist[pos_index_in_unique - 1]
+        except:
+            ycoord = ycoord2
 
+        indices = np.where(np.isclose(designvars.structurecoords[:, 1], ycoord))[0]
+        indices2 = np.where(np.isclose(designvars.structurecoords[:, 1], ycoord2))[0]
+        wing_points = designvars.structurecoords[indices][:, [0, 2]]
+        wing_points2 = designvars.structurecoords[indices2][:, [0, 2]]
+        if not np.equal(ycoord, ycoord2):
+            interpolation_frac = (spanwise_pos_frac * halfspann - ycoord) / (ycoord2 - ycoord)
+            wing_points = (1 - interpolation_frac) * wing_points + interpolation_frac * wing_points2
 
 
 
