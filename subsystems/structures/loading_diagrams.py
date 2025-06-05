@@ -5,7 +5,7 @@ import yaml
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.integrate import cumtrapz
+from scipy.integrate import cumtrapz, cumulative_trapezoid
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -46,18 +46,45 @@ class LoadingDiagrams:
 
         # ==== Generate spanwise mesh (half-span) ====
         self.span = self.params.wing.b_w # Full wingspan = 40 m
-        self.y_half = np.linspace(0, self.span / 2, 1000) 
+        self.y = np.linspace(0, self.span / 2, 1000)  # Half-span from root to tip
+
+        # ==== Initialize arrays for distributed loads ====
+        #
+        # -> NOTE: These are example distributions. In practice, these would be calculated based on aerodynamic analysis and wing weight.
+        self.lift = 1000 * (1 - (2 * self.y / self.span)**2)  # Elliptic lift
+        self.drag = 30 + 5 * np.sin(np.pi * self.y / (self.span / 2))  # Sinusoidal drag
+        self.moment_aero = 50 * np.cos(np.pi * self.y / (self.span / 2))  # Aerodynamic pitching moment
+        self.weight = 600 * (1 - (2 * self.y / self.span)**2)  # Elliptic weight
 
     def compute_resultant_loads(self, lift, drag, moment_aero, weight):
         """
         Compute net vertical load and torque along the span.
+        Inputs:
+            - lift: 1D np.array of lift force per unit span (N/m)
+            - drag: 1D np.array of drag force per unit span (N/m)
+            - moment_aero: 1D np.array of aerodynamic moment per unit span (Nm/m)
+            - weight: 1D np.array of weight per unit span (N/m)
+        Outputs:
+            - force_z: net distributed vertical load in z-direction (N)
+            - force_x: net distributed load in x-direction (N)
+            - torque_y: distributed torque about y-axis (Nm/m)
         """
-        qz = lift - weight  # Net vertical load in z (positive downwards)
-        qx = - drag  # Load in negative x-direction (positive drag opposes flight)
-        torque = moment_aero  # Aerodynamic moment as distributed torque (about x)
-        return qz, qx, torque
+        # Net Distributes Loads
+        force_z = - lift + weight  # net distributed vertical load in z (positive downwards)
+        force_x = - drag  # net distributed horizontal load in negative x-direction (positive towards nose)
 
-    def compute_internal_distributions(self, y, qz, torque_dist):
+        # For Torque: Aerod. Moment + Induced Torque (from Vertical/Horizontal Forces)
+        x_distance_SC_AC = 0.01  # X-axis distance from aerodynamic center to shear center (m)
+        z_distance_SC_AC = 0.01  # Z-axis distance from aerodynamic center to shear center (m)
+        moment_aerodynamic_to_shear_center = - (force_x * z_distance_SC_AC + force_z * x_distance_SC_AC)  # induced torque from forces about y-axis
+
+        # Total torque about y-axis
+        torque_y = moment_aero + moment_aerodynamic_to_shear_center # distributed torque about y-axis (postice Right-handed system)
+        
+
+        return force_z, force_x, torque_y
+
+    def compute_internal_distributions(self, y, force_z, force_x, torque_y):
         """
         Compute internal loads from distributed loading along y-axis (spanwise).
         Inputs:
@@ -69,66 +96,68 @@ class LoadingDiagrams:
             - Tx: torsion about x-axis (Nm)
         """
 
-        y_tip_root = y[::-1]  # Reverse y for integration from tip to root
+        y_tip_root = np.flip(y)  # Reverse y for integration from tip to root
 
         # Integrate from tip (right) to root (left)
-        Vz_tip_to_root = cumtrapz(qz[::-1], y_tip_root, initial=0)  # Shear force in z-direction
+    
+        # Distributed Load in z-direction
+        Vz_tip_to_root = cumtrapz(force_z[::-1], y_tip_root, initial=0)  # Shear force in z-direction
+        # Note: The bending moment about x-axis is due to the shear force in z-direction
         Mx_tip_to_root = cumtrapz(Vz_tip_to_root, y_tip_root, initial=0)   # Bending moment about x-axis
-        Tx_tip_to_root = cumtrapz(torque_dist[::-1], y_tip_root, initial=0)  # Torsion about x-axis
 
-        # Flip back
-        Vz = Vz_tip_to_root[::-1]
-        Mx = Mx_tip_to_root[::-1]
-        Tx = Tx_tip_to_root[::-1]
+        # Distributed Load in x-direction
+        Vx_tip_to_root = cumtrapz(force_x[::-1], y_tip_root, initial=0)  # Shear force in x-direction
+        # Note: The bending moment about z-axis is due to the shear force in x-direction
+        Mz_tip_to_root = cumtrapz(Vx_tip_to_root, y_tip_root, initial=0)  # Bending moment about z-axis
 
-        return Vz, Mx, Tx
+        # Torsion about y-axis
+        Ty_tip_to_root = cumtrapz(torque_y[::-1], y_tip_root, initial=0)  # Torsion about y-axis
 
-    def plot_internal_loads(self, y, Vz, Mx, Tx, Ny=None, title_prefix=""):
+        # Flip back -> root to tip
+        shear_z = Vz_tip_to_root[::-1]
+        bend_moment_x = Mx_tip_to_root[::-1]
+        shear_x = Vx_tip_to_root[::-1]
+        bend_moment_z = Mz_tip_to_root[::-1]
+        torsion_y = Ty_tip_to_root[::-1]
+ 
+        return shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z
+
+    def plot_internal_loads(self, y, Vz, Mx, Tx, Vx, Mz, title_prefix=""):
         """
         Plot internal load distributions along the wing half-span.
-        
+
         Parameters:
         - y: spanwise positions (m)
         - Vz: shear force in z-direction (N)
         - Mx: bending moment about x-axis (Nm)
         - Tx: torsion about x-axis (Nm)
-        - Ny: (optional) axial force along y-axis (N), if applicable
+        - Vx: (optional) shear force in x-direction (N)
+        - Mz: (optional) bending moment about z-axis (Nm)
         - title_prefix: string to prepend to plot titles
         """
-        num_plots = 3 + (Ny is not None)
+        components = [
+            (Vz, "Shear Force $V_z$", "Shear $V_z$ (N)"),
+            (Mx, "Bending Moment $M_x$", "Moment $M_x$ (Nm)"),
+            (Tx, "Torque $T_x$", "Torque $T_x$ (Nm)"),
+            (Vx, "Shear Force $V_x$", "Shear $V_x$ (N)"),
+            (Mz, "Bending Moment $M_z$", "Moment $M_z$ (Nm)")
+        ]
+
+    
+        num_plots = len(components)
         fig, axes = plt.subplots(num_plots, 1, figsize=(12, 3.5 * num_plots), sharex=True)
 
-        ax_idx = 0
-
-        axes[ax_idx].plot(y, Vz)
-        axes[ax_idx].set_title(f"{title_prefix}Shear Force $V_z$")
-        axes[ax_idx].set_ylabel("Shear $V_z$ (N)")
-        axes[ax_idx].grid(True)
-        ax_idx += 1
-
-        axes[ax_idx].plot(y, Mx)
-        axes[ax_idx].set_title(f"{title_prefix}Bending Moment $M_x$")
-        axes[ax_idx].set_ylabel("Moment $M_x$ (Nm)")
-        axes[ax_idx].grid(True)
-        ax_idx += 1
-
-        axes[ax_idx].plot(y, Tx)
-        axes[ax_idx].set_title(f"{title_prefix}Torque $T_x$")
-        axes[ax_idx].set_ylabel("Torque $T_x$ (Nm)")
-        axes[ax_idx].grid(True)
-        ax_idx += 1
-
-        if Ny is not None:
-            axes[ax_idx].plot(y, Ny)
-            axes[ax_idx].set_title(f"{title_prefix}Axial Force $N_y$")
-            axes[ax_idx].set_ylabel("Axial $N_y$ (N)")
-            axes[ax_idx].grid(True)
+        for ax, (data, title, ylabel) in zip(axes, components):
+            ax.plot(y, data)
+            ax.set_title(f"{title_prefix}{title}")
+            ax.set_ylabel(ylabel)
+            ax.grid(True)
 
         axes[-1].set_xlabel("Spanwise Location y (m)")
         plt.tight_layout()
         plt.show()
 
-    def plot_wing_loading(self, lift_dist, drag_dist, moment_dist):
+    def plot_wing_aerodynamic_loading(self, lift_dist, drag_dist, moment_dist):
         """
         Plot wing loading diagrams given the lift, drag, and moment distributions.
         
@@ -192,7 +221,7 @@ class LoadingDiagrams:
 
         print(f"Total Wing Weight: {total_weight:.2f} N")
 
-    def run_analysis_for_case(self, y, lift, drag, moment, weight, label="", PLOT =True):
+    def run_analysis_for_case(self, PLOT):
         """
         Run the loading analysis for a given load case and plot results.
         Parameters:
@@ -205,11 +234,11 @@ class LoadingDiagrams:
         - PLOT: boolean to control plotting
         """
 
-        qz, qx, torque = self.compute_resultant_loads(lift, drag, moment, weight)
-        Vz, Mx, Tx = self.compute_internal_distributions(y, qz, torque)
+        force_z, force_x, torque_y = self.compute_resultant_loads(self.lift, self.drag, self.moment_aero, self.weight)
+        shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z = self.compute_internal_distributions(self.y, force_z, force_x, torque_y)
         if PLOT:
-            self.plot_internal_loads(y, Vz, Mx, Tx, Ny=None, title_prefix=label)
-        return Vz, Mx, Tx
+            self.plot_internal_loads(self.y, shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z, title_prefix="")
+        return shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z
 
 
 if __name__ == "__main__":
@@ -217,16 +246,7 @@ if __name__ == "__main__":
     loading_diagrams = LoadingDiagrams()
 
     # Extract parameters
-    params = loading_diagrams.params
-    span = params.wing.b_w  # Full wingspan = 40 m
-    y_half = loading_diagrams.y_half  # Half-span locations
 
-    # ==== Example Load Case ==== 
-    lift = 1000 * (1 - (2 * y_half / span)**2)  # Elliptic lift
-    drag = 30 + 5 * np.sin(np.pi * y_half / (span / 2))  # Sinusoidal drag
-    moment = 50 * np.cos(np.pi * y_half / (span / 2))  # Aerodynamic pitching moment
-    weight = 600 * (1 - (2 * y_half / span)**2)  # Elliptic weight
-    # TODO: Apply safety factor to load factor
+    loading_diagrams.run_analysis_for_case(PLOT=True)
 
-    loading_diagrams.run_analysis_for_case(y_half, lift, drag, moment, weight, label="Load Case 1 - ")
 

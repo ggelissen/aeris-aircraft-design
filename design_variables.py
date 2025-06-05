@@ -27,6 +27,8 @@ class DesignParameters:
         self.inertia_matrix = None
         self.structurecoords = None
 
+
+
         # Subsystem Parameters
         self.cg = CGParameters()  # Center of Gravity Parameters
         self.weight = WeightParameters()
@@ -127,14 +129,14 @@ class WeightParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.W_TO = 30787.8                         # Maximum Take-Off Weight (MTOW) in N
+        self.W_TO = 37807.7                         # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
         self.W_OE = 11973.3                         # Operational Empty Weight (OEW) in N
         self.W_F = 12930.5                          # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 2563                             # Wing Loading in N/m^2
-        self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
+        self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.5793                          # Maximum Fuel Fraction
         self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
@@ -142,6 +144,7 @@ class WeightParameters:
         self.W_F_used = None                        # Used Fuel Weight in N
         self.W_F_res = None                         # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665                # Maximum Take-Off Mass in kg
+
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -300,6 +303,7 @@ class EngineParameters:
         self.engine_x_pos = -6.5                    # Engine X-Position in m
         self.engine_y_pos = 0.0                     # Engine Y-Position in m
         self.engine_z_pos = -0.9                    # Engine Z-Position in m
+        self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
 
 
     def load_from_dict(self, param_dict):
@@ -321,6 +325,7 @@ class EmpennageParameters:
         self.S_t = None                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
+        self.type = 'fixed'
 
         # V_Tail:
         self.b_v = 3.0                            # V_Tail Span in m
