@@ -287,7 +287,8 @@ class EngineParameters:
     def __init__(self, W_TO: float = None, T_W: float = None):
         # TODO: Add separate variables for the nacelle
         self.N_engines = 1                          # Number of Engines
-        self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
+        # self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
+        self.T_TO = 7535                    # Thrust at Take-Off in N
         self.cruise_thrust_setting = None           # Thrust setting for cruise
         self.engine_weight =   None                 # Engine Weight in N
         self.engine_max_thrust = 9340               # Engine Maximum Thrust in N
