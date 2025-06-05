@@ -26,6 +26,8 @@ class DesignParameters:
         self.crit_mach = None
         self.inertia_matrix = None
 
+
+
         # Subsystem Parameters
         self.cg = CGParameters()  # Center of Gravity Parameters
         self.weight = WeightParameters()
@@ -195,8 +197,8 @@ class WingParameters:
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
         self.yehudi_area = 6.0 # Yehudi area m2
-        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.1, spanwise_pos_frac_outbound=0.2, flapwidth=0.4)
-        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.25, spanwise_pos_frac_outbound=0.5, flapwidth=0.4)
+        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.11, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
+        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
 
         
@@ -320,6 +322,7 @@ class EmpennageParameters:
         self.S_t = None                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
+        self.type = 'fixed'
 
         # V_Tail:
         self.b_v = 3.0                            # V_Tail Span in m
