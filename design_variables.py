@@ -143,6 +143,7 @@ class WeightParameters:
         self.W_F_used = None                        # Used Fuel Weight in N
         self.W_F_res = None                         # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665                # Maximum Take-Off Mass in kg
+        self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():

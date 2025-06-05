@@ -13,6 +13,9 @@ params.load_from_yaml("design_config.yaml")
 #speed of sound in air at sea level
 a = (1.4 * 287.05 * 288.15) ** 0.5  # m/s, speed of sound at sea level at ISA + 15C
 T_to = params.engine.T_TO
-print(T_to) #N, thrust at takeoff
+D_fan = 0.53 # m, fan diameter
+L_eng = 1.397 # m, engine length
+Bpr = 3.3
+
 
 
