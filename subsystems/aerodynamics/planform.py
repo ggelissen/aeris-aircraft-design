@@ -352,7 +352,7 @@ def estimate_lift_induced_drag_factor(planform_params):
     AR = planform_params['AR']
     Lambda_LE_rad = planform_params['Lambda_LE_rad']
 
-    # 1. Oswald Efficiency Factor (e) (Summary Doc, p.29 - for swept wings)
+    # 1. Oswald Efficiency Factor (e) (Sammary ADSEE 2nd year, p.29 - for swept wings)
     e_oswald = 4.61 * (1 - 0.045 * AR**0.68) * (math.cos(Lambda_LE_rad)**0.15) - 3.1
     e_oswald = max(0.6, min(0.95, e_oswald))
     induced_drag_params['e_oswald'] = e_oswald
