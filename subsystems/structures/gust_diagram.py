@@ -38,7 +38,7 @@ VD = VD = 1.25 * VC   # Dive speed (VD) TAS [m/s]
 print(f"VB: {VB}, VC: {VC}, VD: {VD}")
 
 V_values_var = [VB, VC, VD]  # Airspeeds TAS in m/s
-u_values_var = [15.2, 10.21, 10.21/2]  # Gust intensities in m/s STANAG 4671
+u_values_var = [15.2, 10.12, 10.21/2]  # Gust intensities in m/s STANAG 4671
 #u_values_var = [u*0.3048 for u in [66, 50, 25]]
 # Convert TAS to EAS:
 V_values_var = [v*(rho_cruise/rho)**0.5 for v in V_values_var] # EAS [m/s]
