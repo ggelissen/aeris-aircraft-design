@@ -203,9 +203,6 @@ class WingParameters:
         self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
-        self.C_D0 = 0.017196 
-        self.e = 0.9         #oswald efficiency factor
-        self.k2 = 1 / (np.pi * self.A_w_target * self.e)
 
         
 
