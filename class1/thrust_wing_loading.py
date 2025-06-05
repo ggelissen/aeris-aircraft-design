@@ -367,4 +367,3 @@ def run_performance_diagram(params: DesignParameters):
     plot_TW_WS_diagram_pd(W_S_range_Npm2_pd, constraints_list_pd, title=f"T/W vs W/S Diagram - Business uav (A={uav_A_perf})", design_point=design_point_example)
 
     return {"T_W": tw_intersect, "W_S": ws_intersect}
-

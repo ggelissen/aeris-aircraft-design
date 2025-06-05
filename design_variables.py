@@ -25,6 +25,7 @@ class DesignParameters:
         self.max_load_factor = None
         self.crit_mach = None
         self.inertia_matrix = None
+        self.structurecoords = None
 
 
 
@@ -128,14 +129,14 @@ class WeightParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.W_TO = 30787.8                         # Maximum Take-Off Weight (MTOW) in N
+        self.W_TO = 37807.7                         # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
         self.W_OE = 11973.3                         # Operational Empty Weight (OEW) in N
         self.W_F = 12930.5                          # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 2563                             # Wing Loading in N/m^2
-        self.T_W = 0.369                            # Thrust-to-Weight ratio in N/N
+        self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.5793                          # Maximum Fuel Fraction
         self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
@@ -143,6 +144,7 @@ class WeightParameters:
         self.W_F_used = None                        # Used Fuel Weight in N
         self.W_F_res = None                         # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665                # Maximum Take-Off Mass in kg
+
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -197,7 +199,7 @@ class WingParameters:
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
         self.yehudi_area = 6.0 # Yehudi area m2
-        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.11, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
+        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
 
@@ -301,6 +303,10 @@ class EngineParameters:
         self.engine_x_pos = -6.5                    # Engine X-Position in m
         self.engine_y_pos = 0.0                     # Engine Y-Position in m
         self.engine_z_pos = -0.9                    # Engine Z-Position in m
+        self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
+        self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
+        self.eta_fanturb = 0.9  
+        self.tt4to = 1450 #tt4 temp at takeoff               
 
 
     def load_from_dict(self, param_dict):

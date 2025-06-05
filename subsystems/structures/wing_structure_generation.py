@@ -18,13 +18,25 @@ def wing_structure_generation(designvars: DesignParameters = None):
     - designvars: DesignParameters object containing design variables.
     - NCell: Number of cells for the wing structure.
     """
-    #cross_sectional_structure_along_span(designvars, 0.871)
-    #cross_sectional_structure_along_span(designvars, 0.9)
-    #cross_sectional_structure_along_span(designvars, 0.95)
+
+
+    # Freeze geometry:
+    vsp.SetComputationFileName(vsp.DEGEN_GEOM_CSV_TYPE, "data/DegenGeom.csv")
+    vsp.SetSetFlag(designvars.wing.wingid, 8, True)
+    vsp.ComputeDegenGeom(8, vsp.DEGEN_GEOM_CSV_TYPE)
+    print("here")
+    data = pd.read_csv("data/DegenGeom.csv", header=None, skiprows=10, nrows=2211)
+    datanp = data.to_numpy()
+    designvars.structurecoords = datanp
+
+    cross_sectional_structure_along_span(designvars, 0)
+    cross_sectional_structure_along_span(designvars, 0.871)
+    cross_sectional_structure_along_span(designvars, 0.9)
+    cross_sectional_structure_along_span(designvars, 0.95)
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
-def cross_sectional_structure_along_span(designvars: DesignParameters = None, spanwise_position: float = 0.0):
+def cross_sectional_structure_along_span(designvars: DesignParameters = None, spanwise_position: float = 0.0, plot: bool = True):
     """
     Generates the cross-sectional structure along the span of the wing.
 
@@ -261,7 +273,7 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         lines = np.hstack([[len(stringer_points)] + list(range(len(stringer_points)))])
         curve = pv.PolyData(stringer_points)
         curve.lines = lines
-        plotter.add_mesh(curve, color='red', line_width=2, opacity=0.2)
+        plotter.add_mesh(curve, color='red', line_width=0.5, opacity=0.2)
 
     # Draw wingskin
     vertex_list_wingskin = []
@@ -301,7 +313,7 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     for geom in vsp.FindGeoms():
         vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
     fuselage_mesh = pv.read('data/fuselage.stl')
-    fuselage_mesh.translate([-designvars.wing.xpos, 0, 0], inplace=True)
+    fuselage_mesh.translate([0, 0, 0], inplace=True)
     plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
 
 
