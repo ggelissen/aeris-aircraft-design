@@ -38,7 +38,7 @@ def wing_structure_generation(designvars: DesignParameters = None):
     # cross_sectional_structure_along_span(designvars, 0.871)
     # cross_sectional_structure_along_span(designvars, 0.9)
     # cross_sectional_structure_along_span(designvars, 0.95)
-    fuselage_cross_section(designvars, 0.5)
+    #fuselage_cross_section(designvars, 0.5)
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
