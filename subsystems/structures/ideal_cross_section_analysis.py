@@ -2,10 +2,12 @@ import math
 import numpy as np
 import os
 import sys
+import matplotlib.pyplot as plt
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
 from design_variables import DesignParameters
+#from subsystems.structures.loading_diagrams import WingLoadingDiagrams
 
 
 def calculate_panel_lengths_and_enclosed_area(boom_x_coords: list, boom_y_coords: list) -> tuple:
@@ -58,7 +60,7 @@ def calculate_centroid_idealized(boom_areas: list, boom_x_coords_abs: list, boom
     """
     if not (len(boom_areas) == len(boom_x_coords_abs) == len(boom_y_coords_abs)):
         raise ValueError("Input lists must have the same length.")
-    if not boom_areas.any():
+    if not boom_areas:
         raise ValueError("Input lists cannot be empty.")
 
     total_area = sum(boom_areas)
@@ -115,9 +117,9 @@ def calculate_moments_of_inertia_idealized(boom_areas: list, boom_x_coords: list
     if not (len(boom_areas) == len(boom_x_coords) == len(boom_y_coords)):
         raise ValueError("Input lists must have the same length.")
 
-    I_xx = sum(B * y**2 for B, y in zip(boom_areas, boom_y_coords))
-    I_yy = sum(B * x**2 for B, x in zip(boom_areas, boom_x_coords))
-    I_xy = sum(B * x * y for B, x, y in zip(boom_areas, boom_x_coords, boom_y_coords))
+    I_xx = sum(B * (y*1e3)**2 for B, y in zip(boom_areas, boom_y_coords))
+    I_yy = sum(B * (x*1e3)**2 for B, x in zip(boom_areas, boom_x_coords))
+    I_xy = sum(B * (x*1e3) * (y*1e3) for B, x, y in zip(boom_areas, boom_x_coords, boom_y_coords))
 
     return I_xx, I_yy, I_xy
 
@@ -198,6 +200,9 @@ def calculate_bending_stress(Mx: float, My: float, I_xx: float, I_yy: float, I_x
         float: Bending stress (sigma_z).
                Returns float('nan') if denominator is zero.
     """
+    I_xx *= 1e-6 # Convert to m^4 for consistency with Mx, My in Nm
+    I_yy *= 1e-6 # Convert to m^4 for consistency with Mx, My in Nm
+    I_xy *= 1e-6 # Convert to m^4 for consistency with Mx, My in Nm
     numerator = (Mx * I_yy - My * I_xy) * y_coord + (My * I_xx - Mx * I_xy) * x_coord
     denominator = I_xx * I_yy - I_xy**2
 
@@ -236,7 +241,7 @@ def calculate_torsional_shear_flow_and_stress(T: float, A_m: float, t_panel: flo
 
 
     q_torsion = T / (2 * A_m)
-    tau_torsion = q_torsion / t_panel
+    tau_torsion = q_torsion / (t_panel *1e-3)
     return q_torsion, tau_torsion
 
 
@@ -302,6 +307,9 @@ def calculate_basic_shear_flows(Vx: float, Vy: float, I_xx: float, I_yy: float, 
                        q_bi is the flow in the panel connecting boom i to boom (i+1)%N.
                        Returns empty list or list of NaNs if denominator is zero.
     """
+    I_xx *= 1e-6 # Convert to m^4 for consistency with Vx, Vy in N
+    I_yy *= 1e-6 # Convert to m^4 for consistency with Vx, Vy in N
+    I_xy *= 1e-6 # Convert to m^4 for consistency with Vx, Vy in N
     num_booms = len(boom_areas)
     if not (num_booms == len(boom_x_coords) == len(boom_y_coords)):
         raise ValueError("Boom data lists must have the same length.")
@@ -321,9 +329,9 @@ def calculate_basic_shear_flows(Vx: float, Vy: float, I_xx: float, I_yy: float, 
     current_sum_Br_xr = 0.0
 
     for i in range(num_booms):
-        current_sum_Br_yr += boom_areas[i] * boom_y_coords[i]
-        current_sum_Br_xr += boom_areas[i] * boom_x_coords[i]
-        q_b_panels[i] = -Ky_coeff * current_sum_Br_yr - Kx_coeff * current_sum_Br_xr
+        current_sum_Br_yr += boom_areas[i] * boom_y_coords[i] * 1e-3
+        current_sum_Br_xr += boom_areas[i] * boom_x_coords[i] * 1e-3
+        q_b_panels[i] = float(-Ky_coeff * current_sum_Br_yr - Kx_coeff * current_sum_Br_xr)
         
     return q_b_panels
 
@@ -381,7 +389,7 @@ def calculate_q_s0(q_b_panels: list, panel_lengths: list, panel_thicknesses: lis
         return float('nan')
 
     q_s0 = -numerator_sum / denominator_sum
-    return q_s0
+    return float(q_s0)
 
 
 def calculate_final_shear_flows(q_b_panels: list, q_s0: float) -> list:
@@ -436,75 +444,220 @@ def convert_arrays_to_coordinates(spar_points: np.ndarray, stringer_points: np.n
     }
 
 
+def filter_and_sort_coordinates(spar_x_coords: np.ndarray, spar_y_coords: np.ndarray, stringer_x_coords: np.ndarray,
+                                 stringer_y_coords: np.ndarray, spar_boom_areas: np.ndarray, stringer_boom_areas: np.ndarray) -> tuple:
+    """
+    Filter and sort the coordinates of the spars and stringers.
+    """
+    mask_in_range = np.logical_and(stringer_x_coords >= spar_x_coords[0],
+                                   stringer_x_coords <= spar_x_coords[-1])
+
+    stringer_x_coords_filtered = stringer_x_coords[mask_in_range]
+    stringer_y_coords_filtered = stringer_y_coords[mask_in_range]
+    stringer_boom_areas_filtered = stringer_boom_areas[mask_in_range]
+
+    stringer_x_coords_top = np.array([])
+    stringer_y_coords_top = np.array([])
+    stringer_boom_areas_top = np.array([])
+
+    stringer_x_coords_bottom = np.array([])
+    stringer_y_coords_bottom = np.array([])
+    stringer_boom_areas_bottom = np.array([])
+
+    if len(stringer_y_coords_filtered) > 0:
+        avg_y_stringers = np.average(stringer_y_coords_filtered)
+
+        mask_top = stringer_y_coords_filtered > avg_y_stringers
+        mask_bottom = stringer_y_coords_filtered <= avg_y_stringers
+        
+        stringer_x_coords_top = stringer_x_coords_filtered[mask_top]
+        stringer_y_coords_top = stringer_y_coords_filtered[mask_top]
+        stringer_boom_areas_top = stringer_boom_areas_filtered[mask_top]
+
+        stringer_x_coords_bottom = stringer_x_coords_filtered[mask_bottom]
+        stringer_y_coords_bottom = stringer_y_coords_filtered[mask_bottom]
+        stringer_boom_areas_bottom = stringer_boom_areas_filtered[mask_bottom]
+
+    stringer_x_coords_top = stringer_x_coords_top[::-1]
+    stringer_y_coords_top = stringer_y_coords_top[::-1]
+    stringer_boom_areas_top = stringer_boom_areas_top[::-1]
+
+    x_sorted = np.concatenate((spar_x_coords[0:1], stringer_x_coords_bottom, spar_x_coords[2:3], 
+                               spar_x_coords[3:4], stringer_x_coords_top, spar_x_coords[1:2],
+                               spar_x_coords[0:1])) 
+
+    y_sorted = np.concatenate((spar_y_coords[0:1], stringer_y_coords_bottom, spar_y_coords[2:3], 
+                               spar_y_coords[3:4], stringer_y_coords_top, spar_y_coords[1:2],
+                               spar_y_coords[0:1]))
+
+    boom_areas_sorted = np.concatenate((spar_boom_areas[0:1], stringer_boom_areas_bottom, spar_boom_areas[2:3],
+                                        spar_boom_areas[3:4], stringer_boom_areas_top, spar_boom_areas[1:2],
+                                        spar_boom_areas[0:1]))
+
+    return x_sorted, y_sorted, boom_areas_sorted
+
+
+def plot_idealised_cross_section(boom_x: np.ndarray, boom_y: np.ndarray, centroid: tuple):
+    """
+    Plot the idealised cross-section of the wing box structure.
+
+    Parameters:
+        boom_x (np.ndarray): X-coordinates of the boom elements.
+        boom_y (np.ndarray): Y-coordinates of the boom elements.
+        centroid (tuple): Centroid coordinates (x, y).
+    """
+    plt.figure(figsize=(10, 5))
+    plt.plot(boom_x, boom_y, 'o-', label='Booms')
+    # Connect the last point to the first point to close the shape for visualization
+    if len(boom_x) > 1: # Only try to close if there's more than one point
+        plt.plot([boom_x[-1], boom_x[0]], [boom_y[-1], boom_y[0]], '-', color='blue', alpha=0.7) # Close the loop
+    plt.scatter(*centroid, color='red', marker='X', s=150, label='Centroid') # Changed marker for centroid
+    plt.xlabel('X Coordinate (m)')
+    plt.ylabel('Y Coordinate (m)')
+    plt.grid(True) # Ensure grid is visible
+    plt.axis('equal')
+    plt.legend()
+    # Ensure the directory exists before saving
+    output_dir = "Figures/Structures"
+    os.makedirs(output_dir, exist_ok=True)
+    plt.savefig(f"{output_dir}/idealised_cross_section.png")
+    plt.close() # Close the plot to free memory
+
+
+def plot_bending_stresses(bending_stresses: np.ndarray, boom_x: np.ndarray, boom_y: np.ndarray):
+    """
+    Plot the bending stresses on the boom elements.
+
+    Parameters:
+        bending_stresses (np.ndarray): Bending stresses at each boom element.
+        boom_x (np.ndarray): X-coordinates of the boom elements.
+        boom_y (np.ndarray): Y-coordinates of the boom elements.
+    """
+    plt.figure(figsize=(10, 5))
+    
+    # Scatter plot with color mapping for stress values
+    scatter = plt.scatter(boom_x, boom_y, c=bending_stresses, cmap='viridis', s=150, edgecolors='k', label='Boom Stress')
+    cbar = plt.colorbar(scatter, label='Bending Stress (Pa)')
+    
+    # Optionally, add text labels for exact stress values
+    for i, txt in enumerate(bending_stresses):
+        plt.annotate(f'{txt:.2e}', (boom_x[i], boom_y[i]), 
+                     textcoords="offset points", xytext=(0,10), ha='center',
+                     fontsize=8, color='darkblue')
+
+    plt.xlabel('X Coordinate (m)')
+    plt.ylabel('Y Coordinate (m)')
+    plt.grid(True)
+    plt.axis('equal')
+    plt.title('Bending Stresses on Boom Elements')
+    output_dir = "Figures/Structures"
+    os.makedirs(output_dir, exist_ok=True)
+    plt.savefig(f"{output_dir}/bending_stresses.png")
+    plt.close() # Close the plot to free memory
+
+
 def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray, stringer_points: np.ndarray,
                                Mx_applied: float, My_applied: float, T_applied: float, Vx_applied: float, 
                                Vy_applied: float, skin_thickness: float) -> dict:
     """
     Run the cross-section analysis, based on an idealised wing box structure. 
     """
+    #loading = WingLoadingDiagrams()
+    #loading_dict = loading.run_analysis(plot=False)
+
     spar_boom_x = convert_arrays_to_coordinates(spar_points, stringer_points)['spar_x_coords']
     stringer_boom_x = convert_arrays_to_coordinates(spar_points, stringer_points)['stringer_x_coords']
-    print(f"spar_boom_x: {spar_boom_x}")
-    print(f"stringer_boom_x: {stringer_boom_x}")
-    boom_x = np.concatenate((spar_boom_x, stringer_boom_x))
-    boom_x_abs = abs(boom_x)
 
     spar_boom_y = convert_arrays_to_coordinates(spar_points, stringer_points)['spar_y_coords']
     stringer_boom_y = convert_arrays_to_coordinates(spar_points, stringer_points)['stringer_y_coords']
-    boom_y = np.concatenate((spar_boom_y, stringer_boom_y))
-    boom_y_abs = abs(boom_y)
 
-    spar_boom_areas = np.zeros(params.wing.wingsection.num_spars)
-    for i, spar in enumerate(params.wing.wingsection.spars.values()):
-        spar_boom_areas[i] = spar["t_flange_1_mm"] * spar["flange_width_mm"]
-        spar_boom_areas[i] = spar["t_flange_2_mm"] * spar["flange_width_mm"]
+    spar_boom_areas = np.zeros(params.wing.wingsection.num_spars*2)
+    spar1 = params.wing.wingsection.spars["Spar1"]
+    spar2 = params.wing.wingsection.spars["Spar2"]
+    spar_boom_areas[0] = spar1["t_flange_1_mm"] * spar1["flange_width_mm"]
+    spar_boom_areas[1] = spar1["t_flange_2_mm"] * spar1["flange_width_mm"]
+    spar_boom_areas[2] = spar2["t_flange_1_mm"] * spar2["flange_width_mm"]
+    spar_boom_areas[3] = spar2["t_flange_2_mm"] * spar2["flange_width_mm"]
 
     stringer_boom_areas = np.zeros(params.wing.wingsection.num_stringers)
     for i, stringer in enumerate(params.wing.wingsection.stringers.values()):
         stringer_boom_areas[i] = stringer["crosssectionalarea_mm2"]
 
-    boom_areas_initial = np.concatenate((spar_boom_areas, stringer_boom_areas))
-    final_boom_areas = boom_areas_initial # Assuming final areas are equal to initial areas
+    boom_x_sorted, boom_y_sorted, boom_areas_sorted = filter_and_sort_coordinates(
+        spar_boom_x, spar_boom_y, stringer_boom_x, stringer_boom_y, spar_boom_areas, stringer_boom_areas)
+    #print(f"Sorted Boom X Coordinates: {boom_x_sorted}")
+    #print(f"Sorted Boom Y Coordinates: {boom_y_sorted}")
+    #print(f"Sorted Boom Areas: {boom_areas_sorted}")
+
+    # boom_x_sorted = np.concatenate((spar_boom_x, stringer_boom_x))
+    # boom_y_sorted = np.concatenate((spar_boom_y, stringer_boom_y))
+    # boom_areas_sorted = np.concatenate((spar_boom_areas, stringer_boom_areas))
+    boom_x_sorted = boom_x_sorted - np.min(boom_x_sorted)
+    boom_x_abs = abs(boom_x_sorted)
+    boom_y_abs = abs(boom_y_sorted)
+    final_boom_areas = boom_areas_sorted # Assuming final areas are equal to initial areas
 
     # 1. Calculate Centroid
-    xc, yc = calculate_centroid_idealized(final_boom_areas, boom_x_abs, boom_y_abs)
-    print(f"Centroid: ({xc}, {yc})")	
+    xc, yc = calculate_centroid_idealized(final_boom_areas.tolist(), boom_x_abs.tolist(), boom_y_abs.tolist())
+    print(f"Centroid (m): ({xc}, {yc})")        
 
     # 2. Transform coordinates to centroidal
-    boom_x_cen, boom_y_cen = transform_coordinates_to_centroidal(boom_x_abs, boom_y_abs, xc, yc)
-    print(f"Centroidal Coordinates: ({boom_x_cen}, {boom_y_cen})")
+    boom_x_cen, boom_y_cen = transform_coordinates_to_centroidal(boom_x_abs.tolist(), boom_y_abs.tolist(), xc, yc)
 
     # 3. Calculate Moments of Inertia
-    Ixx, Iyy, Ixy = calculate_moments_of_inertia_idealized(final_boom_areas, boom_x_cen, boom_y_cen)
-    print(f"Moments of Inertia: Ixx={Ixx}, Iyy={Iyy}, Ixy={Ixy}")
+    Ixx, Iyy, Ixy = calculate_moments_of_inertia_idealized(final_boom_areas.tolist(), boom_x_cen, boom_y_cen)
+    print(f"Moments of Inertia (m^4): Ixx={Ixx}, Iyy={Iyy}, Ixy={Ixy}")
 
     # 4. Bending Stress Calculation
-    # Stress at boom 2 (top-right: x=1, y=1 centroidal)
     sigma_z_booms = np.zeros(len(boom_x_cen))
 
     for i, point in enumerate(zip(boom_x_cen, boom_y_cen)):
         x_point, y_point = point
         sigma_z_booms[i] = calculate_bending_stress(Mx_applied, My_applied, Ixx, Iyy, Ixy, x_point, y_point)
-        print(f"Bending Stress at Boom {i+1}: {sigma_z_booms[i]}")
+        print(f"Bending Stress at Boom {i+1} (Pa): {sigma_z_booms[i]:.2e}")
 
 
     # 5. Torsion Analysis
-    G_material = params.shear_modulus
-
-    panel_s, A_m_calc = calculate_panel_lengths_and_enclosed_area(boom_x_cen, boom_y_cen)
+    G_material = params.materials.shear_modulus # Pa
+    
+    panel_s, A_m_calc = calculate_panel_lengths_and_enclosed_area(boom_x_sorted.tolist(), boom_y_sorted.tolist())
     q_tor, tau_tor = calculate_torsional_shear_flow_and_stress(T_applied, A_m_calc, skin_thickness)
-    print(f"Torsional Shear Flow: {q_tor}, Torsional Shear Stress: {tau_tor}")
+    print(f"Torsional Shear Flow (N/m): {q_tor:.2e}, Torsional Shear Stress (Pa): {tau_tor:.2e}")
 
     skin_thicknesses_list = [skin_thickness] * len(panel_s)
-    dtheta_dz = calculate_rate_of_twist(T_applied, A_m_calc, G_material, panel_s, skin_thicknesses_list) # Rate of Twist
-    print(f"Rate of Twist: {dtheta_dz}")
+    dtheta_dz = calculate_rate_of_twist(T_applied, A_m_calc, G_material, panel_s, skin_thicknesses_list)
+    print(f"Rate of Twist (rad/m): {dtheta_dz:.2e}")
 
 
     # 6. Shear Flow Analysis due to Shear Forces
 
-    qb_panels = calculate_basic_shear_flows(Vx_applied, Vy_applied, Ixx, Iyy, Ixy, final_boom_areas, boom_x_cen, boom_y_cen)
+    qb_panels = calculate_basic_shear_flows(Vx_applied, Vy_applied, Ixx, Iyy, Ixy, final_boom_areas.tolist(), boom_x_cen, boom_y_cen)
     qs0 = calculate_q_s0(qb_panels, panel_s, skin_thicknesses_list) # G is assumed constant
     qs_panels = calculate_final_shear_flows(qb_panels, qs0)
-    print(f"Basic Shear Flows: {qb_panels}")
-    print(f"Corrective Shear Flow: {qs0}")
-    print(f"Final Shear Flows: {qs_panels}")
+    print(f"Basic Shear Flows (N/m): {[f'{q:.2e}' for q in qb_panels]}")
+    print(f"Corrective Shear Flow (N/m): {qs0:.2e}")
+    print(f"Final Shear Flows (N/m): {[f'{q:.2e}' for q in qs_panels]}")
+
+    # Plotting
+    plot_idealised_cross_section(boom_x_sorted, boom_y_sorted, (xc, yc))
+    plot_bending_stresses(sigma_z_booms, boom_x_sorted, boom_y_sorted)
+
+    results = {
+        "centroid_x": xc,
+        "centroid_y": yc,
+        "Ixx": Ixx,
+        "Iyy": Iyy,
+        "Ixy": Ixy,
+        "bending_stresses": sigma_z_booms.tolist(),
+        "torsional_shear_flow": q_tor,
+        "torsional_shear_stress": tau_tor,
+        "rate_of_twist": dtheta_dz,
+        "basic_shear_flows": qb_panels,
+        "corrective_shear_flow": qs0,
+        "final_shear_flows": qs_panels,
+        "boom_x_coords_sorted": boom_x_sorted.tolist(),
+        "boom_y_coords_sorted": boom_y_sorted.tolist(),
+        "boom_areas_sorted": boom_areas_sorted.tolist()
+    }
+    return results
+
