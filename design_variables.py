@@ -26,6 +26,7 @@ class DesignParameters:
         self.crit_mach = None
         self.inertia_matrix = None
         self.structurecoords = None
+        self.fueltank = FuelTank()
 
 
 
@@ -554,3 +555,14 @@ class FlapGroup:
         self.spanwise_pos_frac_inbound = spanwise_pos_frac_inbound
         self.spanwise_pos_frac_outbound = spanwise_pos_frac_outbound
         self.flapwidth = flapwidth # meter
+
+
+class FuelTank:
+    def __init__(self):
+        self.dist_from_wingskin = 0.151
+        self.frac_pos_chord_min = 0.2537 # 0 = LE + dist_from_wingskin, 1 = TE - dist_from_wingskin
+        self.frac_pos_chord_max = 1.0 # See above
+        self.frac_pos_along_span_inboard = 0.1753
+        self.frac_pos_along_span_outboard = 0.7802
+        self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
+
