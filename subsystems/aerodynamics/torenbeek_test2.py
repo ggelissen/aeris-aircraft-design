@@ -1,3 +1,4 @@
+# torenbeek_test2.py -> be careful, torenbeek_test1.py is leading
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize, fsolve
@@ -37,13 +38,13 @@ def calculate_Lambda_1_subsonic(r_h, W_MZF_frac, W_MTO, q_hat, b_ref_wing, n_ult
     if q_hat <=0 or t_c_w <=0 or cos_Lambda_w_sq <=0 : return np.inf
     return 0.0013 * (1 + r_h) * np.sqrt(W_MZF_frac * W_MTO / q_hat) / b_ref_wing * n_ult * eta_cp_wing / (t_c_w * cos_Lambda_w_sq)
 
-def calculate_Lambda_2(r_h, Sigma_S_wing, q_hat):
-    """ Eq 10.13 - Lambda_2 for wing secondary structure weight """
+def calculate_phi_2(r_h, Sigma_S_wing, q_hat):
+    """ Eq 10.13 - phi_2 for wing secondary structure weight """
     if q_hat <=0 : return np.inf
     return (1 + r_h) * Sigma_S_wing / q_hat
 
-def calculate_Lambda_3_transonic(r_h, W_MZF_frac, W_MTO, q_hat, b_ref_wing, n_ult, eta_cp_wing):
-    """ Eq 10.35 - Lambda_3 for transonic wing weight (part of Lambda_1 independent of t/c and sweep) """
+def calculate_phi_3_transonic(r_h, W_MZF_frac, W_MTO, q_hat, b_ref_wing, n_ult, eta_cp_wing):
+    """ Eq 10.35 - phi_3 for transonic wing weight (part of Lambda_1 independent of t/c and sweep) """
     if q_hat <=0: return np.inf
     return 0.0013 * (1 + r_h) * eta_cp_wing * n_ult * np.sqrt(W_MZF_frac * W_MTO / q_hat) / b_ref_wing
 
@@ -60,23 +61,23 @@ def calculate_propulsion_function(R_eq, eta_o_cruise, mu_T, tau_cruise, delta_cr
 # calculate_optimal_Aw_transonic_given_CL_Lambda
 
 # (Keeping previous functions here, assuming they are correct as per prior context)
-def calculate_wing_plus_htail_weight_fraction_subsonic(Lambda_1, Lambda_2, A_w, C_L_hat):
+def calculate_wing_plus_htail_weight_fraction_subsonic(Lambda_1, phi_2, A_w, C_L_hat):
     if C_L_hat <= 0: return np.inf 
     if A_w <=0: return np.inf
     val_sqrt = A_w / C_L_hat
     if val_sqrt <= 0: return np.inf
     term1 = Lambda_1 * A_w / np.sqrt(val_sqrt)
-    term2 = Lambda_2 / C_L_hat
+    term2 = phi_2 / C_L_hat
     return term1 + term2
 
-def calculate_mu_w_plus_h_transonic(Lambda_3, t_c_w, Lambda_w_rad, A_w, C_L_hat, Lambda_2):
+def calculate_mu_w_plus_h_transonic(phi_3, t_c_w, Lambda_w_rad, A_w, C_L_hat, phi_2):
     if C_L_hat <= 0 or t_c_w <= 0 or np.cos(Lambda_w_rad) == 0 or A_w <=0: return np.inf
     val_sqrt = A_w / C_L_hat
     if val_sqrt <=0: return np.inf
-    term1_num = Lambda_3 * A_w * np.sqrt(val_sqrt)
+    term1_num = phi_3 * A_w * np.sqrt(val_sqrt)
     term1_den = t_c_w * (np.cos(Lambda_w_rad))**2
     term1 = term1_num / term1_den if term1_den > 0.0001 else np.inf 
-    term2 = Lambda_2 / C_L_hat
+    term2 = phi_2 / C_L_hat
     return term1 + term2
 
 def calculate_C_Dp_hat_wing_transonic(t_c_w, Lambda_w_rad, C_f, r_prime=3.0, d_w_h=1.25):
@@ -97,7 +98,7 @@ def get_tc_from_tc_cos2_lambda(tc_cos2_lambda_val, Lambda_w_rad):
     if abs(cos_Lambda_w) < 0.001: return np.inf 
     return tc_cos2_lambda_val / (cos_Lambda_w**2)
 
-def calculate_WPF_transonic(Lambda_3, Lambda_2, F_prop,
+def calculate_WPF_transonic(phi_3, phi_2, F_prop,
                             C_L_hat, A_w, Lambda_w_rad, e_hat,
                             M_dd, M_kappa=0.935, 
                             C_f=0.003, r_prime=3.0, d_w_h=1.25,
@@ -111,7 +112,7 @@ def calculate_WPF_transonic(Lambda_3, Lambda_2, F_prop,
     if t_c_w <= 0.01 or t_c_w == np.inf : 
         return np.inf if not return_tc else (np.inf, t_c_w)
 
-    mu_w_plus_h = calculate_mu_w_plus_h_transonic(Lambda_3, t_c_w, Lambda_w_rad, A_w, C_L_hat, Lambda_2)
+    mu_w_plus_h = calculate_mu_w_plus_h_transonic(phi_3, t_c_w, Lambda_w_rad, A_w, C_L_hat, phi_2)
     if mu_w_plus_h == np.inf: return np.inf if not return_tc else (np.inf, t_c_w)
 
     C_Dp_hat_var = calculate_C_Dp_hat_wing_transonic(t_c_w, Lambda_w_rad, C_f, r_prime, d_w_h)
@@ -146,15 +147,15 @@ def calculate_L_D_wing_plus_htail_transonic(C_L_hat, A_w, Lambda_w_rad, e_hat,
     return C_L_hat / C_D_total_wing_htail
 
 def calculate_optimal_Aw_transonic_given_CL_Lambda(C_L_hat, Lambda_w_rad,
-                                                    F_prop, Lambda_3, e_hat,
+                                                    F_prop, phi_3, e_hat,
                                                     M_dd, M_kappa=0.935):
-    if C_L_hat <= 0 or F_prop <0 or Lambda_3 <=0 or e_hat <=0: return np.inf
+    if C_L_hat <= 0 or F_prop <0 or phi_3 <=0 or e_hat <=0: return np.inf
 
     tc_cos2_lambda_val = calculate_tc_cos2_lambda_limit(M_dd, Lambda_w_rad, C_L_hat, M_kappa)
     if tc_cos2_lambda_val <= 0: return np.inf
 
     numerator = (2/3) * F_prop * C_L_hat * tc_cos2_lambda_val
-    denominator = Lambda_3 * np.pi * e_hat
+    denominator = phi_3 * np.pi * e_hat
     if abs(denominator) < 1e-9: return np.inf 
     
     base_val = numerator / denominator
@@ -167,9 +168,9 @@ def calculate_optimal_Aw_transonic_given_CL_Lambda(C_L_hat, Lambda_w_rad,
 def objective_WPF_opt(variables, params):
     """ Objective function for scipy.optimize.minimize """
     C_L_hat, A_w, Lambda_w_rad = variables
-    Lambda_3, Lambda_2, F_prop, e_hat, M_dd, M_kappa, C_f, r_prime, d_w_h, C_Dc = params
+    phi_3, phi_2, F_prop, e_hat, M_dd, M_kappa, C_f, r_prime, d_w_h, C_Dc = params
     
-    wpf = calculate_WPF_transonic(Lambda_3, Lambda_2, F_prop,
+    wpf = calculate_WPF_transonic(phi_3, phi_2, F_prop,
                                   C_L_hat, A_w, Lambda_w_rad, e_hat,
                                   M_dd, M_kappa, C_f, r_prime, d_w_h, C_Dc)
     return wpf
@@ -181,7 +182,7 @@ def perform_optimization_WPF_transonic(params, initial_guess, bounds):
     """
     print("\n--- Conceptual Optimization Run ---")
     print(f"Initial guess (C_L_hat, A_w, Lambda_w_rad): {initial_guess}")
-    print(f"Parameters (Lambda_3, etc.): {params}")
+    print(f"Parameters (phi_3, etc.): {params}")
     
     result = minimize(objective_WPF_opt, initial_guess, args=(params,), method='SLSQP', bounds=bounds) # L-BFGS-B for bounds only
     
@@ -217,7 +218,7 @@ def plot_figure_10_10(C_L_hat_fixed=0.55, M_kappa_fixed=0.935):
 
 def plot_figure_10_11(A_w_fixed=9.0, M_dd_fixed=0.825, M_kappa_fixed=0.935, params=None):
     if params is None: raise ValueError("Params must be provided for plot_figure_10_11")
-    Lambda_3_val, Lambda_2_val, F_prop_val, e_hat_fixed, _, _, C_f_fixed, r_prime_fixed, d_w_h_fixed, C_Dc_fixed = params
+    phi_3_val, phi_2_val, F_prop_val, e_hat_fixed, _, _, C_f_fixed, r_prime_fixed, d_w_h_fixed, C_Dc_fixed = params
 
     Lambda_w_deg_range = np.linspace(0, 50, 50)
     Lambda_w_rad_range = np.deg2rad(Lambda_w_deg_range)
@@ -225,7 +226,7 @@ def plot_figure_10_11(A_w_fixed=9.0, M_dd_fixed=0.825, M_kappa_fixed=0.935, para
     fig, ax1 = plt.subplots(figsize=(10, 7))
     colors = plt.cm.viridis(np.linspace(0, 1, len(C_L_hat_values)))
     for idx, C_L_hat in enumerate(C_L_hat_values):
-        wpf_results = [calculate_WPF_transonic(Lambda_3_val, Lambda_2_val, F_prop_val, C_L_hat, A_w_fixed,
+        wpf_results = [calculate_WPF_transonic(phi_3_val, phi_2_val, F_prop_val, C_L_hat, A_w_fixed,
                                                lw_rad, e_hat_fixed, M_dd_fixed, M_kappa_fixed, C_f_fixed,
                                                r_prime_fixed, d_w_h_fixed, C_Dc_fixed)
                        for lw_rad in Lambda_w_rad_range]
@@ -251,20 +252,20 @@ def plot_figure_10_11(A_w_fixed=9.0, M_dd_fixed=0.825, M_kappa_fixed=0.935, para
 
 def plot_figure_10_12(Lambda_w_deg_fixed=30.0, M_dd_fixed=0.825, params=None, q_hat_cruise_eg=30000):
     if params is None: raise ValueError("Params must be provided for plot_figure_10_12")
-    Lambda_3_val, Lambda_2_val, F_prop_val, e_hat_fixed, M_kappa_fixed, _, C_f_fixed, r_prime_fixed, d_w_h_fixed, C_Dc_fixed = params
+    phi_3_val, phi_2_val, F_prop_val, e_hat_fixed, M_kappa_fixed, _, C_f_fixed, r_prime_fixed, d_w_h_fixed, C_Dc_fixed = params
     
     C_L_hat_range = np.linspace(0.3, 0.9, 30)
     A_w_range = np.linspace(4, 16, 30)
     Lambda_w_rad_fixed = np.deg2rad(Lambda_w_deg_fixed)
     CLH_mesh, AW_mesh = np.meshgrid(C_L_hat_range, A_w_range)
-    WPF_grid = np.array([[calculate_WPF_transonic(Lambda_3_val, Lambda_2_val, F_prop_val, clh, aw,
+    WPF_grid = np.array([[calculate_WPF_transonic(phi_3_val, phi_2_val, F_prop_val, clh, aw,
                                                  Lambda_w_rad_fixed, e_hat_fixed, M_dd_fixed, M_kappa_fixed, C_f_fixed,
                                                  r_prime_fixed, d_w_h_fixed, C_Dc_fixed)
                          for clh in C_L_hat_range] for aw in A_w_range]) # Corrected loop order for meshgrid
     plt.figure(figsize=(10, 7))
     contour_wpf = plt.contour(CLH_mesh, AW_mesh, WPF_grid, levels=np.arange(0.33, 0.41, 0.005), cmap='viridis')
     plt.clabel(contour_wpf, inline=True, fontsize=8, fmt='%.3f')
-    opt_A_w_line = [calculate_optimal_Aw_transonic_given_CL_Lambda(cl, Lambda_w_rad_fixed, F_prop_val, Lambda_3_val, e_hat_fixed, M_dd_fixed, M_kappa_fixed) for cl in C_L_hat_range]
+    opt_A_w_line = [calculate_optimal_Aw_transonic_given_CL_Lambda(cl, Lambda_w_rad_fixed, F_prop_val, phi_3_val, e_hat_fixed, M_dd_fixed, M_kappa_fixed) for cl in C_L_hat_range]
     plt.plot(C_L_hat_range, opt_A_w_line, 'k--', label='Opt $A_w$ (dFwp/dAw=0)')
     
     # Illustrative Constraints
@@ -281,15 +282,15 @@ def plot_figure_10_12(Lambda_w_deg_fixed=30.0, M_dd_fixed=0.825, params=None, q_
     plt.colorbar(contour_wpf, label='WPF'); plt.show()
 
 # --- Functions for Figure 10.13 ---
-def calculate_WPF_transonic_fixed_tc(Lambda_3_fixed_tc_Lambda, Lambda_2, F_prop,
+def calculate_WPF_transonic_fixed_tc(phi_3_fixed_tc_Lambda, phi_2, F_prop,
                                      C_L_hat, A_w, e_hat,
                                      C_Dp_hat_fixed_tc_Lambda, C_Dc=0.0005):
     """ WPF for fixed t/c and Lambda_w (profile & weight terms become simpler). """
     if C_L_hat <= 0 or A_w <= 0 or e_hat <= 0: return np.inf
     # Weight term: K_wt1 * A_w^1.5 * C_L_hat^-0.5 + K_wt2 * C_L_hat^-1
-    # K_wt1 = Lambda_3 / ( (t/c)_w * cos^2(Lambda_w) )
-    # K_wt2 = Lambda_2
-    mu_w_plus_h = Lambda_3_fixed_tc_Lambda * A_w * np.sqrt(A_w/C_L_hat) + Lambda_2 / C_L_hat
+    # K_wt1 = phi_3 / ( (t/c)_w * cos^2(Lambda_w) )
+    # K_wt2 = phi_2
+    mu_w_plus_h = phi_3_fixed_tc_Lambda * A_w * np.sqrt(A_w/C_L_hat) + phi_2 / C_L_hat
     
     # Drag term: F_prop * ( (C_Dp_profile_fixed + C_Dc)/C_L_hat + C_L_hat/(pi*A_w*e_hat) )
     drag_contrib = F_prop * ( (C_Dp_hat_fixed_tc_Lambda + C_Dc)/C_L_hat + C_L_hat / (np.pi * A_w * e_hat) )
@@ -327,12 +328,12 @@ def plot_figure_10_13(params_const_Mdd, params_fixed_tc, # Provide all necessary
 
     L3_ftc, L2_ftc, Fp_ftc, eh_ftc, Cf_ftc, rp_ftc, dwh_ftc, Cdc_ftc = params_fixed_tc
     # Pre-calculate terms for fixed t/c, fixed Lambda_w
-    Lambda_3_eff_fixed_tc = L3_ftc / (t_c_w_fixed_val * np.cos(Lambda_w_rad_fixed_for_tc_calc)**2)
+    phi_3_eff_fixed_tc = L3_ftc / (t_c_w_fixed_val * np.cos(Lambda_w_rad_fixed_for_tc_calc)**2)
     C_Dp_fixed_tc = calculate_C_Dp_hat_wing_transonic(t_c_w_fixed_val, Lambda_w_rad_fixed_for_tc_calc, Cf_ftc, rp_ftc, dwh_ftc)
 
     opt_CL_const_tc = []
     for aw_val in A_w_range:
-        obj_func_tc = lambda cl: calculate_WPF_transonic_fixed_tc(Lambda_3_eff_fixed_tc, L2_ftc, Fp_ftc, cl, aw_val, eh_ftc, C_Dp_fixed_tc, Cdc_ftc)
+        obj_func_tc = lambda cl: calculate_WPF_transonic_fixed_tc(phi_3_eff_fixed_tc, L2_ftc, Fp_ftc, cl, aw_val, eh_ftc, C_Dp_fixed_tc, Cdc_ftc)
         res = minimize(obj_func_tc, x0=0.55, bounds=[(0.2,1.0)])
         if res.success: opt_CL_const_tc.append(res.x[0])
         else: opt_CL_const_tc.append(np.nan)
@@ -342,7 +343,7 @@ def plot_figure_10_13(params_const_Mdd, params_fixed_tc, # Provide all necessary
     # dFwp/dAw = 1.5*K1*Aw^0.5*CL^-0.5 - K3*CL*Aw^-2 = 0 => 1.5*K1*Aw^2.5 = K3*CL^1.5 => Aw_opt = (K3*CL^1.5 / (1.5*K1) )^0.4
     opt_Aw_const_tc = []
     for cl_val in C_L_hat_range:
-        K1 = Lambda_3_eff_fixed_tc
+        K1 = phi_3_eff_fixed_tc
         K3_term = Fp_ftc / (np.pi * eh_ftc)
         if K1 <= 0: opt_Aw_const_tc.append(np.nan); continue
         base = (K3_term * cl_val**1.5) / (1.5 * K1)
@@ -422,8 +423,8 @@ def plot_figure_10_15_illustrative(params, M_dd_fixed=0.825, Lambda_w_deg_fixed=
 
         # Case A: n_ult fixed based on n_man_limit, CLmax fixed
         n_ult_case_a = 1.5 * n_man_limit
-        current_Lambda_3 = calculate_Lambda_3_transonic(params['r_h'], params['W_MZF_frac'], W_MTO_ref_N, params['q_hat_cruise'], params['b_ref_wing'], n_ult_case_a, params['eta_cp_wing'])
-        wpf_a = calculate_WPF_transonic(current_Lambda_3, params['Lambda_2'], params['F_prop'], CLh, A_w_fixed_plot, Lambda_w_rad, params['e_hat'], M_dd_fixed, params['M_kappa'], params['C_f'], params['r_prime'], params['d_w_h'], params['C_Dc'])
+        current_phi_3 = calculate_phi_3_transonic(params['r_h'], params['W_MZF_frac'], W_MTO_ref_N, params['q_hat_cruise'], params['b_ref_wing'], n_ult_case_a, params['eta_cp_wing'])
+        wpf_a = calculate_WPF_transonic(current_phi_3, params['phi_2'], params['F_prop'], CLh, A_w_fixed_plot, Lambda_w_rad, params['e_hat'], M_dd_fixed, params['M_kappa'], params['C_f'], params['r_prime'], params['d_w_h'], params['C_Dc'])
         wpf_values_case_a.append(wpf_a)
 
         # Case B: n_ult varies (gust vs maneuver), CLmax varies (conceptual)
@@ -434,8 +435,8 @@ def plot_figure_10_15_illustrative(params, M_dd_fixed=0.825, Lambda_w_deg_fixed=
         n_eff_for_ult = max(n_man_limit, n_gust_val)
         n_ult_case_b = 1.5 * n_eff_for_ult
         
-        current_Lambda_3_b = calculate_Lambda_3_transonic(params['r_h'], params['W_MZF_frac'], W_MTO_ref_N, params['q_hat_cruise'], params['b_ref_wing'], n_ult_case_b, params['eta_cp_wing'])
-        wpf_b = calculate_WPF_transonic(current_Lambda_3_b, params['Lambda_2'], params['F_prop'], CLh, A_w_fixed_plot, Lambda_w_rad, params['e_hat'], M_dd_fixed, params['M_kappa'], params['C_f'], params['r_prime'], params['d_w_h'], params['C_Dc'])
+        current_phi_3_b = calculate_phi_3_transonic(params['r_h'], params['W_MZF_frac'], W_MTO_ref_N, params['q_hat_cruise'], params['b_ref_wing'], n_ult_case_b, params['eta_cp_wing'])
+        wpf_b = calculate_WPF_transonic(current_phi_3_b, params['phi_2'], params['F_prop'], CLh, A_w_fixed_plot, Lambda_w_rad, params['e_hat'], M_dd_fixed, params['M_kappa'], params['C_f'], params['r_prime'], params['d_w_h'], params['C_Dc'])
         wpf_values_case_b.append(wpf_b)
 
     plt.figure(figsize=(10,6))
@@ -497,20 +498,20 @@ if __name__ == '__main__':
     p_cruise_val = delta_cruise_val * p_sl
     baseline_params['q_hat_cruise'] = dynamic_pressure_mach(p_cruise_val, baseline_params['M_cruise'])
     
-    Lambda_3_calc = calculate_Lambda_3_transonic(baseline_params['r_h'], baseline_params['W_MZF_frac'], baseline_params['W_MTO_N'],
+    phi_3_calc = calculate_phi_3_transonic(baseline_params['r_h'], baseline_params['W_MZF_frac'], baseline_params['W_MTO_N'],
                                                  baseline_params['q_hat_cruise'], baseline_params['b_ref_wing'],
                                                  baseline_params['n_ult_design'], baseline_params['eta_cp_wing'])
-    Lambda_2_calc = calculate_Lambda_2(baseline_params['r_h'], baseline_params['Sigma_S_wing'], baseline_params['q_hat_cruise'])
+    phi_2_calc = calculate_phi_2(baseline_params['r_h'], baseline_params['Sigma_S_wing'], baseline_params['q_hat_cruise'])
     F_prop_calc = calculate_propulsion_function(baseline_params['R_eq_km'], baseline_params['eta_o_cruise'],
                                                 baseline_params['mu_T'], baseline_params['tau_cruise'], delta_cruise_val)
 
     print(f"Calculated q_hat_cruise: {baseline_params['q_hat_cruise']:.0f} Pa")
-    print(f"Calculated Lambda_3: {Lambda_3_calc:.6f}")
-    print(f"Calculated Lambda_2: {Lambda_2_calc:.6f}")
+    print(f"Calculated phi_3: {phi_3_calc:.6f}")
+    print(f"Calculated phi_2: {phi_2_calc:.6f}")
     print(f"Calculated F_prop: {F_prop_calc:.3f}")
 
     # Parameters for WPF optimizer and plots (order matters for objective_WPF_opt)
-    opt_plot_params = [Lambda_3_calc, Lambda_2_calc, F_prop_calc, baseline_params['e_hat'], 
+    opt_plot_params = [phi_3_calc, phi_2_calc, F_prop_calc, baseline_params['e_hat'], 
                        baseline_params['M_kappa'], baseline_params['C_f_skin'], 
                        baseline_params['r_prime_tc'], baseline_params['d_w_h_drag'], baseline_params['C_Dc_comp']]
     
@@ -527,8 +528,8 @@ if __name__ == '__main__':
     plot_figure_10_10(C_L_hat_fixed=0.55, M_kappa_fixed=baseline_params['M_kappa'])
     
     # For plot_figure_10_11, params are:
-    # Lambda_3, Lambda_2, F_prop, e_hat, M_dd, M_kappa, C_f, r_prime, d_w_h, C_Dc
-    params_10_11 = [Lambda_3_calc, Lambda_2_calc, F_prop_calc, 
+    # phi_3, phi_2, F_prop, e_hat, M_dd, M_kappa, C_f, r_prime, d_w_h, C_Dc
+    params_10_11 = [phi_3_calc, phi_2_calc, F_prop_calc, 
                     baseline_params['e_hat'], baseline_params['M_dd_target'], baseline_params['M_kappa'],
                     baseline_params['C_f_skin'], baseline_params['r_prime_tc'], 
                     baseline_params['d_w_h_drag'], baseline_params['C_Dc_comp']]
@@ -539,17 +540,17 @@ if __name__ == '__main__':
     # For plot_figure_10_13
     # params_const_Mdd is params_10_11
     # params_fixed_tc needs: L3_eff, L2, Fp, eh, Cf, rp, dwh, Cdc_ftc
-    # L3_eff = Lambda_3 / ( (t/c)_w_fixed * cos^2(Lambda_w_fixed) )
+    # L3_eff = phi_3 / ( (t/c)_w_fixed * cos^2(Lambda_w_fixed) )
     # C_Dp_fixed_tc = calculate_C_Dp_hat_wing_transonic(t_c_w_fixed, Lambda_w_rad_fixed, Cf, rp, dwh)
     # This requires selecting a fixed t/c and Lambda_w for the "fixed_tc" case.
     # Let's derive t_c for C_L=0.55, Lambda=30deg, Mdd=0.825
     tc_cos2_ref = calculate_tc_cos2_lambda_limit(baseline_params['M_dd_target'], np.deg2rad(30), 0.55, baseline_params['M_kappa'])
     t_c_w_ref_for_plot13 = get_tc_from_tc_cos2_lambda(tc_cos2_ref, np.deg2rad(30))
 
-    Lambda_3_eff_fixed_tc_val = Lambda_3_calc / (t_c_w_ref_for_plot13 * np.cos(np.deg2rad(30))**2) if (t_c_w_ref_for_plot13 * np.cos(np.deg2rad(30))**2) > 0 else np.inf
+    phi_3_eff_fixed_tc_val = phi_3_calc / (t_c_w_ref_for_plot13 * np.cos(np.deg2rad(30))**2) if (t_c_w_ref_for_plot13 * np.cos(np.deg2rad(30))**2) > 0 else np.inf
     C_Dp_fixed_tc_val = calculate_C_Dp_hat_wing_transonic(t_c_w_ref_for_plot13, np.deg2rad(30), baseline_params['C_f_skin'], baseline_params['r_prime_tc'], baseline_params['d_w_h_drag'])
     
-    params_for_10_13_fixed_tc = [Lambda_3_eff_fixed_tc_val, Lambda_2_calc, F_prop_calc, 
+    params_for_10_13_fixed_tc = [phi_3_eff_fixed_tc_val, phi_2_calc, F_prop_calc, 
                                  baseline_params['e_hat'], baseline_params['C_f_skin'], 
                                  baseline_params['r_prime_tc'], baseline_params['d_w_h_drag'], baseline_params['C_Dc_comp']]
     
@@ -560,4 +561,3 @@ if __name__ == '__main__':
 
     plot_figure_10_14_illustrative(M_cruise_example=baseline_params['M_cruise'])
     plot_figure_10_15_illustrative(params=baseline_params, M_dd_fixed=baseline_params['M_dd_target'])
-

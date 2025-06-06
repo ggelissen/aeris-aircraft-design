@@ -1,3 +1,4 @@
+# torenbeek_test1.py
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -46,13 +47,13 @@ def calculate_C_Dp_hat_subsonic(C_f_eq_fuselage, S_wet_fuselage,
     # print("Note: calculate_C_Dp_hat_subsonic is conceptual. Use detailed drag buildup.")
     return C_Dp_S_fix, 0.008 # Placeholder for C_Dp_coeff_var
 
-def calculate_wing_plus_htail_weight_fraction_subsonic(Lambda_1, Lambda_2, A_w, C_L_hat):
+def calculate_wing_plus_htail_weight_fraction_subsonic(Lambda_1, phi_2, A_w, C_L_hat):
     """
     Calculates wing and horizontal tail weight fraction (mu_w+h) for subsonic aircraft.
     Based on Eq. 10.11.
     Args:
         Lambda_1 (float): Wing weight parameter (Eq. 10.12).
-        Lambda_2 (float): Wing weight parameter (Eq. 10.13).
+        phi_2 (float): Wing weight parameter (Eq. 10.13).
         A_w (float): Wing aspect ratio.
         C_L_hat (float): Design lift coefficient.
     Returns:
@@ -65,7 +66,7 @@ def calculate_wing_plus_htail_weight_fraction_subsonic(Lambda_1, Lambda_2, A_w, 
     if val_sqrt <= 0: return np.inf
         
     term1 = Lambda_1 * A_w / np.sqrt(val_sqrt)
-    term2 = Lambda_2 / C_L_hat
+    term2 = phi_2 / C_L_hat
     return term1 + term2
 
 def calculate_propulsion_function(R_eq, eta_o_cruise, mu_T, tau_cruise, delta_cruise):
@@ -84,7 +85,7 @@ def calculate_propulsion_function(R_eq, eta_o_cruise, mu_T, tau_cruise, delta_cr
     if eta_o_cruise <= 0 or tau_cruise <= 0 or delta_cruise <= 0: return np.inf
     return (R_eq / (eta_o_cruise * H_g)) + (mu_T / (tau_cruise * delta_cruise))
 
-def calculate_WPF_subsonic(Lambda_1, Lambda_2, F_prop,
+def calculate_WPF_subsonic(Lambda_1, phi_2, F_prop,
                            C_Dp_hat_var, # Variable part of parasite drag coeff related to S_w
                            C_L_hat, A_w, e_hat):
     """
@@ -92,7 +93,7 @@ def calculate_WPF_subsonic(Lambda_1, Lambda_2, F_prop,
     Based on Eq. 10.14, assuming (CDpS)_fix drag is handled in MTOW calc.
     This WPF focuses on wing-related drag and weight contributions.
     Args:
-        Lambda_1, Lambda_2: Wing weight parameters.
+        Lambda_1, phi_2: Wing weight parameters.
         F_prop: Propulsion function.
         C_Dp_hat_var: Parasite drag coefficient of wing+htail (referred to S_w).
         C_L_hat: Design lift coefficient.
@@ -103,7 +104,7 @@ def calculate_WPF_subsonic(Lambda_1, Lambda_2, F_prop,
     """
     if C_L_hat <= 0 or A_w <= 0 or e_hat <= 0: return np.inf
     
-    mu_w_plus_h = calculate_wing_plus_htail_weight_fraction_subsonic(Lambda_1, Lambda_2, A_w, C_L_hat)
+    mu_w_plus_h = calculate_wing_plus_htail_weight_fraction_subsonic(Lambda_1, phi_2, A_w, C_L_hat)
     if mu_w_plus_h == np.inf: return np.inf
         
     drag_term_parasite = C_Dp_hat_var / C_L_hat
@@ -189,17 +190,17 @@ def check_tank_volume_constraint(eta_tank, t_c_w_avg, S_w, A_w,
 
 # --- Section 10.6: Transonic Aircraft Wing ---
 
-def calculate_mu_w_plus_h_transonic(Lambda_3, t_c_w, Lambda_w_rad, A_w, C_L_hat, Lambda_2):
+def calculate_mu_w_plus_h_transonic(phi_3, t_c_w, Lambda_w_rad, A_w, C_L_hat, phi_2):
     """
     Calculates wing and horizontal tail weight fraction for transonic aircraft. Eq. 10.34.
     """
     if C_L_hat <= 0 or t_c_w <= 0 or np.cos(Lambda_w_rad) == 0 or A_w <=0: return np.inf
     val_sqrt = A_w / C_L_hat
     if val_sqrt <=0: return np.inf
-    term1_num = Lambda_3 * A_w * np.sqrt(val_sqrt)
+    term1_num = phi_3 * A_w * np.sqrt(val_sqrt)
     term1_den = t_c_w * (np.cos(Lambda_w_rad))**2
     term1 = term1_num / term1_den if term1_den > 0.0001 else np.inf # Avoid division by zero
-    term2 = Lambda_2 / C_L_hat
+    term2 = phi_2 / C_L_hat
     return term1 + term2
 
 def calculate_C_Dp_hat_wing_transonic(t_c_w, Lambda_w_rad, C_f, r_prime=3.0, d_w_h=1.25):
@@ -229,7 +230,7 @@ def get_tc_from_tc_cos2_lambda(tc_cos2_lambda_val, Lambda_w_rad):
     if abs(cos_Lambda_w) < 0.001: return np.inf # Avoid division by zero for near 90 deg sweep
     return tc_cos2_lambda_val / (cos_Lambda_w**2)
 
-def calculate_WPF_transonic(Lambda_3, Lambda_2, F_prop,
+def calculate_WPF_transonic(phi_3, phi_2, F_prop,
                             C_L_hat, A_w, Lambda_w_rad, e_hat,
                             M_dd, M_kappa=0.935, 
                             C_f=0.003, r_prime=3.0, d_w_h=1.25,
@@ -245,7 +246,7 @@ def calculate_WPF_transonic(Lambda_3, Lambda_2, F_prop,
     if t_c_w <= 0.01 or t_c_w == np.inf : 
         return np.inf
 
-    mu_w_plus_h = calculate_mu_w_plus_h_transonic(Lambda_3, t_c_w, Lambda_w_rad, A_w, C_L_hat, Lambda_2)
+    mu_w_plus_h = calculate_mu_w_plus_h_transonic(phi_3, t_c_w, Lambda_w_rad, A_w, C_L_hat, phi_2)
     if mu_w_plus_h == np.inf: return np.inf
 
     C_Dp_hat_var = calculate_C_Dp_hat_wing_transonic(t_c_w, Lambda_w_rad, C_f, r_prime, d_w_h)
@@ -283,18 +284,18 @@ def calculate_L_D_wing_plus_htail_transonic(C_L_hat, A_w, Lambda_w_rad, e_hat,
     return C_L_hat / C_D_total_wing_htail
 
 def calculate_optimal_Aw_transonic_given_CL_Lambda(C_L_hat, Lambda_w_rad,
-                                                    F_prop, Lambda_3, e_hat,
+                                                    F_prop, phi_3, e_hat,
                                                     M_dd, M_kappa=0.935):
     """
     Calculates optimal A_w for given C_L_hat, Lambda_w_rad (transonic). Eq. 10.52 (re-derived).
     """
-    if C_L_hat <= 0 or F_prop <0 or Lambda_3 <=0 or e_hat <=0: return np.inf
+    if C_L_hat <= 0 or F_prop <0 or phi_3 <=0 or e_hat <=0: return np.inf
 
     tc_cos2_lambda_val = calculate_tc_cos2_lambda_limit(M_dd, Lambda_w_rad, C_L_hat, M_kappa)
     if tc_cos2_lambda_val <= 0: return np.inf
 
     numerator = (2/3) * F_prop * C_L_hat * tc_cos2_lambda_val
-    denominator = Lambda_3 * np.pi * e_hat
+    denominator = phi_3 * np.pi * e_hat
     if abs(denominator) < 1e-9: return np.inf # Avoid division by zero
     
     # Ensure base of power is non-negative
@@ -326,7 +327,7 @@ def plot_figure_10_10(C_L_hat_fixed=0.55, M_kappa_fixed=0.935):
     plt.show()
 
 def plot_figure_10_11(A_w_fixed=9.0, M_dd_fixed=0.825, M_kappa_fixed=0.935,
-                        Lambda_3_val=0.0002, Lambda_2_val=0.025, F_prop_val=6.0, # Example values
+                        phi_3_val=0.0002, phi_2_val=0.025, F_prop_val=6.0, # Example values
                         e_hat_fixed=0.9, C_f_fixed=0.0028, r_prime_fixed=3.0,
                         d_w_h_fixed=1.25, C_Dc_fixed=0.0008):
     """Plots data similar to Figure 10.11."""
@@ -340,7 +341,7 @@ def plot_figure_10_11(A_w_fixed=9.0, M_dd_fixed=0.825, M_kappa_fixed=0.935,
     color_idx = 0
     colors = plt.cm.viridis(np.linspace(0, 1, len(C_L_hat_values)))
     for C_L_hat in C_L_hat_values:
-        wpf_results = [calculate_WPF_transonic(Lambda_3_val, Lambda_2_val, F_prop_val, C_L_hat, A_w_fixed,
+        wpf_results = [calculate_WPF_transonic(phi_3_val, phi_2_val, F_prop_val, C_L_hat, A_w_fixed,
                                                lw_rad, e_hat_fixed, M_dd_fixed, M_kappa_fixed, C_f_fixed,
                                                r_prime_fixed, d_w_h_fixed, C_Dc_fixed)
                        for lw_rad in Lambda_w_rad_range]
@@ -392,7 +393,7 @@ def plot_figure_10_11(A_w_fixed=9.0, M_dd_fixed=0.825, M_kappa_fixed=0.935,
     plt.show()
 
 def plot_figure_10_12(Lambda_w_deg_fixed=30.0, M_dd_fixed=0.825, M_kappa_fixed=0.935,
-                        Lambda_3_val=0.0002, Lambda_2_val=0.025, F_prop_val=6.0,
+                        phi_3_val=0.0002, phi_2_val=0.025, F_prop_val=6.0,
                         e_hat_fixed=0.9, C_f_fixed=0.0028, r_prime_fixed=3.0,
                         d_w_h_fixed=1.25, C_Dc_fixed=0.0008,
                         W_MTO_example = 1100e3 * g # Example MTOW for constraints
@@ -407,7 +408,7 @@ def plot_figure_10_12(Lambda_w_deg_fixed=30.0, M_dd_fixed=0.825, M_kappa_fixed=0
 
     for i in range(CLH.shape[0]):
         for j in range(CLH.shape[1]):
-            WPF_grid[i, j] = calculate_WPF_transonic(Lambda_3_val, Lambda_2_val, F_prop_val,
+            WPF_grid[i, j] = calculate_WPF_transonic(phi_3_val, phi_2_val, F_prop_val,
                                                      CLH[i, j], AW[i, j], Lambda_w_rad_fixed, e_hat_fixed,
                                                      M_dd_fixed, M_kappa_fixed, C_f_fixed,
                                                      r_prime_fixed, d_w_h_fixed, C_Dc_fixed)
@@ -418,7 +419,7 @@ def plot_figure_10_12(Lambda_w_deg_fixed=30.0, M_dd_fixed=0.825, M_kappa_fixed=0
     plt.clabel(contour_wpf, inline=True, fontsize=8, fmt='%.3f')
 
     # Optimal A_w for given C_L_hat (Curve II from Fig 10.13 logic)
-    opt_A_w_line = [calculate_optimal_Aw_transonic_given_CL_Lambda(cl, Lambda_w_rad_fixed, F_prop_val, Lambda_3_val, e_hat_fixed, M_dd_fixed, M_kappa_fixed) for cl in C_L_hat_range]
+    opt_A_w_line = [calculate_optimal_Aw_transonic_given_CL_Lambda(cl, Lambda_w_rad_fixed, F_prop_val, phi_3_val, e_hat_fixed, M_dd_fixed, M_kappa_fixed) for cl in C_L_hat_range]
     plt.plot(C_L_hat_range, opt_A_w_line, 'k--', label='Opt $A_w$ (dFwp/dAw=0)')
 
     # Example Constraint Lines (Illustrative)
@@ -430,7 +431,7 @@ def plot_figure_10_12(Lambda_w_deg_fixed=30.0, M_dd_fixed=0.825, M_kappa_fixed=0
     # Assume q_hat_cruise for M=0.8, alt=10.5km (delta=0.25, p_sl=101325, gamma=1.4)
     # p_cruise = 0.25 * 101325 = 25331 Pa
     q_hat_cruise_eg = dynamic_pressure_mach(1.4, 0.25 * 101325, 0.81) # M_des from Fig 10.11 baseline
-    span_load_const_val = 5500 # N/m^2
+    span_load_const_val = 2500 # N/m^2
     A_w_span_load = (q_hat_cruise_eg / span_load_const_val) * C_L_hat_range
     plt.plot(C_L_hat_range, A_w_span_load, 'r:', label=f'Span Load Limit ({span_load_const_val} N/m$^2$)')
       # 2. Buffet Limit (e.g., C_L_hat <= 0.80, from text for Fig 10.12)
@@ -456,8 +457,8 @@ if __name__ == '__main__':
 
     # Example parameters for plotting, trying to align with Fig 10.11/10.12 baseline
     # These are illustrative and may need adjustment for specific aircraft
-    Lambda_3_val_trans = 0.0002  # From text example for Fig 8.1, section 10.6.1
-    Lambda_2_val_trans = 0.025   # From text example for Fig 8.1, section 10.3.3
+    phi_3_val_trans = 0.0002  # From text example for Fig 8.1, section 10.6.1
+    phi_2_val_trans = 0.025   # From text example for Fig 8.1, section 10.3.3
     
     # Propulsion function example (needs specific mission/engine data)
     # Example: R_eq=7000km, eta_o=0.35, mu_T=0.25, tau_cruise=0.8, delta_cruise=0.25 (approx 10.5km alt for M=0.8)
@@ -465,8 +466,8 @@ if __name__ == '__main__':
     print(f"Example F_prop for transonic: {F_prop_val_trans:.3f}")
 
     e_hat_trans = 0.90       # Modified Oswald factor
-    M_dd_trans = 0.825       # Target drag divergence Mach number
-    M_kappa_trans = 0.935    # Aerodynamic technology factor
+    M_dd_trans = 0.865       # Target drag divergence Mach number
+    M_kappa_trans = 0.95     # Aerodynamic technology factor -> TODO Check, modified to 0.95, A05_WP2 for NASA SC airfoil
     C_f_trans = 0.0028       # Skin friction coefficient
     r_prime_trans = 3.0      # Form factor for thickness drag
     d_w_h_trans = 1.25       # Htail profile drag factor
@@ -477,14 +478,14 @@ if __name__ == '__main__':
 
     # Plot Figure 10.11
     plot_figure_10_11(A_w_fixed=9.0, M_dd_fixed=M_dd_trans, M_kappa_fixed=M_kappa_trans,
-                        Lambda_3_val=Lambda_3_val_trans, Lambda_2_val=Lambda_2_val_trans,
+                        phi_3_val=phi_3_val_trans, phi_2_val=phi_2_val_trans,
                         F_prop_val=F_prop_val_trans, e_hat_fixed=e_hat_trans,
                         C_f_fixed=C_f_trans, r_prime_fixed=r_prime_trans,
                         d_w_h_fixed=d_w_h_trans, C_Dc_fixed=C_Dc_trans)
     
     # Plot Figure 10.12
     plot_figure_10_12(Lambda_w_deg_fixed=30.0, M_dd_fixed=M_dd_trans, M_kappa_fixed=M_kappa_trans,
-                        Lambda_3_val=Lambda_3_val_trans, Lambda_2_val=Lambda_2_val_trans,
+                        phi_3_val=phi_3_val_trans, phi_2_val=phi_2_val_trans,
                         F_prop_val=F_prop_val_trans, e_hat_fixed=e_hat_trans,
                         C_f_fixed=C_f_trans, r_prime_fixed=r_prime_trans,
                         d_w_h_fixed=d_w_h_trans, C_Dc_fixed=C_Dc_trans)

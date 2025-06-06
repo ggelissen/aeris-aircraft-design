@@ -1,3 +1,4 @@
+# design_variables.py
 import math as m
 import numpy as np
 import yaml
@@ -221,7 +222,7 @@ class PerformanceParameters:
         self.CL_max_LAND = 1.6                      # Maximum Lift Coefficient at Landing
         self.CL_max_cruise = 1.8                    # Maximum Lift Coefficient at Cruise
 
-        self.CL_alpha = 5.0                  # Lift Curve Slope in 1/rad
+        self.CL_alpha = 5.0                         # Lift Curve Slope in 1/rad
 
         self.L_D_cruise = None                      # Lift-to-Drag Ratio at Cruise
         self.L_D_loiter = None                      # Lift-to-Drag Ratio at Loiter
