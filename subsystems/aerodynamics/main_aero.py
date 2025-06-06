@@ -13,13 +13,15 @@ def panel_openvsp(designvars : DesignParameters = None):
     # add geometries to a set (set 15) that will be used for panel analysis
     vsp.Update()
     vsp.SetSetFlag(designvars.wing.wingid, 15, True)
-    vsp.SetSetFlag(designvars.fuselage.fuselageid, 15, True)
+    vsp.SetSetFlag(designvars.fuselage.fuseid, 15, True)
     vsp.SetSetFlag(designvars.control_surface.vtailid, 15, True)
     vsp.SetSetFlag(designvars.engine.engine_id, 15, True)
 
+    # Activate standard vspaero settings
+    print(vsp.ListAnalysis())
+    vsp.SetAnalysisInputDefaults("VSPAEROSweep")
 
-
-    pass
+    return 0
 
 
 def parasite_drag_2D(designvars : DesignParameters = None):
@@ -27,7 +29,7 @@ def parasite_drag_2D(designvars : DesignParameters = None):
     Calculate the parasite drag using 2D airfoil data and use it to create spanwise parasite drag distribution.
     """
     # Placeholder for 2D airfoil data calculation
-    pass
+    return 0
 
 if __name__ == '__main__':
     AERIS = DesignParameters()

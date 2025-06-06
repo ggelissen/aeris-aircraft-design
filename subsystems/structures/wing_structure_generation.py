@@ -3,12 +3,11 @@ import numpy as np
 import openvsp as vsp
 import os
 from design_variables import *
-from vspfunctions import *
+from subsystems.structures.vspfunctions import *
 import scipy
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
-from ideal_cross_section_analysis import run_cross_section_analysis
 
 
 def wing_structure_generation(designvars: DesignParameters = None, plot: bool = True):

@@ -20,17 +20,17 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas, calculate_fuel_capacity
-from vspfunctions import calculate_cg, calculate_wet_areas
-from vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing, create_V_tail, create_engines
+from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas
+from subsystems.structures.vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing, create_V_tail, create_engines
 try:
     matplotlib.use('Qt5Agg')
 except:
     matplotlib.use('Agg')
 import openvsp as vsp
-import vspfunctions
+import subsystems.structures.vspfunctions
 #import subsystems.structures.stanag as stanag
 from design_variables import *
-from wing_structure_generation import wing_structure_generation
+from subsystems.structures.wing_structure_generation import wing_structure_generation
 
 def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
