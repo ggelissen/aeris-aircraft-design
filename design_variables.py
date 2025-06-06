@@ -559,9 +559,9 @@ class FlapGroup:
 
 class FuelTank:
     def __init__(self):
-        self.dist_from_wingskin = 0.151
+        self.dist_from_wingskin = 0.15
         self.frac_pos_chord_min = 0.2537 # 0 = LE + dist_from_wingskin, 1 = TE - dist_from_wingskin
-        self.frac_pos_chord_max = 1.0 # See above
+        self.frac_pos_chord_max = 0.85 # See above
         self.frac_pos_along_span_inboard = 0.1753
         self.frac_pos_along_span_outboard = 0.7802
         self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
