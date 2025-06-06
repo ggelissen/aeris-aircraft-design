@@ -492,3 +492,33 @@ def fuselage_cross_section(designvars: DesignParameters = None, lengthwise_pos_f
 
 
     return fuselage_points
+
+def calculate_fuel_capacity(designvars: DesignParameters = None):
+    #for both wings together
+    fuel_id = vsp.AddGeom("CONFORMAL", designvars.wing.wingid)
+    vsp.SetParmVal(fuel_id, "Offset", "Design", designvars.fueltank.dist_from_wingskin)
+    vsp.SetParmVal(fuel_id, "UTrimFlag", "Design", 1.0)
+    vsp.SetParmVal(fuel_id, "ChordTrimFlag", "Design", 1.0)
+    vsp.SetParmVal(fuel_id, "ChordTrimMin", "Design", designvars.fueltank.frac_pos_chord_min)
+    vsp.SetParmVal(fuel_id, "ChordTrimMax", "Design", designvars.fueltank.frac_pos_chord_max)
+    vsp.SetParmVal(fuel_id, "UMaxTrimTypeFalg", "Design", 2.0)
+    vsp.SetParmVal(fuel_id, "UMinTrimTypeFalg", "Design", 2.0)
+
+    vsp.SetParmVal(fuel_id, "EtaTrimMin", "Design", designvars.fueltank.frac_pos_along_span_inboard)
+    vsp.SetParmVal(fuel_id, "EtaTrimMax", "Design", designvars.fueltank.frac_pos_along_span_outboard)
+
+    #calculate volume:
+    vsp.SetSetFlag(fuel_id, 11, True)
+    vsp.SetAnalysisInputDefaults("CompGeom")
+    # result = vsp.ExecAnalysis("CompGeom")
+    output_mesh = vsp.ComputeCompGeom(11, False, 0)
+    result = vsp.FindLatestResultsID("Comp_Geom")
+
+    vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete slices
+    for geom in vsp.FindGeoms():
+        vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
+
+    middle_wing_t_over_c = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid, 0), 1), "ThickChord"))
+    fuel_tank_thickness = middle_wing_t_over_c * designvars.wing.mac
+
+    designvars.fueltank.fuel_tank_wing_volume = vsp.GetDoubleResults(result, "Total_Theo_Area", 0)[0] * fuel_tank_thickness
