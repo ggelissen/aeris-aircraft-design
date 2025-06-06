@@ -4,6 +4,7 @@ import yaml
 
 
 
+
 class DesignParameters:
     def __init__(self, initial_config_path=None):
         """
@@ -215,8 +216,6 @@ class WingParameters:
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
 
 
-        # Internal Loading Diagrams
-#        self.shear_z, self.bend_moment_x, self.torsion_y, self.shear_x, self.bend_moment_z = WingLoadingDiagrams().run_analysis_for_case(PLOT=False)
 
         
 
@@ -345,7 +344,7 @@ class EmpennageParameters:
         self.V_v = 0.05 #estimation                             # Horizontal Stabilizer Volume Coefficient
         self.S_t = 2                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
-            self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians, dihedral
+            self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
         self.type = 'fixed'
 
         # V_Tail:

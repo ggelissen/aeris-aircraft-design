@@ -119,8 +119,16 @@ class WingLoadingDiagrams:
         shear_x = Vx_tip_to_root[::-1]
         bend_moment_z = Mz_tip_to_root[::-1]
         torsion_y = Ty_tip_to_root[::-1]
+
+        internal_loads = {
+            'shear_z': shear_z,
+            'bend_moment_x': bend_moment_x,
+            'torsion_y': torsion_y,
+            'shear_x': shear_x,
+            'bend_moment_z': bend_moment_z
+        }
  
-        return shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z
+        return internal_loads
 
     def plot_internal_loads(self, y, Vz, Mx, Tx, Vx, Mz, title_prefix=""):
         """
@@ -221,7 +229,7 @@ class WingLoadingDiagrams:
 
         print(f"Total Wing Weight: {total_weight:.2f} N")
 
-    def run_analysis_for_case(self, PLOT):
+    def run_analysis(self, PLOT):
         """
         Run the loading analysis for a given load case and plot results.
         Parameters:
@@ -248,20 +256,9 @@ class WingLoadingDiagrams:
 if __name__ == "__main__":
     # Initialize the loading diagrams class
     
-    shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z = WingLoadingDiagrams().run_analysis_for_case(PLOT=False)
+    internal_loads = WingLoadingDiagrams().run_analysis(PLOT=False)
 
-    shear_z_root = shear_z[0]  # Shear at root
-    bend_moment_x_root = bend_moment_x[0]  # Bending moment at root
-    torsion_y_root = torsion_y[0]  # Torsion at root
-    shear_x_root = shear_x[0]  # Shear in x-direction at root
-    bend_moment_z_root = bend_moment_z[0]  # Bending moment in z-direction at root
-    print(f"Shear at root: {shear_z_root:.2f} N")
-    print(f"Bending moment at root: {bend_moment_x_root:.2f} Nm")
-    print(f"Torsion at root: {torsion_y_root:.2f} Nm")
-    print(f"Shear in x-direction at root: {shear_x_root:.2f} N")
-    print(f"Bending moment in z-direction at root: {bend_moment_z_root:.2f} Nm")
-    # Plot the wing loading diagrams
-
+    print(internal_loads)
 
 
 
