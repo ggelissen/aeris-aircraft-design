@@ -3,6 +3,7 @@ import numpy as np
 import yaml
 
 
+
 class DesignParameters:
     def __init__(self, initial_config_path=None):
         """
@@ -139,7 +140,7 @@ class WeightParameters:
         self.W_S = 2563                             # Wing Loading in N/m^2
         self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.5793                          # Maximum Fuel Fraction
-        self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
+        self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
         self.W_tfo = None                           # Trapped Fuel and Oil Fraction
         self.W_F_used = None                        # Used Fuel Weight in N
@@ -209,6 +210,10 @@ class WingParameters:
         self.C_D0 = 0.017196 
         self.e = 0.9         #oswald efficiency factor
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
+
+
+        # Internal Loading Diagrams
+#        self.shear_z, self.bend_moment_x, self.torsion_y, self.shear_x, self.bend_moment_z = WingLoadingDiagrams().run_analysis_for_case(PLOT=False)
 
         
 
