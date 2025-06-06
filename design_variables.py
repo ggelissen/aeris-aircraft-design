@@ -377,10 +377,10 @@ class LandingGearParameters:
         self.psi_mlg = None                         # Main Landing Gear Pressure in psi
         self.psi_nlg = None                         # Nose Landing Gear Pressure in psi
         self.LCN = 11                               # Load Classification Number
-        self.scrape_angle  = 15                 # Scrape Angle in degrees, used for the nose wheel  
-        self.tipback_angle = 15                 # Tipback Angle in degrees, used for the nose wheel
-        self.lat_tipover_angle = 7                # Lateral Tipover Angle in degrees, used for the nose wheel
-        self.overturn_angle = 55
+        self.scrape_angle  = 15  * np.pi/180               # Scrape Angle in radians, used for the nose wheel  
+        self.tipback_angle = 15  * np.pi/180               # Tipback Angle in radians, used for the nose wheel
+        self.lat_tipover_angle = 7 * np.pi/180                # Lateral Tipover Angle in radians, used for the nose wheel
+        self.overturn_angle = 55 * np.pi/180  # Overturn Angle in radians, used for the main wheel
         self.static_frac_nlg = 0.08                     # Static Load Fraction on Nose Landing Gear
         self.static_frac_mlg = 1 - self.static_frac_nlg      # Static Load Fraction on Main Landing Gear
 
