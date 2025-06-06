@@ -527,7 +527,7 @@ def run_mission_simulation(params: DesignParameters):
         {
             "name": "Take-off", "duration_minutes": 5,
             "target_thrust_N": T_to, # Given
-            "flight_conditions": {"mach_0": 0.25, "ts_0": 288.15, "ps_0": 101325}, 
+            "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, 
             "engine_params_override": {"tt_4": 1450, "pr_fan": 2.0, "pr_hpc": 6.0}, # Max TIT, slightly increased PRs
             "ei_nox": 0.020 
         },
@@ -569,7 +569,7 @@ def run_mission_simulation(params: DesignParameters):
         {
             "name": "Landing (at Diversion Airport)", "duration_minutes": 5,
             "target_thrust_N": 0.18*T_to, # Approx 18% of 9220N
-            "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, 
+            "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, 
             "engine_params_override": {"tt_4": 1000},
             "ei_nox": 0.008
         },

@@ -74,8 +74,8 @@ class LoadingDiagrams:
         force_x = - drag  # net distributed horizontal load in negative x-direction (positive towards nose)
 
         # For Torque: Aerod. Moment + Induced Torque (from Vertical/Horizontal Forces)
-        x_distance_SC_AC = 0.01  # X-axis distance from aerodynamic center to shear center (m)
-        z_distance_SC_AC = 0.01  # Z-axis distance from aerodynamic center to shear center (m)
+        x_distance_SC_AC = 0.01  # X-axis distance from reference load point to shear center (m)
+        z_distance_SC_AC = 0.01  # Z-axis distance from reference load point to shear center (m)
         moment_aerodynamic_to_shear_center = - (force_x * z_distance_SC_AC + force_z * x_distance_SC_AC)  # induced torque from forces about y-axis
 
         # Total torque about y-axis

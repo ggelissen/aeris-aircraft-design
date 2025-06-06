@@ -56,7 +56,7 @@ def calculate_tail_sizing(S_h: float, S_v: float) -> float:
 
     return S_t
 
-#def perform_tail_positioning(params: DesignParameters):
+# def perform_tail_positioning(params: DesignParameters):
     
 
 if __name__ == "__main__":
