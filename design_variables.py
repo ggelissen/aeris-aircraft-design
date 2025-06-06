@@ -3,6 +3,8 @@ import numpy as np
 import yaml
 
 
+
+
 class DesignParameters:
     def __init__(self, initial_config_path=None):
         """
@@ -26,6 +28,7 @@ class DesignParameters:
         self.crit_mach = None
         self.inertia_matrix = None
         self.structurecoords = None
+        self.fueltank = FuelTank()
 
 
 
@@ -41,6 +44,7 @@ class DesignParameters:
         self.control_surface = ControlSurfaceParameters()
         self.stability_aero = StabilityAerodynamicParameters()
         self.inertia = IntertiaParameters()
+        self.materials = MaterialsParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -93,6 +97,8 @@ class DesignParameters:
             self.cg.load_from_dict(config.get('cg', {}))
         if 'stability_aero' in config:
             self.stability_aero.load_from_dict(config.get('stability_aero', {}))
+        if 'materials' in config:
+            self.materials = config.get('materials', {})
 
     def update_parameter(self, parameter_name, value):
         """
@@ -138,7 +144,7 @@ class WeightParameters:
         self.W_S = 2563                             # Wing Loading in N/m^2
         self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.5793                          # Maximum Fuel Fraction
-        self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
+        self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
         self.W_tfo = None                           # Trapped Fuel and Oil Fraction
         self.W_F_used = None                        # Used Fuel Weight in N
@@ -203,9 +209,13 @@ class WingParameters:
         self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
+        self.airfoil_clalpha = 1.5
+        self.airfoil_cd0 = 0.06
         self.C_D0 = 0.017196 
         self.e = 0.9         #oswald efficiency factor
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
+
+
 
         
 
@@ -257,15 +267,15 @@ class FuselageParameters:
             "fuselagetip1": {"Tan_Angles": {"top": 21.32, "right": 45, "bottom": 21.32, "left": 45}},
             "crosssection_1": {"Tan_Angles": {"top": 7.11, "right": 0, "bottom": 7.11, "left": 0},
                                "Type": "vsp.XS_ROUNDED_RECTANGLE",
-                                 "Dimensions": {"Width": 1.12, "Height": 0.9, "Keystone": 0.57143,
+                                 "Dimensions": {"Width": 1.2, "Height": 1.2, "Keystone": 0.57143,
                                                  "RadiusSymmetryType": 1.0, "Radius": 0.35, "RadiusBR": 0.09}},
             "crosssection_2": {"Tan_Angles": {"top": 0, "right": 0, "bottom": 0, "left": 0},
                                  "Type": "vsp.XS_ROUNDED_RECTANGLE",
-                                    "Dimensions": {"Width": 1.25, "Height": 1.05, "Keystone": 0.58929,
+                                    "Dimensions": {"Width": 1.6, "Height": 1.4, "Keystone": 0.58929,
                                                      "RadiusSymmetryType": 3.0, "Radius": 0.38}},
             "crosssection_3": {"Tan_Angles": {"top": 0, "right": 0, "bottom": 0, "left": 0},
                                     "Type": "vsp.XS_ROUNDED_RECTANGLE",
-                                        "Dimensions": {"Width": 1.25, "Height": 0.98, "Keystone": 0.60357,
+                                        "Dimensions": {"Width": 1.6, "Height": 1.2, "Keystone": 0.60357,
                                                         "RadiusSymmetryType": 3.0, "Radius": 0.38}},
             "fuselagetip2": {"Tan_Angles": {"top": -26.05, "right": -45, "bottom": -26.05, "left": -45}}
         }
@@ -309,7 +319,7 @@ class EngineParameters:
         self.nacelle_outlet_tan_angles = np.deg2rad(np.array([-15., -20., -15., -20.]))  # Nacelle Exhaust Tangent Angles in radians
         self.engine_x_pos = -6.5                    # Engine X-Position in m
         self.engine_y_pos = 0.0                     # Engine Y-Position in m
-        self.engine_z_pos = -0.9                    # Engine Z-Position in m
+        self.engine_z_pos = -1.1                    # Engine Z-Position in m
         self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
         self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
         self.eta_fanturb = 0.9  
@@ -552,3 +562,21 @@ class FlapGroup:
         self.spanwise_pos_frac_inbound = spanwise_pos_frac_inbound
         self.spanwise_pos_frac_outbound = spanwise_pos_frac_outbound
         self.flapwidth = flapwidth # meter
+
+
+class FuelTank:
+    def __init__(self):
+        self.dist_from_wingskin = 0.15
+        self.frac_pos_chord_min = 0.2537 # 0 = LE + dist_from_wingskin, 1 = TE - dist_from_wingskin
+        self.frac_pos_chord_max = 0.85 # See above
+        self.frac_pos_along_span_inboard = 0.1753
+        self.frac_pos_along_span_outboard = 0.7802
+        self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
+
+
+
+
+class MaterialsParameters():
+    def __init__(self):
+        self.elastic_modulus = 70e9  # Pa, Young's modulus for aluminum
+        self.shear_modulus = self.elastic_modulus / (2 * (1 + 0.33))  # Shear modulus for aluminum

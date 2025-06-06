@@ -90,6 +90,10 @@ def create_fuselage(designvars: DesignParameters = None):
     vsp.SetXSecTanAngles(vsp.GetXSec(vsp.GetXSecSurf(fuse_id, 0), 4), vsp.XSEC_BOTH_SIDES, fuselage_tip2['top'], fuselage_tip2["right"], fuselage_tip2["bottom"], fuselage_tip2["left"])
     designvars.fuselage.fuseid = fuse_id
 
+    vsp.SetParmVal(fuse_id, "Tess_W", "Shape", 100)
+    print(vsp.GetParmVal(fuse_id, "Tess_W", "Shape"))
+    vsp.UpdateGeom(fuse_id)
+
 def create_wing(designvars: DesignParameters = None):
     wing_id = vsp.AddGeom("WING", "")
     wing_model = vsp.AddFeaStruct(wing_id)
@@ -431,13 +435,90 @@ def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, 
 
 def is_headless():
     return os.environ.get("DISPLAY", "") == ""
-#
-# def fuselage_cross_section(designvars: DesignParameters = None, lengthwise_pos_frac = 0.0):
-#     if designvars.fuselage.coordinates_have_been_loaded == False:
-#         vsp.UpdateGeom(designvars.fuselage.fuseid)
-#         vsp.SetComputationFileName(vsp.DEGEN_GEOM_CSV_TYPE, "data/DegenGeom2.csv")
-#         vsp.SetSetFlag(designvars.fuselage.fuseid, 9, True)
-#         vsp.ComputeDegenGeom(9, vsp.DEGEN_GEOM_CSV_TYPE)
-#         data = pd.read_csv("data/DegenGeom2.csv", header=None, skiprows=10, nrows=2211)
-#         datanp = data.to_numpy()
-#         designvars.fuselage.fuselage_coords = np.round(datanp, decimals=6)
+
+
+def fuselage_cross_section(designvars: DesignParameters = None, lengthwise_pos_frac = 0.0):
+    if designvars.fuselage.coordinates_have_been_loaded == False:
+        vsp.UpdateGeom(designvars.fuselage.fuseid)
+        vsp.SetComputationFileName(vsp.DEGEN_GEOM_CSV_TYPE, "data/DegenGeom2.csv")
+        vsp.SetSetFlag(designvars.fuselage.fuseid, 9, True)
+        vsp.ComputeDegenGeom(9, vsp.DEGEN_GEOM_CSV_TYPE)
+        data = pd.read_csv("data/DegenGeom2.csv", header=None, skiprows=10, nrows=357)
+        datanp = data.to_numpy()
+        designvars.fuselage.fuselage_coords = np.round(datanp, decimals=6)
+        designvars.fuselage.coordinates_have_been_loaded = True
+
+    vsp.UpdateGeom(designvars.fuselage.fuseid)
+    length = designvars.fuselage.l_f
+    pos_index = np.argmin(np.abs(designvars.fuselage.fuselage_coords[:, 0] - lengthwise_pos_frac * length))
+    if designvars.fuselage.fuselage_coords[pos_index, 0] < lengthwise_pos_frac * length:
+        xcoord = designvars.fuselage.fuselage_coords[pos_index, 0]
+        uniquelist = np.unique(designvars.fuselage.fuselage_coords[:, 0])
+        pos_index_in_unique = np.where(np.isclose(uniquelist, xcoord))[0]
+        try:
+            xcoord2 = uniquelist[pos_index_in_unique + 1]
+        except:
+            xcoord2 = xcoord
+
+        indices = np.where(np.isclose(designvars.fuselage.fuselage_coords[:, 0], xcoord))[0]
+        indices2 = np.where(np.isclose(designvars.fuselage.fuselage_coords[:, 0], xcoord2))[0]
+        fuselage_points = designvars.fuselage.fuselage_coords[indices][:, [1, 2]]
+        fuselage_points2 = designvars.fuselage.fuselage_coords[indices2][:, [1, 2]]
+        if not np.equal(xcoord, xcoord2):
+            interpolation_frac = (lengthwise_pos_frac * length - xcoord) / (xcoord2 - xcoord)
+            fuselage_points = (1 - interpolation_frac) * fuselage_points + interpolation_frac * fuselage_points2
+    else:
+        xcoord2 = designvars.fuselage.fuselage_coords[pos_index, 0]
+        uniquelist = np.unique(designvars.fuselage.fuselage_coords[:, 0])
+        pos_index_in_unique = np.where(np.isclose(uniquelist, xcoord2))[0]
+        try:
+            xcoord = uniquelist[pos_index_in_unique + 1]
+        except:
+            xcoord = xcoord2
+
+        indices = np.where(np.isclose(designvars.fuselage.fuselage_coords[:, 0], xcoord))[0]
+        indices2 = np.where(np.isclose(designvars.fuselage.fuselage_coords[:, 0], xcoord2))[0]
+        fuselage_points = designvars.fuselage.fuselage_coords[indices][:, [1, 2]]
+        fuselage_points2 = designvars.fuselage.fuselage_coords[indices2][:, [1, 2]]
+        if not np.equal(xcoord, xcoord2):
+            interpolation_frac = (lengthwise_pos_frac * length - xcoord) / (xcoord2 - xcoord)
+            fuselage_points = (1 - interpolation_frac) * fuselage_points + interpolation_frac * fuselage_points2
+
+
+
+    import matplotlib.pyplot as plt
+    plt.plot(fuselage_points[:, 0], fuselage_points[:, 1], label=f"Fuselage Cross Section at {lengthwise_pos_frac*100:.1f}%")
+    plt.show()
+
+
+    return fuselage_points
+
+def calculate_fuel_capacity(designvars: DesignParameters = None):
+    #for both wings together
+    fuel_id = vsp.AddGeom("CONFORMAL", designvars.wing.wingid)
+    vsp.SetParmVal(fuel_id, "Offset", "Design", designvars.fueltank.dist_from_wingskin)
+    vsp.SetParmVal(fuel_id, "UTrimFlag", "Design", 1.0)
+    vsp.SetParmVal(fuel_id, "ChordTrimFlag", "Design", 1.0)
+    vsp.SetParmVal(fuel_id, "ChordTrimMin", "Design", designvars.fueltank.frac_pos_chord_min)
+    vsp.SetParmVal(fuel_id, "ChordTrimMax", "Design", designvars.fueltank.frac_pos_chord_max)
+    vsp.SetParmVal(fuel_id, "UMaxTrimTypeFalg", "Design", 2.0)
+    vsp.SetParmVal(fuel_id, "UMinTrimTypeFalg", "Design", 2.0)
+
+    vsp.SetParmVal(fuel_id, "EtaTrimMin", "Design", designvars.fueltank.frac_pos_along_span_inboard)
+    vsp.SetParmVal(fuel_id, "EtaTrimMax", "Design", designvars.fueltank.frac_pos_along_span_outboard)
+
+    #calculate volume:
+    vsp.SetSetFlag(fuel_id, 11, True)
+    vsp.SetAnalysisInputDefaults("CompGeom")
+    # result = vsp.ExecAnalysis("CompGeom")
+    output_mesh = vsp.ComputeCompGeom(11, False, 0)
+    result = vsp.FindLatestResultsID("Comp_Geom")
+
+    vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete slices
+    for geom in vsp.FindGeoms():
+        vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
+
+    middle_wing_t_over_c = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid, 0), 1), "ThickChord"))
+    fuel_tank_thickness = middle_wing_t_over_c * designvars.wing.mac
+
+    designvars.fueltank.fuel_tank_wing_volume = vsp.GetDoubleResults(result, "Total_Theo_Area", 0)[0] * fuel_tank_thickness

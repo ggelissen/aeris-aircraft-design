@@ -32,7 +32,6 @@ def wing_structure_generation(designvars: DesignParameters = None):
     data = pd.read_csv("data/DegenGeom.csv", header=None, skiprows=10, nrows=2211)
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
-    print("here")
     #fuselage_cross_section(designvars, )
 
 
@@ -40,10 +39,11 @@ def wing_structure_generation(designvars: DesignParameters = None):
     # cross_sectional_structure_along_span(designvars, 0.871)
     # cross_sectional_structure_along_span(designvars, 0.9)
     # cross_sectional_structure_along_span(designvars, 0.95)
+    #fuselage_cross_section(designvars, 0.5)
 
     cross_section = cross_sectional_structure_along_span(designvars, 0.95)
-    run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
-                               1000, 1000, 1000, 1000, 0.01)
+    # run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
+    #                            1000, 1000, 1000, 1000, 0.01)
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
@@ -197,7 +197,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     wingskin = []
     dx = halfspan/num_spanwise_points
     for x in np.linspace(0, halfspan, num_spanwise_points):
-        print(x)
         spar_points_array, stringer_array, _, chord_length, lower_airfoil, upper_airfoil = cross_sectional_structure_along_span(designvars, x / halfspan, plot=False)
         for index, spar_points in enumerate(spar_points_array):
             spars[f'spar{index+1}']['spar_points'].append(np.array([spar_points[0][0], spar_points[0][1], x]))
@@ -231,7 +230,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
 
 
     # Draw spars
-    print("now?")
     for spar_index in range(designvars.wing.wingsection.num_spars):
 
         topflange = spars[f'spar{spar_index + 1}']['top_flange']
@@ -281,7 +279,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         plotter.add_mesh(curve2, color='blue', line_width=3, opacity=0.2)
 
     # Draw stringers
-    print("now2")
     for stringer_index in range(designvars.wing.wingsection.num_stringers):
         stringer_points = np.array(stringers[f'stringer{stringer_index + 1}']['stringer_points'])
         lines = np.hstack([[len(stringer_points)] + list(range(len(stringer_points)))])
@@ -290,7 +287,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         plotter.add_mesh(curve, color='red', line_width=0.5, opacity=0.2)
 
     # Draw wingskin
-    print("now3")
     vertex_list_wingskin = []
     index_map_wingskin = {}
     faces_wingskin = []
@@ -309,7 +305,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     plotter.add_mesh(mesh_wingskin, show_edges=False, color="grey", opacity=0.1)
 
     # Draw ribs
-    print("now4")
     for rib in range(len(designvars.wing.wingribs.ribs)):
         spanwise_pos = designvars.wing.wingribs.ribs[f"Rib{rib+1}"]["x_pos_frac"]
         _, _, outline, chord_length, _, _  = cross_sectional_structure_along_span(designvars, spanwise_pos, plot=False)
@@ -323,7 +318,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
 
         plotter.add_mesh(rib_mesh, color='skyblue', show_edges=False)
     # Draw fuselage
-    print("now5")
     vsp.SetSetFlag(designvars.fuselage.fuseid, 6, True)
     vsp.ExportFile('data/fuselage.stl', 6 , vsp.EXPORT_STL)
     vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete NewGeom which gets added after an export

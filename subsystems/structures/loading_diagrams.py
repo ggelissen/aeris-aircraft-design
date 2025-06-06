@@ -30,7 +30,7 @@ from design_variables import *
 #
 # =================================================================
 
-class LoadingDiagrams:
+class WingLoadingDiagrams:
     def __init__(self):
         self.SetUp()
 
@@ -74,8 +74,8 @@ class LoadingDiagrams:
         force_x = - drag  # net distributed horizontal load in negative x-direction (positive towards nose)
 
         # For Torque: Aerod. Moment + Induced Torque (from Vertical/Horizontal Forces)
-        x_distance_SC_AC = 0.01  # X-axis distance from aerodynamic center to shear center (m)
-        z_distance_SC_AC = 0.01  # Z-axis distance from aerodynamic center to shear center (m)
+        x_distance_SC_AC = 0.01  # X-axis distance from reference load point to shear center (m)
+        z_distance_SC_AC = 0.01  # Z-axis distance from reference load point to shear center (m)
         moment_aerodynamic_to_shear_center = - (force_x * z_distance_SC_AC + force_z * x_distance_SC_AC)  # induced torque from forces about y-axis
 
         # Total torque about y-axis
@@ -119,8 +119,16 @@ class LoadingDiagrams:
         shear_x = Vx_tip_to_root[::-1]
         bend_moment_z = Mz_tip_to_root[::-1]
         torsion_y = Ty_tip_to_root[::-1]
+
+        internal_loads = {
+            'shear_z': shear_z,
+            'bend_moment_x': bend_moment_x,
+            'torsion_y': torsion_y,
+            'shear_x': shear_x,
+            'bend_moment_z': bend_moment_z
+        }
  
-        return shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z
+        return internal_loads
 
     def plot_internal_loads(self, y, Vz, Mx, Tx, Vx, Mz, title_prefix=""):
         """
@@ -221,7 +229,7 @@ class LoadingDiagrams:
 
         print(f"Total Wing Weight: {total_weight:.2f} N")
 
-    def run_analysis_for_case(self, PLOT):
+    def run_analysis(self, PLOT):
         """
         Run the loading analysis for a given load case and plot results.
         Parameters:
@@ -241,12 +249,16 @@ class LoadingDiagrams:
         return shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z
 
 
+
+
+
+
 if __name__ == "__main__":
     # Initialize the loading diagrams class
-    loading_diagrams = LoadingDiagrams()
+    
+    internal_loads = WingLoadingDiagrams().run_analysis(PLOT=False)
 
-    # Extract parameters
+    print(internal_loads)
 
-    loading_diagrams.run_analysis_for_case(PLOT=True)
 
 
