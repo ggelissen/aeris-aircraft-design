@@ -9,6 +9,16 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
 def panel_openvsp(designvars : DesignParameters = None):
     """Perform aerodynamic panel analysis using OpenVSP.
     Output: Aerodynamic loads distribution along span"""
+
+    # add geometries to a set (set 15) that will be used for panel analysis
+    vsp.Update()
+    vsp.SetSetFlag(designvars.wing.wingid, 15, True)
+    vsp.SetSetFlag(designvars.fuselage.fuselageid, 15, True)
+    vsp.SetSetFlag(designvars.control_surface.vtailid, 15, True)
+    vsp.SetSetFlag(designvars.engine.engine_id, 15, True)
+
+
+
     pass
 
 
@@ -23,3 +33,4 @@ if __name__ == '__main__':
     AERIS = DesignParameters()
     AERIS.load_from_yaml("design_config.yaml")
     struct_main(AERIS, show_3d=False)
+    aerodynamic_analysis(AERIS)

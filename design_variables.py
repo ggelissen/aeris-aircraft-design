@@ -316,7 +316,8 @@ class EngineParameters:
         self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
         self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
         self.eta_fanturb = 0.9  
-        self.tt4to = 1450 #tt4 temp at takeoff               
+        self.tt4to = 1450 #tt4 temp at takeoff
+        self.engine_id = None
 
 
     def load_from_dict(self, param_dict):
@@ -405,6 +406,7 @@ class ControlSurfaceParameters:
         self.S_a = (self.x_a_outboard-self.x_a_inboard)*self.aileron_width                          # Control Surface Area in m^2
         self.delta_a = None                         # Control Surface Deflection Angle in degrees
         self.C_m_a = None                           # Control Surface Moment Coefficient
+        self.vtailid = None
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
