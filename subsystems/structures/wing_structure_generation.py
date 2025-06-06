@@ -11,7 +11,7 @@ from scipy.spatial import Delaunay
 from ideal_cross_section_analysis import run_cross_section_analysis
 
 
-def wing_structure_generation(designvars: DesignParameters = None):
+def wing_structure_generation(designvars: DesignParameters = None, plot: bool = True):
     """
     Generates the wing structure for the aircraft model using VSP.
 
@@ -46,7 +46,7 @@ def wing_structure_generation(designvars: DesignParameters = None):
     # run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
     #                            1000, 1000, 1000, 1000, 0.01)
 
-    generate_wing_structure_3D(designvars, num_spanwise_points=1001)
+    generate_wing_structure_3D(designvars, num_spanwise_points=1001, plot=plot)
 
 def cross_sectional_structure_along_span(designvars: DesignParameters = None, spanwise_position: float = 0.0, plot: bool = True):
     """
@@ -183,7 +183,7 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
         plt.savefig('data/wing_structure.png', dpi=300, bbox_inches='tight')
     return spar_points_array, stringer_array, outline, chord_length, lower_airfoil, upper_airfoil
 
-def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise_points: int = 1001):
+def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise_points: int = 1001, plot=True):
     halfspan = designvars.wing.b_w / 2
     plotter = pv.Plotter()
 
@@ -334,6 +334,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
 
 
-
-    plotter.show()
+    if plot:
+        plotter.show()
 

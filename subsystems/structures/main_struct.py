@@ -72,7 +72,7 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     calculate_wet_areas(designvars)
 
     ### Set up structure
-    wing_structure_generation(designvars)
+    wing_structure_generation(designvars, plot=show_3d)
 
     # Step 4: Simulate aircraft with loads
 
