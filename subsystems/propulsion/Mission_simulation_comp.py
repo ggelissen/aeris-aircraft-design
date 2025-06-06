@@ -970,9 +970,9 @@ if __name__ == '__main__':
                 "full_output": True
             },
             "mission_segments": [
-                { "name": "Take-off PH_LAB", "duration_minutes": 5, "target_thrust_N": 21120, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1650}, "ei_nox": 0.026 },
-                { "name": "Climb PH_LAB", "duration_minutes": 20, "target_thrust_N": 17952, "flight_conditions": {"mach_0": 0.4, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1500}, "ei_nox": 0.022},
-                { "name": "Cruise PH-LAB", "duration_minutes": 400, "target_thrust_N": 4224, "flight_conditions": {"mach_0": 0.7, "ts_0": 230.0, "ps_0": 35000.0}, "engine_params_override": {"tt_4": 1200}, "ei_nox": 0.009 },
+                { "name": "Take-off PH_LAB", "duration_minutes": 5, "target_thrust_N": 21120, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1650}, "ei_nox": 0.020 },
+                { "name": "Climb PH_LAB", "duration_minutes": 20, "target_thrust_N": 17952, "flight_conditions": {"mach_0": 0.4, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1500}, "ei_nox": 0.018},
+                { "name": "Cruise PH-LAB", "duration_minutes": 400, "target_thrust_N": 4224, "flight_conditions": {"mach_0": 0.7, "ts_0": 230.0, "ps_0": 35000.0}, "engine_params_override": {"tt_4": 1200}, "ei_nox": 0.0010 },
                 # Add more PH_LAB segments here
             ]
         }
