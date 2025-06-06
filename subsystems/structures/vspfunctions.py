@@ -513,7 +513,6 @@ def calculate_fuel_capacity(designvars: DesignParameters = None):
     # result = vsp.ExecAnalysis("CompGeom")
     output_mesh = vsp.ComputeCompGeom(11, False, 0)
     result = vsp.FindLatestResultsID("Comp_Geom")
-    vsp.PrintResults(result)
 
     vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete slices
     for geom in vsp.FindGeoms():
@@ -522,4 +521,4 @@ def calculate_fuel_capacity(designvars: DesignParameters = None):
     middle_wing_t_over_c = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid, 0), 1), "ThickChord"))
     fuel_tank_thickness = middle_wing_t_over_c * designvars.wing.mac
 
-    designvars.fueltank.fuel_tank_wing_volume = vsp.GetDoubleResults(result, "Total_Theo_Area", 0) * fuel_tank_thickness
+    designvars.fueltank.fuel_tank_wing_volume = vsp.GetDoubleResults(result, "Total_Theo_Area", 0)[0] * fuel_tank_thickness
