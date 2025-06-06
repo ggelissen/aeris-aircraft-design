@@ -42,5 +42,5 @@ print(f"Distance from the edge of fuselage to engine nozzle edge: {distance_to_e
 
 #do the distance from edge of fuselage to engine nozzle edge over tan(10 degrees)
 # This is to ensure the engine exhaust cone does not interfere with the v-tail
-x_eng = distance_to_edge / np.tan(np.radians(10)) 
+x_eng = distance_to_edge / np.tan(np.radians(15)) 
 print(f"Maximum distance the engine can to be placed from end of v-tail: {x_eng} m")
