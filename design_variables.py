@@ -4,6 +4,7 @@ import yaml
 
 
 
+
 class DesignParameters:
     def __init__(self, initial_config_path=None):
         """
@@ -43,6 +44,7 @@ class DesignParameters:
         self.control_surface = ControlSurfaceParameters()
         self.stability_aero = StabilityAerodynamicParameters()
         self.inertia = IntertiaParameters()
+        self.materials = MaterialsParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -95,6 +97,8 @@ class DesignParameters:
             self.cg.load_from_dict(config.get('cg', {}))
         if 'stability_aero' in config:
             self.stability_aero.load_from_dict(config.get('stability_aero', {}))
+        if 'materials' in config:
+            self.materials = config.get('materials', {})
 
     def update_parameter(self, parameter_name, value):
         """
@@ -212,8 +216,6 @@ class WingParameters:
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
 
 
-        # Internal Loading Diagrams
-#        self.shear_z, self.bend_moment_x, self.torsion_y, self.shear_x, self.bend_moment_z = WingLoadingDiagrams().run_analysis_for_case(PLOT=False)
 
         
 
@@ -571,3 +573,10 @@ class FuelTank:
         self.frac_pos_along_span_outboard = 0.7802
         self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
 
+
+
+
+class MaterialsParameters():
+    def __init__(self):
+        self.elastic_modulus = 70e9  # Pa, Young's modulus for aluminum
+        self.shear_modulus = self.elastic_modulus / (2 * (1 + 0.33))  # Shear modulus for aluminum
