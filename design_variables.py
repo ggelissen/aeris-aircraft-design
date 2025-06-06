@@ -172,7 +172,7 @@ class WingParameters:
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
         self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
-        self.Lambda_0_w = None                          # Will be calculated in the code in rad
+        self.Lambda_05_w = 0.607                           # Wind half-chord sweep angle in rad
         self.t_c_w_max = None
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
@@ -203,6 +203,11 @@ class WingParameters:
         self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
+        self.airfoil_clalpha = 1.5
+        self.airfoil_cd0 = 0.06
+        self.C_D0 = 0.017196 
+        self.e = 0.9         #oswald efficiency factor
+        self.k2 = 1 / (np.pi * self.A_w_target * self.e)
 
         
 
@@ -254,15 +259,15 @@ class FuselageParameters:
             "fuselagetip1": {"Tan_Angles": {"top": 21.32, "right": 45, "bottom": 21.32, "left": 45}},
             "crosssection_1": {"Tan_Angles": {"top": 7.11, "right": 0, "bottom": 7.11, "left": 0},
                                "Type": "vsp.XS_ROUNDED_RECTANGLE",
-                                 "Dimensions": {"Width": 1.12, "Height": 0.9, "Keystone": 0.57143,
+                                 "Dimensions": {"Width": 1.2, "Height": 1.2, "Keystone": 0.57143,
                                                  "RadiusSymmetryType": 1.0, "Radius": 0.35, "RadiusBR": 0.09}},
             "crosssection_2": {"Tan_Angles": {"top": 0, "right": 0, "bottom": 0, "left": 0},
                                  "Type": "vsp.XS_ROUNDED_RECTANGLE",
-                                    "Dimensions": {"Width": 1.25, "Height": 1.05, "Keystone": 0.58929,
+                                    "Dimensions": {"Width": 1.6, "Height": 1.4, "Keystone": 0.58929,
                                                      "RadiusSymmetryType": 3.0, "Radius": 0.38}},
             "crosssection_3": {"Tan_Angles": {"top": 0, "right": 0, "bottom": 0, "left": 0},
                                     "Type": "vsp.XS_ROUNDED_RECTANGLE",
-                                        "Dimensions": {"Width": 1.25, "Height": 0.98, "Keystone": 0.60357,
+                                        "Dimensions": {"Width": 1.6, "Height": 1.2, "Keystone": 0.60357,
                                                         "RadiusSymmetryType": 3.0, "Radius": 0.38}},
             "fuselagetip2": {"Tan_Angles": {"top": -26.05, "right": -45, "bottom": -26.05, "left": -45}}
         }
@@ -306,7 +311,7 @@ class EngineParameters:
         self.nacelle_outlet_tan_angles = np.deg2rad(np.array([-15., -20., -15., -20.]))  # Nacelle Exhaust Tangent Angles in radians
         self.engine_x_pos = -6.5                    # Engine X-Position in m
         self.engine_y_pos = 0.0                     # Engine Y-Position in m
-        self.engine_z_pos = -0.9                    # Engine Z-Position in m
+        self.engine_z_pos = -1.1                    # Engine Z-Position in m
         self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
         self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
         self.eta_fanturb = 0.9  

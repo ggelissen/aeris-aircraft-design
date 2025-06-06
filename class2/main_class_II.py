@@ -15,21 +15,7 @@ def class_II_weight_estimation(params: DesignParameters,
                                initial_W_TO_N_guess: float,
                                max_iterations: int = 100,
                                tolerance: float = 0.005): 
-    """
-    Performs Class II weight estimation for a UAV iteratively.
 
-    Args:
-        params: DesignParameters object containing all aircraft parameters.
-        initial_W_TO_N_guess: Initial guess for the Take-Off Weight in Newtons.
-        max_iterations: Maximum number of iterations to attempt convergence.
-        tolerance: Convergence tolerance for the relative difference in W_TO.
-
-    Returns:
-        A tuple containing:
-            - float: Converged Take-Off Weight in Newtons (or last calculated if no convergence).
-            - bool: True if converged, False otherwise.
-            - int: Number of iterations performed.
-    """
     W_TO_N_current = initial_W_TO_N_guess
     params.weight.W_TO = W_TO_N_current 
     print(f"Starting Class II Weight Estimation with initial WTO: {W_TO_N_current:.2f} N")
@@ -120,16 +106,7 @@ def calculate_cg_longitudinal(params: DesignParameters, W_empty_N_calculated: fl
     return cg_positions
 
 def estimate_mac_leading_edge(params: DesignParameters, cg_OEW: float, target_CG_percent_MAC: float):
-    """
-    Estimate the longitudinal location of the MAC leading edge.
 
-    Args:
-        cg_OEW: The CG of the OEW condition (in m).
-        target_CG_percent_MAC: Desired CG as %MAC (e.g., 0.3 for 30%).
-
-    Returns:
-        x_LE_MAC: Longitudinal position of MAC leading edge.
-    """
     x_LE_MAC = cg_OEW - target_CG_percent_MAC * params.wing.mac
     print(f"Estimated MAC Leading Edge location: {x_LE_MAC:.2f} m (to place CG at {target_CG_percent_MAC*100:.0f}% MAC)")
     return x_LE_MAC
