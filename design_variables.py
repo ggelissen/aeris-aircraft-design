@@ -342,7 +342,7 @@ class EmpennageParameters:
         self.V_v = 0.05 #estimation                             # Horizontal Stabilizer Volume Coefficient
         self.S_t = 2                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
-            self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
+            self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians, dihedral
         self.type = 'fixed'
 
         # V_Tail:
