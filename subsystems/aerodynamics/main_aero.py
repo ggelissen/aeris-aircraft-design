@@ -18,8 +18,24 @@ def panel_openvsp(designvars : DesignParameters = None):
     vsp.SetSetFlag(designvars.engine.engine_id, 15, True)
 
     # Activate standard vspaero settings
-    print(vsp.ListAnalysis())
     vsp.SetAnalysisInputDefaults("VSPAEROSweep")
+
+    # Print possible inputs
+    vsp.PrintAnalysisDocs("VSPAEROSweep")
+
+    # Set analysis inputs
+    # vsp.SetIntAnalysisInput()
+    # vsp.SetDoubleAnalysisInput()
+    # vsp.SetVec3dAnalysisInput()
+    # vsp.SetStringAnalysisInput()
+
+    # Execute analysis
+    vsp.ExecAnalysis("VSPAEROSweep")
+    results = vsp.FindLatestResultsID("VSPAEROSweep")
+
+    # Print results
+    vsp.PrintResults(results)
+    # vsp.GetDoubleResults()
 
     return 0
 
