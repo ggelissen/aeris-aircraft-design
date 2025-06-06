@@ -2,6 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
+
+
+
 # === Buckling Calculation ===
 def calculate_critical_buckling_stress(E, I, A, L, K_col=1.0):
     if A == 0 or I == 0 or E == 0 or L == 0:

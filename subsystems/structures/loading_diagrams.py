@@ -30,7 +30,7 @@ from design_variables import *
 #
 # =================================================================
 
-class LoadingDiagrams:
+class WingLoadingDiagrams:
     def __init__(self):
         self.SetUp()
 
@@ -241,12 +241,27 @@ class LoadingDiagrams:
         return shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z
 
 
+
+
+
+
 if __name__ == "__main__":
     # Initialize the loading diagrams class
-    loading_diagrams = LoadingDiagrams()
+    
+    shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z = WingLoadingDiagrams().run_analysis_for_case(PLOT=False)
 
-    # Extract parameters
+    shear_z_root = shear_z[0]  # Shear at root
+    bend_moment_x_root = bend_moment_x[0]  # Bending moment at root
+    torsion_y_root = torsion_y[0]  # Torsion at root
+    shear_x_root = shear_x[0]  # Shear in x-direction at root
+    bend_moment_z_root = bend_moment_z[0]  # Bending moment in z-direction at root
+    print(f"Shear at root: {shear_z_root:.2f} N")
+    print(f"Bending moment at root: {bend_moment_x_root:.2f} Nm")
+    print(f"Torsion at root: {torsion_y_root:.2f} Nm")
+    print(f"Shear in x-direction at root: {shear_x_root:.2f} N")
+    print(f"Bending moment in z-direction at root: {bend_moment_z_root:.2f} Nm")
+    # Plot the wing loading diagrams
 
-    loading_diagrams.run_analysis_for_case(PLOT=True)
+
 
 
