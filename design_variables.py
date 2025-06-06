@@ -2,7 +2,6 @@ import math as m
 import numpy as np
 import yaml
 
-from loading_diagrams.py import WingLoadingDiagrams()
 
 
 class DesignParameters:
@@ -214,7 +213,7 @@ class WingParameters:
 
 
         # Internal Loading Diagrams
-        self.shear_z, self.bend_moment_x, self.torsion_y, self.shear_x, self.bend_moment_z = WingLoadingDiagrams().run_analysis_for_case(PLOT=False)
+#        self.shear_z, self.bend_moment_x, self.torsion_y, self.shear_x, self.bend_moment_z = WingLoadingDiagrams().run_analysis_for_case(PLOT=False)
 
         
 
