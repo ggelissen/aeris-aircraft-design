@@ -939,7 +939,7 @@ if __name__ == '__main__':
         "HALO": {
             "num_engines": 2, 
             "baseline_engine_config": {
-                "bpr": 4.2, "pr_fan": 1.6, "pr_lpc": 2.0, "pr_hpc": 10.0, "tt_4": 1500.,
+                "bpr": 4.2, "pr_fan": 1.5, "pr_lpc": 1.2, "pr_hpc": 24.0, "tt_4": 1500.,
                 "eta_fan": 0.92, "eta_lpc": 0.91, "eta_hpc": 0.90,
                 "eta_hpt": 0.93, "eta_lpt": 0.94,
                 "eta_com": 0.99, "eta_mech_l": 0.99, "eta_mech_h": 0.99,
@@ -950,15 +950,16 @@ if __name__ == '__main__':
                 "full_output": True
             },
             "mission_segments": [
-                { "name": "Take-off HALO", "duration_minutes": 5, "target_thrust_N": 60000.0, "flight_conditions": {"mach_0": 0.25, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1550}, "ei_nox": 0.022 },
-                { "name": "Cruise HALO", "duration_minutes": 400, "target_thrust_N": 15000.0, "flight_conditions": {"mach_0": 0.82, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1300}, "ei_nox": 0.010 },
+                { "name": "Take-off HALO", "duration_minutes": 5, "target_thrust_N": 136871, "flight_conditions": {"mach_0": 0.25, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1550}, "ei_nox": 0.020 },
+                { "name": "Climb HALO", "duration_minutes": 20, "target_thrust_N": 115000, "flight_conditions": {"mach_0": 0.70, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1450}, "ei_nox": 0.018 }, #cruise thrust is 0.2 mtto
+                { "name": "Cruise HALO", "duration_minutes": 400, "target_thrust_N": 27374.2, "flight_conditions": {"mach_0": 0.82, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1300}, "ei_nox": 0.010 },
                 # Add more HALO segments here
             ]
         },
         "PH_LAB": {
             "num_engines": 2, 
             "baseline_engine_config": {
-                "bpr": 0.8, "pr_fan": 1.55, "pr_lpc": 1.2, "pr_hpc": 7.47, "tt_4": 1600., 
+                "bpr": 3.9, "pr_fan": 1.55, "pr_lpc": 1.2, "pr_hpc": 7.47, "tt_4": 1283.15, 
                 "eta_fan": 0.915, "eta_lpc": 0.9, "eta_hpc": 0.9,
                 "eta_hpt": 0.93, "eta_lpt": 0.93,
                 "eta_com": 0.99, "eta_mech_l": 0.99, "eta_mech_h": 0.99,
@@ -969,8 +970,9 @@ if __name__ == '__main__':
                 "full_output": True
             },
             "mission_segments": [
-                { "name": "Take-off PH_LAB", "duration_minutes": 5, "target_thrust_N": 30000.0, "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1650}, "ei_nox": 0.025 },
-                { "name": "Cruise PH-LAB", "duration_minutes": 400, "target_thrust_N": 8000.0, "flight_conditions": {"mach_0": 0.60, "ts_0": 230.0, "ps_0": 35000.0}, "engine_params_override": {"tt_4": 1200}, "ei_nox": 0.009 },
+                { "name": "Take-off PH_LAB", "duration_minutes": 5, "target_thrust_N": 21120, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1650}, "ei_nox": 0.026 },
+                { "name": "Climb PH_LAB", "duration_minutes": 20, "target_thrust_N": 17952, "flight_conditions": {"mach_0": 0.4, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1500}, "ei_nox": 0.022},
+                { "name": "Cruise PH-LAB", "duration_minutes": 400, "target_thrust_N": 4224, "flight_conditions": {"mach_0": 0.7, "ts_0": 230.0, "ps_0": 35000.0}, "engine_params_override": {"tt_4": 1200}, "ei_nox": 0.009 },
                 # Add more PH_LAB segments here
             ]
         }
