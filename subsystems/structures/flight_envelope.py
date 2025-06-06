@@ -263,6 +263,9 @@ class FlightEnvelope:
         # Compute VA as the speed at which the parabola hits the flat limit
         VA_index = np.argmax(n_maneuver_pos >= n_pos_limit)
         VA = velocity_aixs[VA_index]
+        VA_TAS = equivalent_to_true_air_speed(VA, self.density_at_altitude[altitude_level], self.density_at_altitude['sea_level'])  # Convert EAS to TAS [m/s]
+        print(f"VA (TAS): {VA_TAS} m/s")
+        
 
         # Custom color map for specific speeds
         speed_labels = ['VS', 'VA', 'VC', 'VD']

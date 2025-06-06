@@ -9,7 +9,7 @@ params.load_from_yaml("design_config.yaml")
 
 def aileron_sizing(params):
     
-    b_inboard = 0.62 # Reference distance b_inboard, adjustable
+    b_inboard = 0.8 # Reference distance b_inboard, adjustable
     
     for i in range(100):
             
@@ -97,10 +97,10 @@ def aileron_sizing(params):
         delta_t = (bank_angle * np.pi) / (180 * P)
 
         #Loop for optimising aileron size
-        if 2/3 - delta_t >= 0.005:
-            b_inboard -= 0.01
-        elif 2/3 - delta_t <= -0.005:
+        if (2/3) - delta_t >= 0.005:
             b_inboard += 0.01
+        elif (2/3) - delta_t <= -0.005:
+            b_inboard -= 0.01
         else:
             break
         
@@ -127,9 +127,8 @@ def rudder_sizing(params):
     
     b_inboard = 0.5
     b_outboard = 0.9
-    b_empennage = params.empennage
+    b_empennage = params.empennage.b_v
     S_ref = params.empennage.S_t          # Reference empennage surface area (m^2)
     CR_to_C = 0.5                         # Rudder chord to empennage chord ratio, accounts for rear spar
-    
-    S_rudder = 4 * CR_to_C *
+    S_rudder = 4 * CR_to_C * b_empennage
     

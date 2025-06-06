@@ -40,6 +40,7 @@ def wing_structure_generation(designvars: DesignParameters = None):
     # cross_sectional_structure_along_span(designvars, 0.871)
     # cross_sectional_structure_along_span(designvars, 0.9)
     # cross_sectional_structure_along_span(designvars, 0.95)
+    #fuselage_cross_section(designvars, 0.5)
 
     cross_section = cross_sectional_structure_along_span(designvars, 0.95)
     run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
@@ -197,7 +198,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     wingskin = []
     dx = halfspan/num_spanwise_points
     for x in np.linspace(0, halfspan, num_spanwise_points):
-        print(x)
         spar_points_array, stringer_array, _, chord_length, lower_airfoil, upper_airfoil = cross_sectional_structure_along_span(designvars, x / halfspan, plot=False)
         for index, spar_points in enumerate(spar_points_array):
             spars[f'spar{index+1}']['spar_points'].append(np.array([spar_points[0][0], spar_points[0][1], x]))
