@@ -42,10 +42,28 @@ def wing_structure_generation(designvars: DesignParameters = None):
     #fuselage_cross_section(designvars, 0.5)
 
     cross_section = cross_sectional_structure_along_span(designvars, 0.95)
-    # run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
-    #                            1000, 1000, 1000, 1000, 0.01)
+    run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
+                                1000, 1000, 1000, 1000, 0.01)
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
+
+
+def perform_cross_section_analysis(designvars: DesignParameters = None, spanwise_position: float = 0.0):
+    """
+    Performs cross-sectional analysis of the wing structure at a given spanwise position.
+
+    Parameters:
+    - designvars: DesignParameters object containing design variables.
+    - spanwise_position: Position along the span where the cross-section is generated as a fraction of the total span (0.0 to 1.0).
+    """
+    outline, chord_length, x_displacement = cross_section(designvars, spanwise_position)
+    run_cross_section_analysis(designvars, outline, chord_length, x_displacement,
+                                designvars.wing.wingsection.num_spars,
+                                designvars.wing.wingsection.num_stringers,
+                                designvars.wing.wingsection.num_ribs,
+                                designvars.wing.wingsection.num_sparcaps,
+                                designvars.wing.wingsection.num_sparcaps,
+                                0.01)
 
 def cross_sectional_structure_along_span(designvars: DesignParameters = None, spanwise_position: float = 0.0, plot: bool = True):
     """
