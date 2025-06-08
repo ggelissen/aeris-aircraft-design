@@ -194,6 +194,8 @@ def run_preliminary_sizing_wing(params: DesignParameters) -> dict:
 
     results = {
         'Lambda_025c_w': Lambda_025c,
+        'Lambda_05c_w': Lambda_05c,
+        'Lambda_LE_w': Lambda_LE,
         'lambda_w': taper_ratio,
         'root_chord': c_root,
         'tip_chord': c_tip,

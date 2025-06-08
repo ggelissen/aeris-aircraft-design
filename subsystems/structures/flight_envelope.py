@@ -1,4 +1,5 @@
 
+
 # _____ IMPORTS _____
 import sys
 import os
@@ -261,7 +262,10 @@ class FlightEnvelope:
         # Key speeds
         # Compute VA as the speed at which the parabola hits the flat limit
         VA_index = np.argmax(n_maneuver_pos >= n_pos_limit)
-        VA = velocity_aixs[VA_index]
+        VA = velocity_aixs[VA_index] # VA Equivalent Airspeed (EAS) [m/s]
+        VA_TAS = equivalent_to_true_air_speed(VA, self.density_at_altitude[altitude_level], self.density_at_altitude['sea_level'])  # Convert EAS to TAS [m/s]
+
+        
 
         # Custom color map for specific speeds
         speed_labels = ['VS', 'VA', 'VC', 'VD']
@@ -305,15 +309,12 @@ class FlightEnvelope:
         n_pos_limit, n_neg_limit = self.calc_load_factor_limits(MTOW_kg)
         # 2. Calculate speeds
         VS, VD, velocity_aixs = self.calc_diagram_speed(weight_N, density, CL_max, self.VC)
-        print(VS)
         # 3. Calculate gust velocity
         #U_gust = self.calc_gust_velocity(altitude, velocity_aixs, self.VC, VD) 
         # 4. Calculate gust loads
         #n_gust_pos, n_gust_neg = self.calc_gust_loads(velocity_aixs, U_gust, weight_N, density, self.chord)
         #n_gust_pos, n_gust_neg = self.compute_gust_loads(velocity_aixs, U_gust)
         n_gust_pos, n_gust_neg, velocities_eas_gust = self.calc_gust()
-        print(f"Positive Gust Load Factors: {n_gust_pos}")
-        print(f"Negative Gust Load Factors: {n_gust_neg}")
         # 5. Calculate maneuver loads
         n_maneuver_pos, n_maneuver_neg = self.calc_maneuver_loads(velocity_aixs, n_pos_limit, n_neg_limit, VS, VD)
         # 6. Plot the V-n diagram

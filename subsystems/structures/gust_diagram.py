@@ -25,7 +25,7 @@ rho = 1.225  # air density in kg/m^3 0.42552 for FL320
 rho_cruise = params.cruise_density # air density at cruise altitude in kg/m^3
 mac = params.wing.mac  # Mean Aerodynamic Chord in m
 Cl_alpha = params.performance.CL_alpha  # Lift curve slope in per radian
-W_S_revised =  (params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction)/params.wing.S_w
+W_S_revised = (params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction)/params.wing.S_w
 print(f"W_S_revised: {W_S_revised}")
 
 mu_g = (W_S_revised) / (9.80665*0.5 * rho_cruise * mac * Cl_alpha)

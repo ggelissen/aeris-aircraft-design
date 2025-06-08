@@ -19,7 +19,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas
+from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas, calculate_fuel_capacity
 from vspfunctions import calculate_cg, calculate_wet_areas
 from vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing, create_V_tail, create_engines
 try:
@@ -35,6 +35,7 @@ from wing_structure_generation import wing_structure_generation
 def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
     # Step 1: Loading analysis
+    
 
 
     # Step 2 Import geometric variables from Class I/II methods
@@ -58,6 +59,14 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
     ### Add engines
     create_engines(designvars)
+
+    # Add fuel tank
+    calculate_fuel_capacity(designvars)
+
+    prev_cwd = os.getcwd()
+    os.chdir(os.getcwd() + "/data")
+    vsp.WriteVSPFile("aircraft_model2.vsp3")
+    os.chdir(prev_cwd)
 
     ### Calculate specifications
     calculate_cg(designvars)

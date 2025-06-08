@@ -177,7 +177,7 @@ def run_improved_drag_estimations(params: DesignParameters) -> float:
 
     CD0 = calculate_CD0(params.wing.S_ref, C_f_lst, FF_lst, IF_lst, S_wet_lst, CD_misc)
                         
-    return {'CD0': CD0}
+    return {'CD0': CD0, 'C_f': C_f_lst}
 
 
 if __name__ == "__main__":
@@ -185,4 +185,5 @@ if __name__ == "__main__":
     params.load_from_yaml('design_config.yaml')
 
     CD0 = run_improved_drag_estimations(params)
-    print(f"Total zero-lift drag coefficient (CD0): {CD0['CD0'].value():.6f}")
+    print(f"Total zero-lift drag coefficient (CD0): {CD0['CD0']:.6f}")
+    print(f"Skin friction coefficients (C_f): {CD0['C_f']}")

@@ -207,11 +207,84 @@ class FlightSim:
         #print(t_history)
         #print(V_history)
         
+    
+    def ground_run2(self, T0, mass0):
+        _,_,density,sos = self.__ISA__(0) # sea level
+        mass = mass0
+        g0 = 9.80665
+        W = mass * g0
+        V = 0 
+        S = 12
+        friction = 0.014
+        Cd0 = 0.0172
+        AR = 9.0
+        oswald = 0.85
+        t = 0
+        dt = 0.001
+        X = 0
+        TSFC = 14.646
+        aoc = 0 
+        #aoc_vel = 0
+        aoa = 0 / 180 * math.pi
+        C_L = 1.1
+        h = 0
+                
+        T = T0
+        
+        C_D = Cd0 + C_L**2 / (math.pi * AR * oswald)
+        #print(C_D)
+        #print(C_L)
+        #print(C_L/C_D)
+        
+        D = C_D * 0.5 * V * V * density * S
+        L = C_L * 0.5 * V * V * density * S
+        
+        #aoc = math.asin((T-D)/W)
+        
+        #h = V * math.sin(aoc )
+        
+        N = W + D*math.sin(aoc) - L*math.cos(aoc) - T*math.sin(aoc+aoa)
+        Df = friction*N
+        acc = (T*math.cos(aoa) - D - Df*math.cos(aoc) - W*math.sin(aoc)) / mass
+        
+        max_time = 360
+        
+        while True:
+            if (L >= W):
+                if 1800*0.9999< X < 1800*1.0001:
+                    print(T0)
+                    print(X)
+                    print(V/sos)
+                    return T0,X,V
+                if X > 1800:
+                    return self.ground_run2(T0+(X-1800), mass0)
+                else:
+                    return self.ground_run2(T0-(1800-X), mass0)
+                    
+                
+            
+            V += acc * dt
+            X += V * dt
+            
+            D = C_D * 0.5 * V * V * density * S
+            L = C_L * 0.5 * V * V * density * S
+            FF = TSFC * T * 0.000001
+            mass -= (FF * dt)
+            W = mass * g0
+            N = W + D*math.sin(aoc) - L*math.cos(aoc) - T*math.sin(aoc+aoa)
+            Df = friction*N
+            acc = (T*math.cos(aoa) - D - Df*math.cos(aoc) - W*math.sin(aoc)) / mass
+            
+            
+            
+            t += dt
+        
+        
     def ground_run(self, T0):
         
         _,_,density,sos = self.__ISA__(0) # sea level
         
-        mass = 3500
+        mass = 4200
         g0 = 9.80665
         W = mass * g0
         V = 0 
@@ -226,8 +299,8 @@ class FlightSim:
         TSFC = 20
         aoc = 0 
         #aoc_vel = 0
-        aoa = 10 / 180 * math.pi
-        C_L = 1.1
+        aoa = 0 / 180 * math.pi
+        C_L = 0.1* aoa *180/math.pi + 0.3
         h = 0
         
         T = T0
@@ -316,35 +389,22 @@ class FlightSim:
                     if (aoa*180/math.pi > -10):
                         aoa -=  dt
             '''
-            #des = (((12000 - h) - hvel) - hacc)
-            if h < 12000:
-                des = ((4 - aoc*180/math.pi) - aoc_vel*180/math.pi)
-                if aoa >= 10/180*math.pi:
-                    if des > 0:
-                        aoa += 0
-                    else:
-                        aoa += des * dt
-                elif aoa <= -10/180*math.pi:
-                    if des < 0:
-                        aoa += 0
-                    else:
-                        aoa += des * dt
+            #des = ((12000 - h)/12000 - hvel) *math.pi/1000
+            des = (((12000 - h)/3000 - aoc*180/math.pi) - aoc_vel*180/math.pi)
+                #des = ((1 - aoc*180/math.pi) - aoc_vel*180/math.pi)
+            #if h > 0:
+            if aoa >= 10/180*math.pi:
+                if des > 0:
+                    aoa += 0
+                else:
+                    aoa += des * dt
+            elif aoa <= -10/180*math.pi:
+                if des < 0:
+                    aoa += 0
                 else:
                     aoa += des * dt
             else:
-                des = ((0 - aoc*180/math.pi) - aoc_vel*180/math.pi)
-                if aoa >= 10/180*math.pi:
-                    if des > 0:
-                        aoa += 0
-                    else:
-                        aoa += des * dt
-                elif aoa <= -10/180*math.pi:
-                    if des < 0:
-                        aoa += 0
-                    else:
-                        aoa += des * dt
-                else:
-                    aoa += des * dt
+                aoa += des * dt
             
             #print(des)
             #T += (((12000 - h) - aoc*180/math.pi) - aoc_vel*180/math.pi)
@@ -395,31 +455,34 @@ class FlightSim:
             # if h > 1000:
             #     C_L = 0.1* aoa *180/math.pi + 0.3
             # else:
-            C_L = 0.1* aoa *180/math.pi + 0.3
+            # if h <= 0:
+            #     C_L = 0.1* aoa *180/math.pi + 1.0
+            # else:
+                C_L = 0.1* aoa *180/math.pi + 0.3
             
             C_D = Cd0 + C_L**2 / (math.pi * AR * oswald)
             hvel = V * math.sin(aoc)
-            #hacc = (hvel_history[-1] - hvel) / dt
+            hacc = (hvel_history[-1] - hvel) / dt
             
             h += hvel * dt
             
             _,_,density,sos = self.__ISA__(h) # sea level
             
             #T = T0 - (t/600)*T0/18
-            
+            des = ((0.85 - M)*3 - acc)
             #T = T0 * (density/1.225)
             if T >= 7000:
-                if ((0.95 - M) - acc) > 0:
+                if des > 0:
                     T += 0
                 else:
-                    T += ((0.85 - M) - acc) * 10 * dt
+                    T += des * 100 * dt
             elif T <= 0:
-                if ((0.95 - M) - acc) < 0:
+                if des < 0:
                     T += 0
                 else:
-                    T += ((0.85 - M) - acc) * 10 * dt
+                    T += des * 100 * dt
             else:
-                T += ((0.95 - M) - acc) * 10 * dt
+                T += des * 100 * dt
             '''
             if M < 0.85:
                 if (T < 7000):
@@ -466,6 +529,8 @@ class FlightSim:
             
             M = V/sos
             
+            #print(T)
+            
             
             
             D = C_D * 0.5 * V * V * density * S
@@ -504,6 +569,7 @@ class FlightSim:
         print("X",X)
         
         self.__plot_result__(t_history, C_L_history, "t [s]", "C_L [-]")
+        self.__plot_result__(t_history, hvel_history, "t [s]", "hdot [m/s]")
         self.__plot_result__(t_history, V_history, "t [s]", "V [m/s]")
         self.__plot_result__(t_history, M_history, "t [s]", "M [-]")
         self.__plot_result__(t_history, acc_history, "t [s]", "acc [m/s2]")
@@ -519,15 +585,12 @@ class FlightSim:
         self.__plot_result__(t_history, W_history, "t [s]", "W [N]")
         self.__plot_result__(t_history, T_history, "t [s]", "T [N]")
         self.__plot_result__(t_history, D_history, "t [s]", "D [N]")
-        
-        
-        
-            
-            
-            
-        
+         
 
 if __name__ == "__main__":
     #FlightSim().level_flight(1500, 12000)
-    FlightSim().ground_run(7000)
+    #FlightSim().ground_run(6000)
+    FlightSim().ground_run2(7000,4000)
+    FlightSim().ground_run2(8000,5000)
+    FlightSim().ground_run2(1000,4000)
         
