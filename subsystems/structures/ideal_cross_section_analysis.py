@@ -538,6 +538,9 @@ def plot_bending_stresses(bending_stresses: np.ndarray, boom_x: np.ndarray, boom
     # Scatter plot with color mapping for stress values
     scatter = plt.scatter(boom_x, boom_y, c=bending_stresses, cmap='viridis', s=150, edgecolors='k', label='Boom Stress')
     cbar = plt.colorbar(scatter, label='Bending Stress (Pa)')
+
+    # Add perimeter lines for the boom elements
+    plt.plot(boom_x, boom_y, '', color='black', alpha=0.5, linewidth=1, label='Boom Perimeter')
     
     # Optionally, add text labels for exact stress values
     for i, txt in enumerate(bending_stresses):
@@ -558,7 +561,7 @@ def plot_bending_stresses(bending_stresses: np.ndarray, boom_x: np.ndarray, boom
 
 def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray, stringer_points: np.ndarray,
                                Mx_applied: float, My_applied: float, T_applied: float, Vx_applied: float, 
-                               Vy_applied: float, skin_thickness: float) -> dict:
+                               Vy_applied: float, skin_thickness: float, plot: bool = True) -> dict:
     """
     Run the cross-section analysis, based on an idealised wing box structure. 
     """
@@ -585,62 +588,54 @@ def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray
 
     boom_x_sorted, boom_y_sorted, boom_areas_sorted = filter_and_sort_coordinates(
         spar_boom_x, spar_boom_y, stringer_boom_x, stringer_boom_y, spar_boom_areas, stringer_boom_areas)
-    #print(f"Sorted Boom X Coordinates: {boom_x_sorted}")
-    #print(f"Sorted Boom Y Coordinates: {boom_y_sorted}")
-    #print(f"Sorted Boom Areas: {boom_areas_sorted}")
 
-    # boom_x_sorted = np.concatenate((spar_boom_x, stringer_boom_x))
-    # boom_y_sorted = np.concatenate((spar_boom_y, stringer_boom_y))
-    # boom_areas_sorted = np.concatenate((spar_boom_areas, stringer_boom_areas))
     boom_x_sorted = boom_x_sorted - np.min(boom_x_sorted)
     boom_x_abs = abs(boom_x_sorted)
     boom_y_abs = abs(boom_y_sorted)
     final_boom_areas = boom_areas_sorted # Assuming final areas are equal to initial areas
 
     # 1. Calculate Centroid
-    xc, yc = calculate_centroid_idealized(final_boom_areas.tolist(), boom_x_abs.tolist(), boom_y_abs.tolist())
-    print(f"Centroid (m): ({xc}, {yc})")        
+    xc, yc = calculate_centroid_idealized(final_boom_areas.tolist(), boom_x_abs.tolist(), boom_y_abs.tolist())       
 
     # 2. Transform coordinates to centroidal
     boom_x_cen, boom_y_cen = transform_coordinates_to_centroidal(boom_x_abs.tolist(), boom_y_abs.tolist(), xc, yc)
 
     # 3. Calculate Moments of Inertia
     Ixx, Iyy, Ixy = calculate_moments_of_inertia_idealized(final_boom_areas.tolist(), boom_x_cen, boom_y_cen)
-    print(f"Moments of Inertia (m^4): Ixx={Ixx}, Iyy={Iyy}, Ixy={Ixy}")
 
     # 4. Bending Stress Calculation
     sigma_z_booms = np.zeros(len(boom_x_cen))
-
     for i, point in enumerate(zip(boom_x_cen, boom_y_cen)):
         x_point, y_point = point
         sigma_z_booms[i] = calculate_bending_stress(Mx_applied, My_applied, Ixx, Iyy, Ixy, x_point, y_point)
-        print(f"Bending Stress at Boom {i+1} (Pa): {sigma_z_booms[i]:.2e}")
-
 
     # 5. Torsion Analysis
     G_material = params.materials.shear_modulus # Pa
     
     panel_s, A_m_calc = calculate_panel_lengths_and_enclosed_area(boom_x_sorted.tolist(), boom_y_sorted.tolist())
     q_tor, tau_tor = calculate_torsional_shear_flow_and_stress(T_applied, A_m_calc, skin_thickness)
-    print(f"Torsional Shear Flow (N/m): {q_tor:.2e}, Torsional Shear Stress (Pa): {tau_tor:.2e}")
-
+    
     skin_thicknesses_list = [skin_thickness] * len(panel_s)
     dtheta_dz = calculate_rate_of_twist(T_applied, A_m_calc, G_material, panel_s, skin_thicknesses_list)
-    print(f"Rate of Twist (rad/m): {dtheta_dz:.2e}")
-
+    
 
     # 6. Shear Flow Analysis due to Shear Forces
-
     qb_panels = calculate_basic_shear_flows(Vx_applied, Vy_applied, Ixx, Iyy, Ixy, final_boom_areas.tolist(), boom_x_cen, boom_y_cen)
     qs0 = calculate_q_s0(qb_panels, panel_s, skin_thicknesses_list) # G is assumed constant
     qs_panels = calculate_final_shear_flows(qb_panels, qs0)
-    print(f"Basic Shear Flows (N/m): {[f'{q:.2e}' for q in qb_panels]}")
-    print(f"Corrective Shear Flow (N/m): {qs0:.2e}")
-    print(f"Final Shear Flows (N/m): {[f'{q:.2e}' for q in qs_panels]}")
+    
 
     # Plotting
-    plot_idealised_cross_section(boom_x_sorted, boom_y_sorted, (xc, yc))
-    plot_bending_stresses(sigma_z_booms, boom_x_sorted, boom_y_sorted)
+    if plot:
+        print(f"Centroid (m): ({xc}, {yc})") 
+        print(f"Moments of Inertia (m^4): Ixx={Ixx}, Iyy={Iyy}, Ixy={Ixy}")
+        print(f"Torsional Shear Flow (N/m): {q_tor:.2e}, Torsional Shear Stress (Pa): {tau_tor:.2e}")
+        print(f"Rate of Twist (rad/m): {dtheta_dz:.2e}")
+        print(f"Basic Shear Flows (N/m): {[f'{q:.2e}' for q in qb_panels]}")
+        print(f"Corrective Shear Flow (N/m): {qs0:.2e}")
+        print(f"Final Shear Flows (N/m): {[f'{q:.2e}' for q in qs_panels]}")
+        plot_idealised_cross_section(boom_x_sorted, boom_y_sorted, (xc, yc))
+        plot_bending_stresses(sigma_z_booms, boom_x_sorted, boom_y_sorted)
 
     results = {
         "centroid_x": xc,
