@@ -101,17 +101,17 @@ class WingLoadingDiagrams:
         # Integrate from tip (right) to root (left)
     
         # Distributed Load in z-direction
-        Vz_tip_to_root = cumtrapz(force_z[::-1], y_tip_root, initial=0)  # Shear force in z-direction
+        Vz_tip_to_root = - cumtrapz(force_z[::-1], y_tip_root, initial=0)  # Shear force in z-direction
         # Note: The bending moment about x-axis is due to the shear force in z-direction
-        Mx_tip_to_root = cumtrapz(Vz_tip_to_root, y_tip_root, initial=0)   # Bending moment about x-axis
+        Mx_tip_to_root = - cumtrapz(Vz_tip_to_root, y_tip_root, initial=0)   # Bending moment about x-axis
 
         # Distributed Load in x-direction
-        Vx_tip_to_root = cumtrapz(force_x[::-1], y_tip_root, initial=0)  # Shear force in x-direction
+        Vx_tip_to_root = - cumtrapz(force_x[::-1], y_tip_root, initial=0)  # Shear force in x-direction
         # Note: The bending moment about z-axis is due to the shear force in x-direction
-        Mz_tip_to_root = cumtrapz(Vx_tip_to_root, y_tip_root, initial=0)  # Bending moment about z-axis
+        Mz_tip_to_root = - cumtrapz(Vx_tip_to_root, y_tip_root, initial=0)  # Bending moment about z-axis
 
         # Torsion about y-axis
-        Ty_tip_to_root = cumtrapz(torque_y[::-1], y_tip_root, initial=0)  # Torsion about y-axis
+        Ty_tip_to_root = - cumtrapz(torque_y[::-1], y_tip_root, initial=0)  # Torsion about y-axis
 
         # Flip back -> root to tip
         shear_z = Vz_tip_to_root[::-1]
@@ -120,6 +120,19 @@ class WingLoadingDiagrams:
         bend_moment_z = Mz_tip_to_root[::-1]
         torsion_y = Ty_tip_to_root[::-1]
 
+        num_points = len(shear_z)  # Assuming all arrays have the same length
+
+        internal_loads_list = [
+        {
+            'shear_z': shear_z[i],
+            'moment_x': bend_moment_x[i],
+            'torsion_y': torsion_y[i],
+            'shear_x': shear_x[i],
+            'moment_z': bend_moment_z[i]
+        }
+        for i in range(num_points)
+        ]
+        
         internal_loads = {
             'shear_z': shear_z,
             'bend_moment_x': bend_moment_x,
@@ -127,10 +140,13 @@ class WingLoadingDiagrams:
             'shear_x': shear_x,
             'bend_moment_z': bend_moment_z
         }
+
+        return internal_loads_list, internal_loads
+
  
         return internal_loads
 
-    def plot_internal_loads(self, y, Vz, Mx, Tx, Vx, Mz, title_prefix=""):
+    def plot_internal_loads(self, y, Vz, Mx, Ty, Vx, Mz, title_prefix=""):
         """
         Plot internal load distributions along the wing half-span.
 
@@ -138,7 +154,7 @@ class WingLoadingDiagrams:
         - y: spanwise positions (m)
         - Vz: shear force in z-direction (N)
         - Mx: bending moment about x-axis (Nm)
-        - Tx: torsion about x-axis (Nm)
+        - Ty: torsion about y-axis (Nm)
         - Vx: (optional) shear force in x-direction (N)
         - Mz: (optional) bending moment about z-axis (Nm)
         - title_prefix: string to prepend to plot titles
@@ -146,7 +162,7 @@ class WingLoadingDiagrams:
         components = [
             (Vz, "Shear Force $V_z$", "Shear $V_z$ (N)"),
             (Mx, "Bending Moment $M_x$", "Moment $M_x$ (Nm)"),
-            (Tx, "Torque $T_x$", "Torque $T_x$ (Nm)"),
+            (Ty, "Torque $T_y$", "Torque $T_y$ (Nm)"),
             (Vx, "Shear Force $V_x$", "Shear $V_x$ (N)"),
             (Mz, "Bending Moment $M_z$", "Moment $M_z$ (Nm)")
         ]
@@ -243,11 +259,16 @@ class WingLoadingDiagrams:
         """
 
         force_z, force_x, torque_y = self.compute_resultant_loads(self.lift, self.drag, self.moment_aero, self.weight)
-        shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z = self.compute_internal_distributions(self.y, force_z, force_x, torque_y)
+        internal_loads_list, internal_loads = self.compute_internal_distributions(self.y, force_z, force_x, torque_y)
+        shear_z = internal_loads['shear_z']
+        bend_moment_x = internal_loads['bend_moment_x']
+        torsion_y = internal_loads['torsion_y']
+        shear_x = internal_loads['shear_x']
+        bend_moment_z = internal_loads['bend_moment_z']
+        # Plotting the internal loads if PLOT is True
         if PLOT:
             self.plot_internal_loads(self.y, shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z, title_prefix="")
-        return shear_z, bend_moment_x, torsion_y, shear_x, bend_moment_z
-
+        return internal_loads_list
 
 
 
@@ -256,9 +277,9 @@ class WingLoadingDiagrams:
 if __name__ == "__main__":
     # Initialize the loading diagrams class
     
-    internal_loads = WingLoadingDiagrams().run_analysis(PLOT=False)
+    internal_loads_list = WingLoadingDiagrams().run_analysis(PLOT=True)
 
-    print(internal_loads)
 
+    print(internal_loads_list[33])
 
 

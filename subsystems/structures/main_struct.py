@@ -35,6 +35,7 @@ from wing_structure_generation import wing_structure_generation
 def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
     # Step 1: Loading analysis
+    
 
 
     # Step 2 Import geometric variables from Class I/II methods

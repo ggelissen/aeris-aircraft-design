@@ -15,7 +15,6 @@ def print_all_params(obj_id):
         val = vsp.GetParmVal(pid)
         print(f" Group: {group} / Parameter Name: {pname} / Value: {val}")
 
-
 def plotSTL(file: str):
     # Load the STL file
     # Load STL
@@ -41,7 +40,6 @@ def plotSTL(file: str):
     plotter = pv.Plotter()
     plotter.add_mesh(pv_mesh, smooth_shading=True, color='lightgray', show_edges=False)
     plotter.show()
-
 
 def create_fuselage(designvars: DesignParameters = None):
     fuse_id = vsp.AddGeom("FUSELAGE", "")
@@ -247,8 +245,6 @@ def create_wing(designvars: DesignParameters = None):
         vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
         vsp.UpdateGeom(wing_id)
 
-
-
 def create_V_tail(designvars: DesignParameters = None):
     hstab_id = vsp.AddGeom("WING")
     vsp.SetGeomName(hstab_id, "Horizontal_Stabilizer")
@@ -333,7 +329,6 @@ def calculate_cg(designvars: DesignParameters = None):
     vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0)) # Delete slices
     for geom in vsp.FindGeoms():
         vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown") , True)
-
 
 def calculate_wet_areas(designvars: DesignParameters = None):
     """
@@ -435,7 +430,6 @@ def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, 
 
 def is_headless():
     return os.environ.get("DISPLAY", "") == ""
-
 
 def fuselage_cross_section(designvars: DesignParameters = None, lengthwise_pos_frac = 0.0):
     if designvars.fuselage.coordinates_have_been_loaded == False:
