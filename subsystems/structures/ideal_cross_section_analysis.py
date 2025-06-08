@@ -565,8 +565,6 @@ def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray
     """
     Run the cross-section analysis, based on an idealised wing box structure. 
     """
-    #loading = WingLoadingDiagrams()
-    #loading_dict = loading.run_analysis(plot=False)
 
     spar_boom_x = convert_arrays_to_coordinates(spar_points, stringer_points)['spar_x_coords']
     stringer_boom_x = convert_arrays_to_coordinates(spar_points, stringer_points)['stringer_x_coords']
@@ -628,6 +626,7 @@ def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray
     # Plotting
     if plot:
         print(f"Centroid (m): ({xc}, {yc})") 
+        print(f"Mean Area (m^2): {A_m_calc:.2e}")
         print(f"Moments of Inertia (m^4): Ixx={Ixx}, Iyy={Iyy}, Ixy={Ixy}")
         print(f"Torsional Shear Flow (N/m): {q_tor:.2e}, Torsional Shear Stress (Pa): {tau_tor:.2e}")
         print(f"Rate of Twist (rad/m): {dtheta_dz:.2e}")
@@ -640,6 +639,8 @@ def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray
     results = {
         "centroid_x": xc,
         "centroid_y": yc,
+        "A_m": A_m_calc,
+        "perimeter": np.sum(panel_s),
         "Ixx": Ixx,
         "Iyy": Iyy,
         "Ixy": Ixy,
