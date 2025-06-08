@@ -89,7 +89,7 @@ def calculate_torenbeek_inputs():
     phi_2 = 0.025
 
     # --- Technology Level Placeholders ---
-    M_des = 0.85
+    M_des = 0.95
     M_dd = M_des + 0.015
     M_kappa = 0.935
     e_hat = 0.90
@@ -111,9 +111,9 @@ def calculate_torenbeek_inputs():
 def optimize_wing_planform(inputs):
     """Performs the wing optimization by iterating through a grid of design variables."""
     print("--- Starting Wing Planform Optimization (Grid Search) ---")
-    Lambda_w_deg_range = np.linspace(20, 38, 40)
-    A_w_range = np.linspace(8, 12, 40)
-    C_L_hat_range = np.linspace(0.4, 0.7, 40)
+    Lambda_w_deg_range = np.linspace(20, 38, 60)
+    A_w_range = np.linspace(6, 20, 60)
+    C_L_hat_range = np.linspace(0.2, 0.7, 60)
 
     min_mtow = float('inf')
     optimal_params = {}
