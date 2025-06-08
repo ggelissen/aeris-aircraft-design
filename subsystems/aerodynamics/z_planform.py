@@ -67,12 +67,12 @@ def calculate_initial_planform_params(M_cruise, M_star, S_m2, A):
     params['AR'] = A       
 
     # 1. Quarter-chord Sweep Angle (Lambda_c4) (A05_WP2.pdf, Eq. 2.1)
-    denominator_lambda_c4 = M_cruise + 0.03
+    denominator_lambda_c4 = M_cruise + 0.03 # TODO, might use 0.015, as per Vargas and Vos. 
     if denominator_lambda_c4 == 0:
         print("Error: Denominator for Lambda_c4 calculation is zero.")
         return None
     
-    cos_Lambda_c4_val = 0.75 * M_star / denominator_lambda_c4
+    cos_Lambda_c4_val = 0.75 * M_star / denominator_lambda_c4 # TODO, formula is for half-chord sweep, not quarter-chord
     if not (-1 <= cos_Lambda_c4_val <= 1):
         print(f"Error: Invalid value for acos for Lambda_c4: {cos_Lambda_c4_val}. Check M_cruise and M_star inputs.")
         return None
