@@ -16,7 +16,7 @@ import os, sys
 # Add path for imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from design_variables import WingParameters
-from subsystems.aerodynamics.planform import calculate_initial_planform_params
+from subsystems.aerodynamics.z_planform_from_A05_report import calculate_initial_planform_params
 
 def parse_airfoil_data(data_str: str) -> Dict[str, List[Tuple[float, float]]]:
     """
