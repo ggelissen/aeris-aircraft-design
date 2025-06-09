@@ -86,7 +86,7 @@ def calculate_torenbeek_inputs():
     phi_2 = 0.025 # Eq. 10.13 context
 
     # --- Technology Level Placeholders ---
-    M_des = 0.95
+    M_des = 0.85
     M_dd = M_des + 0.015 # Vargas and Vos, or 0.03 from Eq. 10.41 context Torembeek
     M_kappa = 0.935 # Eq. 10.46 context
     e_hat = 0.90
