@@ -112,18 +112,26 @@ def aileron_sizing(params):
     print("\n============================")
     print("Aileron Sizing")
     print("============================")
-    print(f"\nThe required time to achieve a {bank_angle} degree bank angle is: {delta_t:.2f} [s] (note: must be below 2/3 [s])")
+    
+    print(f"\n* Inputs *")
+    print(f"The required time to achieve a {bank_angle} degree bank angle is: {delta_t:.2f} [s] (note: must be below 2/3 [s])")
     print(f"TO weight: {W} [N]")
     print(f"Stall speed: {V_stall} [m/s]")
     print(f"CLmax: {C_L_max}")
-    print(f"\nroot chord: {C_r} [m]")
+    
+    print(f"\n* Wing Geometry *")
+    print(f"root chord: {C_r} [m]")
     print(f"Tip chord: {C_t} [m]")
     print(f"Halfspan: {b/2} [m]")
-    print(f"\nb_inboard: {b_inboard} [m]")
+    
+    print(f"\n* Aileron Placement *")
+    print(f"b_inboard: {b_inboard} [m]")
     print(f"b_outboard: {b_outboard} [m]")
     print(f"b1: {b1} [m]")
     print(f"b2: {b2} [m]")
-    print(f"\nSurface area wing: {S_ref} [m^2]")
+    
+    print(f"\n* Surface Area *")
+    print(f"Surface area wing: {S_ref} [m^2]")
     S_aileron = (b2-b1)* (params.wing.root_chord-params.wing.tip_chord) / (b/2) *b1
     print(f"Surface area aileron (approx): {S_aileron} [m^2]")
 
@@ -132,7 +140,7 @@ def aileron_sizing(params):
 def ruddervator_sizing(params):
     #Sizing the Darth is an important step in determining required tail area
     CD_to_C = 0.3
-    b_inboard = 0.4     # Start of the Darth
+    b_inboard = 0.25   # Start of the Darth
     b_outboard = 0.9    # End of the Darth
     
     Tail_b  = params.empennage.b_v                              # V_Tail Span in m
@@ -155,21 +163,25 @@ def ruddervator_sizing(params):
     print("\n============================")
     print("Ruddervator Sizing")
     print("============================")
-    print(f"\nTail span (b_v): {Tail_b:.3f} m")
-    print(f"Tail root chord (c_r): {Tail_cr:.3f} m, tip chord (c_t): {Tail_ct:.3f} m")
-    print(f"Horizontal tail area (S_h): {Tail_Sh:.3f} m²")
-    print(f"Vertical tail area (S_v): {Tail_Sv:.3f} m²")
-    print(f"Tail dihedral angle (Gamma_h): {np.degrees(Tail_dihedral):.2f}°")
+    
+    print(f"\n* Wing Geometry *")
+    print(f"Tail span (b_v): {Tail_b:.3f} [m]")
+    print(f"Tail root chord (c_r): {Tail_cr:.3f} m, tip chord (c_t): {Tail_ct:.3f} [m]")
+    print(f"Horizontal tail area (S_h): {Tail_Sh:.3f} [m^2]")
+    print(f"Vertical tail area (S_v): {Tail_Sv:.3f} [m^2]")
+    print(f"Tail dihedral angle (Gamma_h): {np.degrees(Tail_dihedral):.2f} [°]")
 
-    print(f"\nDarth spanwise start: {Darth_start:.3f} m, end: {Darth_end:.3f} m")
-    print(f"Darth depth: {Darth_depth:.3f} m")
-    print(f"Darth surface area (total): {Darth_S:.3f} m²")
+    print(f"\n* Darth Placement *")
+    print(f"Darth spanwise start: {Darth_start:.3f} [m], end: {Darth_end:.3f} [m]")
+    print(f"Darth depth: {Darth_depth:.3f} [m]")
+    print(f"Darth surface area (total): {Darth_S:.3f} [m^2]")
 
-    print(f"\nProjected Darth horizontal area (Sh): {Darth_Sh:.3f} m²")
-    print(f"Projected Darth vertical area (Sv): {Darth_Sv:.3f} m²")
-
-    print(f"\nHorizontal area ratio (Darth_Sh / Tail_Sh): {Ratio_h:.3f}")
-    print(f"Vertical area ratio (Darth_Sv / Tail_Sv): {Ratio_v:.3f}")
+    print(f"\n* Surface Area *")
+    print(f"Projected Darth horizontal area (Sh): {Darth_Sh:.3f} [m^2]")
+    print(f"Projected Darth vertical area (Sv): {Darth_Sv:.3f} [m^2]")
+    print(f"Horizontal area ratio (Darth_Sh / Tail_Sh): {Ratio_h:.3f} [%]")
+    print(f"Vertical area ratio (Darth_Sv / Tail_Sv): {Ratio_v:.3f} [%]")
 
 aileron_sizing(params)   
 ruddervator_sizing(params)
+print("\n")
