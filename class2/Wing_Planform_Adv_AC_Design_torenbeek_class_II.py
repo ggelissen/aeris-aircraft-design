@@ -9,12 +9,35 @@ import os
 # Allow imports from parent directory to access design_variables
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from design_variables import DesignParameters
-
+import component_weights as cw
+import utils.unit_conversions as uc
+import improved_drag as id
 # --- Constants ---
 H_g = 4350  # km, Fuel specific energy (H/g) for jet fuel (kerosene)
 g = 9.80665 # m/s^2, standard gravity
 
 # --- Calculation Functions from Torenbeek ---
+
+def get_isa_delta_theta(altitude_m): # TODO, check if someone else has this function, it is a common one
+    """ Returns relative pressure (delta) and relative temperature (theta) at a given altitude. """
+    T0 = 288.15; P0 = 101325; R = 287.05; g0 = 9.80665; a = -0.0065
+    if altitude_m <= 11000:
+        T = T0 + a * altitude_m
+        delta = (T / T0)**(-g0 / (a * R))
+    else:
+        T = 216.65
+        P_11k = 22632
+        delta = (P_11k/P0) * np.exp(-g0 * (altitude_m - 11000) / (R * T))
+    return delta, T/T0
+
+def calculate_eta_o_from_tsfc(tsfc_imperial, velocity_ms, H_fuel_J_kg=42.7e6):
+    """Converts TSFC in lb/(h*lbf) to overall efficiency eta_o."""
+    # Conversion factor from lb/(h*lbf) to kg/(s*N)
+    print(f"Converting TSFC from imperial to SI: {tsfc_imperial} lb/(h*lbf)")
+    tsfc_si = uc.lb_hr_lbf_to_kg_Ns(tsfc_imperial)  # Convert TSFC to SI units
+    # eta_o = V / (TSFC_si * H_fuel), see 12.2 Torenbeek
+    eta_o = velocity_ms / (tsfc_si * H_fuel_J_kg)
+    return eta_o
 
 def calculate_propulsion_function(R_eq, eta_o_cruise, mu_T, tau_cruise, delta_cruise):
     """Calculates the propulsion function F_prop. Based on Eq. 10.9."""
@@ -67,13 +90,20 @@ def calculate_torenbeek_inputs_from_params(params: DesignParameters) -> dict:
     W_pay_N = params.weight.W_PL
     W_MZF_N = params.weight.W_OE + params.weight.W_PL
     mu_resf = params.weight.M_tfo
-    mu_lg = 0.04  # Placeholder for landing gear weight fraction TODO, might be able to get from preliminary sizing undercarriage
+    # (Requires importing component_weights as cw)
+    W_lg_N = cw.landing_gear_weight_N(params)
+    mu_lg = W_lg_N / params.weight.W_TO # Turns out to be 0.04, Gundlach's assumption
+    # TODO, this reveals that the W_TO needs to be updated in the params object, but the m_lg should remain constant.
+    print(f"Landing gear weight fraction (mu_lg): {mu_lg:.4f}")
 
     # Estimate fixed other weight (fuselage, systems) as a fraction of OEW
-    W_fix_other_N = params.weight.W_OE * 0.4 # TODO, major assumption
+    # W_fix_other is the sum of OEW components NOT included in the WPF
+    W_fix_other_N = (cw.fuselage_weight_N(params) +
+                    cw.fixed_equipment_weight_N(params))
 
     # --- Propulsion ---
-    eta_o = 0.31 # Placeholder, could be derived from TSFC TODO, check with Arthur
+    eta_o = calculate_eta_o_from_tsfc(params.engine.cruise_tsfc, params.cruise_speed) # Default was 0.31
+    print(f"Overall efficiency (eta_o): {eta_o:.4f}")	
     # Power plant weight per unit take-off thrust
     mu_T = params.engine.engine_weight / params.engine.T_TO if params.engine.T_TO > 0 else 0.172
     print(f"Propulsion weight fraction (mu_T): {mu_T:.4f}")
@@ -82,28 +112,36 @@ def calculate_torenbeek_inputs_from_params(params: DesignParameters) -> dict:
     # --- Performance ---
     q_hat_Pa = 0.5 * params.cruise_density * params.cruise_speed**2
     print(f"Dynamic pressure at cruise (q_hat): {q_hat_Pa:.2f} Pa")
-    C_Dp_S_fix_m2 = 0.25  # Placeholder for fixed parasite drag area TODO, check with detailed drag buildup
-
+    # This is a conceptual call; you'd need to adapt improved_drag.py to calculate
+    # drag for individual components.
+    drag_buildup = id.run_improved_drag_estimations(params) # TODO, this estimation function needs to be defined in improved_drag.py
+    # Assuming drag_buildup returns a dictionary with component drag areas
+    #C_Dp_S_fix_m2 = (drag_buildup['CD0_fuselage'] * params.wing.S_w +
+                    #drag_buildup['CD0_empennage'] * params.wing.S_w)
+    C_Dp_S_fix_m2 = 0.25
     # --- Wing Weight Parameters ---
     n_ult = params.max_load_factor * 1.5
     n_ult = 3.75 # TODO, placeholder, should be derived from design parameters
     # Eq. 10.35 for phi_3
     phi_3 = (0.0013 * (1 + 0.15) * 1.0 * n_ult / 100) * math.sqrt(W_MZF_N / q_hat_Pa)
     # Eq. 10.13 for phi_2
-    phi_2 = 0.025 # Using Torenbeek's typical value for now
+    phi_2 = 0.025 # Using Torenbeek's typical value for now, more accurate values would require FEM?? 
 
     # --- Technology Levels ---
     M_des = params.cruise_mach
     M_dd = M_des + 0.015 # Vargas and Vos, or 0.03 from Eq. 10.41 context Torembeek
     M_kappa = params.wing.Mach_cross  # 0.935, for supercritical airfoil
-    e_hat = 0.90
-    C_Dc = 0.0008 # Eq. 10.42 context
-    C_f = 0.00225
-
+    e_hat = 0.90 # Oswald's efficiency factor, typical for modern aircraft, check with others for consistency TODO
+    C_Dc = 0.0008 # Eq. 10.42 context TODO, ARBITRARY DESIGN TARGET VALUE, NOT DERIVED FROM ANYTHING
+    # C_f is the skin friction coefficient, typically around 0.00225 for clean aircraft, torenbeek
+    Re_cruise = id.calculate_Reynolds_number(V=params.cruise_speed, rho=params.cruise_density, l=params.wing.root_chord, mu=1.4436e-5, k=0.152e-5, Mach=params.cruise_mach)
+    C_f = id.calculate_skin_friction_coefficient(flow_ratio=(0.35, 0.65), Re=Re_cruise, Mach=params.cruise_mach) # For the wing, using a typical flow ratio for a transonic wing
+    # TODO, check that fuselage and empennage skin friction coefficients are not needed here, as they are not included in the WPF?
+    print(f"Skin friction coefficient (C_f): {C_f:.4f}")
     # --- Calculate F_prop ---
     # Simplified delta_cruise for high altitude
-    delta_cruise = params.cruise_density / 1.225 # TODO, was a magic number in the original code, check with Mrugank's functions
-    delta_cruise = 0.246
+    delta_cruise, _ = get_isa_delta_theta(params.cruise_altitude) #  0.246 as default value from Torenbeek? Or Mrugank got it but not sure from where
+    print(f"Relative pressure at cruise altitude (delta_cruise): {delta_cruise:.4f}")
     F_prop = calculate_propulsion_function(R_eq_km, eta_o, mu_T, tau_cruise, delta_cruise)  # Eq. 10.9, or another, 8.32 maybe?
 
     inputs = {
