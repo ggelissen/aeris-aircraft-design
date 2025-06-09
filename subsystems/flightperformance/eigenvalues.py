@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import yaml
 
 sys.path.append(os.path.abspath(os.path.join(os.path.join(os.path.dirname(__file__), '..'), '..')))
 
@@ -208,13 +209,15 @@ def run_eigenvalue_analysis(analytical_outputs, data):
 
 
 if __name__ == "__main__":
-    eigs = short_period_eigenvalues(DesignParameters())
-    print(eigs)
-    eigs = phugoid_eigenvalues(DesignParameters())
-    print(eigs)
-    eigs = aperiodic_roll_eigenvalues(DesignParameters())
-    print(eigs)
-    eigs = dutch_roll_eigenvalues(DesignParameters())
-    print(eigs)
-    eigs = spiral_eigenvalues(DesignParameters())
-    print(eigs)
+    params = DesignParameters()
+    params.load_from_yaml("design_config.yaml")
+    eigs_short_period = short_period_eigenvalues(params)
+    print(f"short period {eigs_short_period}")
+    eigs_phugoid = phugoid_eigenvalues(params)
+    print(f"phugoid {eigs_phugoid}")
+    eigs_aperiodic = aperiodic_roll_eigenvalues(params)
+    print(f"aperiodic roll {eigs_aperiodic}")
+    eigs_dutch = dutch_roll_eigenvalues(params)
+    print(f"dutch roll {eigs_dutch}")
+    eigs_spiral = spiral_eigenvalues(params)
+    print(f"spiral {eigs_spiral}")
