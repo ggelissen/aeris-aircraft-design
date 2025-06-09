@@ -41,7 +41,7 @@ def wing_structure_generation(designvars: DesignParameters = None, plot: bool = 
     # cross_sectional_structure_along_span(designvars, 0.95)
     #fuselage_cross_section(designvars, 0.5)
 
-    cross_section = cross_sectional_structure_along_span(designvars, 0.95)
+    cross_section = cross_sectional_structure_along_span(designvars, 0.95, plot=plot)
     # run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
     #                            1000, 1000, 1000, 1000, 0.01)
 

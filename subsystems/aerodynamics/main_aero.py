@@ -1,10 +1,32 @@
 import openvsp as vsp
 from design_variables import *
 from subsystems.structures.main_struct import struct_main
+import subprocess
+import os
 
 
 def aerodynamic_analysis(designvars : DesignParameters = None):
-    return panel_openvsp(designvars) + parasite_drag_2D(designvars)
+    cur_cwd = os.getcwd()
+    os.chdir(os.path.join(cur_cwd, "data"))
+    with open("EXIN1.DAT", "w") as f:
+        f.write("y\n")
+        f.write("   8.146470      0.0000000E+00  0.2439700      0.5420000    \n")
+        f.write("   8.146470      0.2439700      0.5420000      0.3152800    \n")
+        f.write("   34.80272       34.80272    \n")
+        f.write("           3\n")
+        f.write("           2\n")
+        f.write("           0\n")
+        f.write("Airfoil.dat \n")
+        f.write("  0.0000000E+00  0.0000000E+00  0.0000000E+00  0.0000000E+00\n")
+        f.write("  0.3152700      0.0000000E+00  0.0000000E+00  0.0000000E+00\n")
+        f.write("   1.000000      0.0000000E+00  0.0000000E+00  0.0000000E+00\n")
+        f.write("  0.4570210    \n")
+        f.write("TESTRUNNER                                                                      \n")
+        f.write("y\n")
+        f.write("  0.8500000       2.000000    \n")
+    subprocess.Popen("wine /root/DSEproject/subsystems/aerodynamics/fpcon.exe  < EXIN1.DAT", shell=True)
+    os.chdir(cur_cwd)
+    #return panel_openvsp(designvars) + parasite_drag_2D(designvars)
 
 def panel_openvsp(designvars : DesignParameters = None):
     """Perform aerodynamic panel analysis using OpenVSP.
