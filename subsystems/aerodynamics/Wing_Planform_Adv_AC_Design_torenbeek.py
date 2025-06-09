@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 # --- Constants ---
 H_g = 4350  # km, Fuel specific energy (H/g) for jet fuel (kerosene)
 g = 9.80665 # m/s^2, standard gravity
-lambda_w = 0.2703
 
 # --- Helper & Torenbeek Calculation Functions ---
 
@@ -40,7 +39,7 @@ def calculate_WPF_transonic(phi_3, phi_2, F_prop, C_L_hat, A_w, Lambda_w_rad, e_
     # Step 4: Calculate wing & tail profile drag coefficient, C_Dp_hat (Eq. 10.39)
     C_Dp_hat_var = 2 * (1 + 3.0 * t_c_w * cos_Lambda_w**2) * C_f * 1.25
 
-    # Step 5: Combine into the final WPF (based on Eq. 10.43)
+    # Step 5: Combine into the final WPF (Eq. 10.43)
     drag_term = F_prop * ((C_Dp_hat_var + C_Dc) / C_L_hat + C_L_hat / (np.pi * A_w * e_hat))
     wpf = mu_w_plus_h + drag_term
 
@@ -68,9 +67,6 @@ def calculate_torenbeek_inputs():
     mu_lg = 0.04
     # Refined placeholder based on your OEW of ~12000N. Assumes ~40% of OEW is non-wing/engine/tail.
     W_fix_other_N = 12000 * 0.4
-    
-    # --- Wing and Tail Geometry Placeholders ---
-    lambda_w = 0.2703
 
     # --- Propulsion Placeholders ---
     eta_o = 0.31
@@ -84,21 +80,22 @@ def calculate_torenbeek_inputs():
 
     # --- Wing Weight Parameter Calculation Placeholders ---
     n_ult = 3.75
+    # Eq. 10.35 for phi_3
     phi_3_unscaled = 0.0013 * (1 + 0.15) * 1.0 * n_ult / 100
     phi_3 = phi_3_unscaled * math.sqrt(W_MZF_N / q_hat_Pa)
-    phi_2 = 0.025
+    phi_2 = 0.025 # Eq. 10.13 context
 
     # --- Technology Level Placeholders ---
     M_des = 0.95
-    M_dd = M_des + 0.015
-    M_kappa = 0.935
+    M_dd = M_des + 0.015 # Vargas and Vos, or 0.03 from Eq. 10.41 context Torembeek
+    M_kappa = 0.935 # Eq. 10.46 context
     e_hat = 0.90
-    C_Dc = 0.0008
+    C_Dc = 0.0008 # Eq. 10.42 context
     C_Do = 0.017
     C_f = 0.00225
 
     # *** Calculate F_prop internally ***
-    F_prop = calculate_propulsion_function(R_eq_km, eta_o, mu_T, tau_cruise, delta_cruise)
+    F_prop = calculate_propulsion_function(R_eq_km, eta_o, mu_T, tau_cruise, delta_cruise)  # Eq. 10.9, or another, 8.32 maybe?
 
     inputs = {
         "F_prop": F_prop, "phi_3": phi_3, "phi_2": phi_2, "W_pay_N": W_pay_N,
@@ -178,6 +175,8 @@ def plot_WPF_contours(inputs, optimal_design):
 
     # Plot the optimal point
     plt.plot(optimal_design["C_L_hat"], optimal_design["A_w"], 'r*', markersize=15, label=f'Optimum (MTOW = {optimal_design["MTOW_N"]/g:.0f} kg)')
+
+    lambda_w = 0.2703 # Radians value for the wing sweep at half chord?
 
     tan_Lambda_LE = np.tan(Lambda_w_rad_fixed) + 0.5* 2*1.819 / 9.19 * (1 - lambda_w)
     tan_Lambda_c4 = tan_Lambda_LE - 0.25 * 2 * 1.819 / 9.19 * (1 - lambda_w)
