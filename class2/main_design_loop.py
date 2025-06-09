@@ -11,13 +11,14 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from design_variables import DesignParameters
 from class1.main_class_I import perform_class_I_analysis
 from class2.main_class_II import class_II_weight_estimation, calculate_cg_longitudinal
-from class2.prelim_sizing.prelim_sizing_tail import perform_tail_sizing # Assuming this function exists
-from class2.prelim_sizing.prelim_sizing_undercarriage import perform_undercarriage_positioning
-from class2.drag.improved_drag import run_improved_drag_estimations
+from class2.prelim_sizing_tail import perform_tail_sizing # Assuming this function exists
+from class2.prelim_sizing_undercarriage import perform_undercarriage_positioning
+from class2.improved_drag import run_improved_drag_estimations
 
 # This is our advanced wing optimization script
-from Wing_Planform_Adv_AC_Design_torenbeek import calculate_torenbeek_inputs, optimize_wing_planform
+from class2.Wing_Planform_Adv_AC_Design_torenbeek_class_II import calculate_torenbeek_inputs_from_params, optimize_wing_planform
 
+g = 9.80665  # Standard gravity in m/s^2 # Might want to import this from a constants module instead, for consistency
 def run_full_design_iteration(params: DesignParameters) -> DesignParameters:
     """
     This function represents one full pass through the outer design loop
@@ -30,7 +31,7 @@ def run_full_design_iteration(params: DesignParameters) -> DesignParameters:
     # --- 1. Wing Sizing (Our Advanced Module) ---
     # Use current params to get inputs for Torenbeek optimization
     print("\n[STEP 1] Running Advanced Wing Planform Optimization...")
-    torenbeek_inputs = calculate_torenbeek_inputs(params) # We'll need to adapt this function
+    torenbeek_inputs = calculate_torenbeek_inputs_from_params(params) # We'll need to adapt this function
     optimal_wing_design = optimize_wing_planform(torenbeek_inputs)
     # Update the main params object with the new, optimized wing design
     params.wing.A_w = optimal_wing_design["A_w"]

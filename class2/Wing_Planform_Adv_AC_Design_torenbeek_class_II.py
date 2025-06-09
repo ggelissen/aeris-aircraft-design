@@ -58,48 +58,52 @@ def calculate_MTOW(W_pay, W_fix_other, F_prop, q_hat, C_Dp_S_fix, mu_resf, mu_lg
     numerator = W_pay + W_fix_other + F_prop * q_hat * C_Dp_S_fix
     return numerator / denominator
 
-# --- New Functions for This Optimization ---
+# --- Module-Specific Functions ---
 
-def calculate_torenbeek_inputs():
-    """Calculates the primary input parameters for the Torenbeek optimization."""
-    # TODO: Replace these placeholders with values from your DesignParameters class.
+def calculate_torenbeek_inputs_from_params(params: DesignParameters) -> dict:
+    """Calculates the primary input parameters for the Torenbeek optimization from the DesignParameters object."""
+    # --- Mission and Weight ---
+    R_eq_km = params.range / 1000 * 1.05  # Equivalent Range (km) with 5% margin
+    W_pay_N = params.weight.W_PL
+    W_MZF_N = params.weight.W_OE + params.weight.W_PL
+    mu_resf = params.weight.M_tfo
+    mu_lg = 0.04  # Placeholder for landing gear weight fraction TODO, might be able to get from preliminary sizing undercarriage
 
-    # --- Mission and Weight Placeholders ---
-    R_eq_km = 6500 * 1.05
-    W_pay_N = 5884.0
-    W_MZF_N = 17857.3
-    mu_resf = 0.05
-    mu_lg = 0.04
-    # Refined placeholder based on your OEW of ~12000N. Assumes ~40% of OEW is non-wing/engine/tail.
-    W_fix_other_N = 12000 * 0.4
+    # Estimate fixed other weight (fuselage, systems) as a fraction of OEW
+    W_fix_other_N = params.weight.W_OE * 0.4 # TODO, major assumption
 
-    # --- Propulsion Placeholders ---
-    eta_o = 0.31
-    mu_T = 0.172
-    tau_cruise = 0.85
-    delta_cruise = 0.246
+    # --- Propulsion ---
+    eta_o = 0.31 # Placeholder, could be derived from TSFC TODO, check with Arthur
+    # Power plant weight per unit take-off thrust
+    mu_T = params.engine.engine_weight / params.engine.T_TO if params.engine.T_TO > 0 else 0.172
+    print(f"Propulsion weight fraction (mu_T): {mu_T:.4f}")
+    tau_cruise = 0.85 # Placeholder for thrust lapse
+    
+    # --- Performance ---
+    q_hat_Pa = 0.5 * params.cruise_density * params.cruise_speed**2
+    print(f"Dynamic pressure at cruise (q_hat): {q_hat_Pa:.2f} Pa")
+    C_Dp_S_fix_m2 = 0.25  # Placeholder for fixed parasite drag area TODO, check with detailed drag buildup
 
-    # --- Performance Placeholders ---
-    q_hat_Pa = 9615.0
-    C_Dp_S_fix_m2 = 0.25 # Refined placeholder for a smaller UAV
-
-    # --- Wing Weight Parameter Calculation Placeholders ---
-    n_ult = 3.75
+    # --- Wing Weight Parameters ---
+    n_ult = params.max_load_factor * 1.5
+    n_ult = 3.75 # TODO, placeholder, should be derived from design parameters
     # Eq. 10.35 for phi_3
-    phi_3_unscaled = 0.0013 * (1 + 0.15) * 1.0 * n_ult / 100
-    phi_3 = phi_3_unscaled * math.sqrt(W_MZF_N / q_hat_Pa)
-    phi_2 = 0.025 # Eq. 10.13 context
+    phi_3 = (0.0013 * (1 + 0.15) * 1.0 * n_ult / 100) * math.sqrt(W_MZF_N / q_hat_Pa)
+    # Eq. 10.13 for phi_2
+    phi_2 = 0.025 # Using Torenbeek's typical value for now
 
-    # --- Technology Level Placeholders ---
-    M_des = 0.85
+    # --- Technology Levels ---
+    M_des = params.cruise_mach
     M_dd = M_des + 0.015 # Vargas and Vos, or 0.03 from Eq. 10.41 context Torembeek
-    M_kappa = 0.935 # Eq. 10.46 context
+    M_kappa = params.wing.Mach_cross  # 0.935, for supercritical airfoil
     e_hat = 0.90
     C_Dc = 0.0008 # Eq. 10.42 context
-    C_Do = 0.017
     C_f = 0.00225
 
-    # *** Calculate F_prop internally ***
+    # --- Calculate F_prop ---
+    # Simplified delta_cruise for high altitude
+    delta_cruise = params.cruise_density / 1.225 # TODO, was a magic number in the original code, check with Mrugank's functions
+    delta_cruise = 0.246
     F_prop = calculate_propulsion_function(R_eq_km, eta_o, mu_T, tau_cruise, delta_cruise)  # Eq. 10.9, or another, 8.32 maybe?
 
     inputs = {
@@ -113,8 +117,8 @@ def calculate_torenbeek_inputs():
 def optimize_wing_planform(inputs):
     """Performs the wing optimization by iterating through a grid of design variables."""
     print("--- Starting Wing Planform Optimization (Grid Search) ---")
-    Lambda_w_deg_range = np.linspace(20, 40, 11)
-    A_w_range = np.linspace(7, 15, 17)
+    Lambda_w_deg_range = np.linspace(20, 40, 50)
+    A_w_range = np.linspace(7, 15, 50)
     C_L_hat_range = np.linspace(0.3, 0.8, 21)
     min_mtow = float('inf')
     optimal_params = {}
@@ -175,16 +179,14 @@ def plot_WPF_contours(inputs, optimal_design):
     plt.clabel(contour_wpf, inline=True, fontsize=8, fmt='%.3f')
     # Plot the optimal point
     plt.plot(optimal_design["C_L_hat"], optimal_design["A_w"], 'r*', markersize=15, label=f'Optimum (MTOW = {optimal_design["MTOW_N"]/g:.0f} kg)')
-
-    lambda_w = 0.2703 # Radians value for the wing sweep at half chord?
-
-    tan_Lambda_LE = np.tan(Lambda_w_rad_fixed) + 0.5* 2*1.819 / 9.19 * (1 - lambda_w)
-    tan_Lambda_c4 = tan_Lambda_LE - 0.25 * 2 * 1.819 / 9.19 * (1 - lambda_w)
-    Lambda_w_rad_c4 = np.arctan(tan_Lambda_c4)
-    Lambda_w_deg_c4 = np.rad2deg(Lambda_w_rad_c4)
-    # Pitch up limit
-    print(f"Lambda_w_rad_c4: {Lambda_w_rad_c4:.4f} rad, Lambda_w_deg_fixed: {Lambda_w_deg_c4:.1f}°")
-    A_max = 17.7 * (2 - lambda_w)*np.exp(-0.043*Lambda_w_deg_c4)
+    
+    # Using the existing, correct logic for plotting constraints
+    lambda_w_taper = 0.2703
+    root_chord_approx = optimal_design["S_w_m2"]*2 / ((1+lambda_w_taper)*optimal_design["b_w_m"])
+    tan_Lambda_LE = np.tan(Lambda_w_rad_fixed) - 0.5 * root_chord_approx * (1 - lambda_w_taper) / (optimal_design["b_w_m"]/2)
+    tan_Lambda_c4 = tan_Lambda_LE + 0.25 * root_chord_approx * (1 - lambda_w_taper) / (optimal_design["b_w_m"]/2)
+    Lambda_w_deg_c4 = np.rad2deg(np.arctan(tan_Lambda_c4))
+    A_max = 17.7 * (2 - lambda_w_taper) * np.exp(-0.043 * Lambda_w_deg_c4)
     # Add illustrative constraints (as seen in Fig 10.12)
     plt.axhline(y=A_max, color='c', linestyle=':', label=f'Pitch-up Limit ($A_w \\leq {A_max:.2f}$)')
     plt.axvline(x=0.8, color='m', linestyle='-.', label='Buffet Limit (Illustrative)')
@@ -206,25 +208,43 @@ def plot_WPF_contours(inputs, optimal_design):
     plt.show()
 
 
-# --- Main Execution Block ---
-if __name__ == '__main__':
-    torenbeek_inputs = calculate_torenbeek_inputs()
-    print("\n--- Torenbeek Inputs (from placeholders) ---")
-    for key, val in torenbeek_inputs.items():
-        print(f"{key:<15}: {val:.4g}")
+# --- MAIN FUNCTION TO BE CALLED FROM MASTER SCRIPT ---
 
-    optimal_design = optimize_wing_planform(torenbeek_inputs)
-
+def perform_wing_optimization(params: DesignParameters) -> dict:
+    """
+    Main entry point for the wing optimization module.
+    Takes the main DesignParameters object and returns the optimal wing design.
+    """
+    print("\n" + "="*50)
+    print("      STARTING WING OPTIMIZATION MODULE")
+    print("="*50)
+    
+    # 1. Calculate Torenbeek-specific inputs from the main params object
+    inputs = calculate_torenbeek_inputs_from_params(params)
+    
+    # 2. Run the optimization loop
+    optimal_design = optimize_wing_planform(inputs)
+    
+    # 3. Visualize the results
     if optimal_design:
-        print("\n--- Optimal Wing Planform Found ---")
-        for key, val in optimal_design.items():
-            # Converting MTOW from N to kg for readability
-            if key == "MTOW_N":
-                print(f"MTOW_kg:        {val/g:.2f}")
-            else:
-                print(f"{key:<15}: {val:.4f}")
-        
-        # 4. Visualize the results
-        plot_WPF_contours(torenbeek_inputs, optimal_design)
+        plot_WPF_contours(inputs, optimal_design)
     else:
-        print("\nNo feasible solution found in the specified design space.")
+        print("\nNo feasible wing solution found in the specified design space.")
+        
+    return optimal_design
+
+# --- Example Usage (for testing this module standalone) ---
+if __name__ == '__main__':
+    # Create a DesignParameters instance and load initial data
+    # This simulates how the master script would use this module
+    design_params = DesignParameters()
+    design_params.load_from_yaml('design_config.yaml')
+
+    # Run the full wing optimization process
+    final_wing_design = perform_wing_optimization(design_params)
+
+    # Print final results
+    if final_wing_design:
+        print("\n--- FINAL OPTIMAL WING DESIGN ---")
+        for key, val in final_wing_design.items():
+            print(f"{key:<15}: {val:.4f}" if key != "MTOW_N" else f"MTOW_kg:        {val/g:.2f}")
