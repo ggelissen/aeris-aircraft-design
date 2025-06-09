@@ -181,8 +181,23 @@ class WingParameters:
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
-        self.CST_uppersurf = [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
-        self.CST_lowersurf = [0.23723,    -0.05508,   -0.31490,   -0.01788,   -0.26995,   -0.19510,     0.13560,     0.27263] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
+        self.list_of_airfoils = {
+            "airfoil1": {
+                "Name": "NACA SC(2)-0714 Supercritical Airfoil",
+                "CST_uppersurf": [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933],
+                "CST_lowersurf": [0.23723,    -0.05508,   -0.31490,   -0.01788,   -0.26995,   -0.19510,     0.13560,     0.27263],
+                'Transition_location_for_effective_aoa_0.03_upper_surface': 0.10, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                'momentum_thickness_jump_for_effective_aoa_0.03_upper_surface': 0.01, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                'Transition_location_for_effective_aoa_0.03_lower_surface': 1.0, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                'momentum_thickness_jump_for_effective_aoa_0.03_lower_surface': 0.0, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                'Transition_location_for_effective_aoa_-1.655_upper_surface': 0.08, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                'momentum_thickness_jump_for_effective_aoa_-1.655_upper_surface': 0.01, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                'Transition_location_for_effective_aoa_-1.655_lower_surface': 1.0, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                'momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface': 0.0, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+            }
+        }
+        self.CST_uppersurf = self.list_of_airfoils['airfoil1']['CST_uppersurf'] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
+        self.CST_lowersurf = self.list_of_airfoils['airfoil1']['CST_lowersurf'] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
         self.x_c_m = 0.37                           # Location along chord of max thickness
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
