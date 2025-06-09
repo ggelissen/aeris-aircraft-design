@@ -6,6 +6,18 @@ import os
 import numpy as np
 import shutil
 
+def send_command(command, proc):
+    proc.stdin.write(command + '\n')
+    proc.stdin.flush()
+    output = []
+    while True:
+        line = proc.stdout.readline()
+        if not line:
+            break
+        output.append(line)
+        if line.strip() == "":  # crude end detection
+            break
+    return ''.join(output)
 
 def aerodynamic_analysis(designvars : DesignParameters = None):
     cur_cwd = os.getcwd()
@@ -13,6 +25,8 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
     speed_mach = 0.85  # Mach number for the analysis
     aoa = 2  # Angle of attack in degrees
     eta_crank = vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') / (vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') + vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_2'))
+    chord_root = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))
+    re_at_chord_root = 4000000  # Reynolds number at root chord
     with open("EXIN1.DAT", "w") as f:
         f.write("y\n")
         f.write(f"   {vsp.GetParmVal(designvars.wing.wingid,'TotalAR', 'WingGeom')}      {vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),2), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))}      {vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))}      {eta_crank}    \n")
@@ -28,7 +42,9 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         f.write("TESTRUNNER                                                                      \n")
         f.write("y\n")
         f.write(f"  {speed_mach}       {aoa}    \n")
+    print('Start fpcon')
     subprocess.Popen("wine /root/DSEproject/subsystems/aerodynamics/fpcon.exe  < EXIN1.DAT", shell=True)
+    print('Generated files')
     shutil.copy('GEO.DAT', 'test.geo')
     shutil.copy('GEO.DAT', 'geo.dat')
     shutil.copy('MAP.DAT', 'test2.map')
@@ -41,14 +57,38 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         text=True,  # Ensure text mode (str instead of bytes)
         bufsize=1
     )
-    print(send_command('wine vfpfusegenv2.exe', proc))
-    print(send_command('wine vfptvkbodyv8.exe', proc))
+    print('Starting vpf things')
+    with open("EXIN2.DAT", "w") as f:
+        f.write(f"{speed_mach}\n")
+        f.write(f"{vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_1')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root - vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_3')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} \n")
+    print(send_command('wine vfpfusegenv2.exe < EXIN2.DAT', proc))
+    print("Starting vfptvkbodyv8")
+    with open("EXIN3.DAT", "w") as f:
+        f.write("y\n")
+        f.write("Testrun \n")
+        f.write('y\n')
+        f.write(f'{aoa}, 0.0\n')
+        f.write(f'{re_at_chord_root}\n')
+        f.write("3\n")
+        f.write("3\n")
+        f.write(f"0, {designvars.wing.simulation_parms['Transition_location_for_effective_aoa_0.03_upper_surface']}, {designvars.wing.simulation_parms['Transition_location_for_effective_aoa_0.03_upper_surface'] + 0.05}, {designvars.wing.simulation_parms['momentum_thickness_jump_for_effective_aoa_0.03_upper_surface']} \n")
+        f.write(f"{eta_crank}, {designvars.wing.simulation_parms['Transition_location_for_effective_aoa_0.03_upper_surface']}, {designvars.wing.simulation_parms['Transition_location_for_effective_aoa_0.03_upper_surface'] + 0.05}, {designvars.wing.simulation_parms['momentum_thickness_jump_for_effective_aoa_0.03_upper_surface']} \n")
+        f.write(f'1.0, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_-1.655_upper_surface"]}, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_-1.655_upper_surface"] + 0.05}, {designvars.wing.simulation_parms["momentum_thickness_jump_for_effective_aoa_-1.655_upper_surface"]} \n')
+        f.write(f'0, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_0.03_lower_surface"]}, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_0.03_lower_surface"] + 0.05}, {designvars.wing.simulation_parms["momentum_thickness_jump_for_effective_aoa_0.03_lower_surface"]} \n')
+        f.write(f'{eta_crank}, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_0.03_lower_surface"]}, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_0.03_lower_surface"] + 0.05}, {designvars.wing.simulation_parms["momentum_thickness_jump_for_effective_aoa_0.03_lower_surface"]} \n')
+        f.write(f'1.0, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_-1.655_lower_surface"]}, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_-1.655_lower_surface"] + 0.05}, {designvars.wing.simulation_parms["momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface"]} \n')
+
+
+    print(send_command('wine vfptvkbodyv8.exe < EXIN3.DAT', proc))
+    print("finished vfptvkbodyv8")
     shutil.copy('FLOWdmmean.dat', 'flowfile.dat')
     shutil.copy('test.geo', 'fort.10')
     shutil.copy('test2.map', 'fort.14')
     shutil.copy('flowfile.dat', 'fort.15')
+    print('Starting Aero run')
     print(send_command('wine vfphe.exe', proc))
     # Move files
+    print('Moving/Copying...')
     shutil.move("fort.16", "testflowfile.flow")
     shutil.move("fort.17", "testflowfile.conv")
     shutil.move("fort.22", "test.mapout")
@@ -65,6 +105,7 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
     shutil.copy("fort.55", "testflowfile.fort55")
     shutil.copy("fort.70", "flow.70")
     shutil.copy("fort.71", "flow.71")
+    print('Start wave drag aero')
     print(send_command('wine f137b1.exe', proc))
     shutil.copy("wavedrg73.dat", f"testflowfilewavedrg73.dat")
     shutil.copy("wavedrg74.dat", f"testflowfilewavedrg74.dat")
@@ -78,7 +119,8 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         try:
             os.remove(fname)
         except FileNotFoundError:
-            pass 
+            pass
+    print('Finished aero') 
 
 
 
@@ -173,15 +215,3 @@ if __name__ == '__main__':
     struct_main(AERIS, show_3d=False)
     aerodynamic_analysis(AERIS)
 
-def send_command(command, proc):
-    proc.stdin.write(command + '\n')
-    proc.stdin.flush()
-    output = []
-    while True:
-        line = proc.stdout.readline()
-        if not line:
-            break
-        output.append(line)
-        if line.strip() == "":  # crude end detection
-            break
-    return ''.join(output)
