@@ -50,7 +50,7 @@ def fuselage_weight_N(params: DesignParameters):
 
 def landing_gear_weight_N(params: DesignParameters):
     # equation from gundlach
-    F_lg = 0.04  # range from 0.03 - 0.06
+    F_lg = 0.04  # range from 0.03 - 0.06 # TODO, questionable, assumption. Why?
     W_lg_lb = F_lg * N_to_lbf(params.weight.W_TO)  # lb
     W_lg_N = lbf_to_N(W_lg_lb)  # Convert to Newtons for consistency
     print(f"Landing gear weight (N): {W_lg_N:.2f}")
