@@ -4,6 +4,7 @@ from subsystems.structures.main_struct import struct_main
 import subprocess
 import os
 import numpy as np
+import shutil
 
 
 def aerodynamic_analysis(designvars : DesignParameters = None):
@@ -28,6 +29,62 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         f.write("y\n")
         f.write(f"  {speed_mach}       {aoa}    \n")
     subprocess.Popen("wine /root/DSEproject/subsystems/aerodynamics/fpcon.exe  < EXIN1.DAT", shell=True)
+    shutil.copy('GEO.DAT', 'test.geo')
+    shutil.copy('GEO.DAT', 'geo.dat')
+    shutil.copy('MAP.DAT', 'test2.map')
+    # Start a persistent shell subprocess
+    proc = subprocess.Popen(
+        ['/bin/bash'],  # Use 'cmd.exe' on Windows
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,  # Ensure text mode (str instead of bytes)
+        bufsize=1
+    )
+    print(send_command('wine vfpfusegenv2.exe', proc))
+    print(send_command('wine vfptvkbodyv8.exe', proc))
+    shutil.copy('FLOWdmmean.dat', 'flowfile.dat')
+    shutil.copy('test.geo', 'fort.10')
+    shutil.copy('test2.map', 'fort.14')
+    shutil.copy('flowfile.dat', 'fort.15')
+    print(send_command('wine vfphe.exe', proc))
+    # Move files
+    shutil.move("fort.16", "testflowfile.flow")
+    shutil.move("fort.17", "testflowfile.conv")
+    shutil.move("fort.22", "test.mapout")
+    shutil.move("fort.18", "testflowfile.forces")
+    shutil.move("fort.19", "testflowfile.cp")
+    shutil.move("fort.20", "testflowfile.vis")
+    shutil.move("fort.24", "testflowfile.sum")
+    shutil.copy("fort.11", "testflowfile.fort11")
+    shutil.copy("fort.15", "testflowfile.fort15")
+    shutil.copy("fort.21", "testflowfile.fort21")
+    shutil.copy("fort.50", "testflowfile.fort50")
+    shutil.copy("fort.51", "testflowfile.fort51")
+    shutil.copy("fort.52", "testflowfile.fort52")
+    shutil.copy("fort.55", "testflowfile.fort55")
+    shutil.copy("fort.70", "flow.70")
+    shutil.copy("fort.71", "flow.71")
+    print(send_command('wine f137b1.exe', proc))
+    shutil.copy("wavedrg73.dat", f"testflowfilewavedrg73.dat")
+    shutil.copy("wavedrg74.dat", f"testflowfilewavedrg74.dat")
+    shutil.copy("wavedrg75.dat", f"testflowfilewavedrg75.dat")
+    shutil.copy("wavedrg76.dat", f"testflowfilewavedrg76.dat")
+    for fname in [
+        "fort.11", "fort.15", "fort.21", "fort.50", "fort.51", "fort.52", "fort.55",
+        "fort.70", "fort.71",
+        "wavedrg72.dat", "wavedrg73.dat", "wavedrg74.dat", "wavedrg75.dat", "wavedrg76.dat"
+    ]:
+        try:
+            os.remove(fname)
+        except FileNotFoundError:
+            pass 
+
+
+
+    
+
+
     os.chdir(cur_cwd)
     #return panel_openvsp(designvars) + parasite_drag_2D(designvars)
 
@@ -115,3 +172,16 @@ if __name__ == '__main__':
     AERIS.load_from_yaml("design_config.yaml")
     struct_main(AERIS, show_3d=False)
     aerodynamic_analysis(AERIS)
+
+def send_command(command, proc):
+    proc.stdin.write(command + '\n')
+    proc.stdin.flush()
+    output = []
+    while True:
+        line = proc.stdout.readline()
+        if not line:
+            break
+        output.append(line)
+        if line.strip() == "":  # crude end detection
+            break
+    return ''.join(output)
