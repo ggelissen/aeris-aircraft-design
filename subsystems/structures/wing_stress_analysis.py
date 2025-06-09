@@ -104,6 +104,7 @@ def plot_twist_distribution(spanwise_position_lst: np.ndarray, twist_distributio
 if __name__ == "__main__":
 
     designvars = DesignParameters()
+    designvars.load_from_yaml("design_config.yaml")
     wing_loading = WingLoadingDiagrams()
     wing_loading = wing_loading.run_analysis(PLOT=False)
     spanwise_position_lst = np.linspace(0.0, 1.0, 1000)
