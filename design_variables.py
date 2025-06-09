@@ -215,6 +215,7 @@ class WingParameters:
         self.e = 0.9         #oswald efficiency factor
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
         self.skin_thickness = 0.0015  # Wing Skin Thickness in m
+        self.Mach_cross = 0.935
 
 
 
@@ -349,7 +350,7 @@ class EmpennageParameters:
         self.type = 'fixed'
 
         # V_Tail:
-        self.b_v = 3.0                            # V_Tail Span in m
+        self.b_v = 3.0                            # V_Tail Span in m TODO, computed in preliminary_sizing_tail.py, shouldnt be a magic number
         self.c_t = 1.0                             # V-Tail Tip Chord in m
         self.c_r = 1.5                             # V-Tail Root Chord in m
         self.wetted_area = None                         # V-Tail Wetted Area in m^2, to be calculated by the OpenVSP CompGeom function, taking into account part of stabilizer inside fuselage
