@@ -49,19 +49,20 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
     shutil.copy('GEO.DAT', 'geo.dat')
     shutil.copy('MAP.DAT', 'test2.map')
     # Start a persistent shell subprocess
-    proc = subprocess.Popen(
-        ['/bin/bash'],  # Use 'cmd.exe' on Windows
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,  # Ensure text mode (str instead of bytes)
-        bufsize=1
-    )
+    # proc = subprocess.Popen(
+    #     ['/bin/bash'],  # Use 'cmd.exe' on Windows
+    #     stdin=subprocess.PIPE,
+    #     stdout=subprocess.PIPE,
+    #     stderr=subprocess.PIPE,
+    #     text=True,  # Ensure text mode (str instead of bytes)
+    #     bufsize=1
+    # )
     print('Starting vpf things')
     with open("EXIN2.DAT", "w") as f:
         f.write(f"{speed_mach}\n")
         f.write(f"{vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_1')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root - vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_3')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} \n")
-    print(send_command('wine vfpfusegenv2.exe < EXIN2.DAT', proc))
+        f.write(f'{designvars.wing.xpos - np.tan(designvars.wing.Lambda_0_w) * designvars.fuselage.D_f/2}  \n')
+    subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/vfpfusegenv2.exe < EXIN2.DAT', shell=True)
     print("Starting vfptvkbodyv8")
     with open("EXIN3.DAT", "w") as f:
         f.write("y\n")
@@ -79,34 +80,34 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         f.write(f'1.0, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_-1.655_lower_surface"]}, {np.min([designvars.wing.simulation_parms["Transition_location_for_effective_aoa_-1.655_lower_surface"] + 0.05, 1.0])}, {designvars.wing.simulation_parms["momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface"]} \n')
 
 
-    print(send_command('wine vfptvkbodyv8.exe < EXIN3.DAT', proc))
+    subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/vfptvkbodyv8.exe < EXIN3.DAT', shell=True)
     print("finished vfptvkbodyv8")
-    shutil.copy('FLOWdmmean.dat', 'flowfile.dat')
+    shutil.copy('FLOWdmmean.DAT', 'flowfile.dat')
     shutil.copy('test.geo', 'fort.10')
     shutil.copy('test2.map', 'fort.14')
     shutil.copy('flowfile.dat', 'fort.15')
     print('Starting Aero run')
-    print(send_command('wine vfphe.exe', proc))
+    subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/vfphe.exe', shell=True)
     # Move files
     print('Moving/Copying...')
-    shutil.move("fort.16", "testflowfile.flow")
-    shutil.move("fort.17", "testflowfile.conv")
-    shutil.move("fort.22", "test.mapout")
-    shutil.move("fort.18", "testflowfile.forces")
-    shutil.move("fort.19", "testflowfile.cp")
-    shutil.move("fort.20", "testflowfile.vis")
-    shutil.move("fort.24", "testflowfile.sum")
+    # shutil.move("fort.16", "testflowfile.flow")
+    # shutil.move("fort.17", "testflowfile.conv")
+    # shutil.move("fort.22", "test.mapout")
+    # shutil.move("fort.18", "testflowfile.forces")
+    # shutil.move("fort.19", "testflowfile.cp")
+    # shutil.move("fort.20", "testflowfile.vis")
+    # shutil.move("fort.24", "testflowfile.sum")
     shutil.copy("fort.11", "testflowfile.fort11")
-    shutil.copy("fort.15", "testflowfile.fort15")
-    shutil.copy("fort.21", "testflowfile.fort21")
-    shutil.copy("fort.50", "testflowfile.fort50")
-    shutil.copy("fort.51", "testflowfile.fort51")
-    shutil.copy("fort.52", "testflowfile.fort52")
-    shutil.copy("fort.55", "testflowfile.fort55")
-    shutil.copy("fort.70", "flow.70")
-    shutil.copy("fort.71", "flow.71")
+    # shutil.copy("fort.15", "testflowfile.fort15")
+    # shutil.copy("fort.21", "testflowfile.fort21")
+    # shutil.copy("fort.50", "testflowfile.fort50")
+    # shutil.copy("fort.51", "testflowfile.fort51")
+    # shutil.copy("fort.52", "testflowfile.fort52")
+    # shutil.copy("fort.55", "testflowfile.fort55")
+    # shutil.copy("fort.70", "flow.70")
+    # shutil.copy("fort.71", "flow.71")
     print('Start wave drag aero')
-    print(send_command('wine f137b1.exe', proc))
+    subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/f137b1.exe', shell=True)
     shutil.copy("wavedrg73.dat", f"testflowfilewavedrg73.dat")
     shutil.copy("wavedrg74.dat", f"testflowfilewavedrg74.dat")
     shutil.copy("wavedrg75.dat", f"testflowfilewavedrg75.dat")
