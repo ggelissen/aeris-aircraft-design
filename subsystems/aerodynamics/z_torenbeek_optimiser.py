@@ -355,4 +355,3 @@ print("It uses simplified formulas from Chapter 10 of Torenbeek's 'Advanced Airc
 print(f"Assumed fixed sweep angle: {LAMBDA_W_DEG} degrees.")
 print(f"Assumed design cruise Mach number: {M_DES}.")
 print(f"Assumed (t/c)_w is calculated to meet M_dd = {M_DD_TARGET} using a Korn-like equation.")
-
