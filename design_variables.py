@@ -1,3 +1,4 @@
+# PLEASE PLEASE do never ever under any circumstances change / remove existing variables! unless you are sure no one else is using them
 import math as m
 import numpy as np
 import yaml
@@ -174,13 +175,14 @@ class WingParameters:
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
         self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
         self.Lambda_05_w = 0.607                           # Wind half-chord sweep angle in rad
+        self.Lambda_0_w =None                       # Wing leading edge sweep angle in rad
         self.t_c_w_max = None
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
-        self.CST_uppersurf = [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
-        self.CST_lowersurf = [0.23723,    -0.05508,   -0.31490,   -0.01788,   -0.26995,   -0.19510,     0.13560,     0.27263] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
+        self.CST_uppersurf = [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
+        self.CST_lowersurf = [0.23723,    -0.05508,   -0.31490,   -0.01788,   -0.26995,   -0.19510,     0.13560,     0.27263] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
         self.x_c_m = 0.37                           # Location along chord of max thickness
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient

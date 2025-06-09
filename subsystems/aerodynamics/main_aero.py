@@ -3,27 +3,30 @@ from design_variables import *
 from subsystems.structures.main_struct import struct_main
 import subprocess
 import os
+import numpy as np
 
 
 def aerodynamic_analysis(designvars : DesignParameters = None):
     cur_cwd = os.getcwd()
     os.chdir(os.path.join(cur_cwd, "data"))
+    speed_mach = 0.85  # Mach number for the analysis
+    aoa = 2  # Angle of attack in degrees
+    eta_crank = vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') / (vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') + vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_2'))
     with open("EXIN1.DAT", "w") as f:
         f.write("y\n")
-        f.write("   8.146470      0.0000000E+00  0.2439700      0.5420000    \n")
-        f.write("   8.146470      0.2439700      0.5420000      0.3152800    \n")
-        f.write("   34.80272       34.80272    \n")
+        f.write(f"   {vsp.GetParmVal(designvars.wing.wingid,'TotalAR', 'WingGeom')}      {vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),2), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))}      {vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))}      {eta_crank}    \n")
+        f.write(f"   {np.rad2deg(designvars.wing.Lambda_0_w)}       {np.rad2deg(designvars.wing.Lambda_0_w)}    \n")
         f.write("           3\n")
         f.write("           2\n")
         f.write("           0\n")
         f.write("Airfoil.dat \n")
         f.write("  0.0000000E+00  0.0000000E+00  0.0000000E+00  0.0000000E+00\n")
-        f.write("  0.3152700      0.0000000E+00  0.0000000E+00  0.0000000E+00\n")
+        f.write(f"  {eta_crank}      0.0000000E+00  0.0000000E+00  0.0000000E+00\n")
         f.write("   1.000000      0.0000000E+00  0.0000000E+00  0.0000000E+00\n")
-        f.write("  0.4570210    \n")
+        f.write(f"  {designvars.fuselage.D_f/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))}    \n")
         f.write("TESTRUNNER                                                                      \n")
         f.write("y\n")
-        f.write("  0.8500000       2.000000    \n")
+        f.write(f"  {speed_mach}       {aoa}    \n")
     subprocess.Popen("wine /root/DSEproject/subsystems/aerodynamics/fpcon.exe  < EXIN1.DAT", shell=True)
     os.chdir(cur_cwd)
     #return panel_openvsp(designvars) + parasite_drag_2D(designvars)
