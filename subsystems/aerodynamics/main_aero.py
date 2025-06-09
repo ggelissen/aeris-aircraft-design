@@ -112,15 +112,7 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
     shutil.copy("wavedrg74.dat", f"testflowfilewavedrg74.dat")
     shutil.copy("wavedrg75.dat", f"testflowfilewavedrg75.dat")
     shutil.copy("wavedrg76.dat", f"testflowfilewavedrg76.dat")
-    for fname in [
-        "fort.11", "fort.15", "fort.21", "fort.50", "fort.51", "fort.52", "fort.55",
-        "fort.70", "fort.71",
-        "wavedrg72.dat", "wavedrg73.dat", "wavedrg74.dat", "wavedrg75.dat", "wavedrg76.dat"
-    ]:
-        try:
-            os.remove(fname)
-        except FileNotFoundError:
-            pass
+ 
     print('Finished aero') 
 
 
