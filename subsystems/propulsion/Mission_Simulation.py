@@ -528,37 +528,37 @@ def run_mission_simulation(params: DesignParameters):
             "name": "Take-off", "duration_minutes": 5,
             "target_thrust_N": T_to, # Given
             "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, 
-            "engine_params_override": {"tt_4": 1450, "pr_fan": 2.0, "pr_hpc": 6.0}, # Max TIT, slightly increased PRs
+            "engine_params_override": {"tt_4": 1400, "pr_fan": 2.0, "pr_hpc": 6.0}, # Max TIT, slightly increased PRs
             "ei_nox": 0.020 
         },
         {
             "name": "Climb", "duration_minutes": 20,
             "target_thrust_N": 0.85*T_to , # Approx 85% of 9220N
             "flight_conditions": {"mach_0": 0.65, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
-            "engine_params_override": {"tt_4": 1350},
+            "engine_params_override": {"tt_4": 1300},
             "ei_nox": 0.018
         },
         {
             "name": "Cruise", "duration_minutes": 400,
             "target_thrust_N": 0.3*T_to, # Approx 30% of 9220N
             "flight_conditions": {"mach_0": 0.80, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
-            "engine_params_override": {"tt_4": 1250}, 
+            "engine_params_override": {"tt_4": 1200}, 
             "ei_nox": 0.012
         },
-        {
-            "name": "Diversion Cruise (460km)", "duration_minutes": 34, # Approx. for 460km @ M0.75 / 30000ft
-            "target_thrust_N": 2000, # Estimated for diversion cruise
-            "flight_conditions": {"mach_0": 0.75, "ts_0": 228.7, "ps_0": 30090}, # 30000ft
-            "engine_params_override": {"tt_4": 1200},
-            "ei_nox": 0.011
-        },
-        {
-            "name": "Loiter (2 hours)", "duration_minutes": 120,
-            "target_thrust_N": 800, # Estimated for loiter
-            "flight_conditions": {"mach_0": 0.25, "ts_0": 285.2, "ps_0": 95970}, # 1500ft
-            "engine_params_override": {"tt_4": 880},
-            "ei_nox": 0.005
-        },
+        # {
+        #     "name": "Diversion Cruise (460km)", "duration_minutes": 34, # Approx. for 460km @ M0.75 / 30000ft
+        #     "target_thrust_N": 2000, # Estimated for diversion cruise
+        #     "flight_conditions": {"mach_0": 0.75, "ts_0": 228.7, "ps_0": 30090}, # 30000ft
+        #     "engine_params_override": {"tt_4": 1200},
+        #     "ei_nox": 0.011
+        # },
+        # {
+        #     "name": "Loiter (2 hours)", "duration_minutes": 120,
+        #     "target_thrust_N": 800, # Estimated for loiter
+        #     "flight_conditions": {"mach_0": 0.25, "ts_0": 285.2, "ps_0": 95970}, # 1500ft
+        #     "engine_params_override": {"tt_4": 880},
+        #     "ei_nox": 0.005
+        # },
         {
             "name": "Descent (to Diversion Airport)", "duration_minutes": 15,
             "target_thrust_N": 0.08*T_to, # Approx 8% of 9220N
@@ -574,7 +574,7 @@ def run_mission_simulation(params: DesignParameters):
             "ei_nox": 0.008
         },
         {
-            "name": "Taxi & Shutdown (at Diversion Airport)", "duration_minutes": 5,
+            "name": "Taxi & Shutdown (at Diversion Airport)", "duration_minutes": 15,
             "target_thrust_N": 0.07*T_to, # Approx 7% of 7540N
             "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, 
             "engine_params_override": {"tt_4": 850},
