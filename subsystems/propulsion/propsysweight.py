@@ -20,6 +20,7 @@ Ksp = 6.47 #lbs/gal (density of Jet A-1)
 W_fuel = 1429.18 * kg_to_lbs # fuel weight in lbs
 W_fs = (0.4/Ksp) * W_fuel  # lbs, fuel system weight
 W_fs_kg = W_fs * lbs_to_kg  # convert to kg
+print(f"Fuel System Weight: {W_fs:.2f} lbs / {W_fs_kg:.2f} kg")
 
 
 L_fus = 10*m_to_ft  # fuselage length in ft
