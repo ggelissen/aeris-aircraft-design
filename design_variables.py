@@ -1,6 +1,7 @@
 import math as m
 import numpy as np
 import yaml
+import toml
 
 
 
@@ -503,6 +504,7 @@ class Wingribs:
             "Rib4": {"x_pos_frac": 0.8, "t_mm": 2},
         }
         self.num_ribs = len(self.ribs)
+
 class Control:
     def __init__(self, x_mlg, x_cg):
         self.CLah = None
@@ -590,7 +592,6 @@ class FlapGroup:
         self.spanwise_pos_frac_outbound = spanwise_pos_frac_outbound
         self.flapwidth = flapwidth # meter
 
-
 class FuelTank:
     def __init__(self):
         self.dist_from_wingskin = 0.15
@@ -600,10 +601,35 @@ class FuelTank:
         self.frac_pos_along_span_outboard = 0.7802
         self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
 
-
-
-
 class MaterialsParameters():
     def __init__(self):
-        self.elastic_modulus = 70e9  # Pa, Young's modulus for aluminum
-        self.shear_modulus = self.elastic_modulus / (2 * (1 + 0.33))  # Shear modulus for aluminum
+        # Open VSP materials library is used to get the material properties
+        file_path =  "materials_library.toml"
+        with open(file_path, 'r') as f:
+            data = toml.load(f)
+        
+        # Load materials data from the TOML file
+        materials_data = data["materials"]
+
+        # Set the material name to DESIRED material
+        self.material_name = "Aluminium_2024_T3_wrought"
+
+        for mat_id, mat in materials_data.items():
+            if mat["name"].lower() == self.material_name.lower():
+                self.material = mat
+
+        # Get material properties
+        self.material_code = self.material["code"]                                  # Material code
+        self.material_density = self.material["density"]                            # Density in kg/m^3
+        self.material_E = self.material["E"]                                        # Young's Modulus in Pa
+        self.material_G = self.material["G"]                                        # Shear Modulus in Pa
+        self.material_price_kg = self.material["price_per_kg"]                      # Price per kg in EUR 
+        self.material_sigma_yield = self.material["sigma_yield"]                    # Yield Strenght MPa
+        self.material_sigma_ult = self.material["sigma_ult"]                        # Ultimate Strenght MPa
+        self.material_tau_max = self.material["tau_max"]                            # Shear Strenght MPa
+        self.material_max_service_temp = self.material["max_service_temp"]          # Celsius degrees
+        self.material_min_service_temp = self.material["min_service_temp"]          # Celsius degrees
+        self.material_fracture_tough = self.material["fracture_tough"]              # MPa*m^0.5
+        self.material_thermal_shock_resist = self.material["thermal_shock_resist"]  # Celsius degrees
+        self.material_recycle = self.material["recycle"]                            # 1->yes 0->no
+        self.material_co2_eq = self.material["co2_eq"]                                    # kg/kg
