@@ -9,11 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from utils.unit_conversions import *
 from design_variables import DesignParameters
-# Attempt to import the actual gpr module.
-# Ensure 'gas_property_relations.py' is located in a subdirectory path like:
-# your_project_root/subsystems/propulsion/gas_property_relations.py
-# And that your_project_root is in Python's sys.path or your PYTHONPATH,
-# or that the 'subsystems' directory is in the same directory as this script.
+
 import gas_property_relations as gpr
 
 # --- The placeholder gpr class is removed, as we are attempting to use the import above. ---
@@ -88,7 +84,7 @@ def emissions(mdot_f, ei_nox,
 # --- End of Emissions Calculation Code ---
 
 
-# --- Turbofan Analysis Code (from turbofan_parametric_analysis.py) ---
+# --- Turbofan Analysis Code) ---
 def turbofan_parametric_analysis(
         mach_0, ts_0, ps_0,  # flight conditions
         bpr, pr_fan, pr_lpc, pr_hpc, tt_4,  # design variables
