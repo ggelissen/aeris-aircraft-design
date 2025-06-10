@@ -392,6 +392,7 @@ class EmpennageParameters:
         self.vtail_dihedral = np.deg2rad((110 - 180)/-2) #placeholder                  # V-Tail Dihedral Angle in radians
         self.L_v = 0.45* l_f                         #Moment arm vertical stabilizer
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
+        
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
