@@ -44,6 +44,21 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         f.write("TESTRUNNER                                                                      \n")
         f.write("y\n")
         f.write(f"  {speed_mach}       {aoa}    \n")
+    with open("EXIN1.DAT", "w") as f:
+        f.write("y\n")
+        f.write(f"   8      0.3      0.5      0.4    \n")
+        f.write(f"   35       35    \n")
+        f.write("           3\n")
+        f.write("           2\n")
+        f.write("           0\n")
+        f.write("nac0012.dat \n")
+        f.write("  0.0000000E+00  0.0000000E+00  0.5000000E+00  4.0000000E+00\n")
+        f.write(f"  0.4      0.0000000E+00  0.5000000E+00  2.0000000E+00\n")
+        f.write("   1.000000      0.0000000E+00  0.0000000E+00  0.0000000E+00\n")
+        f.write(f"  0.2    \n")
+        f.write("TESTRUNNER2                                                                   \n")
+        f.write("n\n")
+        f.write(f" 0.75       2    \n")
 
     print('Start fpcon')
     subprocess.Popen("wine /root/DSEproject/subsystems/aerodynamics/fpcon.exe  < EXIN1.DAT", shell=True)
@@ -63,6 +78,10 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
     print('Starting vpf things')
     with open("EXIN2.DAT", "w") as f:
         f.write(f"{speed_mach}\n")
+        f.write(f"{vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_1')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root - vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_3')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} \n")
+        f.write(f'{(designvars.wing.xpos - np.tan(designvars.wing.Lambda_0_w) * designvars.fuselage.D_f/2)/chord_root}  \n')
+    with open("EXIN2.DAT", "w") as f:
+        f.write(f"0.75\n")
         f.write(f"{vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_1')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root - vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_3')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} \n")
         f.write(f'{(designvars.wing.xpos - np.tan(designvars.wing.Lambda_0_w) * designvars.fuselage.D_f/2)/chord_root}  \n')
 
