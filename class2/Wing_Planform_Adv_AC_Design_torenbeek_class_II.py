@@ -110,7 +110,7 @@ def calculate_torenbeek_inputs_from_params(params: DesignParameters) -> dict:
     tau_cruise = 0.85 # Placeholder for thrust lapse
     
     # --- Performance ---
-    q_hat_Pa = 0.5 * params.cruise_density * params.cruise_speed**2 # Default was 9600 Pa
+    q_hat_Pa = 0.5 * params.cruise_density * params.cruise_speed**2 # Default was 9600 Pa # TODO, check for compressibility effects.
     print(f"Dynamic pressure at cruise (q_hat): {q_hat_Pa:.2f} Pa")
     # This is a conceptual call; you'd need to adapt improved_drag.py to calculate
     # drag for individual components.
