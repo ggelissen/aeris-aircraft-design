@@ -85,7 +85,7 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         f.write(f"{vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_1')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root - vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_3')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} \n")
         f.write(f'{(designvars.wing.xpos - np.tan(designvars.wing.Lambda_0_w) * designvars.fuselage.D_f/2)/chord_root}  \n')
 
-    subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/vfpfusegenv2.exe < EXIN2.DAT', shell=True)
+    #subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/vfpfusegenv2.exe < EXIN2.DAT', shell=True)
     print("Starting vfptvkbodyv8")
     with open("EXIN3.DAT", "w") as f:
         f.write("y\n")
@@ -102,7 +102,7 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         f.write(f'{eta_crank}, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_0.03_lower_surface"]}, {np.min([designvars.wing.simulation_parms["Transition_location_for_effective_aoa_0.03_lower_surface"] + 0.05, 1.0])}, {designvars.wing.simulation_parms["momentum_thickness_jump_for_effective_aoa_0.03_lower_surface"]} \n')
         f.write(f'1.0, {designvars.wing.simulation_parms["Transition_location_for_effective_aoa_-1.655_lower_surface"]}, {np.min([designvars.wing.simulation_parms["Transition_location_for_effective_aoa_-1.655_lower_surface"] + 0.05, 1.0])}, {designvars.wing.simulation_parms["momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface"]} \n')
 
-    subprocess.Popen('wine subsystems/aerodynamics/vpwin_vfphv20/visflow.exe < EXIN3.DAT', shell=True)
+    subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/visflow.exe < EXIN3.DAT', shell=True)
     shutil.copy('VISFLOW.DAT', 'flowfile.dat')
     # subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/vfptvkbodyv8.exe < EXIN3.DAT', shell=True)
     # print("finished vfptvkbodyv8")
@@ -111,7 +111,7 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
     # shutil.copy('test2.map', 'fort.14')
     # shutil.copy('flowfile.dat', 'fort.15')
     # print('Starting Aero run')
-    # subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/vfphe.exe', shell=True)
+    subprocess.Popen('wine /root/DSEproject/subsystems/aerodynamics/vpwin_vfphv20/vfphe.exe', shell=True)
     # Move files
     print('Moving/Copying...')
     shutil.move("fort.16", "testflowfile.flow")
