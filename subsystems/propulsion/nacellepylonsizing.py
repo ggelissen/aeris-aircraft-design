@@ -28,9 +28,14 @@ print(f"Mass flow rate of air: {mdot_air:.2f} kg/s")
 
 D_s = 0.14224 #spinner diameter, m
 D_inlet = D_fan
+Ds_i = D_s / D_inlet #spinner to inlet diameter ratio
 spinner_inlet_ratio = 0.05 * (1+((0.1*1.225*a)/(mdot_air))+(3*Bpr)/(1+Bpr))
 #print spinner inlet ratio
 print(f"Spinner inlet ratio: {spinner_inlet_ratio:.2f}")
+D_i = 1.65*((mdot_air/(1.225*a)+0.005)/(1-(Ds_i)**2))**0.5 #inlet diameter, m
+print(f"Inlet diameter: {D_i:.2f} m")
+
+
 
 D_inlet = D_fan
 l_n = 1.44 #nacelle length, m

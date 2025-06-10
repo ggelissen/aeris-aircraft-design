@@ -877,11 +877,11 @@ if __name__ == '__main__':
                 {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1450, "pr_fan": 2.0, "pr_hpc": 6.0}, "ei_nox": 0.020 },
                 {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.65, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1350}, "ei_nox": 0.018 },
                 {"name": "Cruise", "duration_minutes": 200, "target_thrust_N": 0.30 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.80, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1250}, "ei_nox": 0.012 },
-#                {"name": "Diversion Cruise (460km)", "duration_minutes": 34, "target_thrust_N": 2000, "flight_conditions": {"mach_0": 0.75, "ts_0": 228.7, "ps_0": 30090}, "engine_params_override": {"tt_4": 1200}, "ei_nox": 0.011 },
-#                {"name": "Loiter (2 hours)", "duration_minutes": 120, "target_thrust_N": 800, "flight_conditions": {"mach_0": 0.25, "ts_0": 285.2, "ps_0": 95970}, "engine_params_override": {"tt_4": 880}, "ei_nox": 0.005 },
-#                {"name": "Descent (to Diversion Airport)", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 900}, "ei_nox": 0.006 },
-#                {"name": "Landing (at Diversion Airport)", "duration_minutes": 5, "target_thrust_N": 0.18 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1000}, "ei_nox": 0.008 },
-#                {"name": "Taxi & Shutdown (at Diversion Airport)", "duration_minutes": 5, "target_thrust_N": 0.07 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 850}, "ei_nox": 0.004 },
+            #    {"name": "Diversion Cruise (460km)", "duration_minutes": 34, "target_thrust_N": 2000, "flight_conditions": {"mach_0": 0.75, "ts_0": 228.7, "ps_0": 30090}, "engine_params_override": {"tt_4": 1200}, "ei_nox": 0.011 },
+            #    {"name": "Loiter (2 hours)", "duration_minutes": 120, "target_thrust_N": 800, "flight_conditions": {"mach_0": 0.25, "ts_0": 285.2, "ps_0": 95970}, "engine_params_override": {"tt_4": 880}, "ei_nox": 0.005 },
+            #    {"name": "Descent (to Diversion Airport)", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 900}, "ei_nox": 0.006 },
+            #    {"name": "Landing (at Diversion Airport)", "duration_minutes": 5, "target_thrust_N": 0.18 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1000}, "ei_nox": 0.008 },
+            #    {"name": "Taxi & Shutdown (at Diversion Airport)", "duration_minutes": 5, "target_thrust_N": 0.07 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 850}, "ei_nox": 0.004 },
             ]
         },
         "HALO": {
@@ -918,9 +918,9 @@ if __name__ == '__main__':
                 "full_output": True
             },
             "mission_segments": [
-                { "name": "Take-off PH_LAB", "duration_minutes": 5, "target_thrust_N": 21120, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1650}, "ei_nox": 0.020 },
-                { "name": "Climb PH_LAB", "duration_minutes": 20, "target_thrust_N": 17952, "flight_conditions": {"mach_0": 0.4, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1500}, "ei_nox": 0.018},
-                { "name": "Cruise PH-LAB", "duration_minutes": 120, "target_thrust_N": 4224, "flight_conditions": {"mach_0": 0.7, "ts_0": 230.0, "ps_0": 35000.0}, "engine_params_override": {"tt_4": 1200}, "ei_nox": 0.0010 },
+                { "name": "Take-off PH_LAB", "duration_minutes": 5, "target_thrust_N": 9711.9, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1650}, "ei_nox": 0.020 },
+                { "name": "Climb PH_LAB", "duration_minutes": 20, "target_thrust_N": 8255.115, "flight_conditions": {"mach_0": 0.4, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1500}, "ei_nox": 0.018},
+                { "name": "Cruise PH-LAB", "duration_minutes": 120, "target_thrust_N": 2913.57, "flight_conditions": {"mach_0": 0.7, "ts_0": 230.0, "ps_0": 35000.0}, "engine_params_override": {"tt_4": 1200}, "ei_nox": 0.0010 },
                 # Add more PH_LAB segments here
             ]
         }
