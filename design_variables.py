@@ -308,7 +308,7 @@ class EngineParameters:
         # self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
         self.T_TO = 7535                    # Thrust at Take-Off in N
         self.cruise_thrust_setting = None           # Thrust setting for cruise
-        self.engine_weight =   None                 # Engine Weight in N
+        self.engine_weight =   234.05                 # Engine Weight in N
         self.engine_max_thrust = 9340               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
@@ -325,7 +325,32 @@ class EngineParameters:
         self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
         self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
         self.eta_fanturb = 0.9  
-        self.tt4to = 1450 #tt4 temp at takeoff               
+        self.tt4to = 1400 #tt4 temp at takeoff   
+        self.prfan = 1.9           
+        self.prlpc = 1.5
+        self.prhpc = 5.65 
+        self.tt4start = 850
+        self.tt4taxi = 900
+        self.tt4climb = 1300
+        self.tt4cruise = 1200
+        self.tt4descent = 900
+        self.tt4landing = 1000
+        self.lhv = 43.e6
+        self.etafan = 0.915
+        self.etalpc = 0.9
+        self.etahpc = 0.9
+        self.etahpt = 0.93
+        self.etalpt = 0.93
+        self.etacom = 0.99
+        self.etamechl = 0.99
+        self.etamechh = 0.99
+        self.prcom = 0.99
+        self.prinlet = 0.98
+        self.bleedto = 0. 
+        self.power_tol = 0.
+        self.power_toh = 0.
+        self.cooling_l = 0.
+        self.cooling_h = 0.
 
 
     def load_from_dict(self, param_dict):

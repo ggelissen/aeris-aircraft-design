@@ -498,14 +498,14 @@ def run_mission_simulation(params: DesignParameters):
     print("Starting Aircraft Mission Emissions Simulation...\n")
 
     baseline_engine_config = {
-        "bpr": 3.3, "pr_fan": 1.9, "pr_lpc": 1.5, "pr_hpc": 5.65, "tt_4": 1400., # tt_4 is max design TIT
-        "eta_fan": 0.915, "eta_lpc": 0.9, "eta_hpc": 0.9,
-        "eta_hpt": 0.93, "eta_lpt": 0.93,
-        "eta_com": 0.99, "eta_mech_l": 0.99, "eta_mech_h": 0.99,
-        "pr_com": 0.95, "pr_inl": 0.98,
-        "bleed_to": 0., "power_tol": 0., "power_toh": 0.,
-        "cooling_l": 0., "cooling_h": 0.,
-        "lhv": 43.e6, 
+        "bpr": params.engine.Bpr, "pr_fan": params.engine.prfan, "pr_lpc": params.engine.prlpc, "pr_hpc": params.engine.prhpc, "tt_4": 1400., # tt_4 is max design TIT
+        "eta_fan": params.engine.etafan, "eta_lpc": params.engine.etalpc, "eta_hpc": params.engine.etahpc,
+        "eta_hpt": params.engine.etahpt, "eta_lpt": params.engine.etalpt,
+        "eta_com": params.engine.etacom, "eta_mech_l": params.engine.etamechl, "eta_mech_h": params.engine.etamechh,
+        "pr_com": params.engine.prcom, "pr_inl": params.engine.prinlet,
+        "bleed_to": params.engine.bleedto, "power_tol": params.engine.power_tol, "power_toh": params.engine.power_toh,
+        "cooling_l": params.engine.cooling_l, "cooling_h": params.engine.cooling_h,
+        "lhv": params.engine.lhv, 
         "full_output": True
     }
     T_to = params.engine.T_TO #N, takeoff thrust 
