@@ -671,7 +671,9 @@ class FlightSim:
 
 
 if __name__ == "__main__":
-    # Example usage of ground_run2 function
-    FlightSim().ground_run2(7000,4000)
-    FlightSim().ground_run2(8000,5000)
-    FlightSim().ground_run2(1000,4000)
+    #FlightSim().level_flight(1500, 12000)
+    FlightSim().ground_run(6000)
+    # FlightSim().ground_run2(7000,4000)
+    # FlightSim().ground_run2(8000,5000)
+    # FlightSim().ground_run2(1000,4000)
+        
