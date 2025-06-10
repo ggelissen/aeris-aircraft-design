@@ -287,6 +287,48 @@ class Control:
         else:
             print("No suitable Sh/S and x_lemac/lh found for the given parameters.")
 
+    return {
+        "Sh/S": Sh_S,
+        "x_lemac/lh": x_lemac,
+        "cg_range": (Y1, Y2)
+    }
+
+
+
+def run_control_stability(params: DesignParameters):
+    """
+    Runs the control and stability analysis with the given design parameters.
+
+    Parameters:
+    params (DesignParameters): Design parameters for the aircraft.
+    """
+    # Initialize the Control class with parameters from DesignParameters
+    control = Control(
+        CLah=params.CLah,
+        CLaA_h=params.CLaA_h,
+        de_da=params.de_da,
+        lh=params.lh,
+        mac=params.mac,
+        Vh_V=params.Vh_V,
+        x_ac=params.x_ac,
+        CLh=params.CLh,
+        CLA_h=params.CLA_h,
+        C_m_ac=params.C_m_ac
+    )
+    
+    # Example usage of calculate_range method
+    results = control.calculate_range(
+        W_OEW=params.W_OEW,
+        W_payload=params.W_payload,
+        X_payload=params.X_payload,
+        W_fuel=params.W_fuel,
+        W_wing=params.W_wing,
+        W_fuselage=params.W_fuselage,
+        X_fuselage=params.X_fuselage
+    )
+
+    return results
+
 
 if __name__ == "__main__":
     # Example usage

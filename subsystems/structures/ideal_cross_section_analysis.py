@@ -656,4 +656,3 @@ def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray
         "boom_areas_sorted": boom_areas_sorted.tolist()
     }
     return results
-

@@ -135,10 +135,10 @@ class WingLoadingDiagrams:
         
         internal_loads = {
             'shear_z': shear_z,
-            'bend_moment_x': bend_moment_x,
+            'moment_x': bend_moment_x,
             'torsion_y': torsion_y,
             'shear_x': shear_x,
-            'bend_moment_z': bend_moment_z
+            'moment_z': bend_moment_z
         }
 
         return internal_loads_list, internal_loads
