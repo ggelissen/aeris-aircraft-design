@@ -175,7 +175,7 @@ def turbofan_parametric_analysis(
         den_tau_m1 = ((1. - bleed_to - cooling_l - cooling_h) * (1. + far_4) + cooling_h)
         if den_tau_m1 != 0:
             tau_m1_num = (((1. - bleed_to - cooling_l - cooling_h) * (1. + far_4) +
-                       cooling_h * tau_0 * tau_lpc * tau_hpc / tau_lambda))
+                           cooling_h * tau_0 * tau_lpc * tau_hpc / tau_lambda))
             if not isnan(tau_m1_num):
                 tau_m1 = tau_m1_num / den_tau_m1
 
@@ -185,13 +185,13 @@ def turbofan_parametric_analysis(
        not isnan(tau_0) and not isnan(tau_fan) and not isnan(tau_lpc) and not isnan(tau_hpc) and \
        not isnan(eta_mech_h) and not isnan(bpr) and not isnan(power_toh):
         den_tau_hpt_expr_val_part = ((1. - bleed_to - cooling_h - cooling_l) * (1. + far_4) +
-                                 cooling_h * tau_0 * tau_lpc * tau_hpc / tau_lambda)
+                                  cooling_h * tau_0 * tau_lpc * tau_hpc / tau_lambda)
         if not isnan(den_tau_hpt_expr_val_part):
             den_tau_hpt_expr = eta_mech_h * tau_lambda * den_tau_hpt_expr_val_part
             if den_tau_hpt_expr != 0:
                 tau_hpt_num = (tau_0 * tau_fan * tau_lpc * (tau_hpc - 1.) + (1. + bpr) * power_toh)
                 if not isnan(tau_hpt_num):
-                     tau_hpt = (1. - tau_hpt_num / den_tau_hpt_expr)
+                    tau_hpt = (1. - tau_hpt_num / den_tau_hpt_expr)
 
     ht_41 = ht_4 * tau_m1 if not (isnan(ht_4) or isnan(tau_m1)) else nan
     
@@ -212,9 +212,9 @@ def turbofan_parametric_analysis(
     ht_44 = ht_41 * tau_hpt if not (isnan(ht_41) or isnan(tau_hpt)) else nan
     delta_h_hpt = ht_44 - ht_41 if not (isnan(ht_44) or isnan(ht_41)) else nan
     state_44 = gpr.prescribed_delta_h(p_in=pt_41, t_in=tt_41,
-                                      delta_h=delta_h_hpt,
-                                      eta_pol=eta_hpt,
-                                      gas="kerosene_in_air", far=far_41)
+                                     delta_h=delta_h_hpt,
+                                     eta_pol=eta_hpt,
+                                     gas="kerosene_in_air", far=far_41)
     pt_44 = state_44["p_out"]
     tt_44 = state_44["t_out"]
 
@@ -310,11 +310,11 @@ def turbofan_parametric_analysis(
         
         g_ts9 = gpr.gamma_gas(ts_9, gas="kerosene_in_air", far=far_9) if not isnan(ts_9) else nan
         if not (isnan(g_ts9) or g_ts9 == 1 or isnan(tt_9) or isnan(ts_9) or ts_9 == 0):
-             t_ratio_ts9 = tt_9 / ts_9
-             if t_ratio_ts9 >=0:
-                 p_total_static_ratio_ts9 = t_ratio_ts9 ** (g_ts9 / (g_ts9 - 1.))
-                 ps_9 = pt_9 / p_total_static_ratio_ts9 if p_total_static_ratio_ts9 != 0 else ps_0
-             else: ps_9 = ps_0 # Fallback if t_ratio is negative
+            t_ratio_ts9 = tt_9 / ts_9
+            if t_ratio_ts9 >=0:
+                p_total_static_ratio_ts9 = t_ratio_ts9 ** (g_ts9 / (g_ts9 - 1.))
+                ps_9 = pt_9 / p_total_static_ratio_ts9 if p_total_static_ratio_ts9 != 0 else ps_0
+            else: ps_9 = ps_0 # Fallback if t_ratio is negative
         else: ps_9 = ps_0 
 
         a_9 = gpr.s_o_s(ts_9, gas="kerosene_in_air", far=far_9) if not isnan(ts_9) else nan
@@ -372,7 +372,7 @@ def turbofan_parametric_analysis(
             
             sf_pressure_core = 0.0
             if not (isnan(rho_9) or rho_9 == 0 or isnan(v_9) or v_9 == 0):
-                 sf_pressure_core = (ps_9 - ps_0) * (1 - bleed_to) * (1. + far_4) / (rho_9 * v_9)
+                sf_pressure_core = (ps_9 - ps_0) * (1 - bleed_to) * (1. + far_4) / (rho_9 * v_9)
 
             sf_pressure_bypass = 0.0
             if not (isnan(rho_19) or rho_19 == 0 or isnan(v_19) or v_19 == 0):
@@ -421,7 +421,7 @@ def turbofan_parametric_analysis(
         pr_fan=pr_fan, pr_lpc=pr_lpc, pr_hpc=pr_hpc, opr=opr,
         far_4=far_4, tsfc=tsfc, sf=sf,
         v_9=v_9, v_19=v_19,
-        tt_3=tt_3, tt_5=tt_5, tt_9=tt_9, tt_19=tt_19,
+        tt_3=tt_3, tt_5=tt_5, tt_9=tt_9, tt_19=tt_19, # tt_3 and tt_4 already here
         eta_thermal=eta_thermal, eta_propulsive=eta_propulsive, eta_overall=eta_overall,
         # Adding more variables that were in the original detailed output for reference
         pt_0=pt_0, pt_2=pt_2, pt_13=pt_13, pt_25=pt_25, pt_3=pt_3, pt_4=pt_4,
@@ -447,28 +447,29 @@ def print_detailed_results(results, engine_name="Engine Run"):
     output_dict = results[5] if len(results) > 5 else {}
 
     print(f"\n--- {engine_name}: Performance Metrics ---")
-    print(f"  Specific Thrust (SF):                       {sf:.2f} N/(kg/s)" if not isnan(sf) else "  Specific Thrust (SF):                       N/A")
-    print(f"  Thrust Specific Fuel Consumption (TSFC):    {tsfc*1e6:.2f} mg/(N·s)" if not isnan(tsfc) else "  Thrust Specific Fuel Consumption (TSFC):    N/A")
-    print(f"  Thermal Efficiency (eta_thermal):           {eta_thermal*100:.2f}%" if not isnan(eta_thermal) else "  Thermal Efficiency (eta_thermal):           N/A")
-    print(f"  Propulsive Efficiency (eta_propulsive):     {eta_propulsive*100:.2f}%" if not isnan(eta_propulsive) else "  Propulsive Efficiency (eta_propulsive):     N/A")
-    print(f"  Overall Efficiency (eta_overall):           {eta_overall*100:.2f}%" if not isnan(eta_overall) else "  Overall Efficiency (eta_overall):           N/A")
+    print(f"  Specific Thrust (SF):                           {sf:.2f} N/(kg/s)" if not isnan(sf) else "  Specific Thrust (SF):                           N/A")
+    print(f"  Thrust Specific Fuel Consumption (TSFC):        {tsfc*1e6:.2f} mg/(N·s)" if not isnan(tsfc) else "  Thrust Specific Fuel Consumption (TSFC):        N/A")
+    print(f"  Thermal Efficiency (eta_thermal):               {eta_thermal*100:.2f}%" if not isnan(eta_thermal) else "  Thermal Efficiency (eta_thermal):               N/A")
+    print(f"  Propulsive Efficiency (eta_propulsive):         {eta_propulsive*100:.2f}%" if not isnan(eta_propulsive) else "  Propulsive Efficiency (eta_propulsive):         N/A")
+    print(f"  Overall Efficiency (eta_overall):               {eta_overall*100:.2f}%" if not isnan(eta_overall) else "  Overall Efficiency (eta_overall):               N/A")
     
     opr_val = output_dict.get('opr', nan)
-    print(f"  Overall Pressure Ratio (OPR):               {opr_val:.2f}" if not isnan(opr_val) else "  Overall Pressure Ratio (OPR):               N/A")
+    print(f"  Overall Pressure Ratio (OPR):                   {opr_val:.2f}" if not isnan(opr_val) else "  Overall Pressure Ratio (OPR):                   N/A")
 
     if output_dict: 
         print(f"\n--- {engine_name}: Selected Cycle Parameters (from output_dict) ---")
         # Define an order for printing, grouping related parameters
         ordered_keys = [
-            'mach_0', 'ts_0', 'ps_0', 'bpr', 'tt_4', 'lhv',
+            'mach_0', 'ts_0', 'ps_0', 'bpr', 'tt_4', 'lhv', # tt_4 is already here
             'pr_inl', 'pr_fan', 'pr_lpc', 'pr_hpc', 'pr_com', 'opr',
             'eta_fan', 'eta_lpc', 'eta_hpc', 'eta_hpt', 'eta_lpt',
             'eta_com', 'eta_mech_l', 'eta_mech_h',
             'bleed_to', 'power_tol', 'power_toh', 'cooling_l', 'cooling_h',
             'tau_0', 'tau_fan', 'tau_lpc', 'tau_hpc', 'tau_m1', 'tau_hpt', 'tau_m2', 'tau_lpt',
-            'far_4', 'far_41', 'far_45', # far_45 might be missing from dict if not calculated
+            'far_4', 'far_41', 'far_45', 
             'tt_0', 'pt_0', 'tt_2', 'pt_2', 'tt_13', 'pt_13', 'tt_25', 'pt_25',
-            'tt_3', 'pt_3', 'tt_41', 'pt_41', 'tt_44', 'pt_44', 'tt_45', 'pt_45',
+            'tt_3', 'pt_3', # Added tt_3 here
+            'tt_41', 'pt_41', 'tt_44', 'pt_44', 'tt_45', 'pt_45',
             'tt_5', 'pt_5', 'tt_9', 'pt_9', 'tt_19', 'pt_19',
             'v_9', 'v_19',
             'sf', 'tsfc', 'eta_thermal', 'eta_propulsive', 'eta_overall'
@@ -628,12 +629,12 @@ def run_mission_simulation(params: DesignParameters):
         if isnan(tsfc) or tsfc <= 0: 
             print(f"  Warning: Invalid or zero TSFC ({tsfc}) calculated for segment {segment['name']}. Emissions will be NaN.")
             if tf_results is not None and len(tf_results) > 5:
-                 print_detailed_results(tf_results, f"Details for {segment['name']} (Invalid TSFC)")
+                print_detailed_results(tf_results, f"Details for {segment['name']} (Invalid TSFC)")
 
             mdot_f = nan
             segment_emissions_data = emissions(mdot_f, segment["ei_nox"], dt=dt_seconds)
             # segment_fuel_kg remains nan
-        else:
+        else: # Valid TSFC path
             mdot_f = segment["target_thrust_N"] * tsfc
             segment_fuel_kg = mdot_f * dt_seconds # Calculate fuel for this segment
             print(f"  Flight Conditions: M0={current_engine_params['mach_0']}, Ts0={current_engine_params['ts_0']:.2f}K, Ps0={current_engine_params['ps_0']:.0f}Pa")
@@ -648,21 +649,26 @@ def run_mission_simulation(params: DesignParameters):
             for species, mass in segment_emissions_data.items():
                 if species.startswith("m_"): 
                     print(f"    {species}: {mass:.4f}" if not isnan(mass) else f"    {species}: NaN")
+            
+            # --- Added this block to print detailed results for successful segments ---
+            if tf_results is not None and len(tf_results) > 5:
+                print_detailed_results(tf_results, f"Details for {segment['name']} (Successful TSFC)")
+            # ----------------------------------------------------------------------
         
         # Accumulate total fuel
         if not isnan(segment_fuel_kg):
             if not isnan(total_fuel_used_kg): # Only add if total is not already NaN
-                 total_fuel_used_kg += segment_fuel_kg
+                total_fuel_used_kg += segment_fuel_kg
         else:
             total_fuel_used_kg = nan # If any segment fuel is NaN, total becomes NaN
 
 
         for species_mass_key in total_mission_emissions.keys():
             if not isnan(segment_emissions_data.get(species_mass_key, nan)): 
-                 if not isnan(total_mission_emissions[species_mass_key]): # Only add if total for this species is not already NaN
+                if not isnan(total_mission_emissions[species_mass_key]): # Only add if total for this species is not already NaN
                     total_mission_emissions[species_mass_key] += segment_emissions_data[species_mass_key]
             else: 
-                 total_mission_emissions[species_mass_key] = nan 
+                total_mission_emissions[species_mass_key] = nan 
         print("-" * 40)
         # Removed del locals()['tf_results'] as it's better to let it be redefined or go out of scope naturally
 
