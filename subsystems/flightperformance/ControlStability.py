@@ -2,7 +2,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class Control:
+    """
+    A class to perform aircraft control and stability analysis, including generating scissor plots and calculating CG range.
+    """
     def __init__(self, CLah, CLaA_h, de_da, lh, mac, Vh_V, x_ac, CLh, CLA_h, C_m_ac):
+        """
+        Initializes the Control class with aerodynamic and geometric parameters.
+
+        Parameters:
+        CLah (float): Lift coefficient slope of the horizontal tail.
+        CLaA_h (float): Lift coefficient slope of the aircraft less tail.
+        de_da (float): Downwash effect on the lift coefficient.
+        lh (float): Horizontal tail moment arm.
+        mac (float): Mean aerodynamic chord.
+        Vh_V (float): Ratio of tail speed to free stream speed.
+        x_ac (float): Aerodynamic center of the aircraft.
+        CLh (float): Lift coefficient of the horizontal tail.
+        CLA_h (float): Lift coefficient of the aircraft less tail (used in controllability).
+        C_m_ac (float): Moment coefficient at the aerodynamic center.
+        """
         self.CLah = CLah
         self.CLaA_h = CLaA_h
         self.de_da = de_da
@@ -13,205 +31,274 @@ class Control:
         self.CLh = CLh
         self.CLA_h = CLA_h
         self.C_m_ac = C_m_ac
-        self.X = np.arange(0,1,0.0001)
-        
-        
-        
-    def __plot_result__(self, x, y, legend, x_label="x", y_label='y',y_limit = [None, None]):
-        for i in range(len(x)):  
+        # Define a range for xcg/mac for plotting
+        self.X = np.arange(0, 1, 0.0001)
+
+    def __plot_result__(self, x, y, legend, x_label="x", y_label='y', y_limit=[None, None]):
+        """
+        Plots a given set of data with labels and legend.
+
+        Parameters:
+        x (list): List of x-data arrays.
+        y (list): List of y-data arrays.
+        legend (list): List of legend labels for each data set.
+        x_label (str): Label for the x-axis.
+        y_label (str): Label for the y-axis.
+        y_limit (list): List containing the lower and upper limits for the y-axis.
+        """
+        for i in range(len(x)):
             plt.plot(x[i], y[i], label=legend[i])
         plt.xlabel(x_label)
         plt.ylabel(y_label)
-        plt.ylim(y_limit[0],y_limit[1])
+        plt.ylim(y_limit[0], y_limit[1])
         plt.legend()
         plt.show()
-    
+
     def __stability_curve__(self, X, plot=False):
-        
-        den = (self.CLah/self.CLaA_h)*(1-self.de_da)*self.lh/self.mac*((self.Vh_V)**2)
-        #print(den)
-        Y = 1/(den)*X-((self.x_ac-0.05)/(den))
-        
+        """
+        Calculates the stability curve for the scissor plot.
+
+        Parameters:
+        X (np.ndarray): Array of xcg/mac values.
+        plot (bool): Whether to plot the stability curve.
+
+        Returns:
+        np.ndarray: Array of Sh/S values for the stability curve.
+        """
+        # Calculate the denominator term for the stability equation
+        den = (self.CLah / self.CLaA_h) * (1 - self.de_da) * self.lh / self.mac * ((self.Vh_V)**2)
+        # Calculate the stability curve (Sh/S vs xcg/mac)
+        Y = (1 / den) * X - ((self.x_ac - 0.05) / den) # Assuming a stability margin of 0.05
+
         if plot:
-            self.__plot_result__(X, Y, "xcg/mac", "Sh/S")
-        
+            self.__plot_result__([X], [Y], ["Stability"], "xcg/mac", "Sh/S")
+
         return Y
-    
+
     def __control_curve__(self, X, plot=False):
-        den = self.CLh/self.CLA_h*self.lh/self.mac*(self.Vh_V**2)
-        Y = (1/den*X)+((self.C_m_ac/self.CLA_h)-self.x_ac)/(den)
-        
+        """
+        Calculates the controllability curve for the scissor plot.
+
+        Parameters:
+        X (np.ndarray): Array of xcg/mac values.
+        plot (bool): Whether to plot the controllability curve.
+
+        Returns:
+        np.ndarray: Array of Sh/S values for the controllability curve.
+        """
+        # Calculate the denominator term for the controllability equation
+        den = self.CLh / self.CLA_h * self.lh / self.mac * (self.Vh_V**2)
+        # Calculate the controllability curve (Sh/S vs xcg/mac)
+        Y = (1 / den) * X + ((self.C_m_ac / self.CLA_h) - self.x_ac) / den
+
         if plot:
-            self.__plot_result__(X, Y, "xcg/mac", "Sh/S")
+            self.__plot_result__([X], [Y], ["Controllability"], "xcg/mac", "Sh/S")
 
         return Y
 
     def __calculate_X_stability__(self, Y):
-        den = (self.CLah/self.CLaA_h)*(1-self.de_da)*self.lh/self.mac*((self.Vh_V)**2)
-        X = (Y+((self.x_ac-0.05)/(den))) * den 
+        """
+        Calculates the xcg/mac value on the stability curve for a given Sh/S.
+
+        Parameters:
+        Y (float): Sh/S value.
+
+        Returns:
+        float: xcg/mac value on the stability curve.
+        """
+        den = (self.CLah / self.CLaA_h) * (1 - self.de_da) * self.lh / self.mac * ((self.Vh_V)**2)
+        X = (Y + ((self.x_ac - 0.05) / den)) * den
         return X
-        
-        
+
     def scissor_plot(self, plot=False):
-        
+        """
+        Generates the stability and controllability curves for the scissor plot.
+
+        Parameters:
+        plot (bool): Whether to plot the scissor plot.
+
+        Returns:
+        tuple: Arrays of Sh/S values for the stability and controllability curves.
+        """
         stability = self.__stability_curve__(self.X)
         controllability = self.__control_curve__(self.X)
         if plot:
-            self.__plot_result__([self.X,self.X], [stability, controllability],y_limit=[0,None],y_label="Sh/S",x_label="xcg/mac",legend=["stability", "controllability"])
-        
+            self.__plot_result__([self.X, self.X], [stability, controllability], y_limit=[0, None], y_label="Sh/S", x_label="xcg/mac", legend=["Stability", "Controllability"])
+
         return stability, controllability
-        
+
     def xcg_OEW_estimation(self, W_wing, X_wing, W_fuselage, X_fuselage):
-        
-        return ((W_wing*X_wing + W_fuselage*X_fuselage) / (W_wing + W_fuselage))
-    
-    def cg_range(self, W_OEW, X_OEW, W_payload, X_payload, W_fuel, X_fuel): 
-        Xcg = X_OEW
-        Wcg = W_OEW
-        for i in np.arange(len(W_payload)):
-            if X_payload[i] > X_OEW:
-                Xcg = (Xcg*Wcg + X_payload[i]*W_payload[i])/(Wcg+W_payload[i])
-                Wcg = Wcg+W_payload[i]
-            max1 = Xcg
-        Xcg = X_OEW
-        Wcg = W_OEW
-        for i in np.arange(len(W_payload)):
+        """
+        Estimates the xcg for the Operational Empty Weight (OEW).
+
+        Parameters:
+        W_wing (float): Weight of the wing.
+        X_wing (float): x-location of the wing CG.
+        W_fuselage (float): Weight of the fuselage.
+        X_fuselage (float): x-location of the fuselage CG.
+
+        Returns:
+        float: Estimated xcg for OEW.
+        """
+        return ((W_wing * X_wing + W_fuselage * X_fuselage) / (W_wing + W_fuselage))
+
+    def cg_range(self, W_OEW, X_OEW, W_payload, X_payload, W_fuel, X_fuel):
+        """
+        Calculates the center of gravity (CG) range for different loading conditions.
+
+        Parameters:
+        W_OEW (float): Operational Empty Weight.
+        X_OEW (float): x-location of the OEW CG.
+        W_payload (list): List of payload weights.
+        X_payload (list): List of x-locations for each payload item.
+        W_fuel (list): List of fuel weights.
+        X_fuel (list): List of x-locations for each fuel tank.
+
+        Returns:
+        tuple: Minimum and maximum xcg values.
+        """
+        # Calculate CG with payload added forward and aft of OEW
+        Xcg_payload_fwd = X_OEW
+        Wcg_payload_fwd = W_OEW
+        Xcg_payload_aft = X_OEW
+        Wcg_payload_aft = W_OEW
+
+        for i in range(len(W_payload)):
             if X_payload[i] < X_OEW:
-                Xcg = (Xcg*Wcg + X_payload[i]*W_payload[i])/(Wcg+W_payload[i])
-                Wcg = Wcg+W_payload[i]
-            min1 = Xcg
-        
-        for i in np.arange(len(W_payload)):
-            Xcg = (Xcg*Wcg + X_payload[i]*W_payload[i])/(Wcg+W_payload[i])
-            Wcg = Wcg+W_payload[i]
-        
-        
-        for i in np.arange(len(W_fuel)):
-            if X_fuel[i] > X_OEW:
-                Xcg = (Xcg*Wcg + X_fuel[i]*W_fuel[i])/(Wcg+W_fuel[i])
-                Wcg = Wcg+W_fuel[i]
-            max2 = Xcg
-        
-        for i in np.arange(len(W_payload)):
-            Xcg = (Xcg*Wcg + X_payload[i]*W_payload[i])/(Wcg+W_payload[i])
-            Wcg = Wcg+W_payload[i]
-        
-        for i in np.arange(len(W_fuel)):
+                Xcg_payload_fwd = (Xcg_payload_fwd * Wcg_payload_fwd + X_payload[i] * W_payload[i]) / (Wcg_payload_fwd + W_payload[i])
+                Wcg_payload_fwd += W_payload[i]
+            else:
+                Xcg_payload_aft = (Xcg_payload_aft * Wcg_payload_aft + X_payload[i] * W_payload[i]) / (Wcg_payload_aft + W_payload[i])
+                Wcg_payload_aft += W_payload[i]
+
+        # Calculate CG with fuel added forward and aft of OEW
+        Xcg_fuel_fwd = X_OEW
+        Wcg_fuel_fwd = W_OEW
+        Xcg_fuel_aft = X_OEW
+        Wcg_fuel_aft = W_OEW
+
+        for i in range(len(W_fuel)):
             if X_fuel[i] < X_OEW:
-                Xcg = (Xcg*Wcg + X_fuel[i]*W_fuel[i])/(Wcg+W_fuel[i])
-                Wcg = Wcg+W_fuel[i]
-            min2 = Xcg
-        
-        if abs(max2) > abs(max1):
-            max_cg = max2*1.02
-        else:
-            max_cg = max1*1.02
-        
-        if abs(min2) > abs(min1):
-            min_cg = min2*0.98
-        else:
-            min_cg = min1*0.98
-        
+                Xcg_fuel_fwd = (Xcg_fuel_fwd * Wcg_fuel_fwd + X_fuel[i] * W_fuel[i]) / (Wcg_fuel_fwd + W_fuel[i])
+                Wcg_fuel_fwd += W_fuel[i]
+            else:
+                Xcg_fuel_aft = (Xcg_fuel_aft * Wcg_fuel_aft + X_fuel[i] * W_fuel[i]) / (Wcg_fuel_aft + W_fuel[i])
+                Wcg_fuel_aft += W_fuel[i]
+
+        # Determine the overall min and max CG
+        min_cg = min(Xcg_payload_fwd, Xcg_fuel_fwd)
+        max_cg = max(Xcg_payload_aft, Xcg_fuel_aft)
+
+        # Apply a small margin (adjust as needed)
+        min_cg *= 0.98
+        max_cg *= 1.02
+
         return (min_cg, max_cg)
-    
 
     def __overlay_graphs__(self, X, Y1, Y2, stability, controllability, Sh, x_lemac):
+        """
+        Overlays the CG range and scissor plot on a single graph.
+
+        Parameters:
+        X (np.ndarray): Array of xcg/mac values.
+        Y1 (list): List of minimum CG values.
+        Y2 (list): List of maximum CG values.
+        stability (np.ndarray): Array of Sh/S values for the stability curve.
+        controllability (np.ndarray): Array of Sh/S values for the controllability curve.
+        Sh (float): Horizontal tail surface area.
+        x_lemac (float): x-location of the wing leading edge mean aerodynamic chord.
+        """
         fig, ax1 = plt.subplots()
 
         ax1.set_xlabel('xcg/mac')
-        ax1.set_ylabel('x_lemac/lh')
-        ax1.plot(Y1, X, label="min", color ='tab:green')
-        ax1.plot(Y2, X, label="max", color = 'tab:red')
+        ax1.set_ylabel('x_lemac/lh') # This label seems incorrect based on the plot data
+        ax1.plot(Y1, X, label="min", color='tab:green')
+        ax1.plot(Y2, X, label="max", color='tab:red')
         #l, b, w, h = ax1.get_position().bounds
         #ax1.set_position([l, b, w*0.5, h])
-        ax1.set_ylim(x_lemac*0.99999,x_lemac*1.00001)
-        
+        # The y-limit here seems to be trying to focus on a single x_lemac value, which might not be intended
+        ax1.set_ylim(x_lemac * 0.99999, x_lemac * 1.00001)
+
         ax2 = ax1.twinx()
-        
+
         ax2.set_ylabel('Sh/S')  # we already handled the x-label with ax1
         ax2.plot(X, stability, label="stability")
         ax2.plot(X, controllability, label="controllability")
-        ax2.plot(X, len(X)*[Sh], label="Sh/S", color="tab:pink")
-        ax2.set_ylim(0,None)
-    
+        # Plot a horizontal line for the calculated Sh/S
+        ax2.plot(X, len(X) * [Sh], label="Sh/S", color="tab:pink")
+        ax2.set_ylim(0, None)
 
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
         fig.legend()
         plt.show()
-        
+
     def calculate_range(self, W_OEW, W_payload, X_payload, W_fuel, W_wing, W_fuselage, X_fuselage):
-        stability, controllability = control.scissor_plot(False)
-    
-        Y1 = []
-        Y2 = []
-        for i in self.X:    
-            result = control.cg_range(W_OEW, self.xcg_OEW_estimation(W_wing, i, W_fuselage, X_fuselage), W_payload, X_payload, W_fuel, [i])
+        """
+        Calculates the required Sh/S and x_lemac/lh for a given CG range to fit within the stability and controllability requirements.
+
+        Parameters:
+        W_OEW (float): Operational Empty Weight.
+        W_payload (list): List of payload weights.
+        X_payload (list): List of x-locations for each payload item.
+        W_fuel (list): List of fuel weights.
+        W_wing (float): Weight of the wing.
+        W_fuselage (float): Weight of the fuselage.
+        X_fuselage (float): x-location of the fuselage CG.
+        """
+        # Get stability and controllability curves
+        stability, controllability = self.scissor_plot(False)
+
+        Y1 = [] # List to store minimum CG values
+        Y2 = [] # List to store maximum CG values
+        # Calculate CG range for different x_lemac/lh values
+        for i in self.X:
+            # Estimate OEW CG based on wing and fuselage weights and locations
+            x_oew = self.xcg_OEW_estimation(W_wing, i, W_fuselage, X_fuselage)
+            # Calculate the CG range for the current OEW CG
+            result = self.cg_range(W_OEW, x_oew, W_payload, X_payload, W_fuel, [i]) # Assuming fuel is at x_lemac
             Y1.append(result[0])
             Y2.append(result[1])
-        
-        #control.__plot_result__([Y1, Y2], [control.X, control.X],["min","max"], "x_cg","x_lemac/lh")
-        
-        #print(stability)
-        #print(controllability)
+
+        # Find the intersection of the CG range with the stability and controllability requirements
+        Sh_S = None
+        x_lemac = None
         for i in range(len(Y1)):
-            Sh_S = self.__control_curve__(Y1[i])
-            X_stability = self.__calculate_X_stability__(Sh_S)
-            if ((X_stability - Y1[i]) > (Y2[i] - Y1[i])):
+            # Calculate the required Sh/S for controllability at the minimum CG
+            required_Sh_S_controllability = self.__control_curve__(Y1[i])
+            # Calculate the xcg/mac on the stability curve for this Sh/S
+            xcg_stability = self.__calculate_X_stability__(required_Sh_S_controllability)
+
+            # Check if the CG range is within the stable and controllable region
+            if (xcg_stability - Y1[i]) > (Y2[i] - Y1[i]):
+                # If the stability point is aft of the max CG, the range is not fully stable/controllable
                 continue
             else:
-                print('cg range',Y2[i] - Y1[i])
-                #Sh_S = self.__control_curve__(Y1[i])
+                # Found a suitable Sh/S and x_lemac/lh
+                Sh_S = required_Sh_S_controllability
+                x_lemac = self.X[i]
+                print('cg range', Y2[i] - Y1[i])
                 print("Sh/S", Sh_S)
-                x_lemac = control.X[i]
-                print("x_lemac/lh",x_lemac)
-                
+                print("x_lemac/lh", x_lemac)
                 break
-            
-            
-        control.__overlay_graphs__(control.X, Y1, Y2, stability, controllability, Sh_S, x_lemac)
 
-        
+        # Overlay the graphs if a solution was found
+        if Sh_S is not None and x_lemac is not None:
+             self.__overlay_graphs__(self.X, Y1, Y2, stability, controllability, Sh_S, x_lemac)
+        else:
+            print("No suitable Sh/S and x_lemac/lh found for the given parameters.")
+
 
 if __name__ == "__main__":
-    #Control().__stability_curve__()
-    #Control().__control_curve__()
+    # Example usage
+    # Initialize the Control class with example parameters
     control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)
-    control.calculate_range(2000, [600], [0.3], [1000], 1000, 1000, 0.5)
-    
-    '''
-    control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)
-    stability, controllability = control.scissor_plot(True)
-    
-    
-    Y1 = []
-    Y2 = []
-    for i in control.X:    
-        result = control.cg_range(2000, control.xcg_OEW_estimation(1000, i, 1000, 0.5), [600], [0.3], [1000], [i])
-        Y1.append(result[0])
-        Y2.append(result[1])
-    
-    #control.__plot_result__([Y1, Y2], [control.X, control.X],["min","max"], "x_cg","x_lemac/lh")
-    
-    #print(stability)
-    #print(controllability)
-    for i in range(len(Y1)):
-        Sh_S = control.__control_curve__(Y1[i])
-        X_stability = control.__calculate_X_stability__(Sh_S)
-        if (X_stability - Y1[i]) > (Y2[i] - Y1[i]):
-            continue
-        else:
-            print('cg range',Y2[i] - Y1[i])
-            print("Sh/S", Sh_S)
-            print("x_lemac/lh",control.X[i])
-            break
-        
-    control.__overlay_graphs__(control.X, Y1, Y2, stability, controllability, Sh_S)
-    '''
-            
-    
-        
-        
-        
-    
-    
-    #print(control.cg_range(2000, 0.5, [400,200], [0.2,0.7], [800,200], [0.5,0.25]))
+    # Calculate and plot the range
+    control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[0.3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=0.5)
+
+    # Example of plotting scissor plot separately
+    # control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)
+    # stability, controllability = control.scissor_plot(True)
+
+    # Example of calculating CG range separately
+    # control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)
+    # print(control.cg_range(W_OEW=2000, X_OEW=0.5, W_payload=[400, 200], X_payload=[0.2, 0.7], W_fuel=[800, 200], X_fuel=[0.5, 0.25]))
