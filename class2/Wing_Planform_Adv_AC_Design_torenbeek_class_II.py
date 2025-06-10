@@ -18,6 +18,10 @@ g = 9.80665 # m/s^2, standard gravity
 
 # --- Calculation Functions from Torenbeek ---
 
+def dynamic_pressure_mach(gamma, p, M):
+    """Calculates dynamic pressure from Mach number and static pressure."""
+    return 0.5 * gamma * p * M**2
+
 def get_isa_delta_theta(altitude_m): # TODO, check if someone else has this function, it is a common one
     """ Returns relative pressure (delta) and relative temperature (theta) at a given altitude. """
     T0 = 288.15; P0 = 101325; R = 287.05; g0 = 9.80665; a = -0.0065
@@ -108,9 +112,15 @@ def calculate_torenbeek_inputs_from_params(params: DesignParameters) -> dict:
     mu_T = params.engine.engine_weight / params.engine.T_TO if params.engine.T_TO > 0 else 0.172
     print(f"Propulsion weight fraction (mu_T): {mu_T:.4f}")
     tau_cruise = 0.85 # Placeholder for thrust lapse
+    delta_cruise, _ = get_isa_delta_theta(params.cruise_altitude) #  0.246 as default value from Torenbeek? Or Mrugank got it but not sure from where
+
+    # --- Technology Levels ---
+    M_des = params.cruise_mach
+    M_dd = M_des + 0.015 # Vargas and Vos, or 0.03 from Eq. 10.41 context Torembeek
+    M_kappa = params.wing.Mach_cross  # 0.935, for supercritical airfoil
     
     # --- Performance ---
-    q_hat_Pa = 0.5 * params.cruise_density * params.cruise_speed**2 # Default was 9600 Pa # TODO, check for compressibility effects.
+    q_hat_Pa = dynamic_pressure_mach(1.4, delta_cruise * 101325, M_des) # Default was 9600 Pa # TODO, check for compressibility effects.
     print(f"Dynamic pressure at cruise (q_hat): {q_hat_Pa:.2f} Pa")
     # This is a conceptual call; you'd need to adapt improved_drag.py to calculate
     # drag for individual components.
@@ -128,9 +138,6 @@ def calculate_torenbeek_inputs_from_params(params: DesignParameters) -> dict:
     phi_2 = 0.025 # Using Torenbeek's typical value for now, more accurate values would require FEM?? 
 
     # --- Technology Levels ---
-    M_des = params.cruise_mach
-    M_dd = M_des + 0.015 # Vargas and Vos, or 0.03 from Eq. 10.41 context Torembeek
-    M_kappa = params.wing.Mach_cross  # 0.935, for supercritical airfoil
     e_hat = 0.90 # Oswald's efficiency factor, typical for modern aircraft, check with others for consistency TODO
     C_Dc = 0.0008 # Eq. 10.42 context TODO, ARBITRARY DESIGN TARGET VALUE, NOT DERIVED FROM ANYTHING
     # C_f is the skin friction coefficient, typically around 0.00225 for clean aircraft, torenbeek
@@ -140,7 +147,6 @@ def calculate_torenbeek_inputs_from_params(params: DesignParameters) -> dict:
     print(f"Skin friction coefficient (C_f): {C_f:.4f}")
     # --- Calculate F_prop ---
     # Simplified delta_cruise for high altitude
-    delta_cruise, _ = get_isa_delta_theta(params.cruise_altitude) #  0.246 as default value from Torenbeek? Or Mrugank got it but not sure from where
     print(f"Relative pressure at cruise altitude (delta_cruise): {delta_cruise:.4f}")
     F_prop = calculate_propulsion_function(R_eq_km, eta_o, mu_T, tau_cruise, delta_cruise)  # Eq. 10.9, or another, 8.32 maybe?
 
