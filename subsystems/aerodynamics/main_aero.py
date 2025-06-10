@@ -6,6 +6,8 @@ import os
 import numpy as np
 import shutil
 
+# RUN IN DOCKER: https://hub.docker.com/r/lhuirne/dsewithaero . Use launch.json (ask google what that means)
+
 def send_command(command, proc):
     proc.stdin.write(command + '\n')
     proc.stdin.flush()
