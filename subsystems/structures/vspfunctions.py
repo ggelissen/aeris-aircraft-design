@@ -94,6 +94,7 @@ def create_fuselage(designvars: DesignParameters = None):
 
 def create_wing(designvars: DesignParameters = None):
     wing_id = vsp.AddGeom("WING", "")
+    print(f"wingid: {wing_id}")
     wing_model = vsp.AddFeaStruct(wing_id)
     wingpars = designvars.wing
 
@@ -367,7 +368,7 @@ def calculate_wet_areas(designvars: DesignParameters = None):
 def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, return_xdis = True):
     # points = []
 
-    wingid = designvars.wing.wingid
+    wingid = "CTELRBUKYF" # designvars.wing.wingid
     yehudi_frac = designvars.wing.yehudi_pos_frac
     if spanwise_pos_frac < yehudi_frac:
         local_chord_length = vsp.GetParmVal(wingid, "Root_Chord", "XSec_1") * (1 - np.abs(spanwise_pos_frac/yehudi_frac)) + vsp.GetParmVal(wingid, "Tip_Chord", "XSec_1") * np.abs(spanwise_pos_frac/yehudi_frac)
@@ -378,8 +379,8 @@ def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, 
     # for vec in vsp.GetAirfoilCoordinates(designvars.wing.wingid, abs(spanwise_pos_frac)):
     #     points.append(np.array([vec.x(), vec.y()]))
 
-    vsp.UpdateGeom(designvars.wing.wingid)
-    halfspann = vsp.GetParmVal(designvars.wing.wingid, "TotalSpan", "WingGeom")/2
+    vsp.UpdateGeom(wingid)
+    halfspann = vsp.GetParmVal(wingid, "TotalSpan", "WingGeom")/2
     pos_index = np.argmin(np.abs(designvars.structurecoords[:,1] - spanwise_pos_frac*halfspann))
     if designvars.structurecoords[pos_index, 1] < spanwise_pos_frac*halfspann:
         ycoord = designvars.structurecoords[pos_index, 1]
