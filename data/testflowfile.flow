@@ -1,0 +1,863 @@
+
+  FLOWVM7b : COMPUTED AT 08:07:17 ON 10-JUN-25     Testrun                                                                         
+
+ NUMBER OF FINITE BODY MACH NUMBER INCREMENTS=   20
+
+      Y       DELTA M
+    0.86400  -0.01522
+    0.93221  -0.01537
+    1.00042  -0.01526
+    1.06863  -0.01511
+    1.13684  -0.01469
+    1.20505  -0.01434
+    1.27326  -0.01383
+    1.34147  -0.01333
+    1.40969  -0.01290
+    1.47789  -0.01235
+    1.54611  -0.01181
+    1.61432  -0.01137
+    1.68253  -0.01091
+    1.75074  -0.01037
+    1.81895  -0.01000
+    1.88716  -0.00952
+    1.95537  -0.00909
+    2.02358  -0.00875
+    2.09179  -0.00823
+    2.16000  -0.00793
+
+ OPTIONS=23000011002001100001
+
+ NITS=   50 MACH NO=  0.8500 INCIDENCE=  2.000 XCM=   0.00000
+
+ ROVR=  1.6000 RNDR=  1.0000 EPS=  0.9000 LAMBDA=  0.2500
+
+ JAVE=    6 KAVE=    6 JAVE1=    0 KAVE1=    0 jave2=    0 kave2=    0
+
+ ITTY OPTNS=0000000000000000000000000000000000000000000000000000000
+
+ ILPP OPTNS=3333333333333333333333333333333333333333333333333333333
+
+ NTTY=   10 NLPP=   10 JGAM(1)=    3 JGAM(2)=    3 JGAM(3)=    5 JGAM(4)=    7 JGAM(5)=    9
+
+ NUMBER OF ITERATIONS BEFORE CONVERGENCE ACCELERATION (THIS GRID) = 60
+
+ CGCLEV=  0.000001 DIVERG=  1.000000 INPUT WING AREA=  1.000000
+
+ IFGC=    0  NTOL=    0   NTEST=    0   NOUTS=    0   TOLCL=  0.000000   TOLCD  0.000000
+
+ VISCOUS DATA
+
+ IVINC=   50
+
+ RC= 2354234.7 (BASED ON A CHORD OF 0.588559)  MJ=  0  ABC=  0.030000  NK=    0  ILB=    5
+
+ NUTR=    0  NLTR=    0
+
+    SPAN     TRANSITION   INVERSE 
+  0.000000    0.100000    0.150000    0.010000
+  0.680995    0.100000    0.150000    0.010000
+  2.160000    0.080000    0.130000    0.010000
+  0.000000    1.000000    1.000000    0.000000
+  0.680995    1.000000    1.000000    0.000000
+  2.160000    1.000000    1.000000    0.000000
+
+ * START OF INVISCID PROGRAM *
+
+ * INITIAL RUN, AT 08:07:17 ON 10-JUN-25 *
+
+ * SETUP DONE *
+
+ * GRID DONE LEV= 3 *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   50 0.0008603   12    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0006152 0.0896040 0.0013014-0.0006233 0.0904294 0.0012532-0.0005969 0.0814310 0.0012042-0.0005765 0.0674435 0.0011912
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    2   50   50
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    1    1  0.000000
+  Transition detected at x/c  0.757847
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.693735
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.697417
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.698980
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.624998
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.625424
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.700453
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.700635
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.700747
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.626215
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.549009
+  Transition detected at x/c  0.626259
+  Transition detected at x/c  0.549027
+  Transition detected at x/c  0.626279
+ VINT HAS FAILED H= 0.5725E-11XD= 0.3000E+02X= 0.2932E+02V0=1001
+VNW to be reduced to less than 0.001,current VNW=-1446.759326
+  Transition detected at x/c  0.394367
+  Transition detected at x/c  0.471086
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ OPTIONS=03000011001001100010
+
+ NITS=  450 MACH NO=  0.8500 INCIDENCE=  2.000 XCM=   0.00000
+
+ ROVR=  1.6000 RNDR=  1.0000 EPS=  0.9000 LAMBDA=  0.2500
+
+ JAVE=    6 KAVE=    6 JAVE1=    0 KAVE1=    0 jave2=    0 kave2=    0
+
+ ITTY OPTNS=0000000000000000000000000000000000000000000000000000000
+
+ ILPP OPTNS=3333333333333333333333333333333333333333333333333333333
+
+ NTTY=   10 NLPP=   10 JGAM(1)=    3 JGAM(2)=    3 JGAM(3)=    5 JGAM(4)=    7 JGAM(5)=    9
+
+ NUMBER OF ITERATIONS BEFORE CONVERGENCE ACCELERATION (THIS GRID) =460
+
+ CGCLEV=  0.000001 DIVERG=  1.000000 INPUT WING AREA=  1.000000
+
+ IFGC=    0  NTOL=    0   NTEST=    0   NOUTS=    0   TOLCL=  0.000000   TOLCD  0.000000
+
+ VISCOUS DATA
+
+ IVINC=   10
+
+ RC= 2354234.7 (BASED ON A CHORD OF 0.588559)  MJ=  0  ABC=  0.030000  NK=    0  ILB=    5
+
+ NUTR=    0  NLTR=    0
+
+    SPAN     TRANSITION   INVERSE 
+  0.000000    0.100000    0.150000    0.010000
+  0.680995    0.100000    0.150000    0.010000
+  2.160000    0.080000    0.130000    0.010000
+  0.000000    1.000000    1.000000    0.000000
+  0.680995    1.000000    1.000000    0.000000
+  2.160000    1.000000    1.000000    0.000000
+
+ * START OF INVISCID PROGRAM *
+
+ * SETUP DONE *
+
+ * GRID DONE LEV= 3 *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   60 0.0006138    8    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0004854 0.1008374 0.0010108-0.0004706 0.1008148 0.0009622-0.0004459 0.0911195 0.0009161-0.0004603 0.0775818 0.0009410
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1   60   60
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.757847
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.697417
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.698980
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.700453
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.700635
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.700747
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.626259
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.549027
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.471086
+  Transition detected at x/c  0.549028
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   70 0.0004411    4    3   41  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0003542 0.1091212 0.0007427-0.0003493 0.1082499 0.0006974-0.0003503 0.0979982 0.0006617-0.0003637 0.0851427 0.0006974
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1   70   70
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.757847
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.697417
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.698980
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.700453
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.700635
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.700747
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.626259
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.549027
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.471086
+  Transition detected at x/c  0.549028
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   80 0.0003680    3    3   41  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0002728 0.1149227 0.0005196-0.0002679 0.1133339 0.0004834-0.0002648 0.1026568 0.0004572-0.0002749 0.0904729 0.0004908
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1   80   80
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.757847
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.697417
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.698980
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+  Transition detected at x/c  0.700747
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.626259
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.549027
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.471086
+  Transition detected at x/c  0.549028
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   90 0.0003075    3    3   40  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0002063 0.1187064 0.0003368-0.0001971 0.1165100 0.0003081-0.0001919 0.1055028 0.0002889-0.0001978 0.0939131 0.0003155
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1   90   90
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.757847
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.697417
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.698980
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+  Transition detected at x/c  0.700747
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  100 0.0002525    3    3   39  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0001482 0.1208532 0.0001873-0.0001363 0.1181216 0.0001640-0.0001301 0.1068438 0.0001497-0.0001321 0.0957694 0.0001679
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  100  100
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.757847
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.697417
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.698980
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.834363
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  110 0.0002053    3    3   38  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000984 0.1216720 0.0000652-0.0000849 0.1184675 0.0000462-0.0000780 0.1069371 0.0000348-0.0000758 0.0962877 0.0000431
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  110  110
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.757847
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.697417
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.698980
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.834363
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  120-0.0002261   12    9   32  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000563 0.1214145-0.0000345 0.0000585 0.1177825-0.0000505 0.0000741 0.1059895-0.0000599 0.0000708 0.0956819-0.0000615
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  120  120
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.757847
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.831881
+  Transition detected at x/c  0.698980
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.834363
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  130-0.0002430   12    9   32  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000774 0.1202746-0.0001169 0.0000951 0.1162480-0.0001312 0.0001124 0.1041748-0.0001383 0.0001072 0.0941459-0.0001480
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  130  130
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.757847
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.831881
+  Transition detected at x/c  0.698980
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.834363
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.834419
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  140-0.0002552   12    9   32  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0001075 0.1184285-0.0001831 0.0001229 0.1140287-0.0001957 0.0001424 0.1016517-0.0002005 0.0001354 0.0918451-0.0002197
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  140  140
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.881333
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.831881
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.833041
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.833560
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.833858
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.834363
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.834419
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  150-0.0002698   12    9   32  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0001319 0.1159648-0.0002407 0.0001453 0.1112485-0.0002499 0.0001676 0.0985007-0.0002535 0.0001587 0.0888711-0.0002827
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  150  150
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.881333
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.831881
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.833041
+VNW to be reduced to less than 0.001,current VNW=    6.083231
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.833560
+VNW to be reduced to less than 0.001,current VNW=    0.134829
+VNW to be reduced to less than 0.001,current VNW=   31.836712
+  Transition detected at x/c  0.770175
+  Transition detected at x/c  0.833858
+VNW to be reduced to less than 0.001,current VNW=    0.189494
+ VINT HAS FAILED H= 0.7332E-06XD= 0.3100E+02X= 0.3100E+02V0=1001
+VNW to be reduced to less than 0.001,current VNW=38416.185872
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+VNW to be reduced to less than 0.001,current VNW=    0.221692
+VNW to be reduced to less than 0.001,current VNW= 1414.818083
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.834363
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.834419
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  160-0.0003362    5    6   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000700 0.1130512-0.0002825 0.0000665 0.1080332-0.0002881 0.0000840 0.0949842-0.0002821 0.0000324 0.0855663-0.0003161
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  160  160
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.881333
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.831881
+VNW to be reduced to less than 0.001,current VNW=    2.038763
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.833041
+VNW to be reduced to less than 0.001,current VNW=    0.142142
+VNW to be reduced to less than 0.001,current VNW=    9.991012
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.833560
+VNW to be reduced to less than 0.001,current VNW=    0.181906
+VNW to be reduced to less than 0.001,current VNW=   54.002886
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+VNW to be reduced to less than 0.001,current VNW=    0.267389
+ VINT HAS FAILED H= 0.7704E-06XD= 0.3100E+02X= 0.3098E+02V0=1001
+VNW to be reduced to less than 0.001,current VNW=42127.421313
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+VNW to be reduced to less than 0.001,current VNW=    0.284112
+VNW to be reduced to less than 0.001,current VNW=  242.617385
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+VNW to be reduced to less than 0.001,current VNW=    0.277735
+VNW to be reduced to less than 0.001,current VNW=  948.842608
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.834363
+VNW to be reduced to less than 0.001,current VNW=    0.326171
+VNW to be reduced to less than 0.001,current VNW= 2467.266747
+  Transition detected at x/c  0.770840
+  Transition detected at x/c  0.834419
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+VNW to be reduced to less than 0.001,current VNW=    0.584642
+VNW to be reduced to less than 0.001,current VNW=   20.805371
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  170-0.0004169    5    6   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000500 0.1098202-0.0003105 0.0000417 0.1045208-0.0003171 0.0000569 0.0911506-0.0003145 0.0000610 0.0819020-0.0003561
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  170  170
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.881333
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.831881
+VNW to be reduced to less than 0.001,current VNW=    1.756677
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.833041
+VNW to be reduced to less than 0.001,current VNW=    0.136260
+VNW to be reduced to less than 0.001,current VNW=    5.050536
+  Transition detected at x/c  0.769820
+  Transition detected at x/c  0.833560
+VNW to be reduced to less than 0.001,current VNW=    0.233368
+VNW to be reduced to less than 0.001,current VNW=   16.058662
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+VNW to be reduced to less than 0.001,current VNW=    0.362643
+VNW to be reduced to less than 0.001,current VNW=   68.748619
+  Transition detected at x/c  0.770511
+  Transition detected at x/c  0.834140
+VNW to be reduced to less than 0.001,current VNW=    0.388600
+VNW to be reduced to less than 0.001,current VNW=   32.161320
+  Transition detected at x/c  0.770674
+  Transition detected at x/c  0.834278
+VNW to be reduced to less than 0.001,current VNW=    0.389153
+VNW to be reduced to less than 0.001,current VNW=   59.210105
+  Transition detected at x/c  0.770774
+  Transition detected at x/c  0.834363
+VNW to be reduced to less than 0.001,current VNW=    0.438733
+VNW to be reduced to less than 0.001,current VNW=   82.637702
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.770840
+VNW to be reduced to less than 0.001,current VNW=    0.458345
+VNW to be reduced to less than 0.001,current VNW=  125.823602
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+VNW to be reduced to less than 0.001,current VNW=    0.303308
+VNW to be reduced to less than 0.001,current VNW=    4.980017
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+VNW to be reduced to less than 0.001,current VNW=    0.108437
+VNW to be reduced to less than 0.001,current VNW=    1.302921
+VNW to be reduced to less than 0.001,current VNW=  359.034347
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+VNW to be reduced to less than 0.001,current VNW=    1.349328
+ VINT HAS FAILED H= 0.4947E-04XD= 0.3000E+02X= 0.2998E+02V0=1001
+VNW to be reduced to less than 0.001,current VNW= 1915.375767
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  180-0.0004900    5    6   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000900 0.1063422-0.0003359-0.0000827 0.1007361-0.0003453 0.0000645 0.0869622-0.0003456 0.0000698 0.0778488-0.0003935
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  180  180
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
+  Transition detected at x/c  0.823512
+  Transition detected at x/c  0.881333
+  Transition detected at x/c  0.764553
+  Transition detected at x/c  0.829148
+VNW to be reduced to less than 0.001,current VNW=    2.390889
+  Transition detected at x/c  0.767816
+  Transition detected at x/c  0.831881
+VNW to be reduced to less than 0.001,current VNW=    0.118192
+VNW to be reduced to less than 0.001,current VNW=    1.763566
+  Transition detected at x/c  0.769201
+  Transition detected at x/c  0.833041
+VNW to be reduced to less than 0.001,current VNW=    0.162629
+VNW to be reduced to less than 0.001,current VNW=    4.317878
+  Transition detected at x/c  0.699677
+  Transition detected at x/c  0.769820
+VNW to be reduced to less than 0.001,current VNW=    0.335531
+VNW to be reduced to less than 0.001,current VNW=   10.661301
+  Transition detected at x/c  0.700076
+  Transition detected at x/c  0.770175
+VNW to be reduced to less than 0.001,current VNW=    0.574737
+VNW to be reduced to less than 0.001,current VNW=   18.105481
+  Transition detected at x/c  0.700453
+  Transition detected at x/c  0.770511
+VNW to be reduced to less than 0.001,current VNW=    0.100071
+VNW to be reduced to less than 0.001,current VNW=    0.617182
+VNW to be reduced to less than 0.001,current VNW=   11.571047
+  Transition detected at x/c  0.700635
+  Transition detected at x/c  0.770674
+VNW to be reduced to less than 0.001,current VNW=    0.612089
+VNW to be reduced to less than 0.001,current VNW=   15.004732
+  Transition detected at x/c  0.700747
+  Transition detected at x/c  0.770774
+VNW to be reduced to less than 0.001,current VNW=    0.715840
+VNW to be reduced to less than 0.001,current VNW=   19.501070
+  Transition detected at x/c  0.700819
+  Transition detected at x/c  0.770840
+VNW to be reduced to less than 0.001,current VNW=    0.739840
+VNW to be reduced to less than 0.001,current VNW=   27.945789
+  Transition detected at x/c  0.700863
+  Transition detected at x/c  0.770881
+VNW to be reduced to less than 0.001,current VNW=    0.394964
+VNW to be reduced to less than 0.001,current VNW=    3.733631
+  Transition detected at x/c  0.626279
+  Transition detected at x/c  0.700884
+VNW to be reduced to less than 0.001,current VNW=    0.136728
+ VINT HAS FAILED H= 0.4826E-07XD= 0.3000E+02X= 0.2981E+02V0=1001
+VNW to be reduced to less than 0.001,current VNW=************
+ VINT HAS FAILED H= 0.7540E-09XD= 0.3100E+02X= 0.3000E+02V0=1001
+  Transition detected at x/c  0.549028
+  Transition detected at x/c  0.626284
+VNW to be reduced to less than 0.001,current VNW=    0.210548
+ VINT HAS FAILED H= 0.4674E-07XD= 0.2900E+02X= 0.2859E+02V0=1001
+VNW to be reduced to less than 0.001,current VNW=************
+ VINT HAS FAILED H= 0.1169E-07XD= 0.3000E+02X= 0.2900E+02V0=1001
+VNW to be reduced to less than 0.001,current VNW=************
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  190-0.0000361    9   10   22  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000000       NaN       NaN 0.0000000       NaN       NaN 0.0000000       NaN       NaN 0.0000000       NaN       NaN
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  190  190
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.588559  2.354235  0.850000    0    0    0  0.000000
