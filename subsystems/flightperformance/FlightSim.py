@@ -589,8 +589,8 @@ class FlightSim:
 
 if __name__ == "__main__":
     #FlightSim().level_flight(1500, 12000)
-    #FlightSim().ground_run(6000)
-    FlightSim().ground_run2(7000,4000)
-    FlightSim().ground_run2(8000,5000)
-    FlightSim().ground_run2(1000,4000)
+    FlightSim().ground_run(6000)
+    # FlightSim().ground_run2(7000,4000)
+    # FlightSim().ground_run2(8000,5000)
+    # FlightSim().ground_run2(1000,4000)
         
