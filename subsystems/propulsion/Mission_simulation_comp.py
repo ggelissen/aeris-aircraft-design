@@ -21,122 +21,122 @@ except ImportError as e:
     print("This script might require 'utils.unit_conversions', 'design_variables', and 'gas_property_relations'.")
     print("A placeholder for 'DesignParameters' and 'gpr' will be used if not found, but functionality will be limited.")
     
-    # Basic placeholder for DesignParameters if not found
-    if 'DesignParameters' not in globals():
-        class DesignParameters:
-            def __init__(self):
-                self.engine = type('engine', (), {'T_TO': 7540.0})() # Default T_TO
-            def load_from_yaml(self, filepath):
-                print(f"Warning: DesignParameters not found. Using placeholder. Cannot load {filepath}.")
-                pass # Placeholder
+    # # Basic placeholder for DesignParameters if not found
+    # if 'DesignParameters' not in globals():
+    #     class DesignParameters:
+    #         def __init__(self):
+    #             self.engine = type('engine', (), {'T_TO': 7540.0})() # Default T_TO
+    #         def load_from_yaml(self, filepath):
+    #             print(f"Warning: DesignParameters not found. Using placeholder. Cannot load {filepath}.")
+    #             pass # Placeholder
 
-    # Basic placeholder for gpr if not found (will cause errors in turbofan_parametric_analysis)
-    if 'gpr' not in globals() or not gpr_module_loaded_successfully:
-        gpr_module_loaded_successfully = False # Explicitly mark as not loaded
-        class GasPropertyRelationsPlaceholder:
-            def __init__(self):
-                self.R_AIR = 287.058
-                self.GAMMA_AIR = 1.4
-                print("\n--- WARNING: Using GasPropertyRelationsPlaceholder ---")
-                print("--- Thermochemical properties will be highly simplified and likely inaccurate for combustion. ---")
-                print("--- Ensure the actual 'gas_property_relations.py' module is correctly imported for accurate results. ---\n")
+    # # Basic placeholder for gpr if not found (will cause errors in turbofan_parametric_analysis)
+    # if 'gpr' not in globals() or not gpr_module_loaded_successfully:
+    #     gpr_module_loaded_successfully = False # Explicitly mark as not loaded
+    #     class GasPropertyRelationsPlaceholder:
+    #         def __init__(self):
+    #             self.R_AIR = 287.058
+    #             self.GAMMA_AIR = 1.4
+    #             print("\n--- WARNING: Using GasPropertyRelationsPlaceholder ---")
+    #             print("--- Thermochemical properties will be highly simplified and likely inaccurate for combustion. ---")
+    #             print("--- Ensure the actual 'gas_property_relations.py' module is correctly imported for accurate results. ---\n")
 
-            def s_o_s(self, t, gas="air", far=0.):
-                if isnan(t): return nan
-                gamma = self.GAMMA_AIR 
-                r_gas_val = self.R_AIR
-                if gas == "kerosene_in_air" and far > 0: # Very crude adjustment
-                    gamma = 1.33 
-                    r_gas_val = 288.0 # Slight increase for combustion products
-                return sqrt(gamma * r_gas_val * t) if t >= 0 else nan
+    #         def s_o_s(self, t, gas="air", far=0.):
+    #             if isnan(t): return nan
+    #             gamma = self.GAMMA_AIR 
+    #             r_gas_val = self.R_AIR
+    #             if gas == "kerosene_in_air" and far > 0: # Very crude adjustment
+    #                 gamma = 1.33 
+    #                 r_gas_val = 288.0 # Slight increase for combustion products
+    #             return sqrt(gamma * r_gas_val * t) if t >= 0 else nan
 
-            def specific_enthalpy(self, t, gas="air", far=0.):
-                if isnan(t): return nan
-                cp = 1005. # J/(kg.K) for air
-                if gas == "kerosene_in_air" and far > 0: # Crude adjustment for combustion products
-                    cp = 1150. 
-                return cp * t
+    #         def specific_enthalpy(self, t, gas="air", far=0.):
+    #             if isnan(t): return nan
+    #             cp = 1005. # J/(kg.K) for air
+    #             if gas == "kerosene_in_air" and far > 0: # Crude adjustment for combustion products
+    #                 cp = 1150. 
+    #             return cp * t
 
-            def prescribed_delta_h(self, p_in, t_in, delta_h, eta_pol, gas="air", far=0.):
-                if any(isnan(x) for x in [p_in, t_in, delta_h, eta_pol]):
-                    return {"p_out": nan, "t_out": nan, "h_out": nan}
+    #         def prescribed_delta_h(self, p_in, t_in, delta_h, eta_pol, gas="air", far=0.):
+    #             if any(isnan(x) for x in [p_in, t_in, delta_h, eta_pol]):
+    #                 return {"p_out": nan, "t_out": nan, "h_out": nan}
                 
-                cp_val = 1005. if gas == "air" else 1150. # Crude
-                gamma_val = self.GAMMA_AIR if gas == "air" else 1.33 # Crude
+    #             cp_val = 1005. if gas == "air" else 1150. # Crude
+    #             gamma_val = self.GAMMA_AIR if gas == "air" else 1.33 # Crude
 
-                h_in = self.specific_enthalpy(t_in, gas, far)
-                if isnan(h_in): return {"p_out": nan, "t_out": nan, "h_out": nan}
+    #             h_in = self.specific_enthalpy(t_in, gas, far)
+    #             if isnan(h_in): return {"p_out": nan, "t_out": nan, "h_out": nan}
                 
-                h_out = h_in + delta_h
-                t_out = h_out / cp_val if cp_val !=0 else nan # t = h/cp
+    #             h_out = h_in + delta_h
+    #             t_out = h_out / cp_val if cp_val !=0 else nan # t = h/cp
 
-                # Simplified pressure calculation (polytropic process P_out/P_in = (T_out_isen/T_in)^ (gamma/(gamma-1)))
-                # For compression (delta_h > 0): T_out_isen = T_in + (T_out - T_in) * eta_pol
-                # For expansion (delta_h < 0): T_out_isen = T_in + (T_out - T_in) / eta_pol
-                # This is still a simplification of proper polytropic relations.
-                if t_in <=0 : p_out = nan
-                else:
-                    delta_t_actual = t_out - t_in
-                    if delta_h >= 0: # Compression-like
-                        delta_t_isen = delta_t_actual * eta_pol if eta_pol != 0 else delta_t_actual # eta_pol should be >0 for compression
-                    else: # Expansion-like
-                        delta_t_isen = delta_t_actual / eta_pol if eta_pol != 0 else delta_t_actual # eta_pol should be >0 for expansion
+    #             # Simplified pressure calculation (polytropic process P_out/P_in = (T_out_isen/T_in)^ (gamma/(gamma-1)))
+    #             # For compression (delta_h > 0): T_out_isen = T_in + (T_out - T_in) * eta_pol
+    #             # For expansion (delta_h < 0): T_out_isen = T_in + (T_out - T_in) / eta_pol
+    #             # This is still a simplification of proper polytropic relations.
+    #             if t_in <=0 : p_out = nan
+    #             else:
+    #                 delta_t_actual = t_out - t_in
+    #                 if delta_h >= 0: # Compression-like
+    #                     delta_t_isen = delta_t_actual * eta_pol if eta_pol != 0 else delta_t_actual # eta_pol should be >0 for compression
+    #                 else: # Expansion-like
+    #                     delta_t_isen = delta_t_actual / eta_pol if eta_pol != 0 else delta_t_actual # eta_pol should be >0 for expansion
                     
-                    t_out_isen = t_in + delta_t_isen
-                    if t_out_isen <=0 or t_in <=0: p_out = nan
-                    else: p_out = p_in * (t_out_isen / t_in) ** (gamma_val / (gamma_val - 1.)) if (gamma_val-1)!=0 else nan
+    #                 t_out_isen = t_in + delta_t_isen
+    #                 if t_out_isen <=0 or t_in <=0: p_out = nan
+    #                 else: p_out = p_in * (t_out_isen / t_in) ** (gamma_val / (gamma_val - 1.)) if (gamma_val-1)!=0 else nan
 
-                return {"p_out": p_out, "t_out": t_out, "h_out": h_out}
+    #             return {"p_out": p_out, "t_out": t_out, "h_out": h_out}
 
-            def prescribed_p_ratio(self, p_in, t_in, p_ratio, eta_pol, gas="air", far=0.):
-                if any(isnan(x) for x in [p_in, t_in, p_ratio, eta_pol]):
-                     return {"p_out": nan, "t_out": nan, "h_out": nan}
+    #         def prescribed_p_ratio(self, p_in, t_in, p_ratio, eta_pol, gas="air", far=0.):
+    #             if any(isnan(x) for x in [p_in, t_in, p_ratio, eta_pol]):
+    #                  return {"p_out": nan, "t_out": nan, "h_out": nan}
                 
-                cp_val = 1005. if gas == "air" else 1150. # Crude
-                gamma_val = self.GAMMA_AIR if gas == "air" else 1.33 # Crude
+    #             cp_val = 1005. if gas == "air" else 1150. # Crude
+    #             gamma_val = self.GAMMA_AIR if gas == "air" else 1.33 # Crude
 
-                p_out = p_in * p_ratio
+    #             p_out = p_in * p_ratio
                 
-                if t_in <=0 or p_ratio <=0 or eta_pol <=0 : # Invalid inputs for temp/pressure change
-                    t_out = nan
-                    h_out = nan
-                else:
-                    # Isentropic temperature change: T_out_isen / T_in = (P_out / P_in)^((gamma-1)/gamma)
-                    t_out_isen = t_in * (p_ratio)**((gamma_val - 1.) / gamma_val)
+    #             if t_in <=0 or p_ratio <=0 or eta_pol <=0 : # Invalid inputs for temp/pressure change
+    #                 t_out = nan
+    #                 h_out = nan
+    #             else:
+    #                 # Isentropic temperature change: T_out_isen / T_in = (P_out / P_in)^((gamma-1)/gamma)
+    #                 t_out_isen = t_in * (p_ratio)**((gamma_val - 1.) / gamma_val)
                     
-                    delta_t_isen = t_out_isen - t_in
+    #                 delta_t_isen = t_out_isen - t_in
                     
-                    if p_ratio >= 1: # Compression
-                        delta_t_actual = delta_t_isen / eta_pol
-                    else: # Expansion
-                        delta_t_actual = delta_t_isen * eta_pol
+    #                 if p_ratio >= 1: # Compression
+    #                     delta_t_actual = delta_t_isen / eta_pol
+    #                 else: # Expansion
+    #                     delta_t_actual = delta_t_isen * eta_pol
                     
-                    t_out = t_in + delta_t_actual
-                    h_out = self.specific_enthalpy(t_out, gas, far)
+    #                 t_out = t_in + delta_t_actual
+    #                 h_out = self.specific_enthalpy(t_out, gas, far)
 
-                return {"p_out": p_out, "t_out": t_out, "h_out": h_out}
+    #             return {"p_out": p_out, "t_out": t_out, "h_out": h_out}
 
-            def prescribed_h(self, h, gas="air", far=0.):
-                if isnan(h): return nan
-                cp_val = 1005. if gas == "air" else 1150. # Crude
-                return h / cp_val if cp_val != 0 else nan
+    #         def prescribed_h(self, h, gas="air", far=0.):
+    #             if isnan(h): return nan
+    #             cp_val = 1005. if gas == "air" else 1150. # Crude
+    #             return h / cp_val if cp_val != 0 else nan
 
-            def gamma_gas(self, t, gas="air", far=0.):
-                if gas == "kerosene_in_air" and far > 0 : return 1.33 # Crude
-                return self.GAMMA_AIR 
+    #         def gamma_gas(self, t, gas="air", far=0.):
+    #             if gas == "kerosene_in_air" and far > 0 : return 1.33 # Crude
+    #             return self.GAMMA_AIR 
 
-            def r_gas(self, gas="air", far=0.):
-                if gas == "kerosene_in_air" and far > 0 : return 288.0 # Crude
-                return self.R_AIR
+    #         def r_gas(self, gas="air", far=0.):
+    #             if gas == "kerosene_in_air" and far > 0 : return 288.0 # Crude
+    #             return self.R_AIR
 
-            def t_total_to_static(self, tt, mach, gas="air", far=0.):
-                if any(isnan(x) for x in [tt, mach]): return nan
-                gamma_val = self.gamma_gas(tt,gas,far) # Use gamma_gas for consistency
-                denominator = (1 + (gamma_val - 1) / 2 * mach**2)
-                return tt / denominator if denominator !=0 else nan
+    #         def t_total_to_static(self, tt, mach, gas="air", far=0.):
+    #             if any(isnan(x) for x in [tt, mach]): return nan
+    #             gamma_val = self.gamma_gas(tt,gas,far) # Use gamma_gas for consistency
+    #             denominator = (1 + (gamma_val - 1) / 2 * mach**2)
+    #             return tt / denominator if denominator !=0 else nan
 
-        if not gpr_module_loaded_successfully:
-             gpr = GasPropertyRelationsPlaceholder()
+    #     if not gpr_module_loaded_successfully:
+    #          gpr = GasPropertyRelationsPlaceholder()
 
 
 # --- Emissions Calculation Code (from emissions.py) ---
@@ -431,36 +431,11 @@ def turbofan_parametric_analysis(
        not isnan(tau_hpt) and tau_hpt != 0 and not isnan(far_4) and \
        not isnan(tau_0) and not isnan(tau_lpc) and not isnan(tau_hpc) and \
        not isnan(tau_fan) and not isnan(bpr) and not isnan(power_tol):
-        # Numerator: tau0*[ (tau_lpc*tau_fan-1) + bpr*(tau_fan-1) ] + (1+bpr)*power_tol_nondim
-        # Denominator: eta_mech_l * tau_lambda * tau_hpt * tau_m1 * tau_m2_eff * [ (1-bleed-coolH-coolL)*(1+far) + coolH_eff + coolL_eff]
-        # This complex form from Walsh & Fletcher / Mattingly needs careful check of terms. Simplified form from before:
-        # Denom: eta_mech_l * tau_lambda * tau_hpt * [ (1-b-cH-cL)(1+f) + (cH + cL/tau_hpt)*tau0*tau_lpc*tau_hpc/tau_lambda]
-        # Let's use the structure consistent with the previous HPT calculation for power balance.
-        # Power for LPT = Fan Power + LPC Power + LP Shaft Power Offtake
-        # Fan Power: m_core * tau0 * bpr * (tau_fan - 1) * hs0
-        # LPC Power: m_core * tau0 * (tau_lpc - 1) * hs0 --> This is wrong, LPC acts on core flow AFTER fan, so (tau_lpc*tau_fan-tau_fan)
-        # LPC power should be tau0 * tau_fan * (tau_lpc - 1) for the core portion
-        # Corrected LPT power requirement (nondimensionalized by hs0):
-        # tau0 * ( (tau_lpc*tau_fan - tau_fan) + bpr*(tau_fan - 1) ) -> WRONG
-        # Mattingly: tau0 * [ (tau_lpc-1)*tau_fan + bpr*(tau_fan-1)] (for core passing through LPC and fan, and bypass only through fan)
-        # Or more simply: LPT work = LPC work + Fan work (on core) + Fan work (on bypass) + LP power offtake
-        # W_LPC = m_core * (ht_25 - ht_13) = m_core * hs0 * tau0 * tau_fan * (tau_lpc-1)
-        # W_FAN_core = m_core * (ht_13 - ht_2) = m_core * hs0 * tau0 * (tau_fan-1)
-        # W_FAN_bypass = m_bypass * (ht_13 - ht_2) = bpr * m_core * hs0 * tau0 * (tau_fan-1)
-        # Sum for LPT (nondim by m_core*hs0): tau0*tau_fan*(tau_lpc-1) + tau0*(tau_fan-1) + bpr*tau0*(tau_fan-1)
-        # = tau0 * [ tau_fan*(tau_lpc-1) + (1+bpr)*(tau_fan-1) ]
-        # Mattingly form W_LPT/ (m_core*c_p0*T0) = (tau_r/tau_lambda) * [ (tau_cL-1) + alpha*(tau_f-1) ] / eta_mL
-        # Power from turbine: m_LPT_gas * (h_45 - h_5) = m_LPT_gas * c_p_LPT * (T_45 - T_5)
-        # m_LPT_gas / m_core_ref = (1-bleed-cool_H-cool_L)(1+far) + cool_H + cool_L (effective mass flow through LPT)
+
 
         power_tol_nondim = power_tol / hs_0 if hs_0 != 0 else 0.0
         
-        # Work required by LP components, nondimensionalized by hs0
-        # Work_LPC = tau_0 * tau_fan * (tau_lpc - 1.0) # Work done by LPC on core flow after fan
-        # Work_Fan = tau_0 * (1.0 + bpr) * (tau_fan - 1.0) # Work done by Fan on core + bypass flow
-        # num_tau_lpt = Work_LPC + Work_Fan + (1. + bpr) * power_tol_nondim
-        # This matches Jack D. Mattingly, "Elements of Propulsion", Eq. 3.58b (adapted)
-        # W_LPT / (m_dot_0 * c_p0 * T_s0) = tau_0 * [tau_fan*(tau_lpc-1) + (1+bpr)*(tau_fan-1)] for no power offtake
+
         # If power_tol is per unit core inlet flow:
         num_tau_lpt = tau_0 * ( tau_fan*(tau_lpc-1) + (1.+bpr)*(tau_fan-1) ) + (1.+bpr)*power_tol_nondim
 
@@ -555,26 +530,9 @@ def turbofan_parametric_analysis(
         r_19 = gpr.r_gas(gas="air", far=far_19)
         rho_19 = ps_19 / (r_19 * ts_19) if not any(isnan(x) for x in [ps_19,r_19,ts_19]) and r_19*ts_19 != 0 else nan
 
-    # Performance calculations
-    # Specific thrust (per unit of total inlet air mass flow m_dot_0)
-    # SF = [ m_dot_core_exit * v_9 + m_dot_bypass_exit * v_19 - m_dot_0 * v_0 
-    #      + (ps_9 - ps_0)*A_9 + (ps_19 - ps_0)*A_19 ] / m_dot_0
-    # m_dot_core_exit/m_dot_0 = (1/(1+bpr)) * (1-bleed_to) * (1+far_9_eff_at_core_nozzle) - effectively (1-bleed_to)*(1+far_4) mass ratio to core inlet.
-    # m_dot_bypass_exit/m_dot_0 = bpr/(1+bpr)
-    # The far_4 used for mass flow is the combustor FAR. far_9 is effective far at nozzle for properties.
-    
-    # Mass flow ratio of core nozzle exit to engine inlet air m_dot_0
-    # m_core_inlet_ratio_to_m0 = 1. / (1. + bpr)
-    # m_core_nozzle_exit_ratio_to_m0 = m_core_inlet_ratio_to_m0 * (1. - bleed_to) * (1. + far_4) if not isnan(far_4) else nan
-    # Mass flow ratio of bypass nozzle exit to engine inlet air m_dot_0
-    # m_bypass_nozzle_exit_ratio_to_m0 = bpr / (1. + bpr)
 
     sf = nan
-    # Simpler SF form from Mattingly (specific thrust normalized by core inlet mass flow and (1+alpha))
-    # F_sp = { (1-beta_total)*(1+f)*v_9 + alpha*v_19 - (1+alpha)*v_0 } / (1+alpha)
-    #        + { (1-beta_total)*(1+f)*(ps_9-ps_0)/(rho_9*v_9) + alpha*(ps_19-ps_0)/(rho_19*v_19) } / (1+alpha)
-    # where beta_total is total bleed fraction from core. Here bleed_to. alpha is BPR. f is combustor far_4.
-    
+
     # Check all inputs to SF. Note: far_4 is used for mass, far_9 for v_9 properties.
     if not any(isnan(x) for x in [far_4, v_9, bpr, v_19, v_0, ps_9, ps_0, rho_9, ps_19, rho_19, bleed_to]):
         if (1. + bpr) != 0: # Avoid division by zero if bpr = -1 (not physical)
@@ -629,16 +587,6 @@ def turbofan_parametric_analysis(
     # Efficiencies
     eta_thermal, eta_propulsive, eta_overall = nan, nan, nan
     
-    # Kinetic energy added to flow by engine, per unit of m_dot_0
-    # KE_added_per_m0 = [ m_core_exit_ratio*v_9^2/2 + m_bypass_exit_ratio*v_19^2/2 - (v_0^2)/2 ] -- Incorrect form
-    # Correct: Sum of exit KE - Inlet KE, all per unit of m_dot_0
-    # KE_exit_core = ( (1-bleed_to)*(1+far_4)/(1+bpr) ) * v_9**2 / 2
-    # KE_exit_bypass = ( bpr/(1+bpr) ) * v_19**2 / 2
-    # KE_inlet = v_0**2 / 2
-    # This is for propulsive eff. For thermal:
-    # eta_th = (Power Output - Power Input + Pressure Work Rate) / (Fuel Power Rate)
-    # Power Output is KE of jets. Rate of heat input from fuel = m_dot_f * LHV
-    # m_dot_f / m_dot_0 = far_4_comb_eff / (1+bpr)
     
     # Ideal exit velocities including pressure thrust term (v_effective)
     v_9_eff = v_9
@@ -895,19 +843,19 @@ def run_mission_simulation(aircraft_name: str, config: dict):
 
 
 if __name__ == '__main__':
-    if not gpr_module_loaded_successfully:
-        print("*"*70)
-        print("*" + " " * 68 + "*")
-        print("* CRITICAL WARNING: The actual 'gas_property_relations.py' module   *")
-        print("* was NOT loaded. A basic placeholder is being used.              *")
-        print("* RESULTS FOR COMBUSTION, TURBINE, AND NOZZLE CALCULATIONS WILL BE  *")
-        print("* HIGHLY INACCURATE OR MAY FAIL (e.g. 'far_4' convergence).       *")
-        print("* Please ensure 'gas_property_relations.py' is in your Python     *")
-        print("* path and does not have import errors itself.                    *")
-        print("*" + " " * 68 + "*")
-        print("*"*70 + "\n")
+    # if not gpr_module_loaded_successfully:
+    #     print("*"*70)
+    #     print("*" + " " * 68 + "*")
+    #     print("* CRITICAL WARNING: The actual 'gas_property_relations.py' module   *")
+    #     print("* was NOT loaded. A basic placeholder is being used.              *")
+    #     print("* RESULTS FOR COMBUSTION, TURBINE, AND NOZZLE CALCULATIONS WILL BE  *")
+    #     print("* HIGHLY INACCURATE OR MAY FAIL (e.g. 'far_4' convergence).       *")
+    #     print("* Please ensure 'gas_property_relations.py' is in your Python     *")
+    #     print("* path and does not have import errors itself.                    *")
+    #     print("*" + " " * 68 + "*")
+    #     print("*"*70 + "\n")
 
-    T_TAKEOFF_ORIGINAL_PER_ENGINE = 7535.0 
+    T_TAKEOFF_ORIGINAL_PER_ENGINE = 7535 # Original takeoff thrust per engine in Newtons (from the original code)
     
     aircraft_configs = {
         "AERIS": {

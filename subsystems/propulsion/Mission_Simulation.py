@@ -528,7 +528,7 @@ def run_mission_simulation(params: DesignParameters):
             "name": "Take-off", "duration_minutes": 5,
             "target_thrust_N": T_to, # Given
             "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, 
-            "engine_params_override": {"tt_4": 1400, "pr_fan": 2.0, "pr_hpc": 6.0}, # Max TIT, slightly increased PRs
+            "engine_params_override": {"tt_4": 1400}, # Max TIT, slightly increased PRs
             "ei_nox": 0.020 
         },
         {
@@ -541,7 +541,7 @@ def run_mission_simulation(params: DesignParameters):
         {
             "name": "Cruise", "duration_minutes": 400,
             "target_thrust_N": 0.3*T_to, # Approx 30% of 9220N
-            "flight_conditions": {"mach_0": 0.80, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
+            "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
             "engine_params_override": {"tt_4": 1200}, 
             "ei_nox": 0.012
         },
