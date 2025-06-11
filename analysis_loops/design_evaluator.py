@@ -10,7 +10,7 @@ from class1.main_class_I import perform_class_I_analysis
 from class2.main_class_II import perform_class_II_analysis
 from subsystems.aerodynamics.main_aero import analyse_aerodynamics
 from subsystems.flightperformance.main_flight import analyse_flight_performance
-from subsystems.propulsion.main_prop import analyse_propulsion
+from subsystems.propulsion.old.main_prop import analyse_propulsion
 from subsystems.structures.main_struct import analyse_structures
 
 

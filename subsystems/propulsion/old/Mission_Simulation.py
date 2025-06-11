@@ -1,12 +1,11 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-import pprint
+
 from math import sqrt, nan, isnan # Added nan, isnan for handling potential NaN values
 import sys # For potential path debugging
 import os  # For potential path debugging
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))) 
 from utils.unit_conversions import *
 from design_variables import DesignParameters
 
@@ -580,34 +579,34 @@ def run_mission_simulation(params: DesignParameters):
     }
     T_to = params.engine.T_TO #N, takeoff thrust 
     mission_segments = [
-        # {
-        #     "name": "Engine Start & Warm-Up", "duration_minutes": 10,
-        #     "target_thrust_N": 0.07*T_to, # Approx 7% of 7540N
-        #     "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, 
-        #     "engine_params_override": {"tt_4": 850}, 
-        #     "ei_nox": 0.004 
-        # },
-        # {
-        #     "name": "Taxi", "duration_minutes": 10,
-        #     "target_thrust_N": 0.12 * T_to, # Approx 12% of 7540N
-        #     "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, 
-        #     "engine_params_override": {"tt_4": 900},
-        #     "ei_nox": 0.005
-        # },
-        # {
-        #     "name": "Take-off", "duration_minutes": 5,
-        #     "target_thrust_N": T_to, # Given
-        #     "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, 
-        #     "engine_params_override": {"tt_4": 1400}, # Max TIT, slightly increased PRs
-        #     "ei_nox": 0.020 
-        # },
-        # {
-        #     "name": "Climb", "duration_minutes": 20,
-        #     "target_thrust_N": 0.85*T_to , # Approx 85% of 9220N
-        #     "flight_conditions": {"mach_0": 0.65, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
-        #     "engine_params_override": {"tt_4": 1300},
-        #     "ei_nox": 0.018
-        # },
+        {
+            "name": "Engine Start & Warm-Up", "duration_minutes": 10,
+            "target_thrust_N": 0.07*T_to, # Approx 7% of 7540N
+            "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, 
+            "engine_params_override": {"tt_4": 850}, 
+            "ei_nox": 0.004 
+        },
+        {
+            "name": "Taxi", "duration_minutes": 10,
+            "target_thrust_N": 0.12 * T_to, # Approx 12% of 7540N
+            "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, 
+            "engine_params_override": {"tt_4": 900},
+            "ei_nox": 0.005
+        },
+        {
+            "name": "Take-off", "duration_minutes": 5,
+            "target_thrust_N": T_to, # Given
+            "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, 
+            "engine_params_override": {"tt_4": 1400}, # Max TIT, slightly increased PRs
+            "ei_nox": 0.020 
+        },
+        {
+            "name": "Climb", "duration_minutes": 20,
+            "target_thrust_N": 0.85*T_to , # Approx 85% of 9220N
+            "flight_conditions": {"mach_0": 0.65, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
+            "engine_params_override": {"tt_4": 1300},
+            "ei_nox": 0.018
+        },
         {
             "name": "Cruise", "duration_minutes": 400,
             "target_thrust_N": 0.3*T_to, # Approx 30% of 9220N
@@ -629,27 +628,27 @@ def run_mission_simulation(params: DesignParameters):
         #     "engine_params_override": {"tt_4": 880},
         #     "ei_nox": 0.005
         # },
-        # {
-        #     "name": "Descent (to Diversion Airport)", "duration_minutes": 15,
-        #     "target_thrust_N": 0.08*T_to, # Approx 8% of 9220N
-        #     "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
-        #     "engine_params_override": {"tt_4": 900},
-        #     "ei_nox": 0.006
-        # },
-        # {
-        #     "name": "Landing (at Diversion Airport)", "duration_minutes": 5,
-        #     "target_thrust_N": 0.18*T_to, # Approx 18% of 9220N
-        #     "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, 
-        #     "engine_params_override": {"tt_4": 1000},
-        #     "ei_nox": 0.008
-        # },
-        # {
-        #     "name": "Taxi & Shutdown (at Diversion Airport)", "duration_minutes": 15,
-        #     "target_thrust_N": 0.07*T_to, # Approx 7% of 7540N
-        #     "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, 
-        #     "engine_params_override": {"tt_4": 850},
-        #     "ei_nox": 0.004
-        # },
+        {
+            "name": "Descent (to Diversion Airport)", "duration_minutes": 15,
+            "target_thrust_N": 0.08*T_to, # Approx 8% of 9220N
+            "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
+            "engine_params_override": {"tt_4": 900},
+            "ei_nox": 0.006
+        },
+        {
+            "name": "Landing (at Diversion Airport)", "duration_minutes": 5,
+            "target_thrust_N": 0.18*T_to, # Approx 18% of 9220N
+            "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, 
+            "engine_params_override": {"tt_4": 1000},
+            "ei_nox": 0.008
+        },
+        {
+            "name": "Taxi & Shutdown (at Diversion Airport)", "duration_minutes": 15,
+            "target_thrust_N": 0.07*T_to, # Approx 7% of 7540N
+            "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, 
+            "engine_params_override": {"tt_4": 850},
+            "ei_nox": 0.004
+        },
     ]
 
     total_mission_emissions = {
@@ -659,6 +658,8 @@ def run_mission_simulation(params: DesignParameters):
     
     print("Attempting to use the external 'subsystems.propulsion.gas_property_relations' module.")
     print("If this script fails with a ModuleNotFoundError, ensure the module is correctly placed and accessible.\n")
+
+    tsfc_lst = np.array([]) # Initialize TSFC list for all segments
 
     for segment_idx, segment in enumerate(mission_segments): # Added enumerate for segment index
         print(f"--- Processing Segment {segment_idx + 1}: {segment['name']} ---")
@@ -707,6 +708,7 @@ def run_mission_simulation(params: DesignParameters):
             mdot_f = segment["target_thrust_N"] * tsfc
             segment_fuel_kg = mdot_f * dt_seconds # Calculate fuel for this segment
             print(f"  Flight Conditions: M0={current_engine_params['mach_0']}, Ts0={current_engine_params['ts_0']:.2f}K, Ps0={current_engine_params['ps_0']:.0f}Pa")
+            tsfc_lst = np.append(tsfc_lst, tsfc) # Append valid TSFC to the list
             print(f"  Calculated TSFC: {tsfc:.4e} (kg_fuel/s)/N")
             print(f"  Target Thrust: {segment['target_thrust_N']:.0f} N")
             print(f"  Calculated Fuel Flow (mdot_f): {mdot_f:.4f} kg/s")
@@ -748,7 +750,9 @@ def run_mission_simulation(params: DesignParameters):
 
     print("\nSimulation Finished.")
 
+    return {"TSFC (kg/(Ns))": tsfc_lst, "Total Fuel Used (kg)": float(total_fuel_used_kg)}
+
 if __name__ == '__main__':
     params = DesignParameters()
     params.load_from_yaml("design_config.yaml")
-    run_mission_simulation(params)
+    results = run_mission_simulation(params)
