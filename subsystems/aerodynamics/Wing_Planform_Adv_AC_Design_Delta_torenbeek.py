@@ -20,7 +20,7 @@ def calculate_WPF_transonic(phi_3, phi_2, F_prop, C_L_hat, A_w, Lambda_w_rad, e_
     Lambda_w_deg = np.rad2deg(Lambda_w_rad)
     t_c_w = dm.calculate_tc_from_delta_method(target_cruise_mach, A_w, Lambda_w_deg, C_L_hat)
 
-    if t_c_w <= 0.05: return (np.inf, t_c_w) if return_tc else np.inf
+    if t_c_w <= 0.11: return (np.inf, t_c_w) if return_tc else np.inf
 
     cos_Lambda_w = np.cos(Lambda_w_rad)
     mu_w_plus_h = (phi_3 * A_w * np.sqrt(A_w / C_L_hat)) / (t_c_w * cos_Lambda_w**2) + (phi_2 / C_L_hat)
@@ -62,9 +62,9 @@ def optimize_wing_planform(inputs):
     # --- MODIFICATION START ---
     # Adjusted the search space to be more realistic for a M=0.85 design.
     # Higher sweep and more constrained aspect ratio.
-    Lambda_w_deg_range = np.linspace(28, 40, 40)  # More sweep is needed for M=0.85
-    A_w_range = np.linspace(8, 14, 40)           # Very high AR is structurally difficult with high sweep
-    C_L_hat_range = np.linspace(0.4, 0.7, 40)    # Typical cruise CL range
+    Lambda_w_deg_range = np.linspace(29, 40, 100)  # More sweep is needed for M=0.85
+    A_w_range = np.linspace(8, 12, 40)           # Very high AR is structurally difficult with high sweep
+    C_L_hat_range = np.linspace(0.4, 0.7, 20)    # Typical cruise CL range
     # --- MODIFICATION END ---
 
     min_mtow = float('inf')
@@ -96,6 +96,8 @@ def optimize_wing_planform(inputs):
                         "b_w_m": np.sqrt(A_w * (min_mtow / (inputs["q_hat_Pa"] * C_L_hat)))
                     }
     print("--- Optimization Complete ---")
+    # Print wing loading in N/m^2
+    print(f"Minimum MTOW: {min_mtow/9.80665:.2f} kg, Wing Loading: {min_mtow / (optimal_params['S_w_m2']):.2f} N/m^2")
     return optimal_params
 
 # --- Plotting and Main Execution Block (unchanged) ---
@@ -108,7 +110,7 @@ def plot_WPF_contours(inputs, optimal_design):
     Lambda_w_deg_fixed = optimal_design["Lambda_w_deg"]
     Lambda_w_rad_fixed = np.deg2rad(Lambda_w_deg_fixed)
     
-    A_w_range = np.linspace(4, 10, 50)
+    A_w_range = np.linspace(4, 15, 50)
     C_L_hat_range = np.linspace(0.2, 0.9, 50)
     CLH_mesh, AW_mesh = np.meshgrid(C_L_hat_range, A_w_range)
     WPF_grid = np.zeros_like(CLH_mesh)
