@@ -53,3 +53,16 @@ def roll_rate_derivates(params: DesignParameters, CyBv):
     Cnp = Cnpw + Cnpv
     
     return Cyp, Clp, Cnp
+
+def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv):
+    CnrCL2 = input("Figure 10.44 pag. 433/465")
+    CLw = params.performance.CL_cruise
+    CnrCdo = input("found from Figure 10.45")
+    Cd0 = params.wing.C_D0
+    Cnrw = CnrCL2 *CLw**2 + CnrCdo * Cd0
+    
+    alpha = params.cruise_aoa /180 * math.pi
+    Cnrv = (2/(params.wing.S_w**2))*((lv*math.cos(alpha)+zv*math.sin(alpha))**2)*CyBv
+    
+    Cnr = Cnrw + Cnrv
+    return Cnr
