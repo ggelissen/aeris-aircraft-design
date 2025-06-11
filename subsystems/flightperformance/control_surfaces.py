@@ -134,7 +134,7 @@ def aileron_sizing(params):
     print(f"Surface area wing: {S_ref} [m^2]")
     S_aileron = (b2-b1)* (params.wing.root_chord-params.wing.tip_chord) / (b/2) *b1
     print(f"Surface area aileron (approx): {S_aileron} [m^2]")
-    return b1, b2, 
+    return b1, b2
         
 
 def ruddervator_sizing(params):
@@ -182,7 +182,7 @@ def ruddervator_sizing(params):
     print(f"Horizontal area ratio (Darth_Sh / Tail_Sh): {Ratio_h:.3f} [%]")
     print(f"Vertical area ratio (Darth_Sv / Tail_Sv): {Ratio_v:.3f} [%]")
     
-    return Darth_start, Darth_end
+    return Darth_start, Darth_end, Darth_depth
 
 
 aileron_sizing(params)   
