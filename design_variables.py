@@ -30,6 +30,7 @@ class DesignParameters:
         self.inertia_matrix = None
         self.structurecoords = None
         self.fueltank = FuelTank()
+        self.cruise_aoa = None
 
 
 
@@ -76,6 +77,7 @@ class DesignParameters:
         self.max_eq_velocity = config.get('max_eq_velocity') 
         self.max_load_factor = config.get('max_load_factor')
         self.crit_mach = config.get('crit_mach')
+        self.cruise_aoa = config.get('cruise_aoa')
 
         # Load subsystem parameters
         # if 'cg' in config:
@@ -221,6 +223,7 @@ class WingParameters:
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
         self.skin_thickness = 0.0015  # Wing Skin Thickness in m
         self.Mach_cross = 0.935
+        self.epsilon_t = 0         # Wing twist angle [degrees]
 
 
 
@@ -324,6 +327,7 @@ class EngineParameters:
         self.engine_diameter = None                 # Engine Diameter in m
         self.nacelle_diameter = None
         self.nacelle_length = None
+        self.fuel_density = None                    # Fuel density depending on fuel type (A1, SAF, etc)
         self.cruise_tsfc = None                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
         self.nacelle_blend_par = -0.4               # Parameter specifying the blend of the nacelle with the fuselage

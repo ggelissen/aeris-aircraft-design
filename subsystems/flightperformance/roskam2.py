@@ -1,12 +1,17 @@
+import math
+
 from design_variables import DesignParameters
 
-def roll_rate_derivates(params: DesignParameters):
+def roll_rate_derivates(params: DesignParameters, CyBv):
     zv = input(f"zv is read from figure 10.27")
     lv = input(f"lv is read from figure 10.27")
     z = input("vertical distance between the airplane center of gravity and the wing root quarter chord point")
+    M = 0.7
     beta = (1-M**2)**0.5
-    kappa = 
+    ClaM = input("cl-alpha curve due to M")
+    kappa = ClaM * beta /(2*math.pi)
     Clp_gamma_0_cl_0 = (kappa/beta)*((beta*Clp)/kappa) # at C_L = 0
+    alpha = params.cruise_aoa /180 *math.pi
     
     Cyp = 2*CyBv(zv*math.cos(alpha)-lv*math.sin(alpha)-zv)/params.wing.b_w + 3*math.sin(params.wing.Gamma_w) * (1- (4*z/params.wing.b_w)*math.sin(params.wing.Gamma_w))*Clp_gamma_0_cl_0
     
@@ -27,12 +32,37 @@ def roll_rate_derivates(params: DesignParameters):
     
     Clp = Clpw + Clph + Clpv
     
-    qcsweep = input("sweep at quarter chord (/\_c/4)")
-    B = (1-M**2*cos(qcsweep)**2)**0.5
+    qcsweep = params.wing.Lambda_025c_w
+    B = (1-M**2*math.cos(qcsweep)**2)**0.5
     A = params.wing.A_w_actual
-    CnpClCl_0_M_0 = -1/6 * ()
+    CnpClCl_0_M_0 = -1/6 * ((A+6*(math.cos(qcsweep))*(0.25 * (math.tan(qcsweep)/A)+(math.tan(qcsweep))**2/12))/(A+4*math.cos(qcsweep))) # x/c was assumed to be quarter chord = 0.25
     CnpClCl_0 = (A+4*math.cos(qcsweep)/(A*B+4*math.cos(qcsweep))) * ((A*B + 0.5*(A*B+math.cos(qcsweep))*(math.tan(qcsweep)**2))/(A + 0.5*(A+math.cos(qcsweep))*(math.tan(qcsweep)**2))) * CnpClCl_0_M_0
+    
+    Cnpet = input("wing twist contribution as given by Figures 10.37 (pag. 420/452)")
+    
+    deltaCnpadfdf = input("contribution due to symmetrical flap deflection as found from Figure 10.38 (pag. 423/455)")
+    deltacl = input("deltacl determined from 8.1.2.1 for the type of flap used")
+    cla = input("cla is the airfoil (flaps-up) lift-curve-slope as found from 8.1.1.2")
+    df = input("flap deflection employed")
+    
+    adf = deltacl/(cla * df)
+    Cnpw = CnpClCl_0 * C_L + Cnpet * params.wing.epsilon_t + (deltaCnpadfdf)*adf*df
     
     Cnpv = -(2/params.wing.b_w**2)*(lv*math.cos(alpha)+zv*math.sin(alpha))*(zv*math.cos(alpha)-lv*math.sin(alpha)-zv)*CyBv
     
     Cnp = Cnpw + Cnpv
+    
+    return Cyp, Clp, Cnp
+
+def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv):
+    CnrCL2 = input("Figure 10.44 pag. 433/465")
+    CLw = params.performance.CL_cruise
+    CnrCdo = input("found from Figure 10.45")
+    Cd0 = params.wing.C_D0
+    Cnrw = CnrCL2 *CLw**2 + CnrCdo * Cd0
+    
+    alpha = params.cruise_aoa /180 * math.pi
+    Cnrv = (2/(params.wing.S_w**2))*((lv*math.cos(alpha)+zv*math.sin(alpha))**2)*CyBv
+    
+    Cnr = Cnrw + Cnrv
+    return Cnr
