@@ -271,7 +271,7 @@ class FlightSim:
         #print(V_history)
 
 
-    def ground_run2(self, T0, mass0):
+    def ground_run2(self, T0, mass0, S, Cd0, AR, oswald, TSFC, C_L,):
         """
         Simulates ground run (takeoff roll) with a focus on reaching takeoff speed.
         This function appears to use a recursive approach to find the required thrust for a target takeoff distance.
@@ -289,19 +289,19 @@ class FlightSim:
         g0 = 9.80665 # Standard gravity (m/s^2)
         W = mass * g0 # Current weight (N)
         V = 0 # Initial velocity (m/s)
-        S = 12 # Reference area (m^2)
+        #S = 12 # Reference area (m^2)
         friction = 0.014 # Coefficient of rolling friction
-        Cd0 = 0.0172 # Zero-lift drag coefficient
-        AR = 9.0 # Aspect ratio
-        oswald = 0.85 # Oswald efficiency factor
+        #Cd0 = 0.0172 # Zero-lift drag coefficient
+        #AR = 9.0 # Aspect ratio
+        #oswald = 0.85 # Oswald efficiency factor
         t = 0 # Initial time (s)
         dt = 0.001 # Time step (s)
         X = 0 # Initial horizontal distance (m)
-        TSFC = 14.646 # Thrust Specific Fuel Consumption
+        #TSFC = 14.646 # Thrust Specific Fuel Consumption
         aoc = 0 # Angle of climb (radians) - assumed 0 for ground run
         #aoc_vel = 0 # Angle of climb velocity (radians/s)
         aoa = 0 / 180 * math.pi # Angle of attack (radians) - assumed 0 for ground run
-        C_L = 1.1 # Lift coefficient (Note: this is a constant value, likely simplified for ground run)
+        #C_L = 1.1 # Lift coefficient (Note: this is a constant value, likely simplified for ground run)
         h = 0 # Initial altitude (m) - assumed 0 for ground run
 
         T = T0 # Current Thrust (N)
