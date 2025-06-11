@@ -25,7 +25,7 @@ def flaps_TE_sizing(params):
     W = params.weight.W_TO
     CL_max = params.performance.CL_max_cruise
     rho = 1.225  # [kg/m^3]
-    fus_diam = 1.5  # [m]
+    fus_diam = params.fuselage.D_f  # [m]
     CF_to_C = 0.34  # c_flap / c, conservative estimate
     delta_Cl_max_per_c_ratio = 1.3  # for double slotted flaps
 
@@ -44,9 +44,12 @@ def flaps_TE_sizing(params):
     print(f"Planform taper ratio (lambda_w): {lambda_w:.2f}")
 
     Swf_TE = 0
+    placement = []
     for i, flap in enumerate(params.wing.flapgroups):
         span_start = flap.spanwise_pos_frac_inbound * ((b_w - fus_diam) / 2)
+        placement.append(span_start)
         span_end = flap.spanwise_pos_frac_outbound * ((b_w - fus_diam) / 2)
+        placement.append(span_end)
         b_flap = span_end - span_start
         area = 2 * b_flap * c_ave  # 2 for symmetric
         Swf_TE += area
@@ -66,7 +69,7 @@ def flaps_TE_sizing(params):
     delta_Cl_max = delta_Cl_max_per_c_ratio * cprime_over_c #Full flaps = landing config.
     #delta_Cl_max = 0.6 * delta_Cl_max_per_c_ratio * cprime_over_c #Not full flaps = take-off config.
     
-    x_over_c = 0.75  # Hinge location ratio -> look at this
+    x_over_c = 0.75  # Hinge location ratio 
     lambda_hinge = np.arctan(np.tan(Lambda_LE) - x_over_c * 2 * root_chord / b_w * (1 - lambda_w))
 
     delta_CL_max = 0.9 * delta_Cl_max * (Swf_TE / S_ref) * np.cos(lambda_hinge)
@@ -90,5 +93,6 @@ def flaps_TE_sizing(params):
     print(f"\n* Stall Speeds *")
     print(f"Stall speed (clean): {V_stall_clean:.2f} [m/s]")
     print(f"Stall speed (flapped): {V_stall_flapped:.2f} [m/s] (note: should be lower than 85 [knts] for landing)")
-
+    return placement[0],placement[1],placement[2],placement[3], c_ave*CF_to_C
+    
 flaps_TE_sizing(params)
