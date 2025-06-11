@@ -77,11 +77,8 @@ def ei_nox_dallara(pt_3, tt_3, h, relative_humidity=0.6, delta_t_isa=0.,
     humid = atmosphere.specific_humidity(h=h,
                                          relative_humidity=relative_humidity,
                                          delta_t_0=delta_t_isa)
-    ei = (0.0986 * (pt_3 / 101325) ** 0.4 *
-          np.exp((tt_3 / 194.4) - (humid / 53.2))) / 1000.
+    ei = (2+28.5*((pt_3/1000)/3100)**0.5 * np.exp((tt_3-825)/250))/1000
 
-    if reduction_factor != 0.:
-        ei *= (1. - reduction_factor) * (lhv / lhv_ref)
 
     return ei
 # --- The placeholder gpr class is removed, as we are attempting to use the import above. ---
