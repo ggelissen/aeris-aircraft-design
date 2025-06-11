@@ -361,6 +361,7 @@ class EngineParameters:
         self.power_toh = 0.
         self.cooling_l = 0.
         self.cooling_h = 0.
+        self.cruise_thrust = 1800 #N
 
 
     def load_from_dict(self, param_dict):
