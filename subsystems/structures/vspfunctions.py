@@ -368,7 +368,7 @@ def calculate_wet_areas(designvars: DesignParameters = None):
 def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, return_xdis = True):
     # points = []
 
-    wingid = "CTELRBUKYF" # designvars.wing.wingid
+    wingid = designvars.wing.wingid
     yehudi_frac = designvars.wing.yehudi_pos_frac
     if spanwise_pos_frac < yehudi_frac:
         local_chord_length = vsp.GetParmVal(wingid, "Root_Chord", "XSec_1") * (1 - np.abs(spanwise_pos_frac/yehudi_frac)) + vsp.GetParmVal(wingid, "Tip_Chord", "XSec_1") * np.abs(spanwise_pos_frac/yehudi_frac)
