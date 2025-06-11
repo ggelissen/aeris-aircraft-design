@@ -20,7 +20,7 @@ def aileron_sizing(params):
         c_l_alpha = params.wing.airfoil_clalpha                # Airfoil lift curve slope
         c_d_0 = params.wing.airfoil_cd0                        # Airfoil 2D drag coefficient
         S_ref = params.wing.S_w            # Reference wing surface area (m^2)
-        CA_to_C = 0.20                     # Aileron chord to Wing chord ratio, accounts for rear spar
+        CA_to_C = 0.2                     # Aileron chord to Wing chord ratio, accounts for rear spar
                                             
         b_outboard = 0.95                    # Reference distance b_outboard, adjustable
         b1 = b_inboard * b/2                # Inboard edge of aileron from centerline in meters (m)
@@ -134,7 +134,7 @@ def aileron_sizing(params):
     print(f"Surface area wing: {S_ref} [m^2]")
     S_aileron = (b2-b1)* (params.wing.root_chord-params.wing.tip_chord) / (b/2) *b1
     print(f"Surface area aileron (approx): {S_aileron} [m^2]")
-
+    return b1, b2, 
         
 
 def ruddervator_sizing(params):
@@ -181,6 +181,9 @@ def ruddervator_sizing(params):
     print(f"Projected Darth vertical area (Sv): {Darth_Sv:.3f} [m^2]")
     print(f"Horizontal area ratio (Darth_Sh / Tail_Sh): {Ratio_h:.3f} [%]")
     print(f"Vertical area ratio (Darth_Sv / Tail_Sv): {Ratio_v:.3f} [%]")
+    
+    return Darth_start, Darth_end
+
 
 aileron_sizing(params)   
 ruddervator_sizing(params)
