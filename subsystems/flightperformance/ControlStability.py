@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from design_variables import DesignParameters
+
 class Control:
     """
     A class to perform aircraft control and stability analysis, including generating scissor plots and calculating CG range.
@@ -276,16 +278,54 @@ class Control:
                 # Found a suitable Sh/S and x_lemac/lh
                 Sh_S = required_Sh_S_controllability
                 x_lemac = self.X[i]
-                print('cg range', Y2[i] - Y1[i])
-                print("Sh/S", Sh_S)
-                print("x_lemac/lh", x_lemac)
-                break
+                return {
+                    "cg_range": Y2[i] - Y1[i],
+                    "Sh/S": Sh_S,
+                    "x_lemac/lh": x_lemac
+                }
 
         # Overlay the graphs if a solution was found
         if Sh_S is not None and x_lemac is not None:
              self.__overlay_graphs__(self.X, Y1, Y2, stability, controllability, Sh_S, x_lemac)
         else:
             print("No suitable Sh/S and x_lemac/lh found for the given parameters.")
+            return None
+
+
+
+def run_control_stability(params: DesignParameters):
+    """
+    Runs the control and stability analysis with the given design parameters.
+
+    Parameters:
+    params (DesignParameters): Design parameters for the aircraft.
+    """
+    # Initialize the Control class with parameters from DesignParameters
+    control = Control(
+        CLah=params.empennage.Cl_alpha,
+        CLaA_h=params.wing.airfoil_clalpha,
+        de_da=params.wing.de_da,
+        lh=params.fuselage.lh,
+        mac=params.wing.mac,
+        Vh_V=params.empennage.Vh_v,
+        x_ac=params.fuselage.x_ac,
+        CLh=params.empennage.CL_h,
+        CLA_h=params.wing.CL,
+        C_m_ac=params.fuselage.C_m_ac
+    )
+    
+    # Example usage of calculate_range method
+    results = control.calculate_range(
+        W_OEW=params.weight.W_OE,
+        W_payload=params.weight.W_PL,
+        X_payload=params.fuselage.x_payload,
+        W_fuel=params.weight.W_F,
+        W_wing=params.weight.W_wing,
+        W_fuselage=params.weight.W_fus,
+        X_fuselage=params.fuselage.x_fuselage
+    )
+
+    return results
 
 
 if __name__ == "__main__":

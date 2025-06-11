@@ -1,12 +1,11 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-import pprint
+
 from math import sqrt, nan, isnan # Added nan, isnan for handling potential NaN values
 import sys # For potential path debugging
 import os  # For potential path debugging
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))) 
 from utils.unit_conversions import *
 from design_variables import DesignParameters
 
@@ -78,11 +77,8 @@ def ei_nox_dallara(pt_3, tt_3, h, relative_humidity=0.6, delta_t_isa=0.,
     humid = atmosphere.specific_humidity(h=h,
                                          relative_humidity=relative_humidity,
                                          delta_t_0=delta_t_isa)
-    ei = (0.0986 * (pt_3 / 101325) ** 0.4 *
-          np.exp((tt_3 / 194.4) - (humid / 53.2))) / 1000.
+    ei = (2+28.5*((pt_3/1000)/3100)**0.5 * np.exp((tt_3-825)/250))/1000
 
-    if reduction_factor != 0.:
-        ei *= (1. - reduction_factor) * (lhv / lhv_ref)
 
     return ei
 # --- The placeholder gpr class is removed, as we are attempting to use the import above. ---
@@ -660,6 +656,8 @@ def run_mission_simulation(params: DesignParameters):
     print("Attempting to use the external 'subsystems.propulsion.gas_property_relations' module.")
     print("If this script fails with a ModuleNotFoundError, ensure the module is correctly placed and accessible.\n")
 
+    tsfc_lst = np.array([]) # Initialize TSFC list for all segments
+
     for segment_idx, segment in enumerate(mission_segments): # Added enumerate for segment index
         print(f"--- Processing Segment {segment_idx + 1}: {segment['name']} ---")
 
@@ -707,6 +705,7 @@ def run_mission_simulation(params: DesignParameters):
             mdot_f = segment["target_thrust_N"] * tsfc
             segment_fuel_kg = mdot_f * dt_seconds # Calculate fuel for this segment
             print(f"  Flight Conditions: M0={current_engine_params['mach_0']}, Ts0={current_engine_params['ts_0']:.2f}K, Ps0={current_engine_params['ps_0']:.0f}Pa")
+            tsfc_lst = np.append(tsfc_lst, tsfc) # Append valid TSFC to the list
             print(f"  Calculated TSFC: {tsfc:.4e} (kg_fuel/s)/N")
             print(f"  Target Thrust: {segment['target_thrust_N']:.0f} N")
             print(f"  Calculated Fuel Flow (mdot_f): {mdot_f:.4f} kg/s")
@@ -748,7 +747,9 @@ def run_mission_simulation(params: DesignParameters):
 
     print("\nSimulation Finished.")
 
+    return {"TSFC (kg/(Ns))": tsfc_lst, "Total Fuel Used (kg)": float(total_fuel_used_kg)}
+
 if __name__ == '__main__':
     params = DesignParameters()
     params.load_from_yaml("design_config.yaml")
-    run_mission_simulation(params)
+    results = run_mission_simulation(params)

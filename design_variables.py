@@ -1,6 +1,7 @@
 import math as m
 import numpy as np
 import yaml
+import toml
 
 
 
@@ -149,7 +150,9 @@ class WeightParameters:
         self.W_tfo = None                           # Trapped Fuel and Oil Fraction
         self.W_F_used = None                        # Used Fuel Weight in N
         self.W_F_res = None                         # Reserve Fuel Weight in N
-        self.M_TO = self.W_TO / 9.80665                # Maximum Take-Off Mass in kg
+        self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
+        self.W_fus = None                           # Fuselage weight in N
+        self.W_wing = None                          # Wing weight in N
 
 
     def load_from_dict(self, param_dict):
@@ -180,8 +183,10 @@ class WingParameters:
         self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
         self.Lambda_05_w = 0.607                           # Wind half-chord sweep angle in rad
         self.t_c_w_max = None
+        self.de_da = None                         # Downwash effect on the lift coefficient.
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
+        self.CL = None                          # Design CL of aircraft
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
         self.CST_uppersurf = [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933] # First 7 coefficients for NACA SC(2)-7014 Supercritical Airfoil. These coefficients can be optimised.
@@ -263,6 +268,11 @@ class FuselageParameters:
     """
     def __init__(self):
         self.l_f = 10                           # Fuselage Length in m
+        self.lh = None                          # Dist from wing to hor. stabilizer
+        self.C_m_ac = None                       # Moment coefficient at the aerodynamic center.
+        self.x_ac = None                        # Aerodynamic center of the aircraft.
+        self.x_payload = None                   # x-coordinate of Center of gravity of payload
+        self.x_fuselage = None                  # x-coordinate of Center of gravity of fuselage
 
         # Fuselage Cross Sections:
         self.crosssections = {
@@ -351,6 +361,7 @@ class EngineParameters:
         self.power_toh = 0.
         self.cooling_l = 0.
         self.cooling_h = 0.
+        self.cruise_thrust = 1800 #N
 
 
     def load_from_dict(self, param_dict):
@@ -365,14 +376,18 @@ class EmpennageParameters:
     """
     def __init__(self, l_f: float = None):
         # TODO: Change to V-Tail, remove horizontal and vertical stabilizer parameters, which are still used in some part of the code
+        # ^^ no right? V-tail is combination of hor. tail and vert. tail size?
         self.S_h =    1.39                          # Horizontal Stabilizer Area in m^2
         self.S_v =   2.16                          # Vertical Stabilizer Area in m^2
         self.V_h = 0.7 #estimation                             # V-Tail Volume Coefficient
         self.V_v = 0.05 #estimation                             # Horizontal Stabilizer Volume Coefficient
+        self.Cl_alpha = None                          # Hor. Stabilizer cl alpha curve
+        self.CL_h = None                              # Design CL of hor. stabilizer.
         self.S_t = 2                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
         self.type = 'fixed'
+        self.Vh_v = None                             # Ratio of (hor.) tail speed to free stream speed.
 
         # V_Tail:
         self.b_v = 3.0                            # V_Tail Span in m TODO, computed in preliminary_sizing_tail.py, shouldnt be a magic number
@@ -504,6 +519,7 @@ class Wingribs:
             "Rib4": {"x_pos_frac": 0.8, "t_mm": 2},
         }
         self.num_ribs = len(self.ribs)
+
 class Control:
     def __init__(self, x_mlg, x_cg):
         self.CLah = None
@@ -591,7 +607,6 @@ class FlapGroup:
         self.spanwise_pos_frac_outbound = spanwise_pos_frac_outbound
         self.flapwidth = flapwidth # meter
 
-
 class FuelTank:
     def __init__(self):
         self.dist_from_wingskin = 0.15
@@ -601,12 +616,35 @@ class FuelTank:
         self.frac_pos_along_span_outboard = 0.7802
         self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
 
-
-
-
 class MaterialsParameters():
     def __init__(self):
-        self.elastic_modulus = 70e9  # Pa, Young's modulus for aluminum
-        self.shear_modulus = self.elastic_modulus / (2 * (1 + 0.33))  # Shear modulus for aluminum
+        # Open VSP materials library is used to get the material properties
+        file_path =  "materials_library.toml"
+        with open(file_path, 'r') as f:
+            data = toml.load(f)
+        
+        # Load materials data from the TOML file
+        materials_data = data["materials"]
 
+        # Set the material name to DESIRED material
+        self.material_name = "Aluminium_2024_T3_wrought"
 
+        for mat_id, mat in materials_data.items():
+            if mat["name"].lower() == self.material_name.lower():
+                self.material = mat
+
+        # Get material properties
+        self.material_code = self.material["code"]                                  # Material code
+        self.material_density = self.material["density"]                            # Density in kg/m^3
+        self.material_E = self.material["E"]                                        # Young's Modulus in Pa
+        self.material_G = self.material["G"]                                        # Shear Modulus in Pa
+        self.material_price_kg = self.material["price_per_kg"]                      # Price per kg in EUR 
+        self.material_sigma_yield = self.material["sigma_yield"]                    # Yield Strenght MPa
+        self.material_sigma_ult = self.material["sigma_ult"]                        # Ultimate Strenght MPa
+        self.material_tau_max = self.material["tau_max"]                            # Shear Strenght MPa
+        self.material_max_service_temp = self.material["max_service_temp"]          # Celsius degrees
+        self.material_min_service_temp = self.material["min_service_temp"]          # Celsius degrees
+        self.material_fracture_tough = self.material["fracture_tough"]              # MPa*m^0.5
+        self.material_thermal_shock_resist = self.material["thermal_shock_resist"]  # Celsius degrees
+        self.material_recycle = self.material["recycle"]                            # 1->yes 0->no
+        self.material_co2_eq = self.material["co2_eq"]                                    # kg/kg

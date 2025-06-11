@@ -11,6 +11,7 @@ try:
     # Attempt to import from the project structure
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
     from utils.unit_conversions import *
     from design_variables import DesignParameters
     import gas_property_relations as gpr
@@ -179,11 +180,7 @@ def ei_nox_dallara(pt_3, tt_3, h, relative_humidity=0.6, delta_t_isa=0.,
                                          relative_humidity=relative_humidity,
                                          delta_t_0=delta_t_isa)
     # The core formula
-    ei = (0.0986 * (pt_3 / 101325) ** 0.4 *
-          np.exp((tt_3 / 194.4) - (humid / 53.2))) / 1000.
-
-    if reduction_factor != 0.:
-        ei *= (1. - reduction_factor) * (lhv / lhv_ref)
+    ei = (2+28.5*((pt_3/1000)/3100)**0.5 * np.exp((tt_3-825)/250))/1000 #kg/kg
 
     return ei
 
@@ -602,7 +599,7 @@ def run_mission_simulation(params: DesignParameters):
         },
         {
             "name": "Cruise", "duration_minutes": 400,
-            "target_thrust_N": 0.3*T_to,
+            "target_thrust_N": params.engine.cruise_thrust,
             "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
             "engine_params_override": {"tt_4": 1200},
         },
