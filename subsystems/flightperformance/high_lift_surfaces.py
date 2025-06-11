@@ -93,6 +93,6 @@ def flaps_TE_sizing(params):
     print(f"\n* Stall Speeds *")
     print(f"Stall speed (clean): {V_stall_clean:.2f} [m/s]")
     print(f"Stall speed (flapped): {V_stall_flapped:.2f} [m/s] (note: should be lower than 85 [knts] for landing)")
-    return placement[0],placement[1],placement[2],placement[3]
+    return placement[0],placement[1],placement[2],placement[3], c_ave*CF_to_C
     
 flaps_TE_sizing(params)
