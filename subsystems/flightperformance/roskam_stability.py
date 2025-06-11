@@ -85,11 +85,10 @@ def angle_of_sideslip_beta(params: DesignParameters):
 
     C_n_beta = C_n_beta_w + C_n_beta_f + C_n_beta_v
 
-    return C_Y_beta, C_l_beta, C_n_beta
+    return C_Y_beta, C_l_beta, C_n_beta, C_Y_beta_v
 
 def pitch_rate_q(params: DesignParameters):
     C_D_q = 0 
-    C_X_q = C_D_q
 
     B = #from luuks code when merged
     x_w = #position of wing 0.25 c - x_cg of aircraft
@@ -97,8 +96,30 @@ def pitch_rate_q(params: DesignParameters):
     C_L_q_w_M0 = (0.5 + 2*x_w / params.wing.mac)*C_L_alpha_w
     C_L_q_w = ((params.wing.A_w_target + 2*math.cos(params.wing.Lambda_025c_w))/(params.wing.A_w_target*B+2*math.cos(params.wing.Lambda_025c_w)))*C_L_q_w_M0
     C_L_alpha_h = #lift curve slope of tail
+    C_L_q_h = 2*C_L_alpha_h*params.empennage.Vh_v*params.empennage.V_h #check that V_h is volume coefficient
+    C_L_q = C_L_q_w + C_L_q_h 
+
+    K_w = 0.9 #assuming aspect ratio is higher than 10 so change if not, see p.426/459 roskam
+    C_m_q_w_M0 = -K_w*C_L_alpha_w * math.cos(params.wing.Lambda_025c_w)*((params.wing.A_w_target*(2*(x_w/params.wing.mac)**2 + 0.5*(x_w / params.wing.mac)))/(params.wing.A_w_target + 2*math.cos(params.wing.Lambda_025c_w)) + (params.wing.A_w_target**3 * math.tan(params.wing.Lambda_025c_w)**2)/(24*(params.wing.A_w_target + 6*math.cos(params.wing.Lambda_025c_w))) + 1/8)
+    C_m_q_w = C_m_q_w_M0*((params.wing.A_w_target**3 * math.tan(params.wing.Lambda_025c_w)**2)/(params.wing.A_w_target * B + 6 * math.cos(params.wing.Lambda_025c_w))+3/B)/((params.wing.A_w_target**3 * math.tan(params.wing.Lambda_025c_w)**2)/(params.wing.A_w_target + 6*math.cos(params.wing.Lambda_025c_w)+3))
     
+    x_ac_h = #distance between LEMAC to quarter chord of tail
+    C_m_q_h = -2*C_L_alpha_h*params.empennage.Vh_v*params.empennage.V_h*(x_ac_h - params.cg.x_cg) #TODO check that this cg works
+
+    C_m_q = C_m_q_w + C_m_q_h
+
+    return C_L_q, C_m_q, C_D_q
+
+def yaw_rate_r(params: DesignParameters, C_Y_beta_v):
+    C_Y_r = -2* C_Y_beta_v * (params.empennage.L_h * math.cos(params.cruise_aoa) + params.empennage.z_v * math.sin(params.cruise_aoa)) / params.wing.b_w'
+
+    C_L_w = #wing lift coefficient at cruise
+    parameter_for_C_l_r_w = 
+    parameter2_for_C_l_r_w = input("what is the parameter from fig 10.41 p.428/462 roskam?")
+    C_l_r_w = C_L_w * parameter_for_C_l_r_w + parameter2_for_C_l_r_w * params.wing.Gamma_w
     
-    C_L_q_h = 2*C_L_alpha_h*params.empennage.Vh
-   
-    C_L_q = C_L_q_w + C_L_q_vtail + C_L_q_c 
+    C_l_r_v = -(2/params.wing.b_w**2)*(params.empennage.L_h*math.cos(params.cruise_aoa)+params.empennage.z_v*math.sin(cruise_aoa))*(params.empennage.z_v*math.cos(params.cruise_aoa - params.empennage.L_v*math.sin(params.cruise_aoa))*C_Y_beta_v)
+    
+    C_l_r = C_l_r_w + C_l_r_v
+
+    return C_Y_r, C_l_r
