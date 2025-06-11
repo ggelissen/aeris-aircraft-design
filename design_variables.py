@@ -166,7 +166,7 @@ class WingParameters:
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
         self.S_ref = self.S_w
-        self.A_w_target = 9.0                             # Aspect Ratio (INITIAL)
+        self.A_w_target =9.0                              # Aspect Ratio (INITIAL)
         self.A_w_actual = None                      # Because addition of yehudi and winglets change aspect ratio. During iteration, optimise such that target=actual
         if self.S_w is not None and self.A_w_target is not None:
             self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
@@ -391,7 +391,7 @@ class EmpennageParameters:
         self.vtail_dihedral = np.deg2rad((110 - 180)/-2) #placeholder                  # V-Tail Dihedral Angle in radians
         self.L_v = 0.45* l_f                         #Moment arm vertical stabilizer
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
-        
+        self.z_v = 0.5*self.b_v #TODO this is a placeholder for distance between tail a/c and cg vertically
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -608,3 +608,5 @@ class MaterialsParameters():
     def __init__(self):
         self.elastic_modulus = 70e9  # Pa, Young's modulus for aluminum
         self.shear_modulus = self.elastic_modulus / (2 * (1 + 0.33))  # Shear modulus for aluminum
+
+
