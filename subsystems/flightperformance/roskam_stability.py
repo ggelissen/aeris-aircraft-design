@@ -42,3 +42,7 @@ def angle_of_sideslip(params: DesignParameters):
 
     return C_Y_beta, C_l_beta
 
+
+
+
+    

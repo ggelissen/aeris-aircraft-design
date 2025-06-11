@@ -1,6 +1,10 @@
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+
+from design_variables import DesignParameters
+from utils_flight import __ISA__
+from FlightSim import FlightSim
  
 class FlightPerformance:
     def __init__(self):
@@ -53,6 +57,8 @@ class FlightPerformance:
         plt.plot(range, (Wtotal-Wpayload)/9.81)
         plt.show()
         
+        return (min(range), max(range))
+        
     
     def ROC(self, cd0, rho, V, S, W, A, oswald, T):
         
@@ -88,6 +94,141 @@ class FlightPerformance:
         plt.legend()
         plt.show()
         
+    def stall_speed(self, W, S, rho, CLmax):
+        return ((W/S)*(2/rho)*(1/CLmax))**0.5
+    
+    def endurance(self, Wfuel, Wtotal, fuel_density, Cd0, AR, oswald, cT):
+        '''
+        cT is kg/s/N
+        output is endurance in seconds
+        '''
+        k2 = (1/(math.pi*AR*oswald))
+        CLopt = ((12*k2*Cd0)**0.5) / (2*k2)
+        # Vopt = ((W/S)*(2/rho)*(1/CLopt))**0.5
+        CD = Cd0 + (CLopt)**2/(math.pi * AR * oswald)
+        
+        D = (CD/CLopt) * Wtotal
+        
+        F = cT * D # kg/s
+        
+        fuel_flow = F * fuel_density
+        
+        endurance = Wfuel*fuel_density / fuel_flow
+        
+        return endurance
+    
+    def performance_limit(self, W, S, CLmax, T0, cd0, A, oswald):
+        h = np.arange(0,20000,1)
+        density = []
+        Vmin = []
+        T = []
+        Vmax = []
+        
+    
+        for val in h:
+            _, _, density1, _ = __ISA__(val)
+            density.append(density1)
+            Vstall = self.stall_speed(W, S, density1, CLmax)
+            #Vmin.append(Vmin1)
+            thrust = T0*(density1/1.225)
+            T.append(thrust)
+            V = np.arange(1,500,0.1)
+            D, D0, Di = self.__drag__(cd0, density1, V, S, W, A, oswald)
+            # if val % 1000 == 0:
+            #     print(val)
+            #     plt.plot(V,D,label='drag')
+            #     plt.plot(V,[thrust]*len(V),label='thrust')
+            #     plt.ylim(0, thrust*1.1)
+            #     plt.legend()
+            #     plt.show()
+            
+            added = False
+            for i in range(len(D)-1, 0, -1):
+                drag = D[i]
+                if drag < thrust and V[i] > Vstall:
+                    Vmax1 = V[i]
+                    Vmax.append(Vmax1)
+                    added = True
+                    break
+                elif drag > thrust:
+                    continue
+            
+            for i in range(0, len(D)-1, 1):
+                drag = D[i]
+                if drag < thrust:
+                    Vmin1 = V[i]
+                    break
+                elif drag > thrust:
+                    continue
+            
+            if added == False:
+                hmax = val
+                print(hmax)
+                break
+            
+            Vmin_actual = max(Vstall, Vmin1)
+            Vmin.append(Vmin_actual)
+            
+        actual_h = np.arange(0,hmax,1)
+            
+            
+        
+        plt.plot(Vmin, actual_h)
+        plt.plot(Vmax, actual_h)
+        plt.show()
+        
+        return (hmax, max(Vmax))
+        
+
+
+def run_flight_performance(params: DesignParameters):
+    """
+    Runs the control and stability analysis with the given design parameters.
+
+    Parameters:
+    params (DesignParameters): Design parameters for the aircraft.
+    """
+    # Initialize the Control class with parameters from DesignParameters
+    fp = FlightPerformance()
+    fs = FlightSim()
+    Wfuel = params.weight.W_F
+    fuel_density = params.engine.fuel_density
+    cd0 = params.wing.C_D0
+    AR = params.wing.A_w_target
+    oswald = params.wing.e
+    cT = params.engine.cruise_tsfc/3600
+    Wtotal = params.weight.W_TO
+    OEW = params.weight.W_OE
+    S = params.wing.S_w
+    CLmax_cruise = params.performance.CL_max_cruise
+    CLmax_TO = params.performance.CL_max_TO
+    T0 = params.engine.engine_max_thrust
+    # Example usage of calculate_range method
+    T, X, M = fs.ground_run2(T0,Wtotal/9.81,S,cd0,AR,oswald,cT*1000000,CLmax_TO)
+    endurance = fp.endurance(Wfuel, Wtotal, fuel_density, cd0, AR, oswald, cT)
+    min_range, max_range = fp.payload_range(params.cruise_speed, cT, AR, oswald, cd0, Wtotal, Wfuel, OEW)
+    ceiling, vmax = fp.performance_limit(Wtotal, S, CLmax_cruise, T0, cd0, AR, oswald)
+    stall_speed_cruise = fp.stall_speed(Wtotal, S, params.cruise_density, CLmax_cruise)
+    stall_speed_takeoff = fp.stall_speed(Wtotal, S, 1.225, CLmax_TO)
+    ROC_sea_level = fp.ROC(cd0, params.cruise_density, params.stall_speed_land, S, Wtotal, AR, oswald, T0)
+    
+    result = {
+        "endurance [s]": endurance,
+        "range with payload [km]": min_range,
+        "range without payload [km]": max_range,
+        "ceiling [m]": ceiling,
+        "max speed [probably sealevel] [m/s]": vmax,
+        "stall speed cruise [m/s]": stall_speed_cruise,
+        "stall speed takeoff [m/s]": stall_speed_takeoff,
+        "ROC at sea level [m/s]": ROC_sea_level,
+        "take-off thrust [N]": T,
+        "take-off distance (set value) [m]": X,
+        "take-off speed [M]": M
+    }
+
+    return result
+
+        
         
 if __name__ == "__main__":
     
@@ -97,6 +238,8 @@ if __name__ == "__main__":
     
     #FlightPerformance().payload_range(200, 0.00020, 12, 0.85, 0.017, 4000*9.81, 2000*9.81, 1000*9.81)
     
-    FlightPerformance().ROC(0.017, 0.3, np.arange(1,300,1), 12, 4000*9.81, 12, 0.85, 2265)
+    #FlightPerformance().ROC(0.017, 0.3, np.arange(1,300,1), 12, 4000*9.81, 12, 0.85, 2265)
+    
+    FlightPerformance().performance_limit(4000*9.81, 12, 1.5, 8000, 0.017, 12, 0.9)
         
         
