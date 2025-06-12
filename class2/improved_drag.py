@@ -8,6 +8,7 @@ from utils.unit_conversions import *
 from design_variables import DesignParameters
 from class1.preliminary_sizing.prelim_sizing_wing import calculate_sweep_angle_x_c, calculate_sweep_angle_LE
 
+# TODO add winglet CD0_winglet
 def calculate_CD0(S_ref: float, C_f_c: np.ndarray, FF_c: np.ndarray, IF_c: np.ndarray, S_wet_c: np.ndarray, CD_misc: np.ndarray) -> float:
     """
     Calculate the zero-lift drag coefficient (CD0) for a given configuration.
@@ -94,7 +95,8 @@ def determine_interference_factor(component: str) -> float:
     float: The interference factor for the specified component.
     """
     interference_factors = {
-        'wing': 1.0*1.04, # Based on high wing and winglet configuration
+        'wing': 1.0*1.04, # Based on high wing and winglet configuration # TODO, check assumptions here about winglets.
+        # TODO Torenbeek 10.8.4, reduction of 10-15% of vortex drag for winglets. 
         'fuselage': 1.3*1.1, # Based on external nacelle on fuselage and landing gear struts
         'empennage': 1.03 # Based on V-tail configuration
     }

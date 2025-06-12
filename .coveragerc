@@ -1,0 +1,4 @@
+[run]
+omit = *tests*, ./subsystems/structures/packages/openvsp/*
+[report]
+show_missing = True

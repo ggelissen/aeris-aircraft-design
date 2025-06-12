@@ -608,7 +608,7 @@ def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray
         sigma_z_booms[i] = calculate_bending_stress(Mx_applied, My_applied, Ixx, Iyy, Ixy, x_point, y_point)
 
     # 5. Torsion Analysis
-    G_material = params.materials.material.G # Shear modulus in Pa
+    G_material = params.materials.material_G # Shear modulus in Pa
     
     panel_s, A_m_calc = calculate_panel_lengths_and_enclosed_area(boom_x_sorted.tolist(), boom_y_sorted.tolist())
     q_tor, tau_tor = calculate_torsional_shear_flow_and_stress(T_applied, A_m_calc, skin_thickness)

@@ -13,7 +13,7 @@ print("--- Inspecting Behavior for Fixed Parameters ---")
 print(f"Target Mach = {TARGET_MACH}, Target CL = {TARGET_CL}, Fixed AR = {INSPECT_AR}\n")
 print(f"{'Sweep (deg)':<15} | {'Achievable t/c (%)':<20}")
 print("-" * 38)
-for sweep_to_check in [29, 32, 35, 38]:
+for sweep_to_check in [29, 30, 32, 35, 38, 42]:
     t_c_result = dm.calculate_tc_from_delta_method(TARGET_MACH, INSPECT_AR, sweep_to_check, TARGET_CL)
     if t_c_result > 0:
         print(f"{sweep_to_check:<15.1f} | {t_c_result*100:<20.2f}")
