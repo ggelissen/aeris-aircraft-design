@@ -1,6 +1,6 @@
 from subsystems.flightperformance.FlightSim import FlightSim
 
-def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_w,C_N_h,z_cg,z_p):
+def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_w,C_N_h,z_cg,z_p, Cd0, AR, oswald, TSFC, C_L):
     '''
     C_m_ac = moment coefficient about aerodynamic center
     
@@ -33,7 +33,7 @@ def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_w,C_N_h,z_cg,z_p):
     Returns True if aircraft can achieve positive moment coefficient (pitch-up) during take-off, False otherwise. 
     '''
     
-    T, _, V = FlightSim().ground_run2(mass0*2,mass0)
+    T, _, V = FlightSim().ground_run2(mass0*2,mass0, S, Cd0, AR, oswald, TSFC, C_L)
     rho = 1.225
 
     T_c = T / (0.5*rho*V**2*S)
