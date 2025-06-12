@@ -58,7 +58,7 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         f.write(f"  0.2    \n")
         f.write("TESTRUNNER2                                                                   \n")
         f.write("n\n")
-        f.write(f" 0.75       2    \n")
+        f.write(f" 0.6       2    \n")
 
     print('Start fpcon')
     subprocess.Popen("wine /root/DSEproject/subsystems/aerodynamics/fpcon.exe  < EXIN1.DAT", shell=True)
@@ -81,7 +81,7 @@ def aerodynamic_analysis(designvars : DesignParameters = None):
         f.write(f"{vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_1')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root - vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_3')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} \n")
         f.write(f'{(designvars.wing.xpos - np.tan(designvars.wing.Lambda_0_w) * designvars.fuselage.D_f/2)/chord_root}  \n')
     with open("EXIN2.DAT", "w") as f:
-        f.write(f"0.75\n")
+        f.write(f"0.6\n")
         f.write(f"{vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_1')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} {vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root - vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_3')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/chord_root} \n")
         f.write(f'{(designvars.wing.xpos - np.tan(designvars.wing.Lambda_0_w) * designvars.fuselage.D_f/2)/chord_root}  \n')
 
@@ -230,5 +230,6 @@ if __name__ == '__main__':
     AERIS = DesignParameters()
     AERIS.load_from_yaml("design_config.yaml")
     struct_main(AERIS, show_3d=False)
-    aerodynamic_analysis(AERIS)
+    #aerodynamic_analysis(AERIS)
+    panel_openvsp(AERIS)
 

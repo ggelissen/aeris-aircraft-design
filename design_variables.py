@@ -189,12 +189,12 @@ class WingParameters:
                 "simulation_parms": {
                     'Transition_location_for_effective_aoa_0.03_upper_surface': 0.10, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
                     'momentum_thickness_jump_for_effective_aoa_0.03_upper_surface': 0.01, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
-                    'Transition_location_for_effective_aoa_0.03_lower_surface': 1.0, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
-                    'momentum_thickness_jump_for_effective_aoa_0.03_lower_surface': 0.0, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_0.03_lower_surface': 0.1, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_0.03_lower_surface': 0.01, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
                     'Transition_location_for_effective_aoa_-1.655_upper_surface': 0.08, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
                     'momentum_thickness_jump_for_effective_aoa_-1.655_upper_surface': 0.01, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
-                    'Transition_location_for_effective_aoa_-1.655_lower_surface': 1.0, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
-                    'momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface': 0.0, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_-1.655_lower_surface': 0.1, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface': 0.01, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
                 }
             }
         }
