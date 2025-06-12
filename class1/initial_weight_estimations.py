@@ -385,52 +385,6 @@ def calculate_payload_range_points(design_results, aircraft_params, mission_segm
     return sorted(payload_range_data, key=lambda x: x["W_P_kg"], reverse=True)
 
 
-# --- Sensitivity Study ---
-def perform_sensitivity_study(base_aircraft_params, base_mission_params, base_reserve_params, param_to_vary, values_to_test):
-    """
-    Performs a simple sensitivity study by varying one parameter.
-    param_to_vary: string like "mission_params.R_cruise1_m"
-    """
-    print(f"\n--- Sensitivity Study on {param_to_vary} ---")
-    results_list = []
-
-    # Helper to deeply set a parameter
-    def set_nested_param(params_dict, param_path, value):
-        keys = param_path.split('.')
-        d = params_dict
-        for key in keys[:-1]:
-            d = d[key]
-        d[keys[-1]] = value
-
-    for val in values_to_test:
-        # Create deep copies of base parameters to avoid modifying them
-        import copy
-        current_aircraft_params = copy.deepcopy(base_aircraft_params)
-        current_mission_params = copy.deepcopy(base_mission_params)
-        current_reserve_params = copy.deepcopy(base_reserve_params)
-
-        if param_to_vary.startswith("aircraft_params"):
-            set_nested_param({"aircraft_params": current_aircraft_params}, param_to_vary, val)
-        elif param_to_vary.startswith("mission_params"):
-            set_nested_param({"mission_params": current_mission_params}, param_to_vary, val)
-        elif param_to_vary.startswith("reserve_params"):
-             set_nested_param({"reserve_params": current_reserve_params}, param_to_vary, val)
-
-
-        print(f"\nCalculating for {param_to_vary} = {val}")
-        try:
-            result = class1_weight_estimation(current_aircraft_params, current_mission_params, current_reserve_params, verbose=False)
-            if result:
-                W_TO_kg = result["W_TO_kg"]
-                results_list.append({"param_value": val, "W_TO_kg": W_TO_kg})
-                print(f"  W_TO: {W_TO_kg:.2f} kg")
-            else:
-                print(f"  Calculation failed for {param_to_vary} = {val}")
-        except Exception as e:
-            print(f"  Error during calculation for {param_to_vary} = {val}: {e}")
-            
-    return results_list
-
 
 # --- Plot Payload-Range Diagram ---
 def plot_payload_range_diagram(pr_data, export_path=None):

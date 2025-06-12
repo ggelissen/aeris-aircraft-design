@@ -33,17 +33,15 @@ from design_variables import *
 
 
 class FlightEnvelope:
-    def __init__(self):
-        self.SetUp()
+    def __init__(self, params: DesignParameters):
+        self.params = params
+        self.SetUp(params)
     
-    def SetUp(self):
+    def SetUp(self, params: DesignParameters):
         """
         Set up the flight envelope parameters and configurations.
         This method initializes the necessary parameters for the flight envelope calculations.
         """
-        # Load design parameters from a YAML file
-        params = DesignParameters()
-        params.load_from_yaml('design_config.yaml')
 
         # 1 - UAV Paramenters
 
@@ -264,7 +262,7 @@ class FlightEnvelope:
         VA_index = np.argmax(n_maneuver_pos >= n_pos_limit)
         VA = velocity_aixs[VA_index] # VA Equivalent Airspeed (EAS) [m/s]
         VA_TAS = equivalent_to_true_air_speed(VA, self.density_at_altitude[altitude_level], self.density_at_altitude['sea_level'])  # Convert EAS to TAS [m/s]
-
+        print(f"VA (EAS): {VA} m/s, VA (TAS): {VA_TAS} m/s")
         
 
         # Custom color map for specific speeds
@@ -343,7 +341,10 @@ class FlightEnvelope:
 
 
 if __name__ == "__main__":
-    fe = FlightEnvelope()
+    params = DesignParameters()
+    params.load_from_yaml("design_config.yaml")
+
+    fe = FlightEnvelope(params)
     fe.generate_flight_envelope("OEW_Payload_Fuselage_Fuel", "cruise", "CLEAN")
     #fe.run_all_configurations()
 
