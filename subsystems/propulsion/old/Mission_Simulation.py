@@ -45,19 +45,6 @@ class atmosphere:
         t_c = t - 273.15
         return 610.94 * np.exp(17.625 * t_c / (t_c + 243.04))
 
-    @staticmethod
-    def specific_humidity(h, relative_humidity=0.6, delta_t_0=0.):
-        """
-        Returns specific humidity (g/kg) at altitude h (meters), relative humidity (0-1), and delta_t_0 (K).
-        """
-        t = atmosphere.temperature(h, delta_t_0)
-        p = atmosphere.pressure(h)
-        e_s = atmosphere.saturation_vapor_pressure(t)
-        e = relative_humidity * e_s
-        # Specific humidity (kg/kg)
-        q = 0.622 * e / (p - (1 - 0.622) * e)
-        return q * 1000  # Convert to g/kg
-
 # --- NOx Emission Index Calculation (Dallara/Schwartz/Kroo) ---
 def ei_nox_dallara(pt_3, tt_3, h, relative_humidity=0.6, delta_t_isa=0.,
                    reduction_factor=0., lhv=43031.e3, lhv_ref=43031.e3):
@@ -74,9 +61,6 @@ def ei_nox_dallara(pt_3, tt_3, h, relative_humidity=0.6, delta_t_isa=0.,
     :param lhv_ref: Reference LHV (J/kg)
     :return: Emission index of NOx in kg/kg
     """
-    humid = atmosphere.specific_humidity(h=h,
-                                         relative_humidity=relative_humidity,
-                                         delta_t_0=delta_t_isa)
     ei = (2+28.5*((pt_3/1000)/3100)**0.5 * np.exp((tt_3-825)/250))/1000
 
 
@@ -614,7 +598,7 @@ def run_mission_simulation(params: DesignParameters):
         },
         {
             "name": "Diversion Cruise (460km)", "duration_minutes": 34, # Approx. for 460km @ M0.75 / 30000ft
-            "target_thrust_N": 2000, # Estimated for diversion cruise
+            "target_thrust_N": T_cruise, # Estimated for diversion cruise
             "flight_conditions": {"mach_0": 0.75, "ts_0": 228.7, "ps_0": 30090}, # 30000ft
             "engine_params_override": {"tt_4": 1200},
             "ei_nox": 0.011
