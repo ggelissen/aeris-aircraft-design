@@ -147,21 +147,21 @@ class WeightParameters:
     def __init__(self):
         self.W_TO = 37807.7                         # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
-        self.W_OE = 11973.3                         # Operational Empty Weight (OEW) in N
-        self.W_F = 12930.5                          # Total Fuel weight in N
+        self.W_OE = 16352.775                         # Operational Empty Weight (OEW) in N
+        self.W_F = 15570.915                          # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
-        self.W_S = 2563                             # Wing Loading in N/m^2
+        self.W_S = 2562.814                             # Wing Loading in N/m^2
         self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
-        self.M_ff = 0.5793                          # Maximum Fuel Fraction
+        self.M_ff = 0.588                         # Maximum Fuel Fraction
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
-        self.W_tfo = None                           # Trapped Fuel and Oil Fraction
-        self.W_F_used = None                        # Used Fuel Weight in N
-        self.W_F_res = None                         # Reserve Fuel Weight in N
+        self.W_tfo = 1890.384                           # Trapped Fuel and Oil Fraction
+        self.W_F_used = 12594.544                        # Used Fuel Weight in N
+        self.W_F_res = 2976.371                         # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
         self.W_fus = None                           # Fuselage weight in N
-        self.W_wing = None                          # Wing weight in N
+        self.W_wing = 3000                          # Wing weight in N
 
 
     def load_from_dict(self, param_dict):
@@ -274,10 +274,12 @@ class PerformanceParameters:
 
         self.CL_alpha = 5.0                  # Lift Curve Slope in 1/rad
 
-        self.L_D_cruise = None                      # Lift-to-Drag Ratio at Cruise
-        self.L_D_loiter = None                      # Lift-to-Drag Ratio at Loiter
+        self.L_D_cruise = 14.562                      # Lift-to-Drag Ratio at Cruise
+        self.L_D_loiter = 16.815                      # Lift-to-Drag Ratio at Loiter
 
         self.CL_cruise = None                  # Lift Coefficient at Cruise	
+
+        self.V_A = 136.7                       # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
