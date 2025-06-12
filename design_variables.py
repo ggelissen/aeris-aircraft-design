@@ -395,10 +395,6 @@ class EngineParameters:
         self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
         self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
         self.eta_fanturb = 0.9  
-<<<<<<< HEAD
-        self.tt4to = 1450 #tt4 temp at takeoff
-        self.engine_id = None
-=======
         self.tt4to = 1400 #tt4 temp at takeoff   
         self.prfan = 1.9           
         self.prlpc = 1.5
@@ -426,7 +422,6 @@ class EngineParameters:
         self.cooling_l = 0.
         self.cooling_h = 0.
         self.cruise_thrust = 1800 #N
->>>>>>> origin/main
 
 
     def load_from_dict(self, param_dict):

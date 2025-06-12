@@ -3,22 +3,15 @@ import numpy as np
 import openvsp as vsp
 import os
 from design_variables import *
-<<<<<<< HEAD
-from subsystems.structures.vspfunctions import *
-=======
 try:
     from vspfunctions import *
 except:
     from subsystems.structures.vspfunctions import *
->>>>>>> origin/main
 import scipy
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
-<<<<<<< HEAD
-=======
 #from ideal_cross_section_analysis import run_cross_section_analysis
->>>>>>> origin/main
 
 
 def wing_structure_generation(designvars: DesignParameters = None, plot: bool = True):

@@ -28,18 +28,14 @@ try:
 except:
     matplotlib.use('Agg')
 import openvsp as vsp
-<<<<<<< HEAD
-import subsystems.structures.vspfunctions
-#import subsystems.structures.stanag as stanag
-from design_variables import *
-from subsystems.structures.wing_structure_generation import wing_structure_generation
-=======
 
 #import subsystems.structures.stanag as stanag
 from design_variables import *
 #from wing_structure_generation import generate_wing_structure_3D
-from material_selection import run_material_selection_analysis
->>>>>>> origin/main
+try:
+    from material_selection import run_material_selection_analysis
+except:
+    from subsystems.structures.material_selection import run_material_selection_analysis
 
 def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
@@ -82,9 +78,6 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     calculate_wet_areas(designvars)
 
     ### Set up structure
-<<<<<<< HEAD
-    wing_structure_generation(designvars, plot=show_3d)
-=======
     #wing_structure_generation(designvars)
 
     # Freeze geometry:
@@ -99,7 +92,7 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
 
-    run_material_selection_analysis(designvars)
+    #run_material_selection_analysis(designvars)
     #fuselage_cross_section(designvars, )
 
 
@@ -111,7 +104,6 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
     #generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
->>>>>>> origin/main
 
     # Step 4: Simulate aircraft with loads
 
