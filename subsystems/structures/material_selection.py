@@ -10,6 +10,7 @@ from design_variables import DesignParameters
 from loading_diagrams import WingLoadingDiagrams
 from wing_structure_generation import cross_sectional_structure_along_span
 from ideal_cross_section_analysis import calculate_panel_lengths_and_enclosed_area
+from main_struct import struct_main
 
 
 def obtain_spar_coordinates(designvars: DesignParameters, span_lst: np.ndarray) -> tuple:
@@ -211,7 +212,9 @@ if __name__ == "__main__":
     designvars = DesignParameters()
     designvars.load_from_yaml("design_config.yaml")
 
-    wing_loading_diagrams = WingLoadingDiagrams()
+    struct_main(designvars)
+
+    wing_loading_diagrams = WingLoadingDiagrams(designvars)
     loading = wing_loading_diagrams.run_analysis(PLOT=False)
 
     span_lst = np.linspace(0, designvars.wing.b_w/2, 1000)

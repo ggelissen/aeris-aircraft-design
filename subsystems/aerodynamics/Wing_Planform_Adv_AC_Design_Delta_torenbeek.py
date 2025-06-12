@@ -59,18 +59,19 @@ def optimize_wing_planform(inputs):
     """Performs the wing optimization by iterating through a grid of design variables."""
     print("--- Starting Wing Planform Optimization (Grid Search with Delta Method) ---")
     
-    # --- MODIFICATION START ---
-    # Adjusted the search space to be more realistic for a M=0.85 design.
-    # Higher sweep and more constrained aspect ratio.
-    Lambda_w_deg_range = np.linspace(28, 40, 40)  # More sweep is needed for M=0.85
-    A_w_range = np.linspace(8, 14, 40)           # Very high AR is structurally difficult with high sweep
-    C_L_hat_range = np.linspace(0.4, 0.7, 40)    # Typical cruise CL range
+    # Constrain design space as needed
+    Lambda_w_deg_range = np.linspace(30, 42, 40)
+    A_w_range = np.linspace(8, 13, 40)
+    C_L_hat_range = np.linspace(0.1, 0.7, 80)
+
+    # Define the wing loading constraints in N/m^2 (Pascals)
+    MIN_WING_LOADING_Pa = 2000.0
+    MAX_WING_LOADING_Pa = 7000.0
     # --- MODIFICATION END ---
 
     min_mtow = float('inf')
     optimal_params = {}
     
-    # Grid search loop remains the same
     for Lambda_w_deg in Lambda_w_deg_range:
         Lambda_w_rad = np.deg2rad(Lambda_w_deg)
         for A_w in A_w_range:
@@ -81,22 +82,45 @@ def optimize_wing_planform(inputs):
                     inputs["target_cruise_mach"],
                     inputs["C_f"], inputs["C_Dc"], return_tc=True
                 )
-                if wpf == float('inf'): continue
+                if wpf == float('inf'):
+                    continue
+
                 mtow = calculate_MTOW(
                     inputs["W_pay_N"], inputs["W_fix_other_N"], inputs["F_prop"],
                     inputs["q_hat_Pa"], inputs["C_Dp_S_fix_m2"],
                     inputs["mu_resf"], inputs["mu_lg"], wpf
                 )
+                if mtow == float('inf'):
+                    continue
+
+                # --- MODIFICATION START ---
+                # Check the Wing Loading Constraint for the current design point
+                wing_area = mtow / (inputs["q_hat_Pa"] * C_L_hat)
+                if wing_area < 1e-6: continue # Avoid division by zero
+                
+                current_wing_loading = mtow / wing_area
+
+                # If the constraint is violated, discard this point and move to the next iteration
+                if not (MIN_WING_LOADING_Pa <= current_wing_loading <= MAX_WING_LOADING_Pa):
+                    continue
+                # --- MODIFICATION END ---
+
                 if mtow < min_mtow:
                     min_mtow = mtow
                     optimal_params = {
-                        "MTOW_N": min_mtow, "C_L_hat": C_L_hat, "A_w": A_w,
-                        "Lambda_w_deg": Lambda_w_deg, "t_c_ratio": t_c,
-                        "S_w_m2": min_mtow / (inputs["q_hat_Pa"] * C_L_hat),
-                        "b_w_m": np.sqrt(A_w * (min_mtow / (inputs["q_hat_Pa"] * C_L_hat)))
+                        "MTOW_N": min_mtow,
+                        "C_L_hat": C_L_hat,
+                        "A_w": A_w,
+                        "Lambda_w_deg": Lambda_w_deg,
+                        "t_c_ratio": t_c,
+                        "S_w_m2": wing_area, # Use the already calculated wing area
+                        "b_w_m": np.sqrt(A_w * wing_area),
+                        "wing_loading_Pa": current_wing_loading # Also store the final wing loading
                     }
     print("--- Optimization Complete ---")
     return optimal_params
+
+# --- The rest of your script (plotting and main execution block) would follow ---
 
 # --- Plotting and Main Execution Block (unchanged) ---
 # ... (The rest of your script for plotting and execution) ...
@@ -108,7 +132,7 @@ def plot_WPF_contours(inputs, optimal_design):
     Lambda_w_deg_fixed = optimal_design["Lambda_w_deg"]
     Lambda_w_rad_fixed = np.deg2rad(Lambda_w_deg_fixed)
     
-    A_w_range = np.linspace(4, 10, 50)
+    A_w_range = np.linspace(4, 15, 50)
     C_L_hat_range = np.linspace(0.2, 0.9, 50)
     CLH_mesh, AW_mesh = np.meshgrid(C_L_hat_range, A_w_range)
     WPF_grid = np.zeros_like(CLH_mesh)
