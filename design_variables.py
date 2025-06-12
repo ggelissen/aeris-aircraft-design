@@ -35,8 +35,9 @@ class DesignParameters:
 
         # Subsystem Parameters
         self.cg = CGParameters()  # Center of Gravity Parameters
+        self.materials = MaterialsParameters()
         self.weight = WeightParameters()
-        self.wing = WingParameters(W_TO=self.weight.W_TO, W_S=self.weight.W_S)
+        self.wing = WingParameters(self, W_TO=self.weight.W_TO, W_S=self.weight.W_S)
         self.performance = PerformanceParameters()
         self.fuselage = FuselageParameters()
         self.engine = EngineParameters(W_TO=self.weight.W_TO, T_W=self.weight.T_W)
@@ -45,7 +46,7 @@ class DesignParameters:
         self.control_surface = ControlSurfaceParameters()
         self.stability_aero = StabilityAerodynamicParameters()
         self.inertia = IntertiaParameters()
-        self.materials = MaterialsParameters()
+
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -184,7 +185,7 @@ class WingParameters:
     Class to hold wing-related parameters for the aircraft design.
     Append more parameters as needed.
     """
-    def __init__(self, W_TO: float = None, W_S: float = None):
+    def __init__(self, parent, W_TO: float = None, W_S: float = None):
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
         self.S_ref = self.S_w
@@ -244,7 +245,7 @@ class WingParameters:
         self.threeDairfoil2 = None
         self.threeDairfoil3 = None
         self.wingid = None # Will contain the object ID of the wing in VSP, is set by create_wing()
-        self.wingsection = WingSectionParameters()  # Wing section parameters, such as spars, are stored here
+        self.wingsection = WingSectionParameters(parent)  # Wing section parameters, such as spars, are stored here
         self.wingribs = Wingribs()  # Wing ribs parameters, such as thickness, are stored here
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
@@ -591,37 +592,41 @@ class CGParameters:
     
 
 class WingSectionParameters:
-    def __init__(self):
+    def __init__(self, parent):
         self.spars = {
-            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50},
-            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50},
+            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50, 'material_density_kgm3': parent.materials.material_density},
+            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50, 'material_density_kgm3': parent.materials.material_density},
         }
         self.num_spars = len(self.spars)
         self.stringers = {
-            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200 },
-            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200 },
-            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200 },
-            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200 },
-            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200},
-            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200},
-            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200},
-            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200},
-            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200},
-            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200},
-            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200},
-            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200},
-            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200},
-            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200},
+            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density},
+            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density},
+            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density},
+            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density},
+            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
         }
         self.num_stringers = len(self.stringers)
+        self.wingskin = {
+            'thicness': 1, # mm
+            'material_density_kgm3': parent.materials.material_density # kg/m^3
+        }
 
 class Wingribs:
     def __init__(self):
         self.ribs = {
-            "Rib1": {"x_pos_frac": 0.2, "t_mm": 2},
-            "Rib2": {"x_pos_frac": 0.4, "t_mm": 2},
-            "Rib3": {"x_pos_frac": 0.6, "t_mm": 2},
-            "Rib4": {"x_pos_frac": 0.8, "t_mm": 2},
+            "Rib1": {"y_pos_frac": 0.2, "t_mm": 2},
+            "Rib2": {"y_pos_frac": 0.4, "t_mm": 2},
+            "Rib3": {"y_pos_frac": 0.6, "t_mm": 2},
+            "Rib4": {"y_pos_frac": 0.8, "t_mm": 2},
         }
         self.num_ribs = len(self.ribs)
 
@@ -727,6 +732,7 @@ class FlapGroup:
         self.spanwise_pos_frac_inbound = spanwise_pos_frac_inbound
         self.spanwise_pos_frac_outbound = spanwise_pos_frac_outbound
         self.flapwidth = flapwidth # meter
+        self.density_kgm2 = 30 # kg/m^2, density of the flap per square meter of flap area
 
     def __repr__(self):
         """
@@ -744,6 +750,8 @@ class FuelTank:
         self.frac_pos_along_span_inboard = 0.1753
         self.frac_pos_along_span_outboard = 0.7802
         self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
+        self.t = None
+        self.density_kgm3 = 800 # kg/m^3, density of Jet A1 fuel
 
     def __repr__(self):
         """

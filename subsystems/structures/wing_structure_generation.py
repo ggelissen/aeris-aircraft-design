@@ -317,7 +317,7 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
 
     # Draw ribs
     for rib in range(len(designvars.wing.wingribs.ribs)):
-        spanwise_pos = designvars.wing.wingribs.ribs[f"Rib{rib+1}"]["x_pos_frac"]
+        spanwise_pos = designvars.wing.wingribs.ribs[f"Rib{rib+1}"]["y_pos_frac"]
         _, _, outline, chord_length, _, _  = cross_sectional_structure_along_span(designvars, spanwise_pos, plot=False)
         tri = Delaunay(outline)
         faces = tri.simplices
@@ -342,3 +342,52 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     if plot:
         plotter.show()
 
+def weight_distribution(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, num_points: int = 1000):
+    # kg/m
+    crosssection = cross_sectional_structure_along_span(designvars, spanwise_pos_frac, plot=False)
+    stringer_weight = np.ones(num_points) * designvars.wing.wingsection.stringers['Stringer1']['crosssectionalarea_mm2'] * designvars.wing.wingsection.stringers['Stringer1']['material_density_kgm3'] / 1000000
+    spar_weight = np.ones(num_points) * (designvars.wing.wingsection.spars['Spar1']['t_flange_1_mm'] * designvars.wing.wingsection.spars['Spar1']['flange_width_mm'] * designvars.wing.wingsection.spars['Spar1']['material_density_kgm3']
+                                         + designvars.wing.wingsection.spars['Spar1']['t_flange_2_mm'] * designvars.wing.wingsection.spars['Spar1']['flange_width_mm'] * designvars.wing.wingsection.spars['Spar1']['material_density_kgm3'] +
+                                         designvars.wing.wingsection.spars['Spar2']['t_flange_1_mm'] * designvars.wing.wingsection.spars['Spar1']['flange_width_mm'] * designvars.wing.wingsection.spars['Spar2']['material_density_kgm3']
+                                         + designvars.wing.wingsection.spars['Spar2']['t_flange_2_mm'] * designvars.wing.wingsection.spars['Spar1']['flange_width_mm'] * designvars.wing.wingsection.spars['Spar2']['material_density_kgm3'] +
+                                            designvars.wing.wingsection.spars['Spar1']['t_web_mm'] * np.linalg.norm(crosssection[0][0][0,:] - crosssection[0][0][1])  * designvars.wing.wingsection.spars['Spar1']['material_density_kgm3']
+                                        + designvars.wing.wingsection.spars['Spar2']['t_web_mm'] * np.linalg.norm(crosssection[0][1][0,:] - crosssection[0][1][1])  * designvars.wing.wingsection.spars['Spar2']['material_density_kgm3']
+                                         )  / 1000000
+    with open('data/Airfoil.dat', 'r') as f:
+        lines = f.readlines()
+
+    # Skip header lines
+    data = []
+    for line in lines:
+        parts = line.strip().split()
+        if len(parts) >= 2:
+            try:
+                x, y = float(parts[0]), float(parts[1])
+                data.append((x, y))
+            except ValueError:
+                continue  # skip header or bad lines
+    diffs = np.diff(np.array(data), axis=0)
+    segment_lengths = np.sqrt((diffs ** 2).sum(axis=1))
+    circumference_root = segment_lengths.sum() * crosssection[3]
+    wingskin_weight = np.ones(num_points) * (crosssection[3]/vsp.GetParmVal(designvars.wing.wingid, 'Root_Chord', 'XSec_1')) * designvars.wing.wingsection.wingskin['thicness'] * circumference_root * designvars.wing.wingsection.wingskin['material_density_kgm3'] / 1000
+    x = np.array(data)[:, 0]
+    y = np.array(data)[:, 1]
+    # Ensure closed loop
+    if not np.allclose(np.array(data)[0], np.array(data)[-1]):
+        x = np.append(x, x[0])
+        y = np.append(y, y[0])
+    rib_weight = 0
+    for rib in designvars.wing.wingribs.ribs.keys():
+        chord = cross_sectional_structure_along_span(designvars, designvars.wing.wingribs.ribs[rib]['y_pos_frac'], plot=False)[3]
+        area = 0.5 * np.abs(np.dot(x[:-1], y[1:]) - np.dot(x[1:], y[:-1])) * chord**2
+        rib_weight += np.ones(num_points) * area * designvars.wing.wingribs.ribs[rib]['material_density_kgm3'] * designvars.wing.wingribs.ribs[rib]['t_mm'] / (1000 * designvars.wing.b_w * np.cos(np.deg2rad(vsp.GetParmVal(designvars.wing.wingid, 'Dihedral', 'XSec_1'))))
+    if spanwise_pos_frac >  designvars.fueltank.frac_pos_along_span_inboard and spanwise_pos_frac < designvars.fueltank.frac_pos_along_span_outboard:
+        fuel_tank_weight = np.ones(num_points) * (designvars.fueltank.frac_pos_chord_max - designvars.fueltank.frac_pos_chord_min) * designvars.fueltank.t * crosssection[3] * designvars.fueltank.density_kgm3
+    else:
+        fuel_tank_weight = np.zeros(num_points)
+    for flap in designvars.wing.flapgroups:
+        if spanwise_pos_frac > flap.spanwise_pos_frac_inbound and spanwise_pos_frac < flap.spanwise_pos_frac_outbound:
+            flap_weight = np.ones(num_points) * (flap.flapwidth) *  flap.density_kgm2
+        else:
+            flap_weight = np.zeros(num_points)
+    if spanwise_pos_frac

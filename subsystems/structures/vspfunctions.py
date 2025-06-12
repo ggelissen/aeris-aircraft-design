@@ -516,5 +516,6 @@ def calculate_fuel_capacity(designvars: DesignParameters = None):
 
     middle_wing_t_over_c = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid, 0), 1), "ThickChord"))
     fuel_tank_thickness = middle_wing_t_over_c * designvars.wing.mac
+    designvars.fueltank.t = fuel_tank_thickness
 
     designvars.fueltank.fuel_tank_wing_volume = vsp.GetDoubleResults(result, "Total_Theo_Area", 0)[0] * fuel_tank_thickness
