@@ -31,7 +31,8 @@ from design_variables import *
 # =================================================================
 
 class WingLoadingDiagrams:
-    def __init__(self):
+    def __init__(self, params: DesignParameters):
+        self.params = params
         self.SetUp()
 
     def SetUp(self):
@@ -39,10 +40,6 @@ class WingLoadingDiagrams:
         Set up the loading diagrams parameters and configurations.
         This method initializes the necessary parameters for the loading diagrams calculations.
         """     
-
-        # ==== Load Design Parameters ====
-        self.params = DesignParameters()
-        self.params.load_from_yaml('design_config.yaml')
 
         # ==== Generate spanwise mesh (half-span) ====
         self.span = self.params.wing.b_w # Full wingspan = 40 m
@@ -278,8 +275,5 @@ if __name__ == "__main__":
     # Initialize the loading diagrams class
     
     internal_loads_list = WingLoadingDiagrams().run_analysis(PLOT=True)
-
-
-    print(internal_loads_list[33])
 
 

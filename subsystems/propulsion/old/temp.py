@@ -79,6 +79,7 @@ except (ImportError, ModuleNotFoundError):
             self.engine.cooling_h = 0.0
             self.engine.lhv = 43.e6
             self.engine.T_TO = 7535. # N
+            self.engine.T_cruise = 1800. 
         def load_from_yaml(self, filepath):
              print(f"Mock loading parameters from {filepath}")
 
@@ -176,9 +177,9 @@ def ei_nox_dallara(pt_3, tt_3, h, relative_humidity=0.6, delta_t_isa=0.,
     if any(isnan(val) for val in [pt_3, tt_3, h]):
         return nan
         
-    humid = atmosphere.specific_humidity(h=h,
-                                         relative_humidity=relative_humidity,
-                                         delta_t_0=delta_t_isa)
+    # humid = atmosphere.specific_humidity(h=h,
+    #                                      relative_humidity=relative_humidity,
+    #                                      delta_t_0=delta_t_isa)
     # The core formula
     ei = (2+28.5*((pt_3/1000)/3100)**0.5 * np.exp((tt_3-825)/250))/1000 #kg/kg
 
@@ -559,7 +560,7 @@ def print_detailed_results(results, engine_name="Engine Run"):
 # --- Main Mission Simulation ---
 def run_mission_simulation(params: DesignParameters):
     print("Starting Aircraft Mission Emissions Simulation...\n")
-
+    tsfc_lst = np.array([])
     baseline_engine_config = {
         "bpr": params.engine.Bpr, "pr_fan": params.engine.prfan, "pr_lpc": params.engine.prlpc, "pr_hpc": params.engine.prhpc, "tt_4": 1400.,
         "eta_fan": params.engine.etafan, "eta_lpc": params.engine.etalpc, "eta_hpc": params.engine.etahpc,
@@ -572,6 +573,7 @@ def run_mission_simulation(params: DesignParameters):
         "full_output": True
     }
     T_to = params.engine.T_TO #N, takeoff thrust 
+    T_Cruise = params.engine.cruise_thrust #N, cruise thrust
     mission_segments = [
         {
             "name": "Engine Start & Warm-Up", "duration_minutes": 10,
@@ -599,9 +601,21 @@ def run_mission_simulation(params: DesignParameters):
         },
         {
             "name": "Cruise", "duration_minutes": 400,
-            "target_thrust_N": params.engine.cruise_thrust,
+            "target_thrust_N": T_Cruise,
             "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
             "engine_params_override": {"tt_4": 1200},
+        },
+        {
+            "name": "Diversion Cruise (460km)", "duration_minutes": 34, # Approx. for 460km @ M0.75 / 30000ft
+            "target_thrust_N": T_Cruise, # Estimated for diversion cruise
+            "flight_conditions": {"mach_0": 0.75, "ts_0": 228.7, "ps_0": 30090}, # 30000ft
+            "engine_params_override": {"tt_4": 1200},
+        },
+        {
+            "name": "Loiter (2 hours)", "duration_minutes": 120,
+            "target_thrust_N": 800, # Estimated for loiter
+            "flight_conditions": {"mach_0": 0.25, "ts_0": 285.2, "ps_0": 95970}, # 1500ft
+            "engine_params_override": {"tt_4": 880},
         },
         {
             "name": "Descent", "duration_minutes": 15,
@@ -626,6 +640,7 @@ def run_mission_simulation(params: DesignParameters):
     total_mission_emissions = {"m_co2": 0.0, "m_h2o": 0.0, "m_nox": 0.0, "m_so4": 0.0, "m_soot": 0.0}
     total_fuel_used_kg = 0.0
 
+    tsfc_lst = np.array([])
     for segment_idx, segment in enumerate(mission_segments):
         print(f"--- Processing Segment {segment_idx + 1}: {segment['name']} ---")
         dt_seconds = segment["duration_minutes"] * 60.0
@@ -675,6 +690,7 @@ def run_mission_simulation(params: DesignParameters):
         else: # Valid TSFC path
             mdot_f = segment["target_thrust_N"] * tsfc
             segment_fuel_kg = mdot_f * dt_seconds
+            tsfc_lst = np.append(tsfc_lst, tsfc)
             print(f"  Calculated TSFC: {tsfc*1e6:.2f} mg/Ns")
             print(f"  Target Thrust: {segment['target_thrust_N']:.0f} N -> Fuel Flow: {mdot_f:.4f} kg/s")
             print(f"  Fuel used this segment: {segment_fuel_kg:.2f} kg")
@@ -704,6 +720,7 @@ def run_mission_simulation(params: DesignParameters):
         print(f"  Total {species}: {total_mass:.2f} kg" if not isnan(total_mass) else f"  Total {species}: NaN kg")
 
     print("\nSimulation Finished.")
+    return {"TSFC (kg/(Ns))": tsfc_lst, "Total Fuel Used (kg)": float(total_fuel_used_kg)}
 
 if __name__ == '__main__':
     # Initialize mock or real parameters

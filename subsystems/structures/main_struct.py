@@ -16,6 +16,7 @@ import pyvista as pv
 import numpy as np
 import sys
 import os
+import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -27,10 +28,11 @@ try:
 except:
     matplotlib.use('Agg')
 import openvsp as vsp
-import vspfunctions
+
 #import subsystems.structures.stanag as stanag
 from design_variables import *
-from wing_structure_generation import wing_structure_generation
+#from wing_structure_generation import generate_wing_structure_3D
+from material_selection import run_material_selection_analysis
 
 def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
@@ -73,11 +75,37 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     calculate_wet_areas(designvars)
 
     ### Set up structure
-    wing_structure_generation(designvars)
+    #wing_structure_generation(designvars)
+
+    # Freeze geometry:
+
+    vsp.UpdateGeom(designvars.wing.wingid)
+    designvars.wing.b_w = vsp.GetParmVal(designvars.wing.wingid, "TotalSpan", "WingGeom")
+    vsp.UpdateGeom(designvars.wing.wingid)
+    vsp.SetComputationFileName(vsp.DEGEN_GEOM_CSV_TYPE, "data/DegenGeom.csv")
+    vsp.SetSetFlag(designvars.wing.wingid, 8, True)
+    vsp.ComputeDegenGeom(8, vsp.DEGEN_GEOM_CSV_TYPE)
+    data = pd.read_csv("data/DegenGeom.csv", header=None, skiprows=10, nrows=2211)
+    datanp = data.to_numpy()
+    designvars.structurecoords = np.round(datanp, decimals=6)
+
+    run_material_selection_analysis(designvars)
+    #fuselage_cross_section(designvars, )
+
+
+    # cross_sectional_structure_along_span(designvars, 0)
+    # cross_sectional_structure_along_span(designvars, 0.871)
+    # cross_sectional_structure_along_span(designvars, 0.9)
+    # cross_sectional_structure_along_span(designvars, 0.95)
+    #fuselage_cross_section(designvars, 0.5)
+
+    #generate_wing_structure_3D(designvars, num_spanwise_points=1001)
+
 
     # Step 4: Simulate aircraft with loads
 
     # Step 5: Change Structural variables to optimise for mass
+
 
     # Step 6: Save progress and share optimised variables to other subsystems. Share aircraft 3D model to aerodynamics.
     vsp.Update()

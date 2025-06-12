@@ -1,20 +1,12 @@
-# Wing_Planform_Adv_AC_Design_torenbeek.py
-
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-import sys
-import os
-
-# Allow imports from parent directory to access design_variables
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from design_variables import DesignParameters
 
 # --- Constants ---
 H_g = 4350  # km, Fuel specific energy (H/g) for jet fuel (kerosene)
 g = 9.80665 # m/s^2, standard gravity
 
-# --- Calculation Functions from Torenbeek ---
+# --- Helper & Torenbeek Calculation Functions ---
 
 def calculate_propulsion_function(R_eq, eta_o_cruise, mu_T, tau_cruise, delta_cruise):
     """Calculates the propulsion function F_prop. Based on Eq. 10.9."""
@@ -24,7 +16,9 @@ def calculate_propulsion_function(R_eq, eta_o_cruise, mu_T, tau_cruise, delta_cr
     return fuel_term + engine_weight_term
 
 def calculate_WPF_transonic(phi_3, phi_2, F_prop, C_L_hat, A_w, Lambda_w_rad, e_hat, M_dd, M_kappa, C_f, C_Dc, return_tc=False):
-    """Calculates the Wing Penalty Function (WPF) for transonic aircraft. Based on Eq. 10.43."""
+    """
+    Calculates the Wing Penalty Function (WPF) for transonic aircraft. Based on Torenbeek, Ch. 10.
+    """
     if C_L_hat <= 1e-6 or A_w <= 0 or e_hat <= 0:
         return (np.inf, np.inf) if return_tc else np.inf
 
@@ -51,11 +45,12 @@ def calculate_WPF_transonic(phi_3, phi_2, F_prop, C_L_hat, A_w, Lambda_w_rad, e_
 
     return (wpf, t_c_w) if return_tc else wpf
 
+
 def calculate_MTOW(W_pay, W_fix_other, F_prop, q_hat, C_Dp_S_fix, mu_resf, mu_lg, F_wp):
     """Calculates Maximum Take-Off Weight (MTOW). Based on Eq. 10.15."""
+    numerator = W_pay + W_fix_other + F_prop * q_hat * C_Dp_S_fix
     denominator = 1 - (mu_resf + mu_lg + F_wp)
     if denominator <= 0: return float('inf')
-    numerator = W_pay + W_fix_other + F_prop * q_hat * C_Dp_S_fix
     return numerator / denominator
 
 # --- New Functions for This Optimization ---
@@ -113,9 +108,10 @@ def calculate_torenbeek_inputs():
 def optimize_wing_planform(inputs):
     """Performs the wing optimization by iterating through a grid of design variables."""
     print("--- Starting Wing Planform Optimization (Grid Search) ---")
-    Lambda_w_deg_range = np.linspace(20, 40, 11)
-    A_w_range = np.linspace(7, 15, 17)
-    C_L_hat_range = np.linspace(0.3, 0.8, 21)
+    Lambda_w_deg_range = np.linspace(20, 38, 60)
+    A_w_range = np.linspace(6, 20, 60)
+    C_L_hat_range = np.linspace(0.2, 0.7, 60)
+
     min_mtow = float('inf')
     optimal_params = {}
 
@@ -150,8 +146,10 @@ def optimize_wing_planform(inputs):
 def plot_WPF_contours(inputs, optimal_design):
     """Plots the WPF contours similar to Figure 10.12."""
     print("--- Generating WPF Contour Plot (Fig 10.12) ---")
+    
     Lambda_w_deg_fixed = optimal_design["Lambda_w_deg"]
     Lambda_w_rad_fixed = np.deg2rad(Lambda_w_deg_fixed)
+    
     A_w_range = np.linspace(4, 16, 50)
     C_L_hat_range = np.linspace(0.2, 0.9, 50)
     CLH_mesh, AW_mesh = np.meshgrid(C_L_hat_range, A_w_range)
@@ -171,8 +169,10 @@ def plot_WPF_contours(inputs, optimal_design):
     # Filter out infinite values for cleaner plotting
     WPF_grid[WPF_grid == np.inf] = np.nan 
     contour_levels = np.nanpercentile(WPF_grid, np.linspace(1, 50, 20))
+    
     contour_wpf = plt.contour(CLH_mesh, AW_mesh, WPF_grid, levels=contour_levels, cmap='viridis')
     plt.clabel(contour_wpf, inline=True, fontsize=8, fmt='%.3f')
+
     # Plot the optimal point
     plt.plot(optimal_design["C_L_hat"], optimal_design["A_w"], 'r*', markersize=15, label=f'Optimum (MTOW = {optimal_design["MTOW_N"]/g:.0f} kg)')
 
@@ -186,14 +186,15 @@ def plot_WPF_contours(inputs, optimal_design):
     print(f"Lambda_w_rad_c4: {Lambda_w_rad_c4:.4f} rad, Lambda_w_deg_fixed: {Lambda_w_deg_c4:.1f}°")
     A_max = 17.7 * (2 - lambda_w)*np.exp(-0.043*Lambda_w_deg_c4)
     # Add illustrative constraints (as seen in Fig 10.12)
-    plt.axhline(y=A_max, color='c', linestyle=':', label=f'Pitch-up Limit ($A_w \\leq {A_max:.2f}$)')
+    plt.axhline(y=A_max, color='c', linestyle=':', label=f'Pitch-up Limit ($A_w \leq {A_max}$)')
     plt.axvline(x=0.8, color='m', linestyle='-.', label='Buffet Limit (Illustrative)')
+    
     # Take-off distance line (Span Loading Constraint) (Eq. 10.28)
     # W_MTO / b_w^2 = q_hat * C_L_hat / A_w
     # For a fixed TOFL, this span loading is roughly constant. Let's assume 550 N/m^2
     span_load_const_val_Pa = 2000 # Using a lower value for a light UAV
     A_w_span_load = (inputs["q_hat_Pa"] / span_load_const_val_Pa) * C_L_hat_range
-    plt.plot(C_L_hat_range, A_w_span_load, 'grey', linestyle='--', label='Take-off Distance Limit')
+    plt.plot(C_L_hat_range, A_w_span_load, 'grey', linestyle='--', label=f'Take-off Distance Limit')
 
     plt.xlabel('Design Lift Coefficient (C_L_hat)')
     plt.ylabel('Aspect Ratio (A_w)')
