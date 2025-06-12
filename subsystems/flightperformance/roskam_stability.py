@@ -52,13 +52,9 @@ def angle_of_sideslip_beta(params: DesignParameters):
     K_M_Gamma = input("what is the compressibility correction to the wing dihedral? p.396/428")
     fuselage_effect_wing_height = -0.0005*params.wing.A_w_target*(params.fuselage.D_f / params.wing.b_w)**2
     delta_cl_beta_zw = 0.042*(params.wing.A_w_target)**0.5 * (z_w / params.wing.b_w)* (params.fuselage.D_f / params.wing.b_w)
-    wing_twist_correction = input("what is the contribution of the wing twist to the C_l_beta? p.396/428")
-    #wing twist correction very confused on page 397/429
-    #what is root-section zero-lift line and tip-section zero lift line?
-    C_l_beta_wf = 57.3*(C_L_wf *(wing_sweep_contribution*K_M_Lambda*K_f + aspect_ratio_contribution) + params.wing.Gamma_w* wing_dihedral_effect * K_M_Gamma + wing_dihedral_effect + delta_cl_beta_zw + wing_twist_correction)
+    C_l_beta_wf = 57.3*(C_L_wf *(wing_sweep_contribution*K_M_Lambda*K_f + aspect_ratio_contribution) + params.wing.Gamma_w* wing_dihedral_effect * K_M_Gamma + wing_dihedral_effect + delta_cl_beta_zw)
 
 
-    # C_l_beta_h = C_l_beta_hf * ((params.empennage.S_h*params.empennage.b_h) / (params.wing.S_w*params.wing.b_w)) #what is horizontal tail span
     kappa_Gamma = input("what is kappa_Gamma (dihedral factor for roll stability)? Philips paper fig. 17")
     kappa_l = input("what is kappa_l (planform factor for roll stability)? Philips paper fig. 17")
     kappa_L = 0.04 #estimation according do Philips paper
