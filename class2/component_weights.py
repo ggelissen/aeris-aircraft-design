@@ -20,7 +20,7 @@ def wing_weight_N(params: DesignParameters):
     W_TO_lb = N_to_lbf(params.weight.W_TO)  # Convert takeoff weight to lbf
     b_w_ft = m_to_ft(params.wing.b_w)  # Convert wing span to feet
     
-    W_wing_lb = 0.00125 * (N_to_lbf(params.weight.W_TO))*(m_to_ft(params.wing.b_w)/math.cos(params.wing.Lambda_05_w))**0.75 * (1+(6.3*math.cos(params.wing.Lambda_05_w)/m_to_ft(params.wing.b_w))**0.5)* params.max_load_factor**0.55*(m_to_ft(params.wing.S_w)*m_to_ft(params.wing.b_w)/(m_to_ft(params.wing.t_r)*params.weight.W_TO*math.cos(params.wing.Lambda_05_w)))**0.3
+    W_wing_lb = 0.00125 * (W_TO_lb)*(b_w_ft/math.cos(params.wing.Lambda_05_w))**0.75 * (1+(6.3*math.cos(params.wing.Lambda_05_w)/b_w_ft)**0.5)* params.max_load_factor**0.55*(m_to_ft(params.wing.S_w)*b_w_ft/(m_to_ft(params.wing.t_r)*params.weight.W_TO*math.cos(params.wing.Lambda_05_w)))**0.3
     W_wing_N = lbf_to_N(W_wing_lb)  # Convert to Newtons for consistency
     print(f"Wing weight (N): {W_wing_N:.2f}")
     return W_wing_N
