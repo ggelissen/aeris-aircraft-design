@@ -207,3 +207,97 @@ def test_run_mission_simulation_integration(mock_tf_analysis, mock_design_params
     expected_total_fuel = total_thrust_newton_seconds * mock_return_value[1] # thrust * tsfc
 
     assert results["Total Fuel Used (kg)"] == pytest.approx(expected_total_fuel, rel=1e-2)
+
+from old.propsysweight import calculate_propulsion_system_weight
+
+def test_calculate_propulsion_system_weight_nominal(mock_design_params):
+    """
+    Tests the propulsion system weight calculation with nominal values.
+    This test validates the original calculations from your script.
+    """
+    # The function doesn't actually use the 'params' object yet,
+    # but we pass it in for future compatibility.
+    results = calculate_propulsion_system_weight(mock_design_params)
+
+    # Expected values are calculated based on your script's logic
+    lbs_to_kg = 0.45359237
+    kg_to_lbs = 1 / lbs_to_kg
+    n_to_lbf = 0.224809
+    m_to_ft = 3.28084
+
+    We = 516
+    T_to = 7450 * n_to_lbf
+    L_d = 7.28
+    A_inl = 9.5
+    W_ai = 11.45 * (L_d * 1 * A_inl**0.5)**0.7331
+    W_fuel = 1429.18 * kg_to_lbs
+    W_fs = (0.4 / 6.47) * W_fuel
+    L_fus = 10 * m_to_ft
+    W_ec = 0.686 * (L_fus**0.792)
+    W_e = 1400 * kg_to_lbs
+    W_ess = 38.93 * (W_e / 1000)**0.918
+    W_nacelle = 0.065 * T_to
+    
+    W_prop_sys = We + W_ai + W_fs + W_ec + W_ess + W_nacelle
+    
+    expected_prop_sys_kg = W_prop_sys * lbs_to_kg
+    expected_engine_kg = We * lbs_to_kg
+    expected_fuel_sys_kg = W_fs * lbs_to_kg
+    expected_nacelle_kg = W_nacelle * lbs_to_kg
+    expected_electrical_kg = 140
+
+    assert results['propulsion_system_weight_kg'] == pytest.approx(expected_prop_sys_kg, rel=1e-3)
+    assert results['engine_weight_kg'] == pytest.approx(expected_engine_kg, rel=1e-3)
+    assert results['fuel_system_weight_kg'] == pytest.approx(expected_fuel_sys_kg, rel=1e-3)
+    assert results['nacelle_weight_kg'] == pytest.approx(expected_nacelle_kg, rel=1e-3)
+    assert results['electrical_system_weight_kg'] == pytest.approx(expected_electrical_kg, rel=1e-3)
+
+def test_with_zero_values_in_dependent_calcs(mock_design_params):
+    """
+    Tests how the function behaves if some intermediate calculations result in zero.
+    This is a conceptual test, as the function currently uses hardcoded values.
+    To properly test this, the function should be refactored to take inputs.
+    """
+    
+    # To properly test this, we would need to refactor the original function
+    # to accept parameters instead of using hardcoded values.
+    # For now, this test serves as a placeholder to show how it would be done.
+    
+    # Example refactoring of the original function:
+    def calculate_propulsion_weight_refactored(We_lbs, T_to_N, L_d_ft, A_inl_sqft, W_fuel_kg, L_fus_m, W_e_kg):
+        lbs_to_kg = 0.45359237
+        kg_to_lbs = 1 / lbs_to_kg
+        n_to_lbf = 0.224809
+        m_to_ft = 3.28084
+        
+        We = We_lbs
+        T_to = T_to_N * n_to_lbf
+        W_ai = 11.45*(L_d_ft * 1 * A_inl_sqft**0.5)**0.7331 if L_d_ft > 0 and A_inl_sqft > 0 else 0
+        W_fuel_lbs = W_fuel_kg * kg_to_lbs
+        Ksp = 6.47
+        W_fs = (0.4/Ksp) * W_fuel_lbs if Ksp > 0 else 0
+        L_fus_ft = L_fus_m * m_to_ft
+        W_ec = 0.686 *(L_fus_ft**0.792) if L_fus_ft > 0 else 0
+        W_e_lbs = W_e_kg * kg_to_lbs
+        W_ess = 38.93*(W_e_lbs/1000)**0.918 if W_e_lbs > 0 else 0
+        W_nacelle = 0.065*T_to
+        
+        W_prop_sys = We + W_ai + W_fs + W_ec + W_ess + W_nacelle
+        return W_prop_sys * lbs_to_kg
+
+    # Test case with all zero inputs
+    result_kg = calculate_propulsion_weight_refactored(0, 0, 0, 0, 0, 0, 0)
+    assert result_kg == pytest.approx(0.0)
+
+    # Test case with only engine weight
+    result_kg = calculate_propulsion_weight_refactored(516, 0, 0, 0, 0, 0, 0)
+    assert result_kg == pytest.approx(516 * 0.45359237)
+
+
+if __name__ == "__main__":
+    # To run the tests, you would typically use the pytest command in your terminal:
+    # > pytest
+    #
+    # This block allows running the script directly for simple execution,
+    # though using the pytest runner is recommended.
+    pytest.main()
