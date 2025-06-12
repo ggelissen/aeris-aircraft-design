@@ -736,5 +736,5 @@ def run_mission_simulation(params: DesignParameters):
 
 if __name__ == '__main__':
     params = DesignParameters()
-    # params.load_from_yaml("design_config.yaml")
+    params.load_from_yaml("design_config.yaml")
     results = run_mission_simulation(params)
