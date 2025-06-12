@@ -566,10 +566,10 @@ class StabilityAerodynamicParameters:
         # Longitudinal Derivatives
         self.CX0 = None       
         self.CZ0 = None       
-        self.CXu = None
-        self.CZu = None
+        self.CXu = None #from cd-mach curve from alejandro
+        self.CZu = None 
         self.Cmu = None
-        self.CXa = None # Often dCX/dalpha
+        self.CXa = None         # Often dCX/dalpha
         self.CZa = None         # = CLa (if using stability axes and thrust effects on Z are small)
         self.CXq = None
         self.CZq = None
@@ -590,13 +590,13 @@ class StabilityAerodynamicParameters:
         self.Clr = None       # Rolling moment due to yaw rate
         self.Cnr = None       # Yawing moment due to yaw rate (yaw damping)
         
-        # Lateral-Directional Control Derivatives (optional for basic stability, needed for control response)
-        self.CYda = None
-        self.Clda = None      # Aileron effectiveness
-        self.Cnda = None
-        self.CYdr = None
-        self.Cldr = None
-        self.Cndr = None      # Rudder effectiveness
+        # # Lateral-Directional Control Derivatives (optional for basic stability, needed for control response)
+        # self.CYda = None
+        # self.Clda = None      # Aileron effectiveness
+        # self.Cnda = None
+        # self.CYdr = None
+        # self.Cldr = None
+        # self.Cndr = None      # Rudder effectiveness
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
