@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 # User-defined cruise speed
 V_FLIGHT = 250.0  # m/s
 
+# Data extracter from Figure 1, AN INTEGRATED LOADS ANALYSIS MODEL FOR WAKE VORTEX ENCOUNTERS https://core.ac.uk/download/pdf/31018877.pdf
 raw_data_string = """
 0.01609657947686116, 0.15607859040547112
 0.24547283702213285, 0.3000951445104647
@@ -29,6 +30,7 @@ raw_data_string = """
 0.9778672032193159, -7.533729508835961
 0.9979879275653922, -7.403230754033245
 """
+# Data points removed between the highest and lowest points to avoid discontinuities, data fit should be linear between these points.
 #0.8289738430583502, 15.583267044125208
 # 0.8370221327967808, 11.707817967234927
 #0.8410462776659959, 4.989731671683842
