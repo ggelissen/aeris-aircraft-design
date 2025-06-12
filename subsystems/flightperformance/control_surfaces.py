@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d, CubicSpline
 from design_variables import *
+from subsystems.flightperformance.high_lift_surfaces import *
 
 params = DesignParameters()
 params.load_from_yaml("design_config.yaml")
@@ -19,9 +20,9 @@ def aileron_sizing(params):
         c_l_alpha = params.wing.airfoil_clalpha                # Airfoil lift curve slope
         c_d_0 = params.wing.airfoil_cd0                        # Airfoil 2D drag coefficient
         S_ref = params.wing.S_w            # Reference wing surface area (m^2)
-        CA_to_C = 0.20                     # Aileron chord to Wing chord ratio, accounts for rear spar
+        CA_to_C = 0.2                     # Aileron chord to Wing chord ratio, accounts for rear spar
                                             
-        b_outboard = 0.9                    # Reference distance b_outboard, adjustable
+        b_outboard = 0.95                    # Reference distance b_outboard, adjustable
         b1 = b_inboard * b/2                # Inboard edge of aileron from centerline in meters (m)
         b2 = b_outboard * b/2               # Outboard edge of aileron from centerline in meters (m)
         rho = 1.225                         # Air density (kg/m^3)
@@ -49,24 +50,24 @@ def aileron_sizing(params):
         input_x_value = CA_to_C
 
         estimated_y_interp1d = f_cubic(input_x_value)
-        print(f"\nEstimated y for x = {input_x_value} (using interp1d cubic): {estimated_y_interp1d:.4f}")
+        #print(f"\nEstimated y for x = {input_x_value} (using interp1d cubic): {estimated_y_interp1d:.4f}")
         estimated_y_cs = cs(input_x_value)
-        print(f"Estimated y for x = {input_x_value} (using CubicSpline): {estimated_y_cs:.4f}")
+        #print(f"Estimated y for x = {input_x_value} (using CubicSpline): {estimated_y_cs:.4f}")
 
-        plt.figure(figsize=(10, 6))
-        plt.plot(x_data, y_data, 'o', label='Original Data Points', markersize=8, color='red')
-        # Plot interpolated curve using interp1d
-        plt.plot(x_new_interp1d, y_new_interp1d, '-', label='Interpolated Curve (interp1d cubic)', color='blue', linewidth=2)
-        # Plot interpolated curve using Cubicspline
-        plt.plot(x_new_cs, y_new_cs, '-', label='Interpolated Curve (Cubicspline)', color='yellow', linewidth=1)
-        # Plot the interpolated point
-        plt.plot(input_x_value, estimated_y_interp1d, 'X', label=f'Estimated Point ({input_x_value}, {estimated_y_interp1d:.4f})', markersize=10, color='purple', markeredgecolor='black')
+        # plt.figure(figsize=(10, 6))
+        # plt.plot(x_data, y_data, 'o', label='Original Data Points', markersize=8, color='red')
+        # # Plot interpolated curve using interp1d
+        # plt.plot(x_new_interp1d, y_new_interp1d, '-', label='Interpolated Curve (interp1d cubic)', color='blue', linewidth=2)
+        # # Plot interpolated curve using Cubicspline
+        # plt.plot(x_new_cs, y_new_cs, '-', label='Interpolated Curve (Cubicspline)', color='yellow', linewidth=1)
+        # # Plot the interpolated point
+        # plt.plot(input_x_value, estimated_y_interp1d, 'X', label=f'Estimated Point ({input_x_value}, {estimated_y_interp1d:.4f})', markersize=10, color='purple', markeredgecolor='black')
 
-        plt.title('Cubic Interpolation of Data Points')
-        plt.xlabel('X-axis')
-        plt.ylabel('Y-axis')
-        plt.grid(True)
-        plt.legend()
+        # plt.title('Cubic Interpolation of Data Points')
+        # plt.xlabel('X-axis')
+        # plt.ylabel('Y-axis')
+        # plt.grid(True)
+        # plt.legend()
         # plt.show()
 
         tau = (f_cubic(CA_to_C) + cs(CA_to_C)) / 2 # Aileron effectiveness interpolated
@@ -104,31 +105,86 @@ def aileron_sizing(params):
         else:
             break
         
-        print(f"The required time to achieve a {bank_angle} degree bank angle is: {delta_t:.2f} [s]")
+        #print(f"The required time to achieve a {bank_angle} degree bank angle is: {delta_t:.2f} [s]")
         
         
     #Print the calculated time
-    print(f"The required time to achieve a {bank_angle} degree bank angle is: {delta_t:.2f} [s]")
+    print("\n============================")
+    print("Aileron Sizing")
+    print("============================")
+    
+    print(f"\n* Inputs *")
+    print(f"The required time to achieve a {bank_angle} degree bank angle is: {delta_t:.2f} [s] (note: must be below 2/3 [s])")
     print(f"TO weight: {W} [N]")
     print(f"Stall speed: {V_stall} [m/s]")
     print(f"CLmax: {C_L_max}")
+    
+    print(f"\n* Wing Geometry *")
     print(f"root chord: {C_r} [m]")
     print(f"Tip chord: {C_t} [m]")
-    print(f"Wingspan: {b/2} [m]")
+    print(f"Halfspan: {b/2} [m]")
+    
+    print(f"\n* Aileron Placement *")
+    print(f"b_inboard: {b_inboard} [m]")
+    print(f"b_outboard: {b_outboard} [m]")
     print(f"b1: {b1} [m]")
     print(f"b2: {b2} [m]")
+    
+    print(f"\n* Surface Area *")
     print(f"Surface area wing: {S_ref} [m^2]")
     S_aileron = (b2-b1)* (params.wing.root_chord-params.wing.tip_chord) / (b/2) *b1
     print(f"Surface area aileron (approx): {S_aileron} [m^2]")
+    return b1, b2
+        
 
-aileron_sizing(params)           
+def ruddervator_sizing(params):
+    #Sizing the Darth is an important step in determining required tail area
+    CD_to_C = 0.3
+    b_inboard = 0.25   # Start of the Darth
+    b_outboard = 0.9    # End of the Darth
+    
+    Tail_b  = params.empennage.b_v                              # V_Tail Span in m
+    Tail_ct = params.empennage.c_t                              # V-Tail Tip Chord in m
+    Tail_cr = params.empennage.c_r                              # V-Tail Root Chord in m
+    Tail_Sh = params.empennage.S_h                              # Horizontal Stabilizer Area in m^2
+    Tail_Sv = params.empennage.S_v                              # Vertical Stabilizer Area in m^2
+    Tail_dihedral = params.empennage.Gamma_h                    # V-tail dihedral
+    
+    Darth_start = b_inboard * Tail_b/2
+    Darth_end = b_outboard * Tail_b/2
+    Darth_depth = Tail_cr * CD_to_C
+    Darth_S = 2 * Darth_depth * (Darth_end-Darth_start)
+    
+    Darth_Sh = Darth_S * np.cos(Tail_dihedral)
+    Darth_Sv = Darth_S * np.sin(Tail_dihedral)
+    
+    Ratio_h = Darth_Sh / Tail_Sh
+    Ratio_v = Darth_Sv / Tail_Sv
+    print("\n============================")
+    print("Ruddervator Sizing")
+    print("============================")
+    
+    print(f"\n* Wing Geometry *")
+    print(f"Tail span (b_v): {Tail_b:.3f} [m]")
+    print(f"Tail root chord (c_r): {Tail_cr:.3f} m, tip chord (c_t): {Tail_ct:.3f} [m]")
+    print(f"Horizontal tail area (S_h): {Tail_Sh:.3f} [m^2]")
+    print(f"Vertical tail area (S_v): {Tail_Sv:.3f} [m^2]")
+    print(f"Tail dihedral angle (Gamma_h): {np.degrees(Tail_dihedral):.2f} [°]")
 
-def rudder_sizing(params):
+    print(f"\n* Darth Placement *")
+    print(f"Darth spanwise start: {Darth_start:.3f} [m], end: {Darth_end:.3f} [m]")
+    print(f"Darth depth: {Darth_depth:.3f} [m]")
+    print(f"Darth surface area (total): {Darth_S:.3f} [m^2]")
+
+    print(f"\n* Surface Area *")
+    print(f"Projected Darth horizontal area (Sh): {Darth_Sh:.3f} [m^2]")
+    print(f"Projected Darth vertical area (Sv): {Darth_Sv:.3f} [m^2]")
+    print(f"Horizontal area ratio (Darth_Sh / Tail_Sh): {Ratio_h:.3f} [%]")
+    print(f"Vertical area ratio (Darth_Sv / Tail_Sv): {Ratio_v:.3f} [%]")
     
-    b_inboard = 0.5
-    b_outboard = 0.9
-    b_empennage = params.empennage.b_v
-    S_ref = params.empennage.S_t          # Reference empennage surface area (m^2)
-    CR_to_C = 0.5                         # Rudder chord to empennage chord ratio, accounts for rear spar
-    S_rudder = 4 * CR_to_C * b_empennage
-    
+    return Darth_start, Darth_end, Darth_depth
+
+
+aileron_sizing(params)   
+ruddervator_sizing(params)
+print("\n")

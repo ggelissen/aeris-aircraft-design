@@ -3,11 +3,22 @@ import numpy as np
 import openvsp as vsp
 import os
 from design_variables import *
+<<<<<<< HEAD
 from subsystems.structures.vspfunctions import *
+=======
+try:
+    from vspfunctions import *
+except:
+    from subsystems.structures.vspfunctions import *
+>>>>>>> origin/main
 import scipy
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
+<<<<<<< HEAD
+=======
+#from ideal_cross_section_analysis import run_cross_section_analysis
+>>>>>>> origin/main
 
 
 def wing_structure_generation(designvars: DesignParameters = None, plot: bool = True):
@@ -31,7 +42,6 @@ def wing_structure_generation(designvars: DesignParameters = None, plot: bool = 
     data = pd.read_csv("data/DegenGeom.csv", header=None, skiprows=10, nrows=2211)
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
-    print("here")
     #fuselage_cross_section(designvars, )
 
 
@@ -43,9 +53,14 @@ def wing_structure_generation(designvars: DesignParameters = None, plot: bool = 
 
     cross_section = cross_sectional_structure_along_span(designvars, 0.95, plot=plot)
     # run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
-    #                            1000, 1000, 1000, 1000, 0.01)
+    #                             1000, 1000, 1000, 1000, 0.01, plot=True)
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001, plot=plot)
+
+    return designvars
+
+
+
 
 def cross_sectional_structure_along_span(designvars: DesignParameters = None, spanwise_position: float = 0.0, plot: bool = True):
     """
@@ -89,7 +104,8 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
 
 
     # make room for ailerons:
-    if spanwise_position*designvars.wing.b_w/2 - designvars.control_surface.x_a_inboard > 0.0 and spanwise_position*designvars.wing.b_w/2 - designvars.control_surface.x_a_outboard < 0.0:
+    proj_span = vsp.GetParmVal(designvars.wing.wingid, 'TotalProjectedSpan', 'WingGeom')
+    if spanwise_position*proj_span/2 - designvars.control_surface.x_a_inboard > 0.0 and spanwise_position*proj_span/2 - designvars.control_surface.x_a_outboard < 0.0:
         trailing_edge_position = outline[np.argmax(outline[:, 0])][0]
         cut_out_length_from_trailing_edge = designvars.control_surface.aileron_width
         cut_out_position_x = trailing_edge_position -  cut_out_length_from_trailing_edge
@@ -196,41 +212,42 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         stringers[f'stringer{stringer_index+1}'] = {"stringer_points": []}
     wingskin = []
     dx = halfspan/num_spanwise_points
+    dxcos = dx * np.cos(np.deg2rad(vsp.GetParmVal(designvars.wing.wingid, 'Dihedral', 'XSec_1')))
     for x in np.linspace(0, halfspan, num_spanwise_points):
+        xcos = x * np.cos(np.deg2rad(vsp.GetParmVal(designvars.wing.wingid, 'Dihedral', 'XSec_1')))
         spar_points_array, stringer_array, _, chord_length, lower_airfoil, upper_airfoil = cross_sectional_structure_along_span(designvars, x / halfspan, plot=False)
         for index, spar_points in enumerate(spar_points_array):
-            spars[f'spar{index+1}']['spar_points'].append(np.array([spar_points[0][0], spar_points[0][1], x]))
-            spars[f'spar{index+1}']['top_flange'].append(np.array([spar_points[0][0], spar_points[0][1], x]))
-            spars[f'spar{index + 1}']['spar_points'].append(np.array([spar_points[1][0], spar_points[1][1], x]))
-            spars[f'spar{index+1}']['bottom_flange'].append(np.array([spar_points[1][0], spar_points[1][1], x]))
+            spars[f'spar{index+1}']['spar_points'].append(np.array([spar_points[0][0], spar_points[0][1], xcos]))
+            spars[f'spar{index+1}']['top_flange'].append(np.array([spar_points[0][0], spar_points[0][1], xcos]))
+            spars[f'spar{index + 1}']['spar_points'].append(np.array([spar_points[1][0], spar_points[1][1], xcos]))
+            spars[f'spar{index+1}']['bottom_flange'].append(np.array([spar_points[1][0], spar_points[1][1], xcos]))
         for index, stringer in enumerate(stringer_array):
-            stringers[f'stringer{index+1}']['stringer_points'].append(np.array([stringer[0], stringer[1], x]))
+            stringers[f'stringer{index+1}']['stringer_points'].append(np.array([stringer[0], stringer[1], xcos]))
         if x < halfspan:
             _, _, _, _, lower_airfoil2, upper_airfoil2 = cross_sectional_structure_along_span(designvars, (x + dx) / halfspan, plot=False)
             for ind, point in enumerate(upper_airfoil):
                 if ind < len(upper_airfoil)-1 and ind < len(upper_airfoil2)-1:
-                    wingskin.append([np.array([point[0], point[1], x]), np.array([upper_airfoil2[ind][0], upper_airfoil2[ind][1], x + dx]),
-                                         np.array([upper_airfoil[ind+1][0], upper_airfoil[ind+1][1], x]), np.array([upper_airfoil2[ind+1][0], upper_airfoil2[ind+1][1], x+dx])])
+                    wingskin.append([np.array([point[0], point[1], xcos]), np.array([upper_airfoil2[ind][0], upper_airfoil2[ind][1], xcos + dxcos]),
+                                         np.array([upper_airfoil[ind+1][0], upper_airfoil[ind+1][1], xcos]), np.array([upper_airfoil2[ind+1][0], upper_airfoil2[ind+1][1], xcos+dxcos])])
                 else:
-                    wingskin.append([np.array([upper_airfoil[-1][0], upper_airfoil[-1][1], x]),
-                                             np.array([upper_airfoil2[-1][0], upper_airfoil2[-1][1], x + dx]),
-                                             np.array([lower_airfoil[-1][0], lower_airfoil[-1][1], x]),
-                                             np.array([lower_airfoil2[-1][0], lower_airfoil2[-1][1], x + dx])])
+                    wingskin.append([np.array([upper_airfoil[-1][0], upper_airfoil[-1][1], xcos]),
+                                             np.array([upper_airfoil2[-1][0], upper_airfoil2[-1][1], xcos + dxcos]),
+                                             np.array([lower_airfoil[-1][0], lower_airfoil[-1][1], xcos]),
+                                             np.array([lower_airfoil2[-1][0], lower_airfoil2[-1][1], xcos + dxcos])])
             for ind, point in enumerate(lower_airfoil):
                 if ind < len(lower_airfoil)-1 and ind < len(lower_airfoil2)-1:
-                    wingskin.append([np.array([point[0], point[1], x]),
-                                             np.array([lower_airfoil2[ind][0], lower_airfoil2[ind][1], x + dx]),
-                                             np.array([lower_airfoil[ind + 1][0], lower_airfoil[ind + 1][1], x]),
-                                             np.array([lower_airfoil2[ind + 1][0], lower_airfoil2[ind + 1][1], x + dx])])
-            wingskin.append([np.array([upper_airfoil[0][0], upper_airfoil[0][1], x]),
-                             np.array([upper_airfoil2[0][0], upper_airfoil2[0][1], x + dx]),
-                             np.array([lower_airfoil[0][0], lower_airfoil[0][1], x]),
-                             np.array([lower_airfoil2[0][0], lower_airfoil2[0][1], x + dx])])
+                    wingskin.append([np.array([point[0], point[1], xcos]),
+                                             np.array([lower_airfoil2[ind][0], lower_airfoil2[ind][1], xcos + dxcos]),
+                                             np.array([lower_airfoil[ind + 1][0], lower_airfoil[ind + 1][1], xcos]),
+                                             np.array([lower_airfoil2[ind + 1][0], lower_airfoil2[ind + 1][1], xcos + dxcos])])
+            wingskin.append([np.array([upper_airfoil[0][0], upper_airfoil[0][1], xcos]),
+                             np.array([upper_airfoil2[0][0], upper_airfoil2[0][1], xcos + dxcos]),
+                             np.array([lower_airfoil[0][0], lower_airfoil[0][1], xcos]),
+                             np.array([lower_airfoil2[0][0], lower_airfoil2[0][1], xcos + dxcos])])
 
 
 
     # Draw spars
-    print("now?")
     for spar_index in range(designvars.wing.wingsection.num_spars):
 
         topflange = spars[f'spar{spar_index + 1}']['top_flange']
@@ -280,7 +297,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         plotter.add_mesh(curve2, color='blue', line_width=3, opacity=0.2)
 
     # Draw stringers
-    print("now2")
     for stringer_index in range(designvars.wing.wingsection.num_stringers):
         stringer_points = np.array(stringers[f'stringer{stringer_index + 1}']['stringer_points'])
         lines = np.hstack([[len(stringer_points)] + list(range(len(stringer_points)))])
@@ -289,7 +305,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         plotter.add_mesh(curve, color='red', line_width=0.5, opacity=0.2)
 
     # Draw wingskin
-    print("now3")
     vertex_list_wingskin = []
     index_map_wingskin = {}
     faces_wingskin = []
@@ -308,7 +323,6 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     plotter.add_mesh(mesh_wingskin, show_edges=False, color="grey", opacity=0.1)
 
     # Draw ribs
-    print("now4")
     for rib in range(len(designvars.wing.wingribs.ribs)):
         spanwise_pos = designvars.wing.wingribs.ribs[f"Rib{rib+1}"]["x_pos_frac"]
         _, _, outline, chord_length, _, _  = cross_sectional_structure_along_span(designvars, spanwise_pos, plot=False)
@@ -316,13 +330,12 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         faces = tri.simplices
         faces_pv = np.hstack([[3, *face] for face in faces])
         # Create 3D PolyData
-        rib_points = [np.array([outlinepoint[0], outlinepoint[1], spanwise_pos * halfspan]) for outlinepoint in outline]
+        rib_points = [np.array([outlinepoint[0], outlinepoint[1], spanwise_pos * halfspan *np.cos(np.deg2rad(vsp.GetParmVal(designvars.wing.wingid, 'Dihedral', 'XSec_1')))]) for outlinepoint in outline]
         rib_points = np.array(rib_points)
         rib_mesh = pv.PolyData(rib_points, faces_pv)
 
         plotter.add_mesh(rib_mesh, color='skyblue', show_edges=False)
     # Draw fuselage
-    print("now5")
     vsp.SetSetFlag(designvars.fuselage.fuseid, 6, True)
     vsp.ExportFile('data/fuselage.stl', 6 , vsp.EXPORT_STL)
     vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete NewGeom which gets added after an export

@@ -1,0 +1,147 @@
+# Materials Library for Python Project
+
+# The Temperature-dependent Properties, the cruise Temperature is assumed (-56.5 C).
+# CO2 eq: Production + End-of-life
+
+[materials.material1]
+name = "Aluminium_2024_T3_wrought"
+code = "Al-2024-T3"
+density =  2.77e3                   # kg/m^3
+price_per_kg = 3.36                 # avg EUR/kg 
+E = 73.3                            # Young's modulus in GPa
+G = 28.7                            # Shear modulus in GPa (Cruise Temp. is out-of-range)
+sigma_yield = 349                   # Yield Strenght MPa
+sigma_ult = 438                     # Ultimate Strenght MPa
+tau_max = 300                       # Shear Strenght MPa
+max_service_temp = 184              # Celsius degrees
+min_service_temp = -273             # Celsius degrees
+fracture_tough = 38.9               # MPa*m^0.5
+thermal_shock_resist = 187          # Celsius degrees
+recycle = 1                         # 1->yes 0->no
+co2_eq = 11.36                        # 8.96 + 2.4  kg/kg 
+
+
+[materials.material2]
+name = "Aluminium_2014_T6_wrought"
+code = "Al-2014-T6"
+density =  2.8e3                    # kg/m^3
+price_per_kg = 3.34                 # avg EUR/kg 
+E = 73.3                            # Young's modulus in GPa
+G = 27.6                            # Shear modulus in GPa (Cruise Temp. is out-of-range)
+sigma_yield = 398                   # Yield Strenght MPa
+sigma_ult = 435                     # Ultimate Strenght MPa
+tau_max = 300                       # Shear Strenght MPa
+max_service_temp = 184              # Celsius degrees
+min_service_temp = -273             # Celsius degrees
+fracture_tough = 30.6               # MPa*m^0.5
+thermal_shock_resist = 219          # Celsius degrees
+recycle = 1                         # 1->yes 0->no
+co2_eq = 11.3                # (8.92 + 2.38)  kg/kg
+
+
+[materials.material3]
+name = "Aluminium_7075_T6_wrought"
+code = "Al-7075-T6"
+density =  2.8e3                    # kg/m^3
+price_per_kg = 6.27                 # avg EUR/kg 
+E = 73.3                            # Young's modulus in GPa
+G = 27                              # Shear modulus in GPa (Cruise Temp. is out-of-range)
+sigma_yield = 502                   # Yield Strenght MPa
+sigma_ult = 561                     # Ultimate Strenght MPa
+tau_max = 350                       # Shear Strenght MPa
+max_service_temp = 89.4             # Celsius degrees
+min_service_temp = -273             # Celsius degrees
+fracture_tough = 26.8               # MPa*m^0.5
+thermal_shock_resist = 290          # Celsius degrees
+recycle = 1                         # 1->yes 0->no
+co2_eq = 11.31                       # (8.92 + 2.39) kg/kg
+
+
+[materials.material4]
+name = "Aluminium_7068_wrought"
+code = "Al-7068"
+density =  2.85e3                   # kg/m^3
+price_per_kg = 6.31                 # avg EUR/kg 
+E = 73                              # Young's modulus in GPa
+G = 29.2                            # Shear modulus in GPa (Cruise Temp. is out-of-range)
+sigma_yield = 700                   # Yield Strenght MPa
+sigma_ult = 738                     # Ultimate Strenght MPa
+tau_max = 372                       # Shear Strenght MPa
+max_service_temp = 89.4             # Celsius degrees
+min_service_temp = -273             # Celsius degrees
+fracture_tough = 21.3               # MPa*m^0.5
+thermal_shock_resist = 410          # Celsius degrees
+recycle = 1                         # 1->yes 0->no
+co2_eq =  11.21  # (8.85 + 2.36) kg/kg
+
+
+[materials.material5]
+name = "Aluminium_5052_H32_wrought"
+code = "Al-5052-H32"
+density =  2.68e3                   # kg/m^3
+price_per_kg = 3.17                 # avg EUR/kg 
+E = 70.3                            # Young's modulus in GPa
+G = 27.7                            # Shear modulus in GPa (Cruise Temp. is out-of-range)
+sigma_yield = 172                   # Yield Strenght MPa
+sigma_ult = 225                     # Ultimate Strenght MPa
+tau_max = 138                       # Shear Strenght MPa  --> Source: https://asm.matweb.com/search/GetReference.asp?bassnum=ma5052h32
+max_service_temp = 160              # Celsius degrees
+min_service_temp = -273             # Celsius degrees
+fracture_tough = 31.6               # MPa*m^0.5
+thermal_shock_resist = 92.8         # Celsius degrees
+recycle = 1                         # 1->yes 0->no
+co2_eq = 11.76                      # (9.28 + 2.48) kg/kg
+
+
+[materials.material6]
+name = "Carbon_Fiber_Reinforced_Polymer"  # vf 50% due to performance
+code = "CFRP"
+density =  1.7e3                    # kg/m^3
+price_per_kg = 200                  # avg EUR/kg 
+E = 94.9                            # Young's modulus in GPa
+G = 35.9                            # Shear modulus in GPa (Cruise Temp. is out-of-range)
+sigma_yield = 503                   # Yield Strenght MPa
+sigma_ult = 503                     # Ultimate Strenght MPa
+tau_max = 58.1                      # Shear Strenght MPa  --> Source: About Shear Properties of Plain Weave Fabric CFRP at High Temperatures: Analytical and Experimental Approaches
+max_service_temp = 2050             # Celsius degrees
+min_service_temp = -273             # Celsius degrees
+fracture_tough = 5.99               # MPa*m^0.5
+thermal_shock_resist = 2390         # Celsius degrees
+recycle = 0                         # 1->yes 0->no
+co2_eq = 43.7                       # (43.7 + 0) kg/kg
+
+
+[materials.material7]
+name = "Glass_Fiber_Reinforced_Polymer"  # Alumino Silicate/Nextel 720 vf45
+code = "GFRP"
+density =  2.52e3                   # kg/m^3
+price_per_kg = 5310                 # avg EUR/kg 
+E = 144                             # Young's modulus in GPa
+G = 49.8                            # Shear modulus in GPa (Cruise Temp. is out-of-range)
+sigma_yield = 208                   # Yield Strenght MPa
+sigma_ult = 208                     # Ultimate Strenght MPa
+tau_max  = 220                      # Shear Strenght MPa  --> Source: https://composite-tech.com/fiberglass-rebar-gfrp/
+max_service_temp = 1050             # Celsius degrees
+min_service_temp = -273             # Celsius degrees
+fracture_tough = 63.8               # MPa*m^0.5
+thermal_shock_resist = 744          # Celsius degrees
+recycle = 0                         # 1->yes 0->no
+co2_eq = 2.57                       # (2.57 + 0) kg/kg
+
+
+[materials.material8]
+name = "Titanium_Alpha_Beta_alloy" # the annealed option is consider
+code = "Ti-6Al-4V"
+density =  4.43e3                   # kg/m^3
+price_per_kg = 23                   # avg EUR/kg 
+E = 112                             # Young's modulus in GPa
+G = 42.4                            # Shear modulus in GPa (Cruise Temp. is out-of-range)
+sigma_yield = 864                   # Yield Strenght MPa
+sigma_ult = 895                     # Ultimate Strenght MPa
+tau_max  = 582                      # Shear Strenght MPa  
+max_service_temp = 383              # Celsius degrees
+min_service_temp = -273             # Celsius degrees
+fracture_tough = 94.8               # MPa*m^0.5
+thermal_shock_resist = 831          # Celsius degrees
+recycle = 1                         # 1->yes 0->no
+co2_eq = 31.74                      # (24.9 + 6.84) kg/kg

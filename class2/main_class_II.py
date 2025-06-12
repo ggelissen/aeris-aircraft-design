@@ -36,8 +36,8 @@ def class_II_weight_estimation(params: DesignParameters,
 
         
         relative_difference = abs(W_TO_N_new - W_TO_N_current) / W_TO_N_new
-        print(f"Iteration {i+1}: W_TO_current = {W_TO_N_current:.2f} N, W_empty_calc = {W_empty_N_calculated:.2f} N, W_TO_new = {W_TO_N_new:.2f} N, Rel_Diff = {relative_difference:.6f}")
-
+        print("\n")
+        print(f"Iteration {i+1}: W_TO_current = {W_TO_N_current:.2f} N, W_empty_calc = {W_empty_N_calculated:.2f} N, W_TO_new = {W_TO_N_new:.2f} N, Rel_Diff = {relative_difference:.6f}")        
         if relative_difference < tolerance:
             print(f"Class II WTO converged in {i+1} iterations.")
             params.weight.W_TO = W_TO_N_new # Final update to params

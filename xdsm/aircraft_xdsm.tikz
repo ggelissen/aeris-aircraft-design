@@ -1,0 +1,264 @@
+
+%%% Preamble Requirements %%%
+% \usepackage{geometry}
+% \usepackage{amsfonts}
+% \usepackage{amsmath}
+% \usepackage{amssymb}
+% \usepackage{tikz}
+
+% Optional packages such as sfmath set through python interface
+% \usepackage{sfmath}
+
+% \usetikzlibrary{arrows,chains,positioning,scopes,shapes.geometric,shapes.misc,shadows}
+
+%%% End Preamble Requirements %%%
+
+\input{"/root/miniconda3/envs/vsppytools/lib/python3.10/site-packages/pyxdsm/diagram_styles"}
+\begin{tikzpicture}
+
+\matrix[MatrixSetup]{
+%Row 0
+&
+\node [DataIO] (output_opt) {$\mathbf{x^{(0)}}$};&
+\node [DataIO] (output_iterator) {$TLAR$};&
+\node [DataIO] (output_prelim_design) {$TLAR$};&
+&
+\node [DataIO] (output_structures) {$TRB$};&
+\node [DataIO] (output_propulsion) {$TRB$};&
+\node [DataIO] (output_flight_perf) {$TLAR$};&
+\node [DataIO] (output_climate) {$m_{fuel}$};&
+&
+&
+\\
+%Row 1
+\node [DataIO] (left_output_opt) {$\mathbf{x^*}$};&
+\node [Optimization] (opt) {$\text{0, 11-1: Optimizer}$};&
+&
+\node [DataInter,stack] (opt-prelim_design) {$M_{cr}, h_{cr}, A_w$};&
+&
+&
+\node [DataInter,stack] (opt-propulsion) {$M_{cr}, h_{cr}$};&
+&
+&
+&
+&
+\\
+%Row 2
+&
+&
+\node [MDA] (iterator) {$\text{1, 7-2: Iterator}$};&
+\node [DataInter,stack] (iterator-prelim_design) {$C_{L,max}, OEW, MTOW, TSFC$};&
+\node [DataInter,stack] (iterator-aero) {$MTOW$};&
+\node [DataInter,stack] (iterator-structures) {$GEOM_{CS}$};&
+\node [DataInter,stack] (iterator-propulsion) {$MTOW$};&
+\node [DataInter,stack] (iterator-flight_perf) {$MTOW$};&
+&
+&
+&
+\\
+%Row 3
+&
+&
+&
+\node [Function] (prelim_design) {$\text{2: Preliminary Design}$};&
+\node [DataInter,stack] (prelim_design-aero) {$C_{D0}, S_w$};&
+\node [DataInter,stack] (prelim_design-structures) {$n_{ult}, GEOM_c, W_c, X_c$};&
+\node [DataInter,stack] (prelim_design-propulsion) {$T_{TO}$};&
+&
+\node [DataInter,stack] (prelim_design-climate) {$T_{TO}$};&
+&
+&
+\\
+%Row 4
+&
+&
+\node [DataInter,stack] (aero-iterator) {$C_{L,max}, L/D$};&
+&
+\node [Function] (aero) {$\text{3: Aerodynamics}$};&
+\node [DataInter,stack] (aero-structures) {$C_L, C_D, C_M, GEOM_{HLD}$};&
+\node [DataInter,stack] (aero-propulsion) {$L/D$};&
+&
+&
+&
+&
+\\
+%Row 5
+&
+&
+\node [DataInter,stack] (structures-iterator) {$OEW$};&
+&
+&
+\node [Function] (structures) {$\text{4: Structures}$};&
+&
+\node [DataInter,stack] (structures-flight_perf) {$OEW$};&
+\node [DataInter,stack] (structures-climate) {$OEW$};&
+\node [DataInter,stack] (structures-cost) {$OEW$};&
+&
+\\
+%Row 6
+&
+&
+\node [DataInter,stack] (propulsion-iterator) {$TSFC, m_{eng}$};&
+&
+&
+&
+\node [Function] (propulsion) {$\text{5: Propulsion}$};&
+\node [DataInter,stack] (propulsion-flight_perf) {$TSFC$};&
+&
+&
+\node [DataInter,stack] (propulsion-constraints) {$dBN$};&
+\\
+%Row 7
+&
+\node [DataInter,stack] (flight_perf-opt) {$m_{fuel}$};&
+\node [DataInter,stack] (flight_perf-iterator) {$m_{fuel}, GEOM_{cs}$};&
+&
+&
+&
+&
+\node [Function] (flight_perf) {$\text{6: Flight Performance}$};&
+\node [DataInter,stack] (flight_perf-climate) {$m_{fuel}$};&
+\node [DataInter,stack] (flight_perf-cost) {$m_{fuel}, t_{bl}$};&
+&
+\\
+%Row 8
+&
+\node [DataInter,stack] (climate-opt) {$ATR_{100}$};&
+&
+&
+&
+&
+&
+&
+\node [Function] (climate) {$\text{8: Climate}$};&
+&
+&
+\\
+%Row 9
+&
+\node [DataInter,stack] (cost-opt) {$DOC$};&
+&
+&
+&
+&
+&
+&
+&
+\node [Function] (cost) {$\text{9: Cost}$};&
+\node [DataInter,stack] (cost-constraints) {$DOC$};&
+\\
+%Row 10
+&
+\node [DataInter,stack] (constraints-opt) {$g$};&
+&
+&
+&
+&
+&
+&
+&
+&
+\node [Function] (constraints) {$\text{10: Constraints}$};&
+\\
+%Row 11
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+&
+\\
+};
+
+% XDSM process chains
+{ [start chain=process]
+ \begin{pgfonlayer}{process} 
+\chainin (prelim_design);
+\chainin (aero) [join=by ProcessHVA];
+\chainin (structures) [join=by ProcessHVA];
+\chainin (propulsion) [join=by ProcessHVA];
+\chainin (flight_perf) [join=by ProcessHVA];
+\chainin (climate) [join=by ProcessHVA];
+\chainin (cost) [join=by ProcessHVA];
+\chainin (constraints) [join=by ProcessHVA];
+\end{pgfonlayer}
+}
+
+\begin{pgfonlayer}{data}
+\path
+% Horizontal edges
+(opt) edge [DataLine] (opt-prelim_design)
+(iterator) edge [DataLine] (iterator-prelim_design)
+(iterator) edge [DataLine] (iterator-aero)
+(prelim_design) edge [DataLine] (prelim_design-aero)
+(iterator) edge [DataLine] (iterator-structures)
+(prelim_design) edge [DataLine] (prelim_design-structures)
+(aero) edge [DataLine] (aero-structures)
+(opt) edge [DataLine] (opt-propulsion)
+(iterator) edge [DataLine] (iterator-propulsion)
+(prelim_design) edge [DataLine] (prelim_design-propulsion)
+(aero) edge [DataLine] (aero-propulsion)
+(iterator) edge [DataLine] (iterator-flight_perf)
+(structures) edge [DataLine] (structures-flight_perf)
+(propulsion) edge [DataLine] (propulsion-flight_perf)
+(prelim_design) edge [DataLine] (prelim_design-climate)
+(structures) edge [DataLine] (structures-climate)
+(flight_perf) edge [DataLine] (flight_perf-climate)
+(structures) edge [DataLine] (structures-cost)
+(flight_perf) edge [DataLine] (flight_perf-cost)
+(propulsion) edge [DataLine] (propulsion-constraints)
+(cost) edge [DataLine] (cost-constraints)
+(aero) edge [DataLine] (aero-iterator)
+(structures) edge [DataLine] (structures-iterator)
+(propulsion) edge [DataLine] (propulsion-iterator)
+(flight_perf) edge [DataLine] (flight_perf-iterator)
+(flight_perf) edge [DataLine] (flight_perf-opt)
+(climate) edge [DataLine] (climate-opt)
+(cost) edge [DataLine] (cost-opt)
+(constraints) edge [DataLine] (constraints-opt)
+(opt) edge [DataLine] (left_output_opt)
+% Vertical edges
+(opt-prelim_design) edge [DataLine] (prelim_design)
+(iterator-prelim_design) edge [DataLine] (prelim_design)
+(iterator-aero) edge [DataLine] (aero)
+(prelim_design-aero) edge [DataLine] (aero)
+(iterator-structures) edge [DataLine] (structures)
+(prelim_design-structures) edge [DataLine] (structures)
+(aero-structures) edge [DataLine] (structures)
+(opt-propulsion) edge [DataLine] (propulsion)
+(iterator-propulsion) edge [DataLine] (propulsion)
+(prelim_design-propulsion) edge [DataLine] (propulsion)
+(aero-propulsion) edge [DataLine] (propulsion)
+(iterator-flight_perf) edge [DataLine] (flight_perf)
+(structures-flight_perf) edge [DataLine] (flight_perf)
+(propulsion-flight_perf) edge [DataLine] (flight_perf)
+(prelim_design-climate) edge [DataLine] (climate)
+(structures-climate) edge [DataLine] (climate)
+(flight_perf-climate) edge [DataLine] (climate)
+(structures-cost) edge [DataLine] (cost)
+(flight_perf-cost) edge [DataLine] (cost)
+(propulsion-constraints) edge [DataLine] (constraints)
+(cost-constraints) edge [DataLine] (constraints)
+(aero-iterator) edge [DataLine] (iterator)
+(structures-iterator) edge [DataLine] (iterator)
+(propulsion-iterator) edge [DataLine] (iterator)
+(flight_perf-iterator) edge [DataLine] (iterator)
+(flight_perf-opt) edge [DataLine] (opt)
+(climate-opt) edge [DataLine] (opt)
+(cost-opt) edge [DataLine] (opt)
+(constraints-opt) edge [DataLine] (opt)
+(opt) edge [DataLine] (output_opt)
+(iterator) edge [DataLine] (output_iterator)
+(prelim_design) edge [DataLine] (output_prelim_design)
+(structures) edge [DataLine] (output_structures)
+(propulsion) edge [DataLine] (output_propulsion)
+(flight_perf) edge [DataLine] (output_flight_perf)
+(climate) edge [DataLine] (output_climate);
+\end{pgfonlayer}
+
+\end{tikzpicture}

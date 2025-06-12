@@ -2,6 +2,8 @@
 import math as m
 import numpy as np
 import yaml
+import toml
+import json
 
 
 class DesignParameters:
@@ -28,8 +30,7 @@ class DesignParameters:
         self.inertia_matrix = None
         self.structurecoords = None
         self.fueltank = FuelTank()
-
-
+        self.cruise_aoa = None
 
         # Subsystem Parameters
         self.cg = CGParameters()  # Center of Gravity Parameters
@@ -43,6 +44,7 @@ class DesignParameters:
         self.control_surface = ControlSurfaceParameters()
         self.stability_aero = StabilityAerodynamicParameters()
         self.inertia = IntertiaParameters()
+        self.materials = MaterialsParameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -73,6 +75,7 @@ class DesignParameters:
         self.max_eq_velocity = config.get('max_eq_velocity') 
         self.max_load_factor = config.get('max_load_factor')
         self.crit_mach = config.get('crit_mach')
+        self.cruise_aoa = config.get('cruise_aoa')
 
         # Load subsystem parameters
         # if 'cg' in config:
@@ -95,6 +98,8 @@ class DesignParameters:
             self.cg.load_from_dict(config.get('cg', {}))
         if 'stability_aero' in config:
             self.stability_aero.load_from_dict(config.get('stability_aero', {}))
+        if 'materials' in config:
+            self.materials = config.get('materials', {})
 
     def update_parameter(self, parameter_name, value):
         """
@@ -124,6 +129,16 @@ class DesignParameters:
             if current is None:
                 raise AttributeError(f"Parameter '{parameter_name}' not found.")
         return current   
+    
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the object.
+        """
+        # Create a dictionary from the object's attributes
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        
+        # Use json.dumps for a nicely formatted, indented string
+        return json.dumps(attrs, indent=4, default=lambda o: o.__dict__)
 
 class WeightParameters:
     """
@@ -140,18 +155,28 @@ class WeightParameters:
         self.W_S = 2563                             # Wing Loading in N/m^2
         self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.5793                          # Maximum Fuel Fraction
-        self.Fuel_Fuselage_Fraction = 0.5           # Fraction of fuel in fuselage
+        self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
         self.W_tfo = None                           # Trapped Fuel and Oil Fraction
         self.W_F_used = None                        # Used Fuel Weight in N
         self.W_F_res = None                         # Reserve Fuel Weight in N
-        self.M_TO = self.W_TO / 9.80665                # Maximum Take-Off Mass in kg
+        self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
+        self.W_fus = None                           # Fuselage weight in N
+        self.W_wing = None                          # Wing weight in N
 
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WeightParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+
 
 class WingParameters:
     """
@@ -162,7 +187,7 @@ class WingParameters:
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
         self.S_ref = self.S_w
-        self.A_w_target = 9.0                             # Aspect Ratio (INITIAL)
+        self.A_w_target =9.0                              # Aspect Ratio (INITIAL)
         self.A_w_actual = None                      # Because addition of yehudi and winglets change aspect ratio. During iteration, optimise such that target=actual
         if self.S_w is not None and self.A_w_target is not None:
             self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
@@ -177,8 +202,10 @@ class WingParameters:
         self.Lambda_05_w = 0.607                           # Wind half-chord sweep angle in rad
         self.Lambda_0_w =None                       # Wing leading edge sweep angle in rad
         self.t_c_w_max = None
+        self.de_da = None                         # Downwash effect on the lift coefficient.
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
+        self.CL = None                          # Design CL of aircraft
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
         self.list_of_airfoils = {
@@ -229,13 +256,23 @@ class WingParameters:
         self.C_D0 = 0.017196 
         self.e = 0.9         #oswald efficiency factor
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
+        self.skin_thickness = 0.0015  # Wing Skin Thickness in m
+        self.Mach_cross = 0.935
+        self.epsilon_t = 0         # Wing twist angle [degrees]
 
         
-
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+
 
 class PerformanceParameters:
     """
@@ -267,6 +304,14 @@ class PerformanceParameters:
             if hasattr(self, key):
                 setattr(self, key, value)
 
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
+
 class FuselageParameters:
     """
     Class to hold fuselage-related parameters for the aircraft design.
@@ -274,6 +319,11 @@ class FuselageParameters:
     """
     def __init__(self):
         self.l_f = 10                           # Fuselage Length in m
+        self.lh = None                          # Dist from wing to hor. stabilizer
+        self.C_m_ac = None                       # Moment coefficient at the aerodynamic center.
+        self.x_ac = None                        # Aerodynamic center of the aircraft.
+        self.x_payload = None                   # x-coordinate of Center of gravity of payload
+        self.x_fuselage = None                  # x-coordinate of Center of gravity of fuselage
 
         # Fuselage Cross Sections:
         self.crosssections = {
@@ -308,6 +358,14 @@ class FuselageParameters:
             if hasattr(self, key):
                 setattr(self, key, value)
 
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
+
 class EngineParameters:
     """
     Class to hold engine-related parameters for the aircraft design.
@@ -319,12 +377,13 @@ class EngineParameters:
         # self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
         self.T_TO = 7535                    # Thrust at Take-Off in N
         self.cruise_thrust_setting = None           # Thrust setting for cruise
-        self.engine_weight =   None                 # Engine Weight in N
+        self.engine_weight =   234.05                 # Engine Weight in N
         self.engine_max_thrust = 9340               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
         self.nacelle_diameter = None
         self.nacelle_length = None
+        self.fuel_density = None                    # Fuel density depending on fuel type (A1, SAF, etc)
         self.cruise_tsfc = None                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
         self.nacelle_blend_par = -0.4               # Parameter specifying the blend of the nacelle with the fuselage
@@ -336,14 +395,52 @@ class EngineParameters:
         self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
         self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
         self.eta_fanturb = 0.9  
+<<<<<<< HEAD
         self.tt4to = 1450 #tt4 temp at takeoff
         self.engine_id = None
+=======
+        self.tt4to = 1400 #tt4 temp at takeoff   
+        self.prfan = 1.9           
+        self.prlpc = 1.5
+        self.prhpc = 5.65 
+        self.tt4start = 850
+        self.tt4taxi = 900
+        self.tt4climb = 1300
+        self.tt4cruise = 1200
+        self.tt4descent = 900
+        self.tt4landing = 1000
+        self.lhv = 43.e6
+        self.etafan = 0.915
+        self.etalpc = 0.9
+        self.etahpc = 0.9
+        self.etahpt = 0.93
+        self.etalpt = 0.93
+        self.etacom = 0.99
+        self.etamechl = 0.99
+        self.etamechh = 0.99
+        self.prcom = 0.99
+        self.prinlet = 0.98
+        self.bleedto = 0. 
+        self.power_tol = 0.
+        self.power_toh = 0.
+        self.cooling_l = 0.
+        self.cooling_h = 0.
+        self.cruise_thrust = 1800 #N
+>>>>>>> origin/main
 
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
 
 class EmpennageParameters:
     """
@@ -352,17 +449,21 @@ class EmpennageParameters:
     """
     def __init__(self, l_f: float = None):
         # TODO: Change to V-Tail, remove horizontal and vertical stabilizer parameters, which are still used in some part of the code
+        # ^^ no right? V-tail is combination of hor. tail and vert. tail size?
         self.S_h =    1.39                          # Horizontal Stabilizer Area in m^2
         self.S_v =   2.16                          # Vertical Stabilizer Area in m^2
         self.V_h = 0.7 #estimation                             # V-Tail Volume Coefficient
         self.V_v = 0.05 #estimation                             # Horizontal Stabilizer Volume Coefficient
+        self.Cl_alpha = None                          # Hor. Stabilizer cl alpha curve
+        self.CL_h = None                              # Design CL of hor. stabilizer.
         self.S_t = 2                             # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
         self.type = 'fixed'
+        self.Vh_v = None                             # Ratio of (hor.) tail speed to free stream speed.
 
         # V_Tail:
-        self.b_v = 3.0                            # V_Tail Span in m
+        self.b_v = 3.0                            # V_Tail Span in m TODO, computed in preliminary_sizing_tail.py, shouldnt be a magic number
         self.c_t = 1.0                             # V-Tail Tip Chord in m
         self.c_r = 1.5                             # V-Tail Root Chord in m
         self.wetted_area = None                         # V-Tail Wetted Area in m^2, to be calculated by the OpenVSP CompGeom function, taking into account part of stabilizer inside fuselage
@@ -378,11 +479,21 @@ class EmpennageParameters:
         self.vtail_dihedral = np.deg2rad((110 - 180)/-2) #placeholder                  # V-Tail Dihedral Angle in radians
         self.L_v = 0.45* l_f                         #Moment arm vertical stabilizer
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
+        self.z_v = 0.5*self.b_v #TODO this is a placeholder for distance between tail a/c and cg vertically
+        self.tailid = None
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+
 
 class LandingGearParameters:
     """
@@ -401,10 +512,10 @@ class LandingGearParameters:
         self.psi_mlg = None                         # Main Landing Gear Pressure in psi
         self.psi_nlg = None                         # Nose Landing Gear Pressure in psi
         self.LCN = 11                               # Load Classification Number
-        self.scrape_angle  = 15                 # Scrape Angle in degrees, used for the nose wheel  
-        self.tipback_angle = 15                 # Tipback Angle in degrees, used for the nose wheel
-        self.lat_tipover_angle = 7                # Lateral Tipover Angle in degrees, used for the nose wheel
-        self.overturn_angle = 55
+        self.scrape_angle  = 15  * np.pi/180               # Scrape Angle in radians, used for the nose wheel  
+        self.tipback_angle = 15  * np.pi/180               # Tipback Angle in radians, used for the nose wheel
+        self.lat_tipover_angle = 7 * np.pi/180                # Lateral Tipover Angle in radians, used for the nose wheel
+        self.overturn_angle = 55 * np.pi/180  # Overturn Angle in radians, used for the main wheel
         self.static_frac_nlg = 0.08                     # Static Load Fraction on Nose Landing Gear
         self.static_frac_mlg = 1 - self.static_frac_nlg      # Static Load Fraction on Main Landing Gear
 
@@ -413,6 +524,14 @@ class LandingGearParameters:
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
 
 class ControlSurfaceParameters:
     """
@@ -432,6 +551,14 @@ class ControlSurfaceParameters:
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+    
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
 
 class CGParameters:
     """
@@ -456,6 +583,14 @@ class CGParameters:
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+    def __repr__(self):
+            """
+            Provides a developer-friendly string representation of the WingParameters object.
+            """
+            attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+            return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
 
 class WingSectionParameters:
     def __init__(self):
@@ -491,6 +626,7 @@ class Wingribs:
             "Rib4": {"x_pos_frac": 0.8, "t_mm": 2},
         }
         self.num_ribs = len(self.ribs)
+
 class Control:
     def __init__(self, x_mlg, x_cg):
         self.CLah = None
@@ -508,6 +644,14 @@ class Control:
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
 
 class IntertiaParameters:
     def __init__(self, W_TO :float = None, g :float = None):
@@ -533,10 +677,10 @@ class StabilityAerodynamicParameters:
         # Longitudinal Derivatives
         self.CX0 = None       
         self.CZ0 = None       
-        self.CXu = None
-        self.CZu = None
+        self.CXu = None #from cd-mach curve from alejandro
+        self.CZu = None 
         self.Cmu = None
-        self.CXa = None # Often dCX/dalpha
+        self.CXa = None         # Often dCX/dalpha
         self.CZa = None         # = CLa (if using stability axes and thrust effects on Z are small)
         self.CXq = None
         self.CZq = None
@@ -557,18 +701,26 @@ class StabilityAerodynamicParameters:
         self.Clr = None       # Rolling moment due to yaw rate
         self.Cnr = None       # Yawing moment due to yaw rate (yaw damping)
         
-        # Lateral-Directional Control Derivatives (optional for basic stability, needed for control response)
-        self.CYda = None
-        self.Clda = None      # Aileron effectiveness
-        self.Cnda = None
-        self.CYdr = None
-        self.Cldr = None
-        self.Cndr = None      # Rudder effectiveness
+        # # Lateral-Directional Control Derivatives (optional for basic stability, needed for control response)
+        # self.CYda = None
+        # self.Clda = None      # Aileron effectiveness
+        # self.Cnda = None
+        # self.CYdr = None
+        # self.Cldr = None
+        # self.Cndr = None      # Rudder effectiveness
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
 
 class FlapGroup:
     def __init__(self, spanwise_pos_frac_inbound: float = None, spanwise_pos_frac_outbound: float = None,
@@ -578,6 +730,13 @@ class FlapGroup:
         self.spanwise_pos_frac_outbound = spanwise_pos_frac_outbound
         self.flapwidth = flapwidth # meter
 
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
 
 class FuelTank:
     def __init__(self):
@@ -588,3 +747,50 @@ class FuelTank:
         self.frac_pos_along_span_outboard = 0.7802
         self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
 
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))
+    
+
+class MaterialsParameters():
+    def __init__(self):
+        # Open VSP materials library is used to get the material properties
+        file_path =  "materials_library.toml"
+        with open(file_path, 'r') as f:
+            data = toml.load(f)
+        
+        # Load materials data from the TOML file
+        materials_data = data["materials"]
+
+        # Set the material name to DESIRED material
+        self.material_name = "Aluminium_2024_T3_wrought"
+
+        for mat_id, mat in materials_data.items():
+            if mat["name"].lower() == self.material_name.lower():
+                self.material = mat
+
+        # Get material properties
+        self.material_code = self.material["code"]                                  # Material code
+        self.material_density = self.material["density"]                            # Density in kg/m^3
+        self.material_E = self.material["E"]                                        # Young's Modulus in Pa
+        self.material_G = self.material["G"]                                        # Shear Modulus in Pa
+        self.material_price_kg = self.material["price_per_kg"]                      # Price per kg in EUR 
+        self.material_sigma_yield = self.material["sigma_yield"]                    # Yield Strenght MPa
+        self.material_sigma_ult = self.material["sigma_ult"]                        # Ultimate Strenght MPa
+        self.material_tau_max = self.material["tau_max"]                            # Shear Strenght MPa
+        self.material_max_service_temp = self.material["max_service_temp"]          # Celsius degrees
+        self.material_min_service_temp = self.material["min_service_temp"]          # Celsius degrees
+        self.material_fracture_tough = self.material["fracture_tough"]              # MPa*m^0.5
+        self.material_thermal_shock_resist = self.material["thermal_shock_resist"]  # Celsius degrees
+        self.material_recycle = self.material["recycle"]                            # 1->yes 0->no
+        self.material_co2_eq = self.material["co2_eq"]                                    # kg/kg
+
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation of the WingParameters object.
+        """
+        attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
+        return json.dumps(attrs, indent=4, default=lambda o: str(o))

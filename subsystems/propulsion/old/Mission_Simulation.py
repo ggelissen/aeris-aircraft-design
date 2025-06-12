@@ -1,21 +1,70 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-import pprint
+
 from math import sqrt, nan, isnan # Added nan, isnan for handling potential NaN values
 import sys # For potential path debugging
 import os  # For potential path debugging
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))) 
 from utils.unit_conversions import *
 from design_variables import DesignParameters
-# Attempt to import the actual gpr module.
-# Ensure 'gas_property_relations.py' is located in a subdirectory path like:
-# your_project_root/subsystems/propulsion/gas_property_relations.py
-# And that your_project_root is in Python's sys.path or your PYTHONPATH,
-# or that the 'subsystems' directory is in the same directory as this script.
-import gas_property_relations as gpr
 
+import gas_property_relations as gpr
+import numpy as np
+# --- ISA Atmosphere and Humidity Calculation ---
+class atmosphere:
+    @staticmethod
+    def temperature(h, delta_t_0=0.):
+        """
+        Returns ISA temperature at altitude h (meters), optionally with deviation delta_t_0 (K).
+        """
+        # Troposphere up to 11km
+        if h < 11000:
+            t = 288.15 - 0.0065 * h
+        else:
+            t = 216.65
+        return t + delta_t_0
+
+    @staticmethod
+    def pressure(h):
+        """
+        Returns ISA pressure at altitude h (meters).
+        """
+        # Troposphere up to 11km
+        if h < 11000:
+            p = 101325 * (1 - 0.0065 * h / 288.15) ** 5.2561
+        else:
+            p = 22632.1 * np.exp(-9.80665 * (h - 11000) / (287.05 * 216.65))
+        return p
+
+    @staticmethod
+    def saturation_vapor_pressure(t):
+        """
+        Returns saturation vapor pressure (Pa) at temperature t (K).
+        """
+        t_c = t - 273.15
+        return 610.94 * np.exp(17.625 * t_c / (t_c + 243.04))
+
+# --- NOx Emission Index Calculation (Dallara/Schwartz/Kroo) ---
+def ei_nox_dallara(pt_3, tt_3, h, relative_humidity=0.6, delta_t_isa=0.,
+                   reduction_factor=0., lhv=43031.e3, lhv_ref=43031.e3):
+    """
+    Determines the NOx emission index according to Dallara/Schwartz/Kroo.
+
+    :param pt_3: Total pressure before combustor in Pa
+    :param tt_3: Total temperature before combustor in K
+    :param h: Altitude in m
+    :param relative_humidity: Relative humidity (0-1)
+    :param delta_t_isa: ISA deviation in K
+    :param reduction_factor: Fractional reduction in NOx (e.g. 0.4 for 40%)
+    :param lhv: Lower heating value of fuel (J/kg)
+    :param lhv_ref: Reference LHV (J/kg)
+    :return: Emission index of NOx in kg/kg
+    """
+    ei = (2+28.5*((pt_3/1000)/3100)**0.5 * np.exp((tt_3-825)/250))/1000
+
+
+    return ei
 # --- The placeholder gpr class is removed, as we are attempting to use the import above. ---
 
 # --- Emissions Calculation Code (from emissions.py) ---
@@ -88,7 +137,7 @@ def emissions(mdot_f, ei_nox,
 # --- End of Emissions Calculation Code ---
 
 
-# --- Turbofan Analysis Code (from turbofan_parametric_analysis.py) ---
+# --- Turbofan Analysis Code) ---
 def turbofan_parametric_analysis(
         mach_0, ts_0, ps_0,  # flight conditions
         bpr, pr_fan, pr_lpc, pr_hpc, tt_4,  # design variables
@@ -175,7 +224,7 @@ def turbofan_parametric_analysis(
         den_tau_m1 = ((1. - bleed_to - cooling_l - cooling_h) * (1. + far_4) + cooling_h)
         if den_tau_m1 != 0:
             tau_m1_num = (((1. - bleed_to - cooling_l - cooling_h) * (1. + far_4) +
-                       cooling_h * tau_0 * tau_lpc * tau_hpc / tau_lambda))
+                           cooling_h * tau_0 * tau_lpc * tau_hpc / tau_lambda))
             if not isnan(tau_m1_num):
                 tau_m1 = tau_m1_num / den_tau_m1
 
@@ -185,13 +234,13 @@ def turbofan_parametric_analysis(
        not isnan(tau_0) and not isnan(tau_fan) and not isnan(tau_lpc) and not isnan(tau_hpc) and \
        not isnan(eta_mech_h) and not isnan(bpr) and not isnan(power_toh):
         den_tau_hpt_expr_val_part = ((1. - bleed_to - cooling_h - cooling_l) * (1. + far_4) +
-                                 cooling_h * tau_0 * tau_lpc * tau_hpc / tau_lambda)
+                                  cooling_h * tau_0 * tau_lpc * tau_hpc / tau_lambda)
         if not isnan(den_tau_hpt_expr_val_part):
             den_tau_hpt_expr = eta_mech_h * tau_lambda * den_tau_hpt_expr_val_part
             if den_tau_hpt_expr != 0:
                 tau_hpt_num = (tau_0 * tau_fan * tau_lpc * (tau_hpc - 1.) + (1. + bpr) * power_toh)
                 if not isnan(tau_hpt_num):
-                     tau_hpt = (1. - tau_hpt_num / den_tau_hpt_expr)
+                    tau_hpt = (1. - tau_hpt_num / den_tau_hpt_expr)
 
     ht_41 = ht_4 * tau_m1 if not (isnan(ht_4) or isnan(tau_m1)) else nan
     
@@ -212,9 +261,9 @@ def turbofan_parametric_analysis(
     ht_44 = ht_41 * tau_hpt if not (isnan(ht_41) or isnan(tau_hpt)) else nan
     delta_h_hpt = ht_44 - ht_41 if not (isnan(ht_44) or isnan(ht_41)) else nan
     state_44 = gpr.prescribed_delta_h(p_in=pt_41, t_in=tt_41,
-                                      delta_h=delta_h_hpt,
-                                      eta_pol=eta_hpt,
-                                      gas="kerosene_in_air", far=far_41)
+                                     delta_h=delta_h_hpt,
+                                     eta_pol=eta_hpt,
+                                     gas="kerosene_in_air", far=far_41)
     pt_44 = state_44["p_out"]
     tt_44 = state_44["t_out"]
 
@@ -310,11 +359,11 @@ def turbofan_parametric_analysis(
         
         g_ts9 = gpr.gamma_gas(ts_9, gas="kerosene_in_air", far=far_9) if not isnan(ts_9) else nan
         if not (isnan(g_ts9) or g_ts9 == 1 or isnan(tt_9) or isnan(ts_9) or ts_9 == 0):
-             t_ratio_ts9 = tt_9 / ts_9
-             if t_ratio_ts9 >=0:
-                 p_total_static_ratio_ts9 = t_ratio_ts9 ** (g_ts9 / (g_ts9 - 1.))
-                 ps_9 = pt_9 / p_total_static_ratio_ts9 if p_total_static_ratio_ts9 != 0 else ps_0
-             else: ps_9 = ps_0 # Fallback if t_ratio is negative
+            t_ratio_ts9 = tt_9 / ts_9
+            if t_ratio_ts9 >=0:
+                p_total_static_ratio_ts9 = t_ratio_ts9 ** (g_ts9 / (g_ts9 - 1.))
+                ps_9 = pt_9 / p_total_static_ratio_ts9 if p_total_static_ratio_ts9 != 0 else ps_0
+            else: ps_9 = ps_0 # Fallback if t_ratio is negative
         else: ps_9 = ps_0 
 
         a_9 = gpr.s_o_s(ts_9, gas="kerosene_in_air", far=far_9) if not isnan(ts_9) else nan
@@ -372,7 +421,7 @@ def turbofan_parametric_analysis(
             
             sf_pressure_core = 0.0
             if not (isnan(rho_9) or rho_9 == 0 or isnan(v_9) or v_9 == 0):
-                 sf_pressure_core = (ps_9 - ps_0) * (1 - bleed_to) * (1. + far_4) / (rho_9 * v_9)
+                sf_pressure_core = (ps_9 - ps_0) * (1 - bleed_to) * (1. + far_4) / (rho_9 * v_9)
 
             sf_pressure_bypass = 0.0
             if not (isnan(rho_19) or rho_19 == 0 or isnan(v_19) or v_19 == 0):
@@ -421,7 +470,7 @@ def turbofan_parametric_analysis(
         pr_fan=pr_fan, pr_lpc=pr_lpc, pr_hpc=pr_hpc, opr=opr,
         far_4=far_4, tsfc=tsfc, sf=sf,
         v_9=v_9, v_19=v_19,
-        tt_3=tt_3, tt_5=tt_5, tt_9=tt_9, tt_19=tt_19,
+        tt_3=tt_3, tt_5=tt_5, tt_9=tt_9, tt_19=tt_19, # tt_3 and tt_4 already here
         eta_thermal=eta_thermal, eta_propulsive=eta_propulsive, eta_overall=eta_overall,
         # Adding more variables that were in the original detailed output for reference
         pt_0=pt_0, pt_2=pt_2, pt_13=pt_13, pt_25=pt_25, pt_3=pt_3, pt_4=pt_4,
@@ -447,28 +496,29 @@ def print_detailed_results(results, engine_name="Engine Run"):
     output_dict = results[5] if len(results) > 5 else {}
 
     print(f"\n--- {engine_name}: Performance Metrics ---")
-    print(f"  Specific Thrust (SF):                       {sf:.2f} N/(kg/s)" if not isnan(sf) else "  Specific Thrust (SF):                       N/A")
-    print(f"  Thrust Specific Fuel Consumption (TSFC):    {tsfc*1e6:.2f} mg/(N·s)" if not isnan(tsfc) else "  Thrust Specific Fuel Consumption (TSFC):    N/A")
-    print(f"  Thermal Efficiency (eta_thermal):           {eta_thermal*100:.2f}%" if not isnan(eta_thermal) else "  Thermal Efficiency (eta_thermal):           N/A")
-    print(f"  Propulsive Efficiency (eta_propulsive):     {eta_propulsive*100:.2f}%" if not isnan(eta_propulsive) else "  Propulsive Efficiency (eta_propulsive):     N/A")
-    print(f"  Overall Efficiency (eta_overall):           {eta_overall*100:.2f}%" if not isnan(eta_overall) else "  Overall Efficiency (eta_overall):           N/A")
+    print(f"  Specific Thrust (SF):                           {sf:.2f} N/(kg/s)" if not isnan(sf) else "  Specific Thrust (SF):                           N/A")
+    print(f"  Thrust Specific Fuel Consumption (TSFC):        {tsfc*1e6:.2f} mg/(N·s)" if not isnan(tsfc) else "  Thrust Specific Fuel Consumption (TSFC):        N/A")
+    print(f"  Thermal Efficiency (eta_thermal):               {eta_thermal*100:.2f}%" if not isnan(eta_thermal) else "  Thermal Efficiency (eta_thermal):               N/A")
+    print(f"  Propulsive Efficiency (eta_propulsive):         {eta_propulsive*100:.2f}%" if not isnan(eta_propulsive) else "  Propulsive Efficiency (eta_propulsive):         N/A")
+    print(f"  Overall Efficiency (eta_overall):               {eta_overall*100:.2f}%" if not isnan(eta_overall) else "  Overall Efficiency (eta_overall):               N/A")
     
     opr_val = output_dict.get('opr', nan)
-    print(f"  Overall Pressure Ratio (OPR):               {opr_val:.2f}" if not isnan(opr_val) else "  Overall Pressure Ratio (OPR):               N/A")
+    print(f"  Overall Pressure Ratio (OPR):                   {opr_val:.2f}" if not isnan(opr_val) else "  Overall Pressure Ratio (OPR):                   N/A")
 
     if output_dict: 
         print(f"\n--- {engine_name}: Selected Cycle Parameters (from output_dict) ---")
         # Define an order for printing, grouping related parameters
         ordered_keys = [
-            'mach_0', 'ts_0', 'ps_0', 'bpr', 'tt_4', 'lhv',
+            'mach_0', 'ts_0', 'ps_0', 'bpr', 'tt_4', 'lhv', # tt_4 is already here
             'pr_inl', 'pr_fan', 'pr_lpc', 'pr_hpc', 'pr_com', 'opr',
             'eta_fan', 'eta_lpc', 'eta_hpc', 'eta_hpt', 'eta_lpt',
             'eta_com', 'eta_mech_l', 'eta_mech_h',
             'bleed_to', 'power_tol', 'power_toh', 'cooling_l', 'cooling_h',
             'tau_0', 'tau_fan', 'tau_lpc', 'tau_hpc', 'tau_m1', 'tau_hpt', 'tau_m2', 'tau_lpt',
-            'far_4', 'far_41', 'far_45', # far_45 might be missing from dict if not calculated
+            'far_4', 'far_41', 'far_45', 
             'tt_0', 'pt_0', 'tt_2', 'pt_2', 'tt_13', 'pt_13', 'tt_25', 'pt_25',
-            'tt_3', 'pt_3', 'tt_41', 'pt_41', 'tt_44', 'pt_44', 'tt_45', 'pt_45',
+            'tt_3', 'pt_3', # Added tt_3 here
+            'tt_41', 'pt_41', 'tt_44', 'pt_44', 'tt_45', 'pt_45',
             'tt_5', 'pt_5', 'tt_9', 'pt_9', 'tt_19', 'pt_19',
             'v_9', 'v_19',
             'sf', 'tsfc', 'eta_thermal', 'eta_propulsive', 'eta_overall'
@@ -498,17 +548,18 @@ def run_mission_simulation(params: DesignParameters):
     print("Starting Aircraft Mission Emissions Simulation...\n")
 
     baseline_engine_config = {
-        "bpr": 3.3, "pr_fan": 1.9, "pr_lpc": 1.5, "pr_hpc": 5.65, "tt_4": 1400., # tt_4 is max design TIT
-        "eta_fan": 0.915, "eta_lpc": 0.9, "eta_hpc": 0.9,
-        "eta_hpt": 0.93, "eta_lpt": 0.93,
-        "eta_com": 0.99, "eta_mech_l": 0.99, "eta_mech_h": 0.99,
-        "pr_com": 0.95, "pr_inl": 0.98,
-        "bleed_to": 0., "power_tol": 0., "power_toh": 0.,
-        "cooling_l": 0., "cooling_h": 0.,
-        "lhv": 43.e6, 
+        "bpr": params.engine.Bpr, "pr_fan": params.engine.prfan, "pr_lpc": params.engine.prlpc, "pr_hpc": params.engine.prhpc, "tt_4": 1400., # tt_4 is max design TIT
+        "eta_fan": params.engine.etafan, "eta_lpc": params.engine.etalpc, "eta_hpc": params.engine.etahpc,
+        "eta_hpt": params.engine.etahpt, "eta_lpt": params.engine.etalpt,
+        "eta_com": params.engine.etacom, "eta_mech_l": params.engine.etamechl, "eta_mech_h": params.engine.etamechh,
+        "pr_com": params.engine.prcom, "pr_inl": params.engine.prinlet,
+        "bleed_to": params.engine.bleedto, "power_tol": params.engine.power_tol, "power_toh": params.engine.power_toh,
+        "cooling_l": params.engine.cooling_l, "cooling_h": params.engine.cooling_h,
+        "lhv": params.engine.lhv, 
         "full_output": True
     }
-    T_to = params.engine.T_TO #N, takeoff thrust 
+    T_to = params.engine.T_TO
+    T_cruise = params.engine.cruise_thrust #N, takeoff thrust 
     mission_segments = [
         {
             "name": "Engine Start & Warm-Up", "duration_minutes": 10,
@@ -528,26 +579,26 @@ def run_mission_simulation(params: DesignParameters):
             "name": "Take-off", "duration_minutes": 5,
             "target_thrust_N": T_to, # Given
             "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, 
-            "engine_params_override": {"tt_4": 1450, "pr_fan": 2.0, "pr_hpc": 6.0}, # Max TIT, slightly increased PRs
+            "engine_params_override": {"tt_4": 1400}, # Max TIT, slightly increased PRs
             "ei_nox": 0.020 
         },
         {
             "name": "Climb", "duration_minutes": 20,
             "target_thrust_N": 0.85*T_to , # Approx 85% of 9220N
             "flight_conditions": {"mach_0": 0.65, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
-            "engine_params_override": {"tt_4": 1350},
+            "engine_params_override": {"tt_4": 1300},
             "ei_nox": 0.018
         },
         {
             "name": "Cruise", "duration_minutes": 400,
-            "target_thrust_N": 0.3*T_to, # Approx 30% of 9220N
-            "flight_conditions": {"mach_0": 0.80, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
-            "engine_params_override": {"tt_4": 1250}, 
+            "target_thrust_N": T_cruise, # Approx 30% of 9220N
+            "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
+            "engine_params_override": {"tt_4": 1200}, 
             "ei_nox": 0.012
         },
         {
             "name": "Diversion Cruise (460km)", "duration_minutes": 34, # Approx. for 460km @ M0.75 / 30000ft
-            "target_thrust_N": 2000, # Estimated for diversion cruise
+            "target_thrust_N": T_cruise, # Estimated for diversion cruise
             "flight_conditions": {"mach_0": 0.75, "ts_0": 228.7, "ps_0": 30090}, # 30000ft
             "engine_params_override": {"tt_4": 1200},
             "ei_nox": 0.011
@@ -574,7 +625,7 @@ def run_mission_simulation(params: DesignParameters):
             "ei_nox": 0.008
         },
         {
-            "name": "Taxi & Shutdown (at Diversion Airport)", "duration_minutes": 5,
+            "name": "Taxi & Shutdown (at Diversion Airport)", "duration_minutes": 15,
             "target_thrust_N": 0.07*T_to, # Approx 7% of 7540N
             "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, 
             "engine_params_override": {"tt_4": 850},
@@ -589,6 +640,8 @@ def run_mission_simulation(params: DesignParameters):
     
     print("Attempting to use the external 'subsystems.propulsion.gas_property_relations' module.")
     print("If this script fails with a ModuleNotFoundError, ensure the module is correctly placed and accessible.\n")
+
+    tsfc_lst = np.array([]) # Initialize TSFC list for all segments
 
     for segment_idx, segment in enumerate(mission_segments): # Added enumerate for segment index
         print(f"--- Processing Segment {segment_idx + 1}: {segment['name']} ---")
@@ -628,15 +681,16 @@ def run_mission_simulation(params: DesignParameters):
         if isnan(tsfc) or tsfc <= 0: 
             print(f"  Warning: Invalid or zero TSFC ({tsfc}) calculated for segment {segment['name']}. Emissions will be NaN.")
             if tf_results is not None and len(tf_results) > 5:
-                 print_detailed_results(tf_results, f"Details for {segment['name']} (Invalid TSFC)")
+                print_detailed_results(tf_results, f"Details for {segment['name']} (Invalid TSFC)")
 
             mdot_f = nan
             segment_emissions_data = emissions(mdot_f, segment["ei_nox"], dt=dt_seconds)
             # segment_fuel_kg remains nan
-        else:
+        else: # Valid TSFC path
             mdot_f = segment["target_thrust_N"] * tsfc
             segment_fuel_kg = mdot_f * dt_seconds # Calculate fuel for this segment
             print(f"  Flight Conditions: M0={current_engine_params['mach_0']}, Ts0={current_engine_params['ts_0']:.2f}K, Ps0={current_engine_params['ps_0']:.0f}Pa")
+            tsfc_lst = np.append(tsfc_lst, tsfc) # Append valid TSFC to the list
             print(f"  Calculated TSFC: {tsfc:.4e} (kg_fuel/s)/N")
             print(f"  Target Thrust: {segment['target_thrust_N']:.0f} N")
             print(f"  Calculated Fuel Flow (mdot_f): {mdot_f:.4f} kg/s")
@@ -648,21 +702,26 @@ def run_mission_simulation(params: DesignParameters):
             for species, mass in segment_emissions_data.items():
                 if species.startswith("m_"): 
                     print(f"    {species}: {mass:.4f}" if not isnan(mass) else f"    {species}: NaN")
+            
+            # --- Added this block to print detailed results for successful segments ---
+            if tf_results is not None and len(tf_results) > 5:
+                print_detailed_results(tf_results, f"Details for {segment['name']} (Successful TSFC)")
+            # ----------------------------------------------------------------------
         
         # Accumulate total fuel
         if not isnan(segment_fuel_kg):
             if not isnan(total_fuel_used_kg): # Only add if total is not already NaN
-                 total_fuel_used_kg += segment_fuel_kg
+                total_fuel_used_kg += segment_fuel_kg
         else:
             total_fuel_used_kg = nan # If any segment fuel is NaN, total becomes NaN
 
 
         for species_mass_key in total_mission_emissions.keys():
             if not isnan(segment_emissions_data.get(species_mass_key, nan)): 
-                 if not isnan(total_mission_emissions[species_mass_key]): # Only add if total for this species is not already NaN
+                if not isnan(total_mission_emissions[species_mass_key]): # Only add if total for this species is not already NaN
                     total_mission_emissions[species_mass_key] += segment_emissions_data[species_mass_key]
             else: 
-                 total_mission_emissions[species_mass_key] = nan 
+                total_mission_emissions[species_mass_key] = nan 
         print("-" * 40)
         # Removed del locals()['tf_results'] as it's better to let it be redefined or go out of scope naturally
 
@@ -673,7 +732,9 @@ def run_mission_simulation(params: DesignParameters):
 
     print("\nSimulation Finished.")
 
+    return {"TSFC (kg/(Ns))": tsfc_lst, "Total Fuel Used (kg)": float(total_fuel_used_kg)}
+
 if __name__ == '__main__':
     params = DesignParameters()
     params.load_from_yaml("design_config.yaml")
-    run_mission_simulation(params)
+    results = run_mission_simulation(params)

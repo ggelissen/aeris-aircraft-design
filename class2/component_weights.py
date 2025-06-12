@@ -50,7 +50,7 @@ def fuselage_weight_N(params: DesignParameters):
 
 def landing_gear_weight_N(params: DesignParameters):
     # equation from gundlach
-    F_lg = 0.04  # range from 0.03 - 0.06
+    F_lg = 0.04  # range from 0.03 - 0.06 # TODO, questionable, assumption. Why?
     W_lg_lb = F_lg * N_to_lbf(params.weight.W_TO)  # lb
     W_lg_N = lbf_to_N(W_lg_lb)  # Convert to Newtons for consistency
     print(f"Landing gear weight (N): {W_lg_N:.2f}")
@@ -77,7 +77,7 @@ def propulsion_weight_N(params: DesignParameters):
     W_fuel_system_lb = F_fs * N_to_lbf(params.weight.W_F)**E1  # lbf
     #W_ai = air induction system?
     W_propulsion_lb = W_nacelle_lb + N_to_lbf(params.engine.engine_weight) + W_fuel_system_lb  # lbf
-    W_propulsion_N = lbf_to_N(W_propulsion_lb)  # Convert to Newtons for consistency
+    W_propulsion_N = 477.22 * 9.81  # Convert to Newtons for consistency
     print(f"Propulsion weight (N): {W_propulsion_N:.2f}")
     return W_propulsion_N
 

@@ -15,7 +15,6 @@ def print_all_params(obj_id):
         val = vsp.GetParmVal(pid)
         print(f" Group: {group} / Parameter Name: {pname} / Value: {val}")
 
-
 def plotSTL(file: str):
     # Load the STL file
     # Load STL
@@ -41,7 +40,6 @@ def plotSTL(file: str):
     plotter = pv.Plotter()
     plotter.add_mesh(pv_mesh, smooth_shading=True, color='lightgray', show_edges=False)
     plotter.show()
-
 
 def create_fuselage(designvars: DesignParameters = None):
     fuse_id = vsp.AddGeom("FUSELAGE", "")
@@ -91,7 +89,6 @@ def create_fuselage(designvars: DesignParameters = None):
     designvars.fuselage.fuseid = fuse_id
 
     vsp.SetParmVal(fuse_id, "Tess_W", "Shape", 100)
-    print(vsp.GetParmVal(fuse_id, "Tess_W", "Shape"))
     vsp.UpdateGeom(fuse_id)
 
 def create_wing(designvars: DesignParameters = None):
@@ -220,7 +217,6 @@ def create_wing(designvars: DesignParameters = None):
             vsp.SetParmVal(wing_id, "Area", "XSec_2", wingpars.S_w / 2 - wingpars.yehudi_area / 2)
             vsp.UpdateGeom(wing_id)
         new_halfspan = vsp.GetParmVal(wing_id, "Span", "XSec_1") + vsp.GetParmVal(wing_id, "Span", "XSec_2")
-        print(vsp.GetParmVal(wing_id, "Area", "XSec_1"), vsp.GetParmVal(wing_id, "Area", "XSec_2"), wingpars.S_w/2)
         wingpars.b_w = new_halfspan * 2
         mac = vsp.GetParmVal(wing_id, "MAC", "WingGeom")
         wingpars.mac = mac
@@ -247,8 +243,6 @@ def create_wing(designvars: DesignParameters = None):
         vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
         vsp.UpdateGeom(wing_id)
 
-
-
 def create_V_tail(designvars: DesignParameters = None):
     hstab_id = vsp.AddGeom("WING")
     vsp.SetGeomName(hstab_id, "Horizontal_Stabilizer")
@@ -268,6 +262,7 @@ def create_V_tail(designvars: DesignParameters = None):
     vsp.SetParmVal(hstab_id, "Span", "XSec_1", tailpars.b_v/2)  # Half span
     vsp.SetParmVal(hstab_id, "Tip_Chord", "XSec_1", tailpars.c_t)
     vsp.SetParmVal(hstab_id, "Root_Chord", "XSec_1", tailpars.c_r)
+    designvars.empennage.tailid = hstab_id
 
     designvars.control_surface.vtailid = hstab_id
 
@@ -337,7 +332,6 @@ def calculate_cg(designvars: DesignParameters = None):
     for geom in vsp.FindGeoms():
         vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown") , True)
 
-
 def calculate_wet_areas(designvars: DesignParameters = None):
     """
     Calculate the wetted areas of the aircraft components, taking into account parts of the aircraft being partly inside of other
@@ -386,8 +380,8 @@ def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, 
     # for vec in vsp.GetAirfoilCoordinates(designvars.wing.wingid, abs(spanwise_pos_frac)):
     #     points.append(np.array([vec.x(), vec.y()]))
 
-    vsp.UpdateGeom(designvars.wing.wingid)
-    halfspann = vsp.GetParmVal(designvars.wing.wingid, "TotalSpan", "WingGeom")/2
+    vsp.UpdateGeom(wingid)
+    halfspann = vsp.GetParmVal(wingid, "TotalSpan", "WingGeom")/2
     pos_index = np.argmin(np.abs(designvars.structurecoords[:,1] - spanwise_pos_frac*halfspann))
     if designvars.structurecoords[pos_index, 1] < spanwise_pos_frac*halfspann:
         ycoord = designvars.structurecoords[pos_index, 1]
@@ -438,7 +432,6 @@ def cross_section(designvars: DesignParameters = None, spanwise_pos_frac = 0.0, 
 
 def is_headless():
     return os.environ.get("DISPLAY", "") == ""
-
 
 def fuselage_cross_section(designvars: DesignParameters = None, lengthwise_pos_frac = 0.0):
     if designvars.fuselage.coordinates_have_been_loaded == False:
