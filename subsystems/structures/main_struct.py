@@ -28,7 +28,7 @@ try:
 except:
     matplotlib.use('Agg')
 import openvsp as vsp
-import vspfunctions
+
 #import subsystems.structures.stanag as stanag
 from design_variables import *
 #from wing_structure_generation import generate_wing_structure_3D
@@ -76,7 +76,7 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
     ### Set up structure
     #wing_structure_generation(designvars)
-    
+
     # Freeze geometry:
 
     vsp.UpdateGeom(designvars.wing.wingid)
@@ -100,7 +100,7 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     #fuselage_cross_section(designvars, 0.5)
 
     #generate_wing_structure_3D(designvars, num_spanwise_points=1001)
-    
+
 
     # Step 4: Simulate aircraft with loads
 
