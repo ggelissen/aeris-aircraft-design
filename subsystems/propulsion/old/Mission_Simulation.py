@@ -574,7 +574,8 @@ def run_mission_simulation(params: DesignParameters):
         "lhv": params.engine.lhv, 
         "full_output": True
     }
-    T_to = params.engine.T_TO #N, takeoff thrust 
+    T_to = params.engine.T_TO
+    T_cruise = params.engine.cruise_thrust #N, takeoff thrust 
     mission_segments = [
         {
             "name": "Engine Start & Warm-Up", "duration_minutes": 10,
@@ -606,7 +607,7 @@ def run_mission_simulation(params: DesignParameters):
         },
         {
             "name": "Cruise", "duration_minutes": 400,
-            "target_thrust_N": 0.3*T_to, # Approx 30% of 9220N
+            "target_thrust_N": T_cruise, # Approx 30% of 9220N
             "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
             "engine_params_override": {"tt_4": 1200}, 
             "ei_nox": 0.012
