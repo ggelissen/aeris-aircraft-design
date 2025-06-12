@@ -3,7 +3,7 @@ import math
 import matplotlib.pyplot as plt
 import delta_method as dm
 
-# --- Constants and Helper Functions (unchanged) ---
+# --- Constants and Helper Functions ---
 H_g = 4350
 g = 9.80665
 
@@ -67,8 +67,8 @@ def optimize_wing_planform(inputs):
     # Define the wing loading constraints in N/m^2 (Pascals)
     MIN_WING_LOADING_Pa = 2000.0
     MAX_WING_LOADING_Pa = 7000.0
-    # --- MODIFICATION END ---
 
+    # Initialize variables to track the minimum MTOW and optimal parameters
     min_mtow = float('inf')
     optimal_params = {}
     
@@ -93,7 +93,6 @@ def optimize_wing_planform(inputs):
                 if mtow == float('inf'):
                     continue
 
-                # --- MODIFICATION START ---
                 # Check the Wing Loading Constraint for the current design point
                 wing_area = mtow / (inputs["q_hat_Pa"] * C_L_hat)
                 if wing_area < 1e-6: continue # Avoid division by zero
@@ -103,7 +102,6 @@ def optimize_wing_planform(inputs):
                 # If the constraint is violated, discard this point and move to the next iteration
                 if not (MIN_WING_LOADING_Pa <= current_wing_loading <= MAX_WING_LOADING_Pa):
                     continue
-                # --- MODIFICATION END ---
 
                 if mtow < min_mtow:
                     min_mtow = mtow
@@ -120,11 +118,7 @@ def optimize_wing_planform(inputs):
     print("--- Optimization Complete ---")
     return optimal_params
 
-# --- The rest of your script (plotting and main execution block) would follow ---
-
 # --- Plotting and Main Execution Block (unchanged) ---
-# ... (The rest of your script for plotting and execution) ...
-
 def plot_WPF_contours(inputs, optimal_design):
     """Plots the WPF contours similar to Figure 10.12."""
     print("--- Generating WPF Contour Plot (Fig 10.12) ---")
