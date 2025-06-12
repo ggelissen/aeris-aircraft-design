@@ -13,6 +13,7 @@ class DesignParameters:
         If an initial configuration file is provided, load the parameters from it.
         """
         # Top-level Parameters
+        self.landing_mach = 0.2 # TODO Alejandro Added this so that the preliminary_stability code can run
         self.range = None
         self.cruise_speed = None
         self.cruise_mach = None

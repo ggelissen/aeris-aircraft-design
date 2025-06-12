@@ -12,7 +12,7 @@ diversion_distance: 460000      # Diversion distance in meters
 loiter_time: 7200               # Loiter time in seconds
 max_eq_velocity: 207.549        # Maximum Equivalent Velocity in kts
 max_load_factor: 3.3            # Maximum Load Factor
-crit_mach: 0.75                 # Critical Mach Number
+crit_mach: 0.75                 # Critical Mach Number TODO why is this a top level parameter? What? Alejandro
 cruise_viscosity: 0.00004
 cruise_aoa: 0.03 #placeholder value for cruise aoa in rad
 
