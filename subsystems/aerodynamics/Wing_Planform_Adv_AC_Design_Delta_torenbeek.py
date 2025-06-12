@@ -66,7 +66,7 @@ def optimize_wing_planform(inputs):
 
     # Define the wing loading constraints in N/m^2 (Pascals)
     MIN_WING_LOADING_Pa = 2000.0
-    MAX_WING_LOADING_Pa = 000.0
+    MAX_WING_LOADING_Pa = 7000.0
     # --- MODIFICATION END ---
 
     min_mtow = float('inf')

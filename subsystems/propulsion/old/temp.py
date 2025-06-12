@@ -572,6 +572,7 @@ def run_mission_simulation(params: DesignParameters):
         "full_output": True
     }
     T_to = params.engine.T_TO #N, takeoff thrust 
+    T_Cruise = params.engine.cruise_thrust #N, cruise thrust
     mission_segments = [
         {
             "name": "Engine Start & Warm-Up", "duration_minutes": 10,
@@ -599,7 +600,7 @@ def run_mission_simulation(params: DesignParameters):
         },
         {
             "name": "Cruise", "duration_minutes": 400,
-            "target_thrust_N": params.engine.cruise_thrust,
+            "target_thrust_N": T_Cruise,
             "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
             "engine_params_override": {"tt_4": 1200},
         },

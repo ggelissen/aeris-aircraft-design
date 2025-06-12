@@ -11,6 +11,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 # Attempt to import necessary modules
 gpr_module_loaded_successfully = False
+import gas_property_relations as gpr
+
 try:
     from utils.unit_conversions import * # Assuming this is available
     from design_variables import DesignParameters # For loading initial T_TO if needed
@@ -791,7 +793,7 @@ if __name__ == '__main__':
         "PH_LAB": {
             "num_engines": 2, 
             "baseline_engine_config": {
-                "bpr": 3.9, "pr_fan": 1.55, "pr_lpc": 1.2, "pr_hpc": 7.47, "tt_4": 1283.15, 
+                "bpr": 2.6, "pr_fan": 1.5, "pr_lpc": 1.2, "pr_hpc": 7, "tt_4": 1200, 
                 "eta_fan": 0.915, "eta_lpc": 0.9, "eta_hpc": 0.9,
                 "eta_hpt": 0.93, "eta_lpt": 0.93,
                 "eta_com": 0.99, "eta_mech_l": 0.99, "eta_mech_h": 0.99,
