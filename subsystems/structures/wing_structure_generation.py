@@ -47,6 +47,8 @@ def wing_structure_generation(designvars: DesignParameters = None):
 
     generate_wing_structure_3D(designvars, num_spanwise_points=1001)
 
+    return designvars
+
 
 
 

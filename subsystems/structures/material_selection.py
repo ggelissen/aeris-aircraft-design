@@ -10,7 +10,6 @@ from design_variables import DesignParameters
 from loading_diagrams import WingLoadingDiagrams
 from wing_structure_generation import cross_sectional_structure_along_span
 from ideal_cross_section_analysis import calculate_panel_lengths_and_enclosed_area
-from main_struct import struct_main
 
 
 def obtain_spar_coordinates(designvars: DesignParameters, span_lst: np.ndarray) -> tuple:
@@ -28,12 +27,13 @@ def obtain_spar_coordinates(designvars: DesignParameters, span_lst: np.ndarray) 
     y_coordinates = np.array([])
 
     for i in range(len(span_lst)):
-        coordinates_x = cross_sectional_structure_along_span(designvars, span_lst[i])[0][:][:][0]
-        coordinates_x = np.array(coordinates_x[0], coordinates_x[1], coordinates_x[3], coordinates_x[2], coordinates_x[0])
-        coordinates_y = cross_sectional_structure_along_span(designvars, span_lst[i])[0][:][:][1]
-        coordinates_y = np.array(coordinates_y[0], coordinates_y[1], coordinates_y[3], coordinates_y[2], coordinates_y[0])
-        x_coordinates = np.append(x_coordinates, coordinates_x)
-        y_coordinates = np.append(y_coordinates, coordinates_y)
+        coordinates = np.array(cross_sectional_structure_along_span(designvars, span_lst[i])[0])
+        x1, y1 = coordinates[0,0]
+        x2, y2 = coordinates[0,1]
+        x3, y3 = coordinates[1,0]
+        x4, y4 = coordinates[1,1]
+        x_coordinates = np.append(x_coordinates, [x2, x3, x4, x1])
+        y_coordinates = np.append(y_coordinates, [y2, y3, y4, y1])
 
     return x_coordinates, y_coordinates
 
@@ -207,15 +207,20 @@ def calculate_torsional_shear_flow_and_stress(T: float, A_m: float, panel_thickn
 
 
 
-if __name__ == "__main__":
+def run_material_selection_analysis(designvars: DesignParameters):
+    """
+    Run the material selection analysis for the wing structure based on the design variables.
+    This function calculates the optimal skin and spar thicknesses based on the maximum bending and torsional stresses,
+    and evaluates the feasibility of the design based on material properties.
 
-    designvars = DesignParameters()
-    designvars.load_from_yaml("design_config.yaml")
+    Parameters:
+    - designvars: An instance of DesignParameters containing the design variables.
 
-    struct_main(designvars)
+    Returns:
+    - None: Prints the results of the analysis.
+    """
 
-    wing_loading_diagrams = WingLoadingDiagrams(designvars)
-    loading = wing_loading_diagrams.run_analysis(PLOT=False)
+    loading = WingLoadingDiagrams(designvars).run_analysis(PLOT=False)
 
     span_lst = np.linspace(0, designvars.wing.b_w/2, 1000)
 
@@ -265,6 +270,8 @@ if __name__ == "__main__":
             max_panel_area = panel_areas_lst[max_sigma_max_index]
 
             if max_sigma_max > sigma_max_mat or max_tau_max > tau_max_mat:
+                print(f"Skipping: t_skin = {t_skin:.3f} m, t_spar = {t_spar:.3f} m, max_sigma_max = {max_sigma_max:.2f} Pa, max_tau_max = {max_tau_max:.2f} Pa")
+                print(f"Material limits: sigma_max_mat = {sigma_max_mat:.2f} Pa, tau_max_mat = {tau_max_mat:.2f} Pa")
                 continue
             else:
                 feasible_sigma_max_lst = np.append(feasible_sigma_max_lst, max_sigma_max)
@@ -272,6 +279,7 @@ if __name__ == "__main__":
                 feasible_panel_areas_lst = np.append(feasible_panel_areas_lst, max_panel_area)
                 feasible_t_spar_lst = np.append(feasible_t_spar_lst, t_spar)
                 feasible_t_skin_lst = np.append(feasible_t_skin_lst, t_skin)
+                print(f"Feasible design found: t_skin = {t_skin:.3f} m, t_spar = {t_spar:.3f} m")
 
     optimal_index = np.argmin(feasible_panel_areas_lst)
     opt_panel_area = feasible_panel_areas_lst[optimal_index]
@@ -291,11 +299,23 @@ if __name__ == "__main__":
     total_cost = total_mass * designvars.materials.material_price_kg                        # in EUR
     total_co2eq = total_mass * designvars.materials.material_co2_eq                         # in kg CO2eq
 
-    print(f"Maximum Bending Stress (sigma_max): {max_sigma_max:.2f} Pa")
-    print(f"Maximum Torsional Shear Stress (tau_max): {max_tau_max:.2f} Pa")
+    print(f"Maximum Bending Stress (sigma_max): {opt_sigma_max:.2f} Pa")
+    print(f"Maximum Torsional Shear Stress (tau_max): {opt_tau_max:.2f} Pa")
     print(f"Optimal Spar Thickness (t_spar): {opt_t_spar:.3f} m")
     print(f"Optimal Skin Thickness (t_skin): {opt_t_skin:.3f} m")
 
     print(f"Total Mass: {total_mass:.2f} kg")
     print(f"Total Cost: {total_cost:.2f} EUR")
     print(f"Total CO2eq: {total_co2eq:.2f} kg CO2eq")
+
+
+
+if __name__ == "__main__":
+    from main_struct import struct_main
+
+    designvars = DesignParameters()
+    designvars.load_from_yaml("design_config.yaml")
+
+    struct_main(designvars)
+
+    run_material_selection_analysis(designvars)
