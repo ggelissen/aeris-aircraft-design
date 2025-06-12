@@ -211,7 +211,7 @@ if __name__ == "__main__":
     designvars = DesignParameters()
     designvars.load_from_yaml("design_config.yaml")
 
-    wing_loading_diagrams = WingLoadingDiagrams(designvars)
+    wing_loading_diagrams = WingLoadingDiagrams()
     loading = wing_loading_diagrams.run_analysis(PLOT=False)
 
     span_lst = np.linspace(0, designvars.wing.b_w/2, 1000)
