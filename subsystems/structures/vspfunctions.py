@@ -262,6 +262,7 @@ def create_V_tail(designvars: DesignParameters = None):
     vsp.SetParmVal(hstab_id, "Span", "XSec_1", tailpars.b_v/2)  # Half span
     vsp.SetParmVal(hstab_id, "Tip_Chord", "XSec_1", tailpars.c_t)
     vsp.SetParmVal(hstab_id, "Root_Chord", "XSec_1", tailpars.c_r)
+    designvars.empennage.tailid = hstab_id
 
 def create_engines(designvars: DesignParameters = None):
     proppars = designvars.engine

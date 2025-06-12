@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from design_variables import DesignParameters
-from utils_flight import __ISA__
-from FlightSim import FlightSim
+from subsystems.flightperformance.utils_flight import __ISA__
+from subsystems.flightperformance.FlightSim import FlightSim
  
 class FlightPerformance:
     def __init__(self):
@@ -20,7 +20,7 @@ class FlightPerformance:
         return D, D0, Di
         
     
-    def drag_plot(self, cd0, rho, V, S, W, A, oswald):
+    def drag_plot(self, cd0, rho, V, S, W, A, oswald): # pragma: no cover
         
         D, D0, Di = self.__drag__(cd0, rho, V, S, W, A, oswald)
         

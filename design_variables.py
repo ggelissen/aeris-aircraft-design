@@ -457,6 +457,7 @@ class EmpennageParameters:
         self.L_v = 0.45* l_f                         #Moment arm vertical stabilizer
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
         self.z_v = 0.5*self.b_v #TODO this is a placeholder for distance between tail a/c and cg vertically
+        self.tailid = None
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
