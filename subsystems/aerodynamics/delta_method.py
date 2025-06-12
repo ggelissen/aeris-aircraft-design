@@ -66,50 +66,45 @@ def calculate_tc_from_delta_method(target_cruise_mach, aspect_ratio, sweep_deg, 
         return 0
     
 
-# --- Plotting Section ---
-# --- Example Usage ---
+# --- Main block for plotting ---
 if __name__ == '__main__':
-    ar_test = 11.0 # 1/AR = 0.0909
-    sweep_test = 30.0
-    cl_test = 0.5
-    mach_test = 0.85
-    
-    tc_result = calculate_tc_from_delta_method(mach_test, ar_test, sweep_test, cl_test)
-    
-    print("--- Example Run with Updated Data ---")
-    print(f"For M={mach_test}, AR={ar_test}, Sweep={sweep_test}°, CL={cl_test}:")
-    print(f"The achievable t/c is: {tc_result:.4f} or {tc_result*100:.2f}%")
-        
     # Create a figure with 3 subplots
-    fig, axs = plt.subplots(3, 1, figsize=(8, 18))
+    fig, axs = plt.subplots(3, 1, figsize=(8, 22))
     fig.suptitle('Visual Validation of Digitized Delta Method Charts', fontsize=16)
+    plt.style.use('seaborn-v0_8-whitegrid')
 
-    # Plot 1: Sweep Correction
+    # Plot 1 & 2: Correction factors (unchanged)
     axs[0].plot(DELTA_M_SWEEP_X, DELTA_M_SWEEP_Y, 'o-', label='Digitized Data')
-    axs[0].set_title('Figure 4 (Top): Sweep Correction')
-    axs[0].set_xlabel('Sweep Angle, Λ_c/4 (deg)')
-    axs[0].set_ylabel('Correction, ΔM')
-    axs[0].grid(True)
-    axs[0].legend()
-
-    # Plot 2: Aspect Ratio Correction
+    axs[0].set_title('Figure 4 (Top): Sweep Correction'); axs[0].set_xlabel('Sweep Angle, Λ_c/4 (deg)'); axs[0].set_ylabel('Correction, ΔM'); axs[0].grid(True); axs[0].legend()
     axs[1].plot(DELTA_M_AR_X, DELTA_M_AR_Y, 'o-', label='Digitized Data', color='green')
-    axs[1].set_title('Figure 4 (Bottom): Aspect Ratio Correction')
-    axs[1].set_xlabel('Inverse Aspect Ratio (1/AR)')
-    axs[1].set_ylabel('Correction, ΔM')
-    axs[1].grid(True)
-    axs[1].legend()
+    axs[1].set_title('Figure 4 (Bottom): Aspect Ratio Correction'); axs[1].set_xlabel('Inverse Aspect Ratio (1/AR)'); axs[1].set_ylabel('Correction, ΔM'); axs[1].grid(True); axs[1].legend()
 
-    # Plot 3: Advanced Airfoil Performance
-    axs[2].set_title('Figure 3: Advanced Airfoil Performance')
+    # --- MODIFICATION START: Corrected Plotting Logic ---
+    # Plot 3: Advanced Airfoil Performance with correct non-linear curve
+    axs[2].set_title('Figure 3: Advanced Airfoil Performance (Mdd vs t/c)')
+    
     for cl, data in ADVANCED_AIRFOIL_DATA.items():
-        axs[2].plot(data['x'], data['y'], 'o-', label=f'CL_DES = {cl}')
-    axs[2].set_xlabel('(t/c)^(2/3)')
-    axs[2].set_ylabel('M_dd^2 - 1')
+        # Step 1: Create a dense set of points in the *original, theoretical* units
+        # We sort the x-values to create a valid range for linspace
+        x_theoretical_range = np.linspace(min(data['x']), max(data['x']), 200)
+        # We perform the linear interpolation in this domain
+        y_theoretical_interp = np.interp(x_theoretical_range, data['x'], data['y'])
+        
+        # Step 2: Convert the entire dense set of points to the *intuitive* units
+        intuitive_x_tc_percent = (x_theoretical_range ** 1.5) * 100
+        # Add a check to avoid math domain error for sqrt of negative number
+        intuitive_y_mdd = np.sqrt(y_theoretical_interp + 1, where=(y_theoretical_interp + 1) >= 0, out=np.full_like(y_theoretical_interp, np.nan))
+        
+        # Step 3: Plot the correctly curved line
+        axs[2].plot(intuitive_x_tc_percent, intuitive_y_mdd, '-', label=f'CL_DES = {cl}')
+
+    # --- MODIFICATION END ---
+    
+    axs[2].set_xlabel('Thickness-to-Chord Ratio, t/c (%)')
+    axs[2].set_ylabel('2D Drag Divergence Mach, M_dd')
     axs[2].grid(True)
     axs[2].legend()
-    axs[2].invert_yaxis() # The original chart has a descending y-axis
+    axs[2].set_ylim(bottom=0.65) # Set a reasonable y-axis limit
 
-    # Show the plots
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     plt.show()
