@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from design_variables import DesignParameters
-from utils_flight import __ISA__
-from FlightSim import FlightSim
+from subsystems.flightperformance.utils_flight import __ISA__
+from subsystems.flightperformance.FlightSim import FlightSim
  
 class FlightPerformance:
     def __init__(self):
@@ -20,7 +20,7 @@ class FlightPerformance:
         return D, D0, Di
         
     
-    def drag_plot(self, cd0, rho, V, S, W, A, oswald):
+    def drag_plot(self, cd0, rho, V, S, W, A, oswald): # pragma: no cover
         
         D, D0, Di = self.__drag__(cd0, rho, V, S, W, A, oswald)
         
@@ -31,15 +31,20 @@ class FlightPerformance:
         plt.legend()
         plt.show()
     
-    def __range__(self, V,cT,W_ini,W_fin, A, oswald, cd0):
-        C_L = (0.3333333 * math.pi * A * oswald * cd0)
+    def __range__(self, cT, W_ini, W_fin, A, oswald, cd0, rho, S):
+        '''
+        weight in N!
+        '''
+        C_L = (0.3333333 * math.pi * A * oswald * cd0)**0.5
         C_D = 1.33333333333* cd0
+        W = ((W_ini+W_fin)/2)/9.81
+        Vopt = ( (2/rho) * (W/S) * (1/C_L) )**0.5
         
-        R = V/cT*C_L/C_D*math.log(W_ini/W_fin)
+        R = Vopt/(9.81*cT)*C_L/C_D*math.log(W_ini/W_fin)
         
-        return R/1000
+        return R/1000, Vopt
 
-    def payload_range(self, V, cT, A, oswald, cd0, Wtotal, Wfuel, OEW):
+    def payload_range(self, cT, A, oswald, cd0, Wtotal, Wfuel, OEW, rho, S):
         
         #range = self.__range__(V, cT, Wtotal, Wtotal-Wfuel, 12, 0.85, 0.017)
         #range2 = self.__range__(V, cT, Wtotal-100*9.81, Wtotal-Wfuel-100*9.81, 12, 0.85, 0.017)
@@ -47,10 +52,14 @@ class FlightPerformance:
         #print(range, range2)
         #print("--")
         
+        '''
+        weight in N!
+        '''
+        
         Wpayload = np.arange(Wtotal-Wfuel-OEW, 0, -1*9.81)
         range = []
         for payload in Wpayload:
-            range.append(self.__range__(V, cT, Wtotal - payload , Wtotal-Wfuel -payload ,A, oswald, cd0))
+            range.append(self.__range__(cT, Wtotal - payload , Wtotal-Wfuel -payload ,A, oswald, cd0, rho, S)[0])
         
         
         
@@ -181,7 +190,7 @@ class FlightPerformance:
         
 
 
-def run_flight_performance(params: DesignParameters):
+def run_flight_performance(params: DesignParameters): # pragma: no cover
     """
     Runs the control and stability analysis with the given design parameters.
 

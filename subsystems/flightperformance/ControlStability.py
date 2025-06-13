@@ -36,7 +36,7 @@ class Control:
         # Define a range for xcg/mac for plotting
         self.X = np.arange(0, 1, 0.0001)
 
-    def __plot_result__(self, x, y, legend, x_label="x", y_label='y', y_limit=[None, None]):
+    def __plot_result__(self, x, y, legend, x_label="x", y_label='y', y_limit=[None, None]): # pragma: no cover
         """
         Plots a given set of data with labels and legend.
 
@@ -72,7 +72,7 @@ class Control:
         # Calculate the stability curve (Sh/S vs xcg/mac)
         Y = (1 / den) * X - ((self.x_ac - 0.05) / den) # Assuming a stability margin of 0.05
 
-        if plot:
+        if plot: # pragma: no cover
             self.__plot_result__([X], [Y], ["Stability"], "xcg/mac", "Sh/S")
 
         return Y
@@ -93,7 +93,7 @@ class Control:
         # Calculate the controllability curve (Sh/S vs xcg/mac)
         Y = (1 / den) * X + ((self.C_m_ac / self.CLA_h) - self.x_ac) / den
 
-        if plot:
+        if plot: # pragma: no cover
             self.__plot_result__([X], [Y], ["Controllability"], "xcg/mac", "Sh/S")
 
         return Y
@@ -124,7 +124,7 @@ class Control:
         """
         stability = self.__stability_curve__(self.X)
         controllability = self.__control_curve__(self.X)
-        if plot:
+        if plot: # pragma: no cover
             self.__plot_result__([self.X, self.X], [stability, controllability], y_limit=[0, None], y_label="Sh/S", x_label="xcg/mac", legend=["Stability", "Controllability"])
 
         return stability, controllability
@@ -164,6 +164,8 @@ class Control:
         Wcg_payload_fwd = W_OEW
         Xcg_payload_aft = X_OEW
         Wcg_payload_aft = W_OEW
+        Xcg_payload = X_OEW
+        Wcg_payload = W_OEW
 
         for i in range(len(W_payload)):
             if X_payload[i] < X_OEW:
@@ -173,18 +175,23 @@ class Control:
                 Xcg_payload_aft = (Xcg_payload_aft * Wcg_payload_aft + X_payload[i] * W_payload[i]) / (Wcg_payload_aft + W_payload[i])
                 Wcg_payload_aft += W_payload[i]
 
+        for i in range(len(W_payload)):
+            Xcg_payload = (Xcg_payload * Wcg_payload + X_payload[i] * W_payload[i]) / (Wcg_payload + W_payload[i])
+            Wcg_payload += W_payload[i]
+        #print(Xcg_payload)
         # Calculate CG with fuel added forward and aft of OEW
-        Xcg_fuel_fwd = X_OEW
-        Wcg_fuel_fwd = W_OEW
-        Xcg_fuel_aft = X_OEW
-        Wcg_fuel_aft = W_OEW
+        Xcg_fuel_fwd = Xcg_payload
+        Wcg_fuel_fwd = Wcg_payload
+        Xcg_fuel_aft = Xcg_payload
+        Wcg_fuel_aft = Wcg_payload
 
         for i in range(len(W_fuel)):
-            if X_fuel[i] < X_OEW:
+            if X_fuel[i] < Xcg_payload:
                 Xcg_fuel_fwd = (Xcg_fuel_fwd * Wcg_fuel_fwd + X_fuel[i] * W_fuel[i]) / (Wcg_fuel_fwd + W_fuel[i])
                 Wcg_fuel_fwd += W_fuel[i]
             else:
                 Xcg_fuel_aft = (Xcg_fuel_aft * Wcg_fuel_aft + X_fuel[i] * W_fuel[i]) / (Wcg_fuel_aft + W_fuel[i])
+                #print('fuel_aft',Xcg_fuel_aft)
                 Wcg_fuel_aft += W_fuel[i]
 
         # Determine the overall min and max CG
@@ -197,7 +204,7 @@ class Control:
 
         return (min_cg, max_cg)
 
-    def __overlay_graphs__(self, X, Y1, Y2, stability, controllability, Sh, x_lemac):
+    def __overlay_graphs__(self, X, Y1, Y2, stability, controllability, Sh, x_lemac): # pragma: no cover
         """
         Overlays the CG range and scissor plot on a single graph.
 
@@ -233,8 +240,9 @@ class Control:
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
         fig.legend()
         plt.show()
+        
 
-    def calculate_range(self, W_OEW, W_payload, X_payload, W_fuel, W_wing, W_fuselage, X_fuselage):
+    def calculate_range(self, W_OEW, W_payload, X_payload, W_fuel, W_wing, W_fuselage, X_fuselage, plot=False):
         """
         Calculates the required Sh/S and x_lemac/lh for a given CG range to fit within the stability and controllability requirements.
 
@@ -278,22 +286,26 @@ class Control:
                 # Found a suitable Sh/S and x_lemac/lh
                 Sh_S = required_Sh_S_controllability
                 x_lemac = self.X[i]
-                return {
+                result = {
                     "cg_range": Y2[i] - Y1[i],
                     "Sh/S": Sh_S,
                     "x_lemac/lh": x_lemac
                 }
+                break
 
         # Overlay the graphs if a solution was found
         if Sh_S is not None and x_lemac is not None:
-             self.__overlay_graphs__(self.X, Y1, Y2, stability, controllability, Sh_S, x_lemac)
+            if plot == True: # pragma: no cover
+                self.__overlay_graphs__(self.X, Y1, Y2, stability, controllability, Sh_S, x_lemac)
         else:
             print("No suitable Sh/S and x_lemac/lh found for the given parameters.")
             return None
 
+        return result
 
 
-def run_control_stability(params: DesignParameters):
+
+def run_control_stability(params: DesignParameters): # pragma: no cover
     """
     Runs the control and stability analysis with the given design parameters.
 
@@ -328,12 +340,14 @@ def run_control_stability(params: DesignParameters):
     return results
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     # Example usage
     # Initialize the Control class with example parameters
-    control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)
+    control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=2, Vh_V=1, x_ac=0.55, CLh=-2, CLA_h=0.6, C_m_ac=-0.5)
     # Calculate and plot the range
-    control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[0.3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=0.5)
+    control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[0.3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=0.7)
+    
+    #control.cg_range(2500, 0.65, [100, 500], [0.8, 0.1], [800, 200], [0.65, 0.8])
 
     # Example of plotting scissor plot separately
     # control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)

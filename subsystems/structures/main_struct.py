@@ -21,18 +21,25 @@ import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas, calculate_fuel_capacity
-from vspfunctions import calculate_cg, calculate_wet_areas
-from vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing, create_V_tail, create_engines
+from subsystems.structures.vspfunctions import calculate_cg, calculate_wet_areas
+from subsystems.structures.vspfunctions import print_all_params, plotSTL, create_fuselage, create_wing, create_V_tail, create_engines
 try:
     matplotlib.use('Qt5Agg')
 except:
     matplotlib.use('Agg')
 import openvsp as vsp
-import vspfunctions
+
 #import subsystems.structures.stanag as stanag
 from design_variables import *
 #from wing_structure_generation import generate_wing_structure_3D
-from material_selection import run_material_selection_analysis
+try:
+    from material_selection import run_material_selection_analysis
+except:
+    from subsystems.structures.material_selection import run_material_selection_analysis
+try:
+    from subsystems.structures.wing_structure_generation import weight_distribution, generate_wing_structure_3D
+except:
+    from wing_structure_generation import weight_distribution, generate_wing_structure_3D
 
 def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
@@ -76,7 +83,7 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
     ### Set up structure
     #wing_structure_generation(designvars)
-    
+
     # Freeze geometry:
 
     vsp.UpdateGeom(designvars.wing.wingid)
@@ -88,8 +95,11 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     data = pd.read_csv("data/DegenGeom.csv", header=None, skiprows=10, nrows=2211)
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
+    generate_wing_structure_3D(designvars, num_spanwise_points=1001, plot=True)
 
-    run_material_selection_analysis(designvars)
+
+
+    #run_material_selection_analysis(designvars)
     #fuselage_cross_section(designvars, )
 
 
@@ -100,7 +110,7 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     #fuselage_cross_section(designvars, 0.5)
 
     #generate_wing_structure_3D(designvars, num_spanwise_points=1001)
-    
+
 
     # Step 4: Simulate aircraft with loads
 

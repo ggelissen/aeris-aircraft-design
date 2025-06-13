@@ -136,7 +136,7 @@ def calculate_misc_drag_coefficient(Mach_dd: float, Mach_cr: float) -> float:
         return 0.002 * (1 + 2.5 * (Mach_dd - Mach_cr) / 0.05) ** (-1)
     
 
-def run_improved_drag_estimations(params: DesignParameters) -> float:
+def run_improved_drag_estimations(params: DesignParameters) -> dict:
     """
     Run the improved drag estimations based on the design parameters.
     
@@ -144,7 +144,7 @@ def run_improved_drag_estimations(params: DesignParameters) -> float:
     params (DesignParameters): The design parameters containing all necessary data for drag calculations.
     
     Returns:
-    float: The total zero-lift drag coefficient (CD0) for the aircraft configuration.
+    dict: The total zero-lift drag coefficient (CD0) for the aircraft configuration plus skin friction coefficients (C_f).
     """
 
     Re = calculate_Reynolds_number(V=params.cruise_speed, rho=params.cruise_density, l=params.wing.root_chord, mu=1.4436e-5, k=0.152e-5, Mach=params.cruise_mach)
@@ -178,8 +178,16 @@ def run_improved_drag_estimations(params: DesignParameters) -> float:
     CD_misc = calculate_misc_drag_coefficient(params.cruise_mach + 0.03, params.cruise_mach)
 
     CD0 = calculate_CD0(params.wing.S_ref, C_f_lst, FF_lst, IF_lst, S_wet_lst, CD_misc)
-                        
-    return {'CD0': CD0, 'C_f': C_f_lst}
+    
+    # Prepare C_f_lst for output TODO, not sure if this is the best way to do it, but it works for now.
+    C_f_lst = {
+        'fuselage': C_f_lst[0],
+        'wing': C_f_lst[1],
+        'tail': C_f_lst[2]
+    }
+    
+    return {'CD0': CD0, 
+            'C_f': C_f_lst}
 
 
 if __name__ == "__main__":

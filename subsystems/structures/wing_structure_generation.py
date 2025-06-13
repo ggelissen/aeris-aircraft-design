@@ -3,15 +3,18 @@ import numpy as np
 import openvsp as vsp
 import os
 from design_variables import *
-from vspfunctions import *
+try:
+    from vspfunctions import *
+except:
+    from subsystems.structures.vspfunctions import *
 import scipy
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
-from ideal_cross_section_analysis import run_cross_section_analysis
+#from ideal_cross_section_analysis import run_cross_section_analysis
 
 
-def wing_structure_generation(designvars: DesignParameters = None):
+def wing_structure_generation(designvars: DesignParameters = None, plot: bool = True):
     """
     Generates the wing structure for the aircraft model using VSP.
 
@@ -41,11 +44,11 @@ def wing_structure_generation(designvars: DesignParameters = None):
     # cross_sectional_structure_along_span(designvars, 0.95)
     #fuselage_cross_section(designvars, 0.5)
 
-    cross_section = cross_sectional_structure_along_span(designvars, 0.95)
-    run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
-                                1000, 1000, 1000, 1000, 0.01, plot=True)
+    cross_section = cross_sectional_structure_along_span(designvars, 0.95, plot=plot)
+    # run_cross_section_analysis(designvars, cross_section[0], cross_section[1], 1000,
+    #                             1000, 1000, 1000, 1000, 0.01, plot=True)
 
-    generate_wing_structure_3D(designvars, num_spanwise_points=1001)
+    generate_wing_structure_3D(designvars, num_spanwise_points=1001, plot=plot)
 
     return designvars
 
@@ -94,7 +97,8 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
 
 
     # make room for ailerons:
-    if spanwise_position*designvars.wing.b_w/2 - designvars.control_surface.x_a_inboard > 0.0 and spanwise_position*designvars.wing.b_w/2 - designvars.control_surface.x_a_outboard < 0.0:
+    proj_span = vsp.GetParmVal(designvars.wing.wingid, 'TotalProjectedSpan', 'WingGeom')
+    if spanwise_position*proj_span/2 - designvars.control_surface.x_a_inboard > 0.0 and spanwise_position*proj_span/2 - designvars.control_surface.x_a_outboard < 0.0:
         trailing_edge_position = outline[np.argmax(outline[:, 0])][0]
         cut_out_length_from_trailing_edge = designvars.control_surface.aileron_width
         cut_out_position_x = trailing_edge_position -  cut_out_length_from_trailing_edge
@@ -187,7 +191,7 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
         plt.savefig('data/wing_structure.png', dpi=300, bbox_inches='tight')
     return spar_points_array, stringer_array, outline, chord_length, lower_airfoil, upper_airfoil
 
-def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise_points: int = 1001):
+def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise_points: int = 1001, plot=True):
     halfspan = designvars.wing.b_w / 2
     plotter = pv.Plotter()
 
@@ -201,36 +205,38 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         stringers[f'stringer{stringer_index+1}'] = {"stringer_points": []}
     wingskin = []
     dx = halfspan/num_spanwise_points
+    dxcos = dx * np.cos(np.deg2rad(vsp.GetParmVal(designvars.wing.wingid, 'Dihedral', 'XSec_1')))
     for x in np.linspace(0, halfspan, num_spanwise_points):
+        xcos = x * np.cos(np.deg2rad(vsp.GetParmVal(designvars.wing.wingid, 'Dihedral', 'XSec_1')))
         spar_points_array, stringer_array, _, chord_length, lower_airfoil, upper_airfoil = cross_sectional_structure_along_span(designvars, x / halfspan, plot=False)
         for index, spar_points in enumerate(spar_points_array):
-            spars[f'spar{index+1}']['spar_points'].append(np.array([spar_points[0][0], spar_points[0][1], x]))
-            spars[f'spar{index+1}']['top_flange'].append(np.array([spar_points[0][0], spar_points[0][1], x]))
-            spars[f'spar{index + 1}']['spar_points'].append(np.array([spar_points[1][0], spar_points[1][1], x]))
-            spars[f'spar{index+1}']['bottom_flange'].append(np.array([spar_points[1][0], spar_points[1][1], x]))
+            spars[f'spar{index+1}']['spar_points'].append(np.array([spar_points[0][0], spar_points[0][1], xcos]))
+            spars[f'spar{index+1}']['top_flange'].append(np.array([spar_points[0][0], spar_points[0][1], xcos]))
+            spars[f'spar{index + 1}']['spar_points'].append(np.array([spar_points[1][0], spar_points[1][1], xcos]))
+            spars[f'spar{index+1}']['bottom_flange'].append(np.array([spar_points[1][0], spar_points[1][1], xcos]))
         for index, stringer in enumerate(stringer_array):
-            stringers[f'stringer{index+1}']['stringer_points'].append(np.array([stringer[0], stringer[1], x]))
+            stringers[f'stringer{index+1}']['stringer_points'].append(np.array([stringer[0], stringer[1], xcos]))
         if x < halfspan:
             _, _, _, _, lower_airfoil2, upper_airfoil2 = cross_sectional_structure_along_span(designvars, (x + dx) / halfspan, plot=False)
             for ind, point in enumerate(upper_airfoil):
                 if ind < len(upper_airfoil)-1 and ind < len(upper_airfoil2)-1:
-                    wingskin.append([np.array([point[0], point[1], x]), np.array([upper_airfoil2[ind][0], upper_airfoil2[ind][1], x + dx]),
-                                         np.array([upper_airfoil[ind+1][0], upper_airfoil[ind+1][1], x]), np.array([upper_airfoil2[ind+1][0], upper_airfoil2[ind+1][1], x+dx])])
+                    wingskin.append([np.array([point[0], point[1], xcos]), np.array([upper_airfoil2[ind][0], upper_airfoil2[ind][1], xcos + dxcos]),
+                                         np.array([upper_airfoil[ind+1][0], upper_airfoil[ind+1][1], xcos]), np.array([upper_airfoil2[ind+1][0], upper_airfoil2[ind+1][1], xcos+dxcos])])
                 else:
-                    wingskin.append([np.array([upper_airfoil[-1][0], upper_airfoil[-1][1], x]),
-                                             np.array([upper_airfoil2[-1][0], upper_airfoil2[-1][1], x + dx]),
-                                             np.array([lower_airfoil[-1][0], lower_airfoil[-1][1], x]),
-                                             np.array([lower_airfoil2[-1][0], lower_airfoil2[-1][1], x + dx])])
+                    wingskin.append([np.array([upper_airfoil[-1][0], upper_airfoil[-1][1], xcos]),
+                                             np.array([upper_airfoil2[-1][0], upper_airfoil2[-1][1], xcos + dxcos]),
+                                             np.array([lower_airfoil[-1][0], lower_airfoil[-1][1], xcos]),
+                                             np.array([lower_airfoil2[-1][0], lower_airfoil2[-1][1], xcos + dxcos])])
             for ind, point in enumerate(lower_airfoil):
                 if ind < len(lower_airfoil)-1 and ind < len(lower_airfoil2)-1:
-                    wingskin.append([np.array([point[0], point[1], x]),
-                                             np.array([lower_airfoil2[ind][0], lower_airfoil2[ind][1], x + dx]),
-                                             np.array([lower_airfoil[ind + 1][0], lower_airfoil[ind + 1][1], x]),
-                                             np.array([lower_airfoil2[ind + 1][0], lower_airfoil2[ind + 1][1], x + dx])])
-            wingskin.append([np.array([upper_airfoil[0][0], upper_airfoil[0][1], x]),
-                             np.array([upper_airfoil2[0][0], upper_airfoil2[0][1], x + dx]),
-                             np.array([lower_airfoil[0][0], lower_airfoil[0][1], x]),
-                             np.array([lower_airfoil2[0][0], lower_airfoil2[0][1], x + dx])])
+                    wingskin.append([np.array([point[0], point[1], xcos]),
+                                             np.array([lower_airfoil2[ind][0], lower_airfoil2[ind][1], xcos + dxcos]),
+                                             np.array([lower_airfoil[ind + 1][0], lower_airfoil[ind + 1][1], xcos]),
+                                             np.array([lower_airfoil2[ind + 1][0], lower_airfoil2[ind + 1][1], xcos + dxcos])])
+            wingskin.append([np.array([upper_airfoil[0][0], upper_airfoil[0][1], xcos]),
+                             np.array([upper_airfoil2[0][0], upper_airfoil2[0][1], xcos + dxcos]),
+                             np.array([lower_airfoil[0][0], lower_airfoil[0][1], xcos]),
+                             np.array([lower_airfoil2[0][0], lower_airfoil2[0][1], xcos + dxcos])])
 
 
 
@@ -311,13 +317,13 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
 
     # Draw ribs
     for rib in range(len(designvars.wing.wingribs.ribs)):
-        spanwise_pos = designvars.wing.wingribs.ribs[f"Rib{rib+1}"]["x_pos_frac"]
+        spanwise_pos = designvars.wing.wingribs.ribs[f"Rib{rib+1}"]["y_pos_frac"]
         _, _, outline, chord_length, _, _  = cross_sectional_structure_along_span(designvars, spanwise_pos, plot=False)
         tri = Delaunay(outline)
         faces = tri.simplices
         faces_pv = np.hstack([[3, *face] for face in faces])
         # Create 3D PolyData
-        rib_points = [np.array([outlinepoint[0], outlinepoint[1], spanwise_pos * halfspan]) for outlinepoint in outline]
+        rib_points = [np.array([outlinepoint[0], outlinepoint[1], spanwise_pos * halfspan *np.cos(np.deg2rad(vsp.GetParmVal(designvars.wing.wingid, 'Dihedral', 'XSec_1')))]) for outlinepoint in outline]
         rib_points = np.array(rib_points)
         rib_mesh = pv.PolyData(rib_points, faces_pv)
 
@@ -333,6 +339,64 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
 
 
+    if plot:
+        plotter.show()
 
-    plotter.show()
+def weight_distribution(designvars: DesignParameters = None, num_points: int = 1000):
+    # kg/m
+    weight_dist = []
+    for indexxx, spanwise_pos_frac in enumerate(np.linspace(0, 1, num_points)):
+        crosssection = cross_sectional_structure_along_span(designvars, spanwise_pos_frac, plot=False)
+        stringer_weight = designvars.wing.wingsection.stringers['Stringer1']['crosssectionalarea_mm2'] * designvars.wing.wingsection.stringers['Stringer1']['material_density_kgm3'] / 1000000
+        spar_weight = 0
+        for spar in range(1, len(crosssection[0])+1):
+            spar_weight +=  (designvars.wing.wingsection.spars[f'Spar{spar}']['t_flange_1_mm'] * designvars.wing.wingsection.spars[f'Spar{spar}']['flange_width_mm'] * designvars.wing.wingsection.spars[f'Spar{spar}']['material_density_kgm3']
+                                                 + designvars.wing.wingsection.spars[f'Spar{spar}']['t_flange_2_mm'] * designvars.wing.wingsection.spars[f'Spar{spar}']['flange_width_mm'] * designvars.wing.wingsection.spars[f'Spar{spar}']['material_density_kgm3'] +
+
+                                                    designvars.wing.wingsection.spars[f'Spar{spar}']['t_web_mm'] * np.linalg.norm(crosssection[0][spar-1][0,:] - crosssection[0][spar-1][1, :])  * designvars.wing.wingsection.spars[f'Spar{spar}']['material_density_kgm3']
+
+                                                 )  / 1000000
+
+        with open('data/Airfoil.dat', 'r') as f:
+            lines = f.readlines()
+
+        # Skip header lines
+        data = []
+        for line in lines:
+            parts = line.strip().split()
+            if len(parts) >= 2:
+                try:
+                    x, y = float(parts[0]), float(parts[1])
+                    data.append((x, y))
+                except ValueError:
+                    continue  # skip header or bad lines
+        diffs = np.diff(np.array(data), axis=0)
+        segment_lengths = np.sqrt((diffs ** 2).sum(axis=1))
+        circumference_root = segment_lengths.sum() * crosssection[3]
+        wingskin_weight =  (crosssection[3]/vsp.GetParmVal(designvars.wing.wingid, 'Root_Chord', 'XSec_1')) * designvars.wing.wingsection.wingskin['thicness'] * circumference_root * designvars.wing.wingsection.wingskin['material_density_kgm3'] / 1000
+        x = np.array(data)[:, 0]
+        y = np.array(data)[:, 1]
+        # Ensure closed loop
+        if not np.allclose(np.array(data)[0], np.array(data)[-1]):
+            x = np.append(x, x[0])
+            y = np.append(y, y[0])
+        rib_weight = 0
+        for rib in designvars.wing.wingribs.ribs.keys():
+            chord = cross_sectional_structure_along_span(designvars, designvars.wing.wingribs.ribs[rib]['y_pos_frac'], plot=False)[3]
+            area = 0.5 * np.abs(np.dot(x[:-1], y[1:]) - np.dot(x[1:], y[:-1])) * chord**2
+            rib_weight +=  area * designvars.wing.wingribs.ribs[rib]['material_density_kgm3'] * designvars.wing.wingribs.ribs[rib]['t_mm'] / (1000 * designvars.wing.b_w * np.cos(np.deg2rad(vsp.GetParmVal(designvars.wing.wingid, 'Dihedral', 'XSec_1'))))
+        if spanwise_pos_frac >  designvars.fueltank.frac_pos_along_span_inboard and spanwise_pos_frac < designvars.fueltank.frac_pos_along_span_outboard:
+            fuel_tank_weight =  (designvars.fueltank.frac_pos_chord_max - designvars.fueltank.frac_pos_chord_min) * designvars.fueltank.t * crosssection[3] * designvars.fueltank.density_kgm3
+        else:
+            fuel_tank_weight = 0
+        flap_weight = 0
+        for flap in designvars.wing.flapgroups:
+            if spanwise_pos_frac > flap.spanwise_pos_frac_inbound and spanwise_pos_frac < flap.spanwise_pos_frac_outbound:
+                flap_weight =  (flap.flapwidth) *  flap.density_kgm2
+            else:
+                flap_weight = 0
+
+        weight_dist.append(stringer_weight + spar_weight + wingskin_weight + rib_weight + fuel_tank_weight + flap_weight)
+
+    return np.array(weight_dist)
 

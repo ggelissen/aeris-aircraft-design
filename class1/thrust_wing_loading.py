@@ -27,7 +27,7 @@ def get_isa_conditions_pd(altitude_m):
 
     temp_K = T_0_ISA_PD - LAPSE_RATE_ISA_PD * h_eff
     # Pressure calculation based on hydrostatic equation and lapse rate
-    if LAPSE_RATE_ISA_PD == 0: # Isothermal layer (not used here for h < 11km)
+    if LAPSE_RATE_ISA_PD == 0: # Isothermal layer (not used here for h < 11km) # pragma: no cover
         pressure_Pa = P_0_ISA_PD * math.exp(-G * h_eff / (R_AIR_ISA_PD * T_0_ISA_PD))
     else:
         pressure_Pa = P_0_ISA_PD * (temp_K / T_0_ISA_PD)**(G / (R_AIR_ISA_PD * LAPSE_RATE_ISA_PD))
@@ -87,7 +87,7 @@ def get_aircraft_config_aerodynamics_pd(aircraft_type_pd, config_name="clean", a
              C_D0, e_val, C_Lmax = base_C_D0_clean_uav, base_e_clean_uav, C_Lmax_clean_typical_uav_max
 
 
-    if C_D0 is None:
+    if C_D0 is None: # pragma: no cover
         raise ValueError(f"Perf. Diagram Aero params for {aircraft_type_pd} config '{config_name}' not defined.")
     return C_D0, e_val, C_Lmax, aspect_ratio
 
@@ -110,9 +110,9 @@ def interpolate_TOP_pd(S_TO_ft, ac_category="uav_2_engine"): # [cite: 44] (chart
     chart_S_TO_ft = np.array([2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]) # Extended range
     if ac_category == "uav_2_engine": # "uav OVER 50ft" (2 engines)
         chart_TOP_psf = np.array([60, 100, 135, 170, 200, 230, 260, 290, 320])
-    elif ac_category == "propeller_single_double":
+    elif ac_category == "propeller_single_double": # pragma: no cover
         chart_TOP_psf = np.array([80, 130, 180, 230, 280, 330, 380, 430, 480])
-    else: # Default to uav
+    else: # Default to uav #pragma: no cover
         chart_TOP_psf = np.array([60, 100, 135, 170, 200, 230, 260, 290, 320])
     TOP_psf = np.interp(S_TO_ft, chart_S_TO_ft, chart_TOP_psf, left=chart_TOP_psf[0], right=chart_TOP_psf[-1])
     return psf_to_Npm2(TOP_psf)
@@ -221,7 +221,7 @@ def constraint_climb_gradient_uav_pd(wing_loading_range_Npm2, grad_req, alt_grad
 
 
 # --- Plotting Function (from previous combined code) ---
-def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs W/S Diagram", design_point=None):
+def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs W/S Diagram", design_point=None): #pragma: no cover
     plt.figure(figsize=(14, 7))
     colors = plt.cm.get_cmap('tab10', len(constraints_data_pd))
     
@@ -270,9 +270,15 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
     print("\nPerformance Diagram saved as TW_WS_Diagram.pdf")
 
 
-def run_performance_diagram(params: DesignParameters):
+def run_performance_diagram(params: DesignParameters) -> dict: # Alejandro, added type hint
     """
     Generates the T/W vs W/S diagram for the UAV based on performance constraints.
+
+    Parameters:
+    - params(DesignParameters): Design parameters containing performance requirements and aerodynamic configurations.
+
+    Returns:
+    - dict: A dictionary containing the constraints data for the performance diagram.
     """
     uav_A_perf = params.wing.A_w_target
     num_engines_uav_perf = params.engine.N_engines
@@ -368,7 +374,7 @@ def run_performance_diagram(params: DesignParameters):
 
     return {"T_W": float(tw_intersect), "W_S": float(ws_intersect)}
 
-if __name__ == "__main__":
+if __name__ == "__main__": #pragma: no cover
 
     params = DesignParameters()
     params.load_from_yaml("design_config.yaml")
