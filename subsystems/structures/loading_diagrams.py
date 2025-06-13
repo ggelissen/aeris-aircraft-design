@@ -55,11 +55,13 @@ class WingLoadingDiagrams:
 
         # ==== Initialize arrays for distributed loads ====
         #
-        # -> NOTE: These are example distributions. In practice, these would be calculated based on aerodynamic analysis and wing weight.
-        self.lift = 1000 * (1 - (2 * self.y / self.span)**2)                # Elliptic lift
-        self.drag = 30 + 5 * np.sin(np.pi * self.y / (self.span / 2))       # Sinusoidal drag
-        self.moment_aero = 50 * np.cos(np.pi * self.y / (self.span / 2))    # Aerodynamic pitching moment
-        self.weight = self.params.weight.W_wing * (1 - (2 * self.y / self.span)**2)               # Elliptic weight
+        self.V_critical = self.params.performance.V_A
+       
+        self.lift = self.params.wing.CL_distribution * 0.5 * self.params.cruise_density * (self.V_critical ** 2) * self.params.wing.S_w             
+        self.drag = self.params.wing.CD_distribution * 0.5 * self.params.cruise_density * (self.V_critical ** 2) * self.params.wing.S_w       
+        self.moment_aero = self.params.wing.CM_distribution * 0.5 * self.params.cruise_density * (self.V_critical ** 2) * self.params.wing.S_w  * self.params.wing.mac
+        # TODO: fix weight distribution
+        self.weight = self.params.weight.W_wing * (1 - (2 * self.y / self.span)**2)  
 
 
         self.load_max = self.params.max_load_factor
