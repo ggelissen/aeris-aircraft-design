@@ -134,6 +134,32 @@ def fixed_equipment_weight_N(params: DesignParameters):
     W_fixed_equipment_lb = W_avionics_lb + W_FCS_lb
     return lbf_to_N(W_fixed_equipment_lb)
 
+def get_final_weight_breakdown(params: DesignParameters) -> dict:
+    """
+    Calculates the final weight of each component based on the converged design
+    and returns a dictionary with the breakdown.
+    """
+    print("\n--- Generating Final Weight Breakdown ---")
+    
+    weights = {
+        "W_wing": wing_weight_N(params),
+        "W_fuselage": fuselage_weight_N(params),
+        "W_landing_gear": landing_gear_weight_N(params),
+        "W_empennage": empennage_weight_N(params),
+        "W_propulsion": propulsion_weight_N(params),
+        "W_fixed_equipment": fixed_equipment_weight_N(params),
+    }
+
+    W_E_calc = sum(weights.values())
+    W_OE_calc = W_E_calc + params.weight.W_crew
+    weights["W_E_calculated"] = W_E_calc
+    weights["W_OE_calculated"] = W_OE_calc
+    
+    print(f"\n  Calculated Empty Weight (W_E): {W_E_calc:.2f} N")
+    print(f"  Calculated Op. Empty Weight (W_OE): {W_OE_calc:.2f} N")
+    
+    return weights
+
 # ==============================================================================
 # CLASS II WEIGHT ESTIMATION LOOP (MOVED FROM main_class_II.py)
 # ==============================================================================
