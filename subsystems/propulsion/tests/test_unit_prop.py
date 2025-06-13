@@ -10,7 +10,7 @@ import sys
 # and this test file as 'test_mission_simulation.py' in the same directory.
 # For this example, we assume the code from the artifact can be imported.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from old.Mission_Simulation import (
+from simulation_files.Mission_Simulation import (
     atmosphere as atmosphere_old,
     ei_nox_dallara as ei_nox_dallara_old,
     fuelflow_to_emissionflow,
@@ -21,7 +21,7 @@ from old.Mission_Simulation import (
 )
 
 # Imports for the new test targeting temp.py
-from old.temp import (
+from simulation_files.NOx_simulation import (
     atmosphere,
     ei_nox_dallara,
     emissions,
@@ -104,8 +104,8 @@ def mock_gpr_for_tests():
     mock_gpr_object.t_total_to_static.side_effect = lambda tt, m, **kwargs: tt / (1 + 0.2 * m**2) if not (isnan(tt) or isnan(m)) else nan
     mock_gpr_object.prescribed_h.side_effect = lambda h, **kwargs: h / 1005 if not isnan(h) else nan
 
-    with patch('old.temp.gpr', mock_gpr_object, create=True), \
-         patch('old.Mission_Simulation.gpr', mock_gpr_object, create=True):
+    with patch('simulation_files.NOx_simulation.gpr', mock_gpr_object, create=True), \
+         patch('simulation_files.Mission_Simulation.gpr', mock_gpr_object, create=True):
         yield mock_gpr_object
 
 
@@ -186,7 +186,7 @@ def test_turbofan_analysis_sanity():
     assert not isnan(eta_thermal) and 0 < eta_thermal < 1.0, "Thermal efficiency should be between 0 and 1"
     assert not isnan(eta_propulsive) and 0 < eta_propulsive < 1.0, "Propulsive efficiency should be between 0 and 1"
 
-@patch('old.Mission_Simulation.turbofan_parametric_analysis')
+@patch('simulation_files.Mission_Simulation.turbofan_parametric_analysis')
 def test_run_mission_simulation_integration(mock_tf_analysis, mock_design_params):
     """
     Tests the integration of the run_mission_simulation function,
@@ -229,7 +229,7 @@ def test_run_mission_simulation_integration(mock_tf_analysis, mock_design_params
 
     assert results["Total Fuel Used (kg)"] == pytest.approx(expected_total_fuel, rel=1e-2)
 
-from old.propsysweight import calculate_propulsion_system_weight
+from simulation_files.propsysweight import calculate_propulsion_system_weight
 
 def test_calculate_propulsion_system_weight_nominal(mock_design_params):
     """
@@ -316,7 +316,7 @@ def test_with_zero_values_in_dependent_calcs(mock_design_params):
 
 
 
-from old.nacellepylonsizing import nacelle_pylon_sizing
+from simulation_files.nacellepylonsizing import nacelle_pylon_sizing
 
 
 def test_nacelle_pylon_sizing_nominal(mock_design_params):
@@ -367,9 +367,9 @@ def test_nacelle_pylon_sizing_nominal(mock_design_params):
     print(f"Nacelle exit diameter: {results['D_ef']:.2f} m")
     print(f"Nacelle length: {results['l_nacelle']:.2f} m")
 
-# New Unit Test for temp.py
-@patch('old.temp.turbofan_parametric_analysis')
-def test_temp_mission_simulation_logic(mock_tf_analysis, mock_design_params): #test run_mission_simulation in temp.py
+# New Unit Test for NOx simulation.py
+@patch('simulation_files.NOx_simulation.turbofan_parametric_analysis')
+def test_NOx_simulation_mission_simulation_logic(mock_tf_analysis, mock_design_params): #test run_mission_simulation in NOx_simulation.py
 
     # 1. Arrange: Define a consistent return value for the mocked analysis.
     # The dictionary is crucial as the new script uses it to get pt_3 and tt_3.
@@ -415,7 +415,7 @@ def test_temp_mission_simulation_logic(mock_tf_analysis, mock_design_params): #t
         "Total calculated fuel does not match expected value based on mock TSFC"
 
     #Print for manual verification
-    print(f"\n--- Test: test_temp_mission_simulation_logic ---")
+    print(f"\n--- Test: test_NOx_simulation_mission_simulation_logic ---")
     print(f"Mock TF analysis call count: {mock_tf_analysis.call_count}")
     print(f"Expected Total Fuel (kg): {expected_total_fuel:.2f}")
     print(f"Actual Total Fuel (kg) from sim: {results['Total Fuel Used (kg)']:.2f}")
