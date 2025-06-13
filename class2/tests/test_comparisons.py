@@ -7,7 +7,7 @@ import math
 # assuming this script is run from the project's root directory.
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'class2')))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '...')))
 
 from design_variables import DesignParameters
 from utils.unit_conversions import *
