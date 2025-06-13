@@ -97,6 +97,8 @@ class TestClassI(unittest.TestCase):
                                                         verbose=False)
         self.assertGreater(longer_range_results["W_TO"], results["W_TO"])
     
+    
+
     def setUpPayloadRange(self):
         self.design_results = {
             "W_TO_N": 70000,
@@ -163,7 +165,6 @@ class TestClassI(unittest.TestCase):
 
         self.assertEqual(ferry_point["R_km"], max(ranges_km))
         
-    
 class TestThrustWingLoading(unittest.TestCase):
     def test_get_isa_conditions_pd(self):
         T, P, rho, sig, delta, theta = get_isa_conditions_pd(0)
@@ -187,6 +188,9 @@ class TestThrustWingLoading(unittest.TestCase):
         T, _, _, _, _, _ = get_isa_conditions_pd(20000)
         self.assertAlmostEqual(T, T, places=1)
 
+        # for LAPSE RATE ISA ==0
+
+
     def test_get_aircraft_config_aerodynamics(self):
         C_D0, e, C_Lmax, A  = get_aircraft_config_aerodynamics_pd('uav', "clean_config_P12", 9.0)
         self.assertEqual(C_D0, 0.0145)
@@ -197,6 +201,17 @@ class TestThrustWingLoading(unittest.TestCase):
         self.assertEqual(C_D0_def, 0.0145)
         self.assertEqual(e_def, 0.85)
         self.assertEqual(C_Lmax_def, 1.8)
+
+        C_D0, e, C_Lmax, A = get_aircraft_config_aerodynamics_pd('uav', "take_off_gear_down_P12", 9.0)
+        self.assertEqual(C_D0, 0.042)
+        self.assertEqual(e, 0.9)
+        self.assertEqual(C_Lmax, 1.9)
+
+        C_D0, e, C_Lmax, A = get_aircraft_config_aerodynamics_pd('uav', "generic_landing_flaps_gear_down", 9.0)
+        self.assertEqual(C_D0, 0.0145 + 0.02 + 0.065)
+        self.assertEqual(e, 0.85+0.1)
+        self.assertEqual(C_Lmax, 2.6)
+
 
     def test_get_C_L_at_CL32_CD_max_pd(self):
         self.assertEqual(get_C_L_at_CL32_CD_max_pd(0, 0, 0), 0)
@@ -235,18 +250,17 @@ class TestThrustWingLoading(unittest.TestCase):
 
     def test_interpolate_TOP_pd(self):
         """ Tests the Take-Off Parameter interpolation from the chart. """
-        # Test interpolation within the range
-        # For S_TO=4500 ft, TOP should be halfway between 135 and 170 psf -> 152.5 psf
         expected_top_npm2 = psf_to_Npm2(152.5)
         self.assertAlmostEqual(interpolate_TOP_pd(4500, "uav_2_engine"), expected_top_npm2, places=1)
         
-        # Test extrapolation below the range (should clamp to the first value)
         expected_low_npm2 = psf_to_Npm2(60)
         self.assertAlmostEqual(interpolate_TOP_pd(1000, "uav_2_engine"), expected_low_npm2, places=1)
 
-        # Test extrapolation above the range (should clamp to the last value)
         expected_high_npm2 = psf_to_Npm2(320)
         self.assertAlmostEqual(interpolate_TOP_pd(12000, "uav_2_engine"), expected_high_npm2, places=1)
+
+       
+
     def test_constraint_climb_rate_uav_pd(self):
         """ Tests the climb rate constraint calculation. """
         wing_loading = np.array([4000.0]) # N/m^2
