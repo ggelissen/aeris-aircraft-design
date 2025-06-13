@@ -48,6 +48,15 @@ def mock_design_params():
     mock_engine.lhv = 43.1e6
     mock_engine.T_TO = 7540.0
     mock_engine.cruise_thrust = 2000.0
+    # --- Parameters for Nacelle Sizing ---
+    mock_engine.T_TO = 7450.0  # Thrust at Takeoff (N)
+    mock_engine.eta_fanturb = 0.95 # fan/turbine efficiency
+    mock_engine.tt4to = 1600 # tt4 temp at takeoff (K)
+    mock_engine.eta_nozz = 0.98 # nozzle efficiency
+    
+    # Create the main mock object and attach the engine mock
+    mock_params = Mock()
+    mock_params.engine = mock_engine
 
     # Create the main mock object and attach the engine mock
     mock_params = Mock()
@@ -89,7 +98,6 @@ def mock_gpr_for_tests():
     with patch('old.Mission_Simulation.gpr', mock_gpr_object):
         yield mock_gpr_object
 
-# --- Unit Test Functions ---
 
 @pytest.mark.parametrize("altitude, expected_temp, expected_press", [
     (0, 288.15, 101325.0),      # Sea Level
@@ -294,10 +302,58 @@ def test_with_zero_values_in_dependent_calcs(mock_design_params):
     assert result_kg == pytest.approx(516 * 0.45359237)
 
 
+
+from old.nacellepylonsizing import nacelle_pylon_sizing
+
+
+def test_nacelle_pylon_sizing_nominal(mock_design_params):
+    """
+    Unit test for the nacelle and pylon sizing function.
+    Validates the calculations using the mocked design parameters.
+    """
+    # --- 1. Arrange ---
+    # The 'mock_design_params' fixture already provides the inputs.
+    # Now, calculate the expected results based on the function's logic
+    # and the known values from the mock.
+    a = (1.4 * 287.05 * 288.15) ** 0.5
+    T_to = mock_design_params.engine.T_TO
+    Bpr = mock_design_params.engine.Bpr
+    eta_ft = mock_design_params.engine.eta_fanturb
+    tt4to = mock_design_params.engine.tt4to
+    eta_nozz = mock_design_params.engine.eta_nozz
+
+    G = (tt4to / 600) - 1.25
+    expected_mdot_air = (T_to / a) * ((1 + Bpr) / (5 * eta_nozz * G * (1 + (eta_ft * Bpr))**0.5))
+
+    D_fan = 0.508
+    # Correctly calculate l_nacelle first
+    expected_l_nacelle = 1.397 + 0.2 
+    expected_D_inlet = D_fan
+
+    # CORRECTED: Use expected_l_nacelle and remove the 0.75 multiplier
+    expected_D_n = D_fan + (0.06 * expected_l_nacelle) + 0.03 
+
+    # D_ef depends on the corrected D_n
+    expected_D_ef = expected_D_n * (1 - (1/3) * 0.75**2)
+
+    results = nacelle_pylon_sizing(mock_design_params)
+
+    # --- 3. Assert ---
+    # Check that each calculated value matches the expected result.
+
+    assert results["mdot_air"] == pytest.approx(expected_mdot_air, rel=1e-2)
+    assert results["D_inlet"] == pytest.approx(expected_D_inlet, rel=1e-2)
+    assert results["D_n"] == pytest.approx(expected_D_n, rel=1e-2)
+    assert results["D_ef"] == pytest.approx(expected_D_ef, rel=1e-2)
+    assert results["l_nacelle"] == pytest.approx(expected_l_nacelle, rel=1e-2)
+
+    #print the results for manual verification
+    print(f"Mass flow rate of air: {results['mdot_air']:.2f} kg/s")
+    print(f"Inlet diameter: {results['D_inlet']:.2f} m")
+    print(f"Maximum nacelle diameter: {results['D_n']:.2f} m")
+    print(f"Nacelle exit diameter: {results['D_ef']:.2f} m")
+    print(f"Nacelle length: {results['l_nacelle']:.2f} m")
+
 if __name__ == "__main__":
-    # To run the tests, you would typically use the pytest command in your terminal:
-    # > pytest
-    #
-    # This block allows running the script directly for simple execution,
-    # though using the pytest runner is recommended.
+
     pytest.main()

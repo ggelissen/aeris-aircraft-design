@@ -270,9 +270,15 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
     print("\nPerformance Diagram saved as TW_WS_Diagram.pdf")
 
 
-def run_performance_diagram(params: DesignParameters): #pragma: no cover	
+def run_performance_diagram(params: DesignParameters) -> dict: # Alejandro, added type hint
     """
     Generates the T/W vs W/S diagram for the UAV based on performance constraints.
+
+    Parameters:
+    - params(DesignParameters): Design parameters containing performance requirements and aerodynamic configurations.
+
+    Returns:
+    - dict: A dictionary containing the constraints data for the performance diagram.
     """
     uav_A_perf = params.wing.A_w_target
     num_engines_uav_perf = params.engine.N_engines

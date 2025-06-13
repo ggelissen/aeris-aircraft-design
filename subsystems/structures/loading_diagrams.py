@@ -28,6 +28,14 @@ from design_variables import *
 # - Internal load distributions (shear force, bending moment, torsion)
 # - Total wing weight
 #
+
+
+
+
+# Axis System Convention:
+# - X-axis: Longitudinal axis (nose to tail; postive backwards)
+# - Y-axis: Lateral axis (wingtip to wingtip; positive to right wingtip)
+# - Z-axis: Vertical axis (positive upwards)
 # =================================================================
 
 class WingLoadingDiagrams:
@@ -48,10 +56,14 @@ class WingLoadingDiagrams:
         # ==== Initialize arrays for distributed loads ====
         #
         # -> NOTE: These are example distributions. In practice, these would be calculated based on aerodynamic analysis and wing weight.
-        self.lift = 1000 * (1 - (2 * self.y / self.span)**2)  # Elliptic lift
-        self.drag = 30 + 5 * np.sin(np.pi * self.y / (self.span / 2))  # Sinusoidal drag
-        self.moment_aero = 50 * np.cos(np.pi * self.y / (self.span / 2))  # Aerodynamic pitching moment
-        self.weight = 600 * (1 - (2 * self.y / self.span)**2)  # Elliptic weight
+        self.lift = 1000 * (1 - (2 * self.y / self.span)**2)                # Elliptic lift
+        self.drag = 30 + 5 * np.sin(np.pi * self.y / (self.span / 2))       # Sinusoidal drag
+        self.moment_aero = 50 * np.cos(np.pi * self.y / (self.span / 2))    # Aerodynamic pitching moment
+        self.weight = self.params.weight.W_wing * (1 - (2 * self.y / self.span)**2)               # Elliptic weight
+
+
+        self.load_max = self.params.max_load_factor
+        self.lift = self.lift * self.load_max * 1.5       # Scale lift by ultimate load factor (SF = 1.5)
 
     def compute_resultant_loads(self, lift, drag, moment_aero, weight):
         """
@@ -67,8 +79,8 @@ class WingLoadingDiagrams:
             - torque_y: distributed torque about y-axis (Nm/m)
         """
         # Net Distributes Loads
-        force_z = - lift + weight  # net distributed vertical load in z (positive downwards)
-        force_x = - drag  # net distributed horizontal load in negative x-direction (positive towards nose)
+        force_z = + lift - weight  # net distributed vertical load in z (positive downwards)
+        force_x = + drag  # net distributed horizontal load in negative x-direction (positive towards nose)
 
         # For Torque: Aerod. Moment + Induced Torque (from Vertical/Horizontal Forces)
         x_distance_SC_AC = 0.01  # X-axis distance from reference load point to shear center (m)
@@ -273,7 +285,9 @@ class WingLoadingDiagrams:
 
 if __name__ == "__main__":
     # Initialize the loading diagrams class
-    
-    internal_loads_list = WingLoadingDiagrams().run_analysis(PLOT=True)
+    params = DesignParameters()
+    params.load_from_yaml("design_config.yaml")
+
+    internal_loads_list = WingLoadingDiagrams(params).run_analysis(PLOT=True)
 
 
