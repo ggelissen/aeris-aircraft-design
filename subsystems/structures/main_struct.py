@@ -95,7 +95,6 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     data = pd.read_csv("data/DegenGeom.csv", header=None, skiprows=10, nrows=2211)
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
-    weight_distribution(designvars)
     generate_wing_structure_3D(designvars, num_spanwise_points=1001, plot=True)
 
 
