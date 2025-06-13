@@ -217,12 +217,13 @@ def calculate_all_coefficients(params: DesignParameters) -> dict:
     Returns:
     dict: Contains calculated coefficients.
     """
-    C_L_h = calculate_lift_coefficient_tail(params.empennage.A_h, params.empennage.type)
+    # TODO Alejandro changed A_h to A_t for consistency with the design_variables class
+    C_L_h = calculate_lift_coefficient_tail(params.empennage.A_t, params.empennage.type)
     beta_cruise = calculate_Mach_correction_factor(params.cruise_mach)
     beta_landing = calculate_Mach_correction_factor(params.landing_mach)
     
-    C_L_alpha_h_cruise = calculate_lift_slope(params.empennage.A_h, beta_cruise, params.wing.Lambda_05c, params.wing.eta)
-    C_L_alpha_h_landing = calculate_lift_slope(params.empennage.A_h, beta_landing, params.wing.Lambda_05c, params.wing.eta)
+    C_L_alpha_h_cruise = calculate_lift_slope(params.empennage.A_t, beta_cruise, params.wing.Lambda_05c, params.wing.eta)
+    C_L_alpha_h_landing = calculate_lift_slope(params.empennage.A_t, beta_landing, params.wing.Lambda_05c, params.wing.eta)
     
     C_L_alpha_w_cruise = calculate_lift_slope(params.wing.A, beta_cruise, params.wing.Lambda_05c, params.wing.eta)
     C_L_alpha_w_landing = calculate_lift_slope(params.wing.A, beta_landing, params.wing.Lambda_05c, params.wing.eta)

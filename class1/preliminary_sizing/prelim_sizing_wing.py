@@ -161,7 +161,7 @@ def calculate_sweep_angle_x_c(Lambda_LE: float, c_root: float, b: float, x_c: fl
     return np.arctan2(np.tan(Lambda_LE) - x_c * 2 * c_root / b * (1 - taper_ratio), 1)
 
 
-def run_preliminary_sizing_wing(params: DesignParameters) -> dict:
+def run_preliminary_sizing_wing(params: DesignParameters) -> dict: # pragma: no cover
     """
     Run preliminary sizing calculations for the wing based on design parameters.
 

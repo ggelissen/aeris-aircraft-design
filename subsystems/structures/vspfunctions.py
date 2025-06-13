@@ -264,6 +264,8 @@ def create_V_tail(designvars: DesignParameters = None):
     vsp.SetParmVal(hstab_id, "Root_Chord", "XSec_1", tailpars.c_r)
     designvars.empennage.tailid = hstab_id
 
+    designvars.control_surface.vtailid = hstab_id
+
 def create_engines(designvars: DesignParameters = None):
     proppars = designvars.engine
     pod_id = vsp.AddGeom("STACK")
@@ -290,6 +292,7 @@ def create_engines(designvars: DesignParameters = None):
     vsp.SetParmVal(pod_id, "X_Rel_Location", "XForm", -proppars.engine_x_pos)  # Longitudinal position
     vsp.SetParmVal(pod_id, "Y_Rel_Location", "XForm", proppars.engine_y_pos)  # Side offset (0 = centerline)
     vsp.SetParmVal(pod_id, "Z_Rel_Location", "XForm", -proppars.engine_z_pos)  # Vertical offset (on top of fuselage)
+    designvars.engine.engine_id = pod_id
 
 def calculate_cg(designvars: DesignParameters = None):
     """
@@ -513,5 +516,6 @@ def calculate_fuel_capacity(designvars: DesignParameters = None):
 
     middle_wing_t_over_c = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid, 0), 1), "ThickChord"))
     fuel_tank_thickness = middle_wing_t_over_c * designvars.wing.mac
+    designvars.fueltank.t = fuel_tank_thickness
 
     designvars.fueltank.fuel_tank_wing_volume = vsp.GetDoubleResults(result, "Total_Theo_Area", 0)[0] * fuel_tank_thickness

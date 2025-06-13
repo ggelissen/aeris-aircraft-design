@@ -7,9 +7,18 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from design_variables import DesignParameters
-from loading_diagrams import WingLoadingDiagrams
-from wing_structure_generation import cross_sectional_structure_along_span
-from ideal_cross_section_analysis import calculate_panel_lengths_and_enclosed_area
+try:
+    from loading_diagrams import WingLoadingDiagrams
+except:
+    from subsystems.structures.loading_diagrams import WingLoadingDiagrams
+try:
+    from wing_structure_generation import cross_sectional_structure_along_span
+except:
+    from subsystems.structures.wing_structure_generation import cross_sectional_structure_along_span
+try:
+    from ideal_cross_section_analysis import calculate_panel_lengths_and_enclosed_area
+except:
+    from subsystems.structures.ideal_cross_section_analysis import calculate_panel_lengths_and_enclosed_area
 
 
 def obtain_spar_coordinates(designvars: DesignParameters, span_lst: np.ndarray) -> tuple:
