@@ -36,6 +36,10 @@ try:
     from material_selection import run_material_selection_analysis
 except:
     from subsystems.structures.material_selection import run_material_selection_analysis
+try:
+    from subsystems.structures.wing_structure_generation import weight_distribution, generate_wing_structure_3D
+except:
+    from wing_structure_generation import weight_distribution, generate_wing_structure_3D
 
 def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
 
@@ -91,6 +95,10 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     data = pd.read_csv("data/DegenGeom.csv", header=None, skiprows=10, nrows=2211)
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
+    weight_distribution(designvars)
+    generate_wing_structure_3D(designvars, num_spanwise_points=1001, plot=True)
+
+
 
     #run_material_selection_analysis(designvars)
     #fuselage_cross_section(designvars, )

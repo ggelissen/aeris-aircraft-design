@@ -246,7 +246,7 @@ class WingParameters:
         self.threeDairfoil3 = None
         self.wingid = None # Will contain the object ID of the wing in VSP, is set by create_wing()
         self.wingsection = WingSectionParameters(parent)  # Wing section parameters, such as spars, are stored here
-        self.wingribs = Wingribs()  # Wing ribs parameters, such as thickness, are stored here
+        self.wingribs = Wingribs(parent)  # Wing ribs parameters, such as thickness, are stored here
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
         self.yehudi_area = 7.0 # Yehudi area m2
@@ -621,12 +621,12 @@ class WingSectionParameters:
         }
 
 class Wingribs:
-    def __init__(self):
+    def __init__(self, parent):
         self.ribs = {
-            "Rib1": {"y_pos_frac": 0.2, "t_mm": 2},
-            "Rib2": {"y_pos_frac": 0.4, "t_mm": 2},
-            "Rib3": {"y_pos_frac": 0.6, "t_mm": 2},
-            "Rib4": {"y_pos_frac": 0.8, "t_mm": 2},
+            "Rib1": {"y_pos_frac": 0.2, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
+            "Rib2": {"y_pos_frac": 0.4, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
+            "Rib3": {"y_pos_frac": 0.6, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
+            "Rib4": {"y_pos_frac": 0.8, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
         }
         self.num_ribs = len(self.ribs)
 
