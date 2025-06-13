@@ -359,6 +359,7 @@ class WingParameters:
         self.Gamma_w = 0.0175                         # Wing Dihedral Angle in radians
         self.root_chord = 1.819  # Wing Root Chord in m
         self.tip_chord = 0.4916  # Wing Tip Chord in m
+        self.C_m_ac = None       # Wing moment coefficient at aerodynamic center
         self.t_r = self.t_c_w_r * self.root_chord   # Wing Root Thickness in m
         self.planform_points = None  # 2D Numpy array with points forming the planform, is calculated by create_wing()
         self.threeDpoints = None # 3D Numpy array with points forming the wing, is calculated by create_wing()
@@ -707,7 +708,8 @@ class CGParameters:
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.z_cg = 1.5                          # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
-
+        self.z_cg_propulsion = None              # Z CG pos of the propulsion system in m
+        
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
             if hasattr(self, key):
