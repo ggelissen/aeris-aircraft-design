@@ -40,62 +40,27 @@ def nacelle_pylon_sizing(params: DesignParameters):
 
 
     D_inlet = D_fan
-    l_n = 1.44 #nacelle length, m
-    D_n = D_inlet + (0.06*0.75*l_n) +0.03 #max nacelle diameter, m
+    l_n = L_eng + 0.2 #nacelle length, m
+    D_n = D_inlet + (0.06*l_n) +0.03 #max nacelle diameter, m
     print(f"Maximum nacelle diameter: {D_n:.2f} m")
     D_ef = D_n*(1-(1/3)*0.75**2) #exit fan diameter, m
     print(f"Nacelle exit diameter: {D_ef:.2f} m")
-
+      # Total nacelle length with margins
     # Constants
-    D_fan = 0.508               # Fan and core diameter
-    D_s = 0.14224               # Spinner diameter
-    D_ef = 0.49                 # Exit nacelle diameter
-    D_n = 0.63                  # Max nacelle diameter
-    L_eng = 1.397               # Engine core length
-    l_nacelle = L_eng + 0.2     # Total nacelle length with margins
+    # D_fan = 0.508               # Fan and core diameter
+    # D_s = 0.14224               # Spinner diameter
+    # D_ef = 0.49                 # Exit nacelle diameter
+    # D_n = 0.63                  # Max nacelle diameter
+    # L_eng = 1.397               # Engine core length
+    # l_nacelle = L_eng + 0.2     # Total nacelle length with margins
 
-    # # Radius values
-    # R_fan = D_fan / 2
-    # R_s = D_s / 2
-    # R_ef = D_ef / 2
-    # R_n = D_n / 2
 
-    # # Nacelle shape profile
-    # z_nacelle = np.array([-0.1, l_nacelle * 0.3, l_nacelle * 0.7, l_nacelle])
-    # r_nacelle = np.array([R_fan, R_n, R_n, R_ef])
-
-    # z_profile = np.concatenate([z_nacelle, z_nacelle[::-1]])
-    # r_profile = np.concatenate([r_nacelle, -r_nacelle[::-1]])
-
-    # # Engine core
-    # core_z = [0, L_eng, L_eng, 0, 0]
-    # core_r = [R_fan, R_fan, -R_fan, -R_fan, R_fan]
-
-    # # Spinner (cone shape)
-    # spinner_z = [-0.1, 0, 0]
-    # spinner_r = [0, R_s, -R_s]
-
-    # # Plot
-    # plt.figure(figsize=(10, 4))
-    # plt.plot(z_profile, r_profile, label="Nacelle Surface", color='steelblue')
-    # plt.fill(core_z, core_r, color='gray', alpha=0.6, label="Engine Core")
-    # plt.fill(spinner_z, spinner_r, color='red', label="Spinner")
-
-    # # Labels and aesthetics
-    # plt.title("Side View of Engine Nacelle with Spinner")
-    # plt.xlabel("Length (m)")
-    # plt.ylabel("Radius (m)")
-    # plt.axis("equal")
-    # plt.grid(True)
-    # plt.legend()
-    # plt.tight_layout()
-    # plt.show()
 
     return {
         "D_inlet": D_inlet,
         "D_n": D_n,
         "D_ef": D_ef,
-        "l_nacelle": l_nacelle,
+        "l_nacelle": l_n,
         "mdot_air": mdot_air
     }
 if __name__ == "__main__":
