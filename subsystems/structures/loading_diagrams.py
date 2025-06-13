@@ -28,10 +28,6 @@ from design_variables import *
 # - Internal load distributions (shear force, bending moment, torsion)
 # - Total wing weight
 #
-
-
-
-
 # Axis System Convention:
 # - X-axis: Longitudinal axis (nose to tail; postive backwards)
 # - Y-axis: Lateral axis (wingtip to wingtip; positive to right wingtip)
@@ -291,5 +287,10 @@ if __name__ == "__main__":
     params.load_from_yaml("design_config.yaml")
 
     internal_loads_list = WingLoadingDiagrams(params).run_analysis(PLOT=True)
+
+
+
+
+
 
 
