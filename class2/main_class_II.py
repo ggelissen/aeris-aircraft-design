@@ -10,46 +10,6 @@ import component_weights as cw
 from utils.unit_conversions import * 
 
 
-
-def class_II_weight_estimation(params: DesignParameters,
-                               initial_W_TO_N_guess: float,
-                               max_iterations: int = 100,
-                               tolerance: float = 0.005): 
-
-    W_TO_N_current = initial_W_TO_N_guess
-    params.weight.W_TO = W_TO_N_current 
-    print(f"Starting Class II Weight Estimation with initial WTO: {W_TO_N_current:.2f} N")
-
-    for i in range(max_iterations):
-        
-        # Recalculate empty weight based on the current W_TO_N_current (params.weight.W_TO)
-        W_empty_N_calculated = (
-            cw.wing_weight_N(params) +
-            cw.landing_gear_weight_N(params) +
-            cw.empennage_weight_N(params) +
-            cw.propulsion_weight_N(params) +
-            cw.fixed_equipment_weight_N(params) +
-            cw.fuselage_weight_N(params) 
-        )
-
-        W_TO_N_new = (W_empty_N_calculated + params.weight.W_PL) / (1 - params.weight.M_ff)
-
-        
-        relative_difference = abs(W_TO_N_new - W_TO_N_current) / W_TO_N_new
-        print("\n")
-        print(f"Iteration {i+1}: W_TO_current = {W_TO_N_current:.2f} N, W_empty_calc = {W_empty_N_calculated:.2f} N, W_TO_new = {W_TO_N_new:.2f} N, Rel_Diff = {relative_difference:.6f}")        
-        if relative_difference < tolerance:
-            print(f"Class II WTO converged in {i+1} iterations.")
-            params.weight.W_TO = W_TO_N_new # Final update to params
-            return W_TO_N_new, True, i + 1, W_empty_N_calculated
-        
-        W_TO_N_current = W_TO_N_new
-        params.weight.W_TO = W_TO_N_current # Update WTO in params for the next iteration's component calculations
-
-    print(f"Class II WTO did not converge after {max_iterations} iterations.")
-    params.weight.W_TO = W_TO_N_current 
-    return W_TO_N_current, False, max_iterations, W_empty_N_calculated
-
 def calculate_cg_longitudinal(params: DesignParameters, W_empty_N_calculated: float):
     """
     Calculates CG locations for various aircraft loading conditions and plots CG excursion.
@@ -110,6 +70,45 @@ def estimate_mac_leading_edge(params: DesignParameters, cg_OEW: float, target_CG
     x_LE_MAC = cg_OEW - target_CG_percent_MAC * params.wing.mac
     print(f"Estimated MAC Leading Edge location: {x_LE_MAC:.2f} m (to place CG at {target_CG_percent_MAC*100:.0f}% MAC)")
     return x_LE_MAC
+
+def class_II_weight_estimation(params: DesignParameters,
+                               initial_W_TO_N_guess: float,
+                               max_iterations: int = 100,
+                               tolerance: float = 0.005): 
+
+    W_TO_N_current = initial_W_TO_N_guess
+    params.weight.W_TO = W_TO_N_current 
+    print(f"Starting Class II Weight Estimation with initial WTO: {W_TO_N_current:.2f} N")
+
+    for i in range(max_iterations):
+        
+        # Recalculate empty weight based on the current W_TO_N_current (params.weight.W_TO)
+        W_empty_N_calculated = (
+            cw.wing_weight_N(params) +
+            cw.landing_gear_weight_N(params) +
+            cw.empennage_weight_N(params) +
+            cw.propulsion_weight_N(params) +
+            cw.fixed_equipment_weight_N(params) +
+            cw.fuselage_weight_N(params) 
+        )
+
+        W_TO_N_new = (W_empty_N_calculated + params.weight.W_PL) / (1 - params.weight.M_ff)
+
+        
+        relative_difference = abs(W_TO_N_new - W_TO_N_current) / W_TO_N_new
+        print("\n")
+        print(f"Iteration {i+1}: W_TO_current = {W_TO_N_current:.2f} N, W_empty_calc = {W_empty_N_calculated:.2f} N, W_TO_new = {W_TO_N_new:.2f} N, Rel_Diff = {relative_difference:.6f}")        
+        if relative_difference < tolerance:
+            print(f"Class II WTO converged in {i+1} iterations.")
+            params.weight.W_TO = W_TO_N_new # Final update to params
+            return W_TO_N_new, True, i + 1, W_empty_N_calculated
+        
+        W_TO_N_current = W_TO_N_new
+        params.weight.W_TO = W_TO_N_current # Update WTO in params for the next iteration's component calculations
+
+    print(f"Class II WTO did not converge after {max_iterations} iterations.")
+    params.weight.W_TO = W_TO_N_current 
+    return W_TO_N_current, False, max_iterations, W_empty_N_calculated
 
 if __name__ == "__main__":
     params = DesignParameters()
