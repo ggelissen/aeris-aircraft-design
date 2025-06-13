@@ -278,6 +278,7 @@ class PerformanceParameters:
         self.L_D_loiter = None                      # Lift-to-Drag Ratio at Loiter
 
         self.CL_cruise = None                  # Lift Coefficient at Cruise	
+        self.C_L_hat = 0.6                      # Design Lift Coefficient
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():

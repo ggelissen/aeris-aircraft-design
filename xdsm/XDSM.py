@@ -82,6 +82,19 @@ xdsm.add_output("opt", r"\mathbf{x^*}", side="left")
 # This will draw a box around the specified components
 xdsm.add_process(
     [
+        "iterator",
+        "prelim_design",
+        "aero",
+        "structures",
+        "propulsion",
+        "flight_perf",
+        "iterator"
+    ]
+)
+xdsm.add_process(
+    [
+        "opt",
+        "iterator",
         "prelim_design",
         "aero",
         "structures",
@@ -90,7 +103,8 @@ xdsm.add_process(
         "climate",
         "cost",
         "constraints",
-    ]
+        "opt"
+    ],
 )
 
 # 5. Write the XDSM diagram to a PDF file
