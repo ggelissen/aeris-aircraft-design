@@ -382,6 +382,7 @@ class WingParameters:
         self.skin_thickness = 0.0015  # Wing Skin Thickness in m
         self.Mach_cross = 0.935
         self.epsilon_t = 0         # Wing twist angle [degrees]
+        self.weight_distribution = None
 
 
         # Aerodynamics Loads Distribution

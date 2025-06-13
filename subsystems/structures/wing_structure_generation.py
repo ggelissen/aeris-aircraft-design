@@ -398,6 +398,6 @@ def weight_distribution(designvars: DesignParameters = None, num_points: int = 1
                 flap_weight = 0
 
         weight_dist.append(stringer_weight + spar_weight + wingskin_weight + rib_weight + fuel_tank_weight + flap_weight)
-
+    designvars.wing.weight_distribution = np.array(weight_dist)
     return np.array(weight_dist)
 
