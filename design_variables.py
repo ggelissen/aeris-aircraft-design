@@ -262,6 +262,12 @@ class WingParameters:
         self.Mach_cross = 0.935
         self.epsilon_t = 0         # Wing twist angle [degrees]
 
+
+        # Aerodynamics Loads Distribution
+        self.CL_distribution = None  # Lift Coefficient Distribution along the span
+        self.CD_distribution = None  # Drag Coefficient Distribution along the span
+        self.CM_distribution = None  # Moment Coefficient Distribution along the span
+
         
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
