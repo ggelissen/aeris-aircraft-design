@@ -90,14 +90,28 @@ class TestStability(unittest.TestCase):
 
 class TestFlightPerformance(unittest.TestCase):
     def setUp(self):
-        fp = FlightPerformance()
-        self.D, self.D0, self.Di = fp.__drag__(0.02, 1.225, 100, 20, 5000, 10, 0.9)
-        self.range = fp.__range__(250, 14*10**-5, 50000, 30000, 10, 0.9, 0.01)
-        
-    def testDrag(self):
+        self.fp = FlightPerformance()
+        self.D, self.D0, self.Di = self.fp.__drag__(0.02, 1.225, 100, 20, 5000, 10, 0.9)
+        self.range = self.fp.__range__(20*(10**-6), 50000, 30000, 10, 0.9, 0.01, 0.3108, 12)
+        self.payload_range_min, self.payload_range_max = self.fp.payload_range(20*(10**-6), 10, 0.9, 0.01, 50000, 20000, 20000, 0.3108, 12)
+
+    def testDrag1(self):
         self.assertAlmostEqual(self.D,2457.217911, 5)
+    def testDrag2(self):
         self.assertAlmostEqual(self.D0,2450)
+    def testDrag3(self):
         self.assertAlmostEqual(self.Di,7.217911251, 5)
-    
+
     def testRange(self):
-        self.assertAlmostEqual(self.range, 865)
+        self.assertAlmostEqual(self.range[0], 5059.202, places=1)
+    
+    def test_range_vel(self):
+        self.assertAlmostEqual(self.range[1], 84.394, places=1)
+    
+    def test_max_payload_range(self):
+        self.assertAlmostEqual(self.payload_range_max, self.fp.__range__(20*(10**-6), 40000, 20000, 10, 0.9, 0.01, 0.3108, 12)[0],0)
+    
+    def test_min_payload_range(self):
+        self.assertAlmostEqual(self.payload_range_min, self.fp.__range__(20*(10**-6), 50000, 30000, 10, 0.9, 0.01, 0.3108, 12)[0],0)
+
+    

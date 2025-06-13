@@ -44,3 +44,8 @@ def __ISA__(altitude: float):
     speed_of_sound = a
 
     return temperature,pressure,density,speed_of_sound
+
+
+if __name__ == "__main__":
+    result = __ISA__(12000)
+    print(result)
