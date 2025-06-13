@@ -5,4 +5,4 @@
 1.00000 0.00000 0.00000 Axis Vector
 
     Loc    XCenter  YCenter  ZCenter         Area
-    9.215     9.215     0.000     0.006     0.469
+    7.500     7.500     0.000     0.023     1.773

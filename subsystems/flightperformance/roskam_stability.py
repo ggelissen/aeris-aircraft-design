@@ -48,51 +48,65 @@ def angle_of_sideslip_beta(params: DesignParameters):
         vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
     two_r_1 = 2*np.sqrt(fuselage_area_at_that_place/np.pi) #from lucas: fuselage depth in region of vertical tail (at x_ac_mac of tail)
     print(f"this is the x axis of k_v plot: {b_v / two_r_1}")
-    k_v = input("what is the value of k_v? p.385/417")
-    C_L_alpha_v = None #get eventually from tail sizing
-    parameter_in_C_Y_beta_v = 0.724 + 3.06*((params.empennage.S_v / params.wing.S_w)/(1+ math.cost(params.wing.Lambda_025c_w)))+0.4* z_w / z_f + 0.009 * params.wing.A_w_target
+    k_v = float(input("what is the value of k_v? p.385/417"))
+    C_L_alpha_v = 0 #get eventually from tail sizing
+    parameter_in_C_Y_beta_v = 0.724 + 3.06*((params.empennage.S_v / params.wing.S_w)/(1+ math.cos(params.wing.Lambda_025c_w)))+0.4* z_w / z_f + 0.009 * params.wing.A_w_target
     C_Y_beta_v = -k_v*(C_L_alpha_v)* parameter_in_C_Y_beta_v * (params.empennage.S_v / params.wing.S_w)
 
     C_Y_beta = C_Y_beta_w + C_Y_beta_f + C_Y_beta_v
     
     
-    C_L_wf = None #cruise lift coefficient of aircraft
-    wing_sweep_contribution = input("what is the contribution of the wing sweep to the C_l_beta? p.393/425")
+    C_L_wf = 0 #cruise lift coefficient of aircraft
+    wing_sweep_contribution = float(input("what is the contribution of the wing sweep to the C_l_beta? p.393/425"))
     M_cos_Lambda_half = params.cruise_mach*math.cos(params.wing.Lambda_05_w)
     A_Sweep = params.wing.A_w_target / math.cos(params.wing.Lambda_05_w)
     print(f"this is the x axis of the compressibility sweep plot: {M_cos_Lambda_half, A_Sweep}")
-    K_M_Lambda = input("what is the compressibility correction to sweep? p.394/426")
+    K_M_Lambda = float(input("what is the compressibility correction to sweep? p.394/426"))
     lf_b = params.fuselage.l_f / params.wing.b_w
     print(f"this is the x axis of the K_F plot: {lf_b, A_Sweep}")
-    K_f = input("what is the fuselage correction to sweep? p.394/426")    
-    aspect_ratio_contribution = input("what is the contribution of the aspect ratio to the C_l_beta? p.394/426")
-    wing_dihedral_effect = input("what is the contribution of the wing dihedral to the C_l_beta? p.395/427")
+    K_f = float(input("what is the fuselage correction to sweep? p.394/426") )
+    aspect_ratio_contribution = float(input("what is the contribution of the aspect ratio to the C_l_beta? p.394/426"))
+    wing_dihedral_effect = float(input("what is the contribution of the wing dihedral to the C_l_beta? p.395/427"))
     print(f"this is the x axis of the K__M_Gamma plot: {M_cos_Lambda_half, A_Sweep}")
-    K_M_Gamma = input("what is the compressibility correction to the wing dihedral? p.396/428")
+    K_M_Gamma = float(input("what is the compressibility correction to the wing dihedral? p.396/428"))
     fuselage_effect_wing_height = -0.0005*params.wing.A_w_target*(params.fuselage.D_f / params.wing.b_w)**2
     delta_cl_beta_zw = 0.042*(params.wing.A_w_target)**0.5 * (z_w / params.wing.b_w)* (params.fuselage.D_f / params.wing.b_w)
     C_l_beta_wf = 57.3*(C_L_wf *(wing_sweep_contribution*K_M_Lambda*K_f + aspect_ratio_contribution) + params.wing.Gamma_w* wing_dihedral_effect * K_M_Gamma + wing_dihedral_effect + delta_cl_beta_zw)
 
 
-    kappa_Gamma = input("what is kappa_Gamma (dihedral factor for roll stability)? Philips paper fig. 17")
-    kappa_l = input("what is kappa_l (planform factor for roll stability)? Philips paper fig. 17")
+    kappa_Gamma = float(input("what is kappa_Gamma (dihedral factor for roll stability)? Philips paper fig. 17"))
+    kappa_l = float(input("what is kappa_l (planform factor for roll stability)? Philips paper fig. 17"))
     kappa_L = 0.04 #estimation according do Philips paper
     C_L_alpha_tail_airfoil = 2*np.pi
     C_L_alpha_Gamma0 = (C_L_alpha_tail_airfoil) / (1 + C_L_alpha_tail_airfoil / (np.pi*params.empennage.A_t))*(1 + kappa_L)
-    C_l_beta_vtail = -((2*params.empennage.S_t*params.empennage*b_v) / (3*np.pi * params.wing.S_w * params.wing.b_w))*kappa_Gamma * kappa_l * C_L_alpha_Gamma0 * math.sin(params.empennage.vtail_dihedral) #ensure that this is the total area and span of v-tail
+    C_l_beta_vtail = -((2*params.empennage.S_t*params.empennage.b_v) / (3*np.pi * params.wing.S_w * params.wing.b_w))*kappa_Gamma * kappa_l * C_L_alpha_Gamma0 * math.sin(params.empennage.vtail_dihedral) #ensure that this is the total area and span of v-tail
     
     C_l_beta = C_l_beta_wf + C_l_beta_vtail
 
     C_n_beta_w = 0
 
-    h1 = None #get from lucas, diameter of fuselage at l_f / 4
-    h2 = None #get from lucas, diameter of fuselage at 3l_f/4
+
+    vsp.ComputePlaneSlice(17, 1, vsp.vec3d(1, 0, 0), False, start_bnd=params.fuselage.l_f*0.25)
+    fuselage_area_at_that_place = np.asarray(vsp.GetDoubleResults(vsp.FindLatestResultsID('Slice'), 'Slice_Area'))[0]
+    vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete NewGeom which gets added after an export
+    for geom in vsp.FindGeoms():
+        vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
+    h1 = 2 * np.sqrt(fuselage_area_at_that_place / np.pi) #get from lucas, diameter of fuselage at l_f / 4
+    vsp.ComputePlaneSlice(17, 1, vsp.vec3d(1, 0, 0), False, start_bnd=params.fuselage.l_f * 0.75)
+    fuselage_area_at_that_place = np.asarray(vsp.GetDoubleResults(vsp.FindLatestResultsID('Slice'), 'Slice_Area'))[0]
+    vsp.DeleteGeom(vsp.FindGeom("MeshGeom", 0))  # Delete NewGeom which gets added after an export
+    for geom in vsp.FindGeoms():
+        vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
+    h2 = 2 * np.sqrt(fuselage_area_at_that_place / np.pi) #get from lucas, diameter of fuselage at 3l_f/4
     print(f"This is needed for K_N: {np.sqrt(h1/h2)}")
-    K_N = input("what is K_N? p.397/431")
+    K_N = float(input("what is K_N? p.397/431"))
     Re_L_f = (params.cruise_speed * params.fuselage.l_f) / params.cruise_viscosity #find cruise viscosity
     print(f"This is needed for K_R_l, the reynolds number of fuselage: {Re_L_f}")
-    K_R_l = input("what is K_R_l? p.399/432")
-    S_B_S = None #from lucas body side area
+    K_R_l = float(input("what is K_R_l? p.399/432"))
+    vsp.SetIntAnalysisInput('Projection', 'DirectionType', [1])
+    vsp.SetVec3dAnalysisInput('Projection', 'Direction', [vsp.vec3d(0, 1, 0)])
+    resultsid = vsp.ExecAnalysis('Projection')
+    S_B_S = vsp.GetDoubleResults(resultsid, 'Area')[0] #from lucas body side area
     C_n_beta_f = -57.3*K_N*K_R_l*((S_B_S*params.fuselage.l_f)/(params.wing.S_w*params.wing.b_w))
     
     C_n_beta_v = -C_Y_beta_v *(params.empennage.L_h * math.cos(params.cruise_aoa)+ params.empennage.z_v * math.sin(params.cruise_aoa))/params.wing.b_w

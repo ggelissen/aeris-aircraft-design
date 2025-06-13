@@ -37,8 +37,8 @@ class DesignParameters:
         self.cg = CGParameters()  # Center of Gravity Parameters
         self.materials = MaterialsParameters()
         self.weight = WeightParameters()
-        self.wing = WingParameters(self, W_TO=self.weight.W_TO, W_S=self.weight.W_S)
         self.performance = PerformanceParameters()
+        self.wing = WingParameters(self, W_TO=self.weight.W_TO, W_S=self.weight.W_S)
         self.fuselage = FuselageParameters()
         self.engine = EngineParameters(W_TO=self.weight.W_TO, T_W=self.weight.T_W)
         self.empennage = EmpennageParameters(l_f=self.fuselage.l_f)
@@ -78,6 +78,7 @@ class DesignParameters:
         self.max_load_factor = config.get('max_load_factor')
         self.crit_mach = config.get('crit_mach')
         self.cruise_aoa = config.get('cruise_aoa')
+        self.cruise_viscosity = config.get('cruise_viscosity')
 
         # Load subsystem parameters
         # if 'cg' in config:
@@ -207,12 +208,15 @@ class WingParameters:
         self.de_da = None                         # Downwash effect on the lift coefficient.
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
+        self.t_c_w = 0.12                     # Wing Thickness-to-Chord Ratio, average of root and tip
         self.CL = None                          # Design CL of aircraft
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
         self.list_of_airfoils = {
             "airfoil1": {
                 "Name": "NACA SC(2)-0714 Supercritical Airfoil",
+                "tcratio": 0.14,
+                'designcl': 0.7,
                 "CST_uppersurf": [0.23723,   0.08150,   0.32028,     0.04044,       0.31712,     0.18393,    0.29198,     0.30933],
                 "CST_lowersurf": [0.23723,    -0.05508,   -0.31490,   -0.01788,   -0.26995,   -0.19510,     0.13560,     0.27263],
                 "simulation_parms": {
@@ -225,11 +229,128 @@ class WingParameters:
                     'Transition_location_for_effective_aoa_-1.655_lower_surface': 0.1, # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
                     'momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface': 0.01, # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
                 }
-            }
+            },
+            "airfoil2": {
+                "Name": "NACA SC(2)-0612 Supercritical Airfoil",
+                'tcratio': 0.12,
+                'designcl': 0.6,
+                "CST_uppersurf": [0.20037, 0.07330, 0.27432,0.02640, 0.27780, 0.16726, 0.21760, 0.25335],
+                "CST_lowersurf": [  -0.20037, -0.06944, -0.21812, -0.11350, -0.11873,  -0.24495,   0.10684,  0.21754],
+                "simulation_parms": {
+                    'Transition_location_for_effective_aoa_0.03_upper_surface': 0.10,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_0.03_upper_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_0.03_lower_surface': 0.1,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_0.03_lower_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_-1.655_upper_surface': 0.08,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_-1.655_upper_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_-1.655_lower_surface': 0.1,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                }
+            },
+            "airfoil3": {
+                "Name": "NACA SC(2)-0412 Supercritical Airfoil",
+                "tcratio": 0.12,
+                'designcl': 0.4,
+                "CST_uppersurf": [0.20026, 0.06946, 0.26357, 0.01485, 0.27227,   0.14107,   0.17255,   0.17255],
+                "CST_lowersurf": [-0.20026,  -0.08105,  -0.21756,  -0.12698, -0.14338,  -0.24577,   0.04569,   0.16772],
+                "simulation_parms": {
+                    'Transition_location_for_effective_aoa_0.03_upper_surface': 0.10,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_0.03_upper_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_0.03_lower_surface': 0.1,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_0.03_lower_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_-1.655_upper_surface': 0.08,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_-1.655_upper_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_-1.655_lower_surface': 0.1,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                }
+            },
+            "airfoil4": {
+                "Name": "NACA SC(2)-0410 Supercritical Airfoil",
+                "tcratio": 0.10,
+                'designcl': 0.4,
+                "CST_uppersurf": [  0.16386,   0.05367,   0.22778,   0.00233,   0.22977,     0.11922,     0.14088,   0.18320],
+                "CST_lowersurf": [-  0.16386,   -0.06313,   -0.19743,  -0.07145,  -0.15608,   -0.18852,     0.02047,    0.15824],
+                "simulation_parms": {
+                    'Transition_location_for_effective_aoa_0.03_upper_surface': 0.10,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_0.03_upper_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_0.03_lower_surface': 0.1,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_0.03_lower_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_-1.655_upper_surface': 0.08,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_-1.655_upper_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_-1.655_lower_surface': 0.1,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                }
+            },
+            "airfoil5": {
+                "Name": "NACA SC(2)-0610 Supercritical Airfoil",
+                "tcratio": 0.10,
+                'designcl': 0.6,
+                "CST_uppersurf": [    0.16404,     0.05956,    0.23113,     0.02687,    0.21458,      0.16472,      0.17881,    0.24337],
+                "CST_lowersurf": [-   0.16404,    -0.04884,   -0.21140,   -0.03327,   -0.16024,   -0.17440,    0.07773,     0.21854],
+                "simulation_parms": {
+                    'Transition_location_for_effective_aoa_0.03_upper_surface': 0.10,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_0.03_upper_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_0.03_lower_surface': 0.1,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_0.03_lower_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_-1.655_upper_surface': 0.08,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_-1.655_upper_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                    'Transition_location_for_effective_aoa_-1.655_lower_surface': 0.1,
+                    # source: https://ntrs.nasa.gov/api/citations/19890008197/downloads/19890008197.pdf # TODO: Check validity for M=0.85
+                    'momentum_thickness_jump_for_effective_aoa_-1.655_lower_surface': 0.01,
+                    # Better estimate needed TODO: Mrugank read ESDU documenation for DELTHU
+                }
+            },
         }
-        self.simulation_parms = self.list_of_airfoils['airfoil1']['simulation_parms'] # Simulation parameters for the airfoil, such as transition location and momentum thickness jump
-        self.CST_uppersurf = self.list_of_airfoils['airfoil1']['CST_uppersurf'] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
-        self.CST_lowersurf = self.list_of_airfoils['airfoil1']['CST_lowersurf'] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
+
+        closest_key = None
+        min_distance = float('inf')
+
+        for key, data in self.list_of_airfoils.items():
+            tcratio = data.get('tcratio')
+            designcl = data.get('designcl')
+            if tcratio is None or designcl is None:
+                continue  # Skip if either value is missing
+
+            # Euclidean distance in (tcratio, designcl) space
+            distance = ((tcratio -  self.t_c_w) ** 2 + (designcl - parent.performance.C_L_hat) ** 2) ** 0.5
+
+            if distance < min_distance:
+                min_distance = distance
+                closest_key = key
+        self.chosenairfoil = closest_key
+        self.simulation_parms = self.list_of_airfoils[closest_key]['simulation_parms'] # Simulation parameters for the airfoil, such as transition location and momentum thickness jump
+        self.CST_uppersurf = self.list_of_airfoils[closest_key]['CST_uppersurf'] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
+        self.CST_lowersurf = self.list_of_airfoils[closest_key]['CST_lowersurf'] # First 7 coefficients for NACA SC(2)-0714 Supercritical Airfoil. These coefficients can be optimised.
         self.x_c_m = 0.37                           # Location along chord of max thickness
         if self.t_c_w_r is not None and self.t_c_w_t is not None:
             self.tau_w = self.t_c_w_t / self.t_c_w_r    # Wing Thickness-to-Chord Ratio Gradient
@@ -306,9 +427,10 @@ class PerformanceParameters:
         self.L_D_loiter = 16.815                      # Lift-to-Drag Ratio at Loiter
 
         self.CL_cruise = None                  # Lift Coefficient at Cruise	
-        self.C_L_hat = 0.6                      # Design Lift Coefficient
+        self.C_L_hat = 0.6                      # Design Lift Coefficient, to be updated by alejandro's code
 
         self.V_A = 136.7                       # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
+
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():

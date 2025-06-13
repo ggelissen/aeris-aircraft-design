@@ -336,6 +336,7 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
         vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
     fuselage_mesh = pv.read('data/fuselage.stl')
     fuselage_mesh.translate([0, 0, 0], inplace=True)
+    fuselage_mesh.rotate_x(-90, inplace=True)
     plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
 
 
