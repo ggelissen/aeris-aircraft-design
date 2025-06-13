@@ -114,9 +114,9 @@ def create_wing(designvars: DesignParameters = None):
     vsp.UpdateGeom(wing_id)
     vsp.WriteSeligAirfoil("data/Airfoil.dat", wing_id, 0) # Write airfoil to file
 
-    vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 0, vsp.XS_FILE_AIRFOIL)
-    vsp.ReadFileAirfoil(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), "data/Airfoil.dat") # Read airfoil from file
-    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), "ThickChord"), wingpars.t_c_w_r) # After reimiport thickness can be set
+    # vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 0, vsp.XS_FILE_AIRFOIL)
+    # vsp.ReadFileAirfoil(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), "data/Airfoil.dat") # Read airfoil from file
+    # vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 0), "ThickChord"), wingpars.t_c_w_r) # After reimiport thickness can be set
 
     # Set tip airfoil, parametrised using Class-Shape Transformation (CST) coefficients, which are better for supercritical airfoils
     vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 1, vsp.XS_CST_AIRFOIL)
@@ -128,9 +128,9 @@ def create_wing(designvars: DesignParameters = None):
     # Scale tip airfoil to required thickness to chord ratio
     vsp.UpdateGeom(wing_id)
     vsp.WriteSeligAirfoil("data/Airfoil.dat", wing_id, 1)  # Write airfoil to file
-    vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 1, vsp.XS_FILE_AIRFOIL)
-    vsp.ReadFileAirfoil(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "data/Airfoil.dat")  # Read airfoil from file
-    vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 1), 0), "ThickChord"), wingpars.t_c_w_t)  # After reimiport thickness can be set
+    # vsp.ChangeXSecShape(vsp.GetXSecSurf(wing_id, 0), 1, vsp.XS_FILE_AIRFOIL)
+    # vsp.ReadFileAirfoil(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 0), 1), "data/Airfoil.dat")  # Read airfoil from file
+    # vsp.SetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(wing_id, 1), 0), "ThickChord"), wingpars.t_c_w_t)  # After reimiport thickness can be set
     vsp.UpdateGeom(wing_id)
 
     # Position wing on fuselage

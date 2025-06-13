@@ -96,7 +96,7 @@ def struct_main(designvars: DesignParameters = None, show_3d: bool = True):
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
     generate_wing_structure_3D(designvars, num_spanwise_points=1001, plot=True)
-
+    weight_distribution(designvars)
 
 
     #run_material_selection_analysis(designvars)

@@ -1,5 +1,3 @@
-
-
 import os
 import sys
 
@@ -10,30 +8,55 @@ from class1.thrust_wing_loading import run_performance_diagram
 from class1.preliminary_sizing.prelim_sizing_wing import run_preliminary_sizing_wing
 from class1.preliminary_sizing.prelim_sizing_fus import run_preliminary_sizing_fuselage
 
-def perform_class_I_analysis(params: DesignParameters) -> dict: # Alejandro: Changed to dict for clarity, as the function returns a dictionary of results
+def perform_class_I_analysis(params: DesignParameters) -> dict:
     """
     Perform Class I analysis on the design parameters.
+    
+    This function orchestrates the initial design phase including:
+    - Initial weight estimations
+    - Performance constraint analysis (T/W vs W/S)
+    - Wing preliminary sizing
+    - Fuselage preliminary sizing (placeholder)
     
     Parameters:
         params (DesignParameters): An instance of DesignParameters containing the design variables.
     
     Returns:
-        dict: The updated design parameters dictionary after Class I analysis.
+        dict: The combined results from all Class I analysis modules.
     """
+    print("\n" + "="*60)
+    print("           RUNNING CLASS I ANALYSIS")
+    print("="*60)
+    
+    # Run individual Class I modules
+    print("\n1. Initial Weight Estimations...")
     results_weights = run_initial_weight_estimations(params)
+    
+    print("\n2. Performance Constraint Analysis (T/W vs W/S)...")
     results_thrust_area = run_performance_diagram(params)
+    
+    print("\n3. Wing Preliminary Sizing...")
     results_wing_sizing = run_preliminary_sizing_wing(params)
+    
+    print("\n4. Fuselage Preliminary Sizing...")
     results_fuselage_sizing = run_preliminary_sizing_fuselage(params)
 
-    return results_weights | results_thrust_area | results_wing_sizing | results_fuselage_sizing
+    # Combine all results
+    combined_results = {**results_weights, **results_thrust_area, 
+                       **results_wing_sizing, **results_fuselage_sizing}
+    
+    print(f"\n✅ Class I Analysis Complete. Generated {len(combined_results)} parameters.")
+    return combined_results
 
 
 if __name__ == "__main__":
-
     params = DesignParameters()
     params.load_from_yaml("design_config.yaml")
 
     analysis_results = perform_class_I_analysis(params)
     
+    print("\n" + "="*40)
+    print("       CLASS I RESULTS SUMMARY")
+    print("="*40)
     for key, value in analysis_results.items():
         print(f"{key}: {round(value, 3) if isinstance(value, float) else value}")

@@ -2,7 +2,7 @@ import math
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '...')))
 from utils.unit_conversions import *
 from design_variables import DesignParameters
 
@@ -43,7 +43,7 @@ def fuselage_weight_N(params: DesignParameters):
         0.5257 * F_MG * F_NG * F_press * F_VT * F_matl
         * (L_struct_ft ** 0.3796)
         * ((W_carried_lbf * N_Z) ** 0.4863)
-        * (params.max_eq_velocity/100)**2 # TODO, there was a factor 1.3 here! Remove it?, seems like it as per 6.40?
+        * (params.max_eq_velocity)**2 # TODO, there was a factor 1.3 here! Remove it?, seems like it as per 6.40?
         # Why is max_eq_velocity divided by 100?
     )
     W_fus_N = lbf_to_N(W_fus_lb)  # Convert to Newtons for consistency
