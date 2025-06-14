@@ -16,7 +16,7 @@ def wing_weight_N(params: DesignParameters):
     Source: Torenbeek, "Advanced Aircraft Design", Appendix C.
     NOTE: This formula is empirical and requires imperial units (lbf, ft).
     """
-    print("  - Calculating Wing Weight (Torenbeek)...")
+    #print("  - Calculating Wing Weight (Torenbeek)...") # Removed so that it doesnt print in iterations.
     W_TO_lb = N_to_lbf(params.weight.W_TO)
     b_w_ft = m_to_ft(params.wing.b_w)
     S_w_ft2 = m2_to_ft2(params.wing.S_w)
