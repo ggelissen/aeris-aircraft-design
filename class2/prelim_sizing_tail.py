@@ -79,7 +79,7 @@ def run_preliminary_sizing_tail(params: DesignParameters) -> dict:
     Returns:
         dict: A dictionary containing the calculated tail geometry parameters.
     """
-    print("\nRunning Preliminary Tail Sizing (Corrected Logic)...")
+    #print("\nRunning Preliminary Tail Sizing (Corrected Logic)...")
     
     # Step 1: Calculate decomposed tail areas using the original script's formulas
     S_h, S_v = calculate_decomposed_tail_sizing(params)
