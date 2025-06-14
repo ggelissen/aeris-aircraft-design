@@ -157,9 +157,9 @@ class WeightParameters:
         self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 2562.814                             # Wing Loading in N/m^2
         self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
-        self.M_ff = 0.588                         # Maximum Fuel Fraction
+        self.M_ff = 0.66                         # Maximum Fuel Fraction TODO, changed by Alejandro from 0.588 to 0.66
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
-        self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
+        self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction TODO, why is this here? Does it need to be accounted? Though it is just part of OEW? This is not contingency fuel, value yes, but not the description
         self.W_tfo = 1890.384                           # Trapped Fuel and Oil Fraction
         self.W_F_used = 12594.544                        # Used Fuel Weight in N
         self.W_F_res = 2976.371                         # Reserve Fuel Weight in N
