@@ -28,7 +28,7 @@ def calculate_decomposed_tail_sizing(params: DesignParameters) -> tuple:
          print("Warning: Missing parameters for tail area calculation. Returning (0, 0).")
          return 0, 0
     
-    # NOTE: The following formulas are implemented exactly as in the user's original script.
+    # The following formulas are implemented exactly as in the user's original script.
     # S_h is calculated using the vertical volume coefficient and wing span.
     S_h = (params.empennage.V_v * params.wing.b_w * params.wing.S_w) / params.empennage.L_v
     # S_v is calculated using the horizontal volume coefficient and MAC.
