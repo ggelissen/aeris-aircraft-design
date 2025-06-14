@@ -94,7 +94,7 @@ def calculate_cg_longitudinal(params: DesignParameters, weight_results: dict) ->
     
     # Payload and fuel
     W_PL = params.weight.W_PL
-    W_F = weight_results["W_F"] # TODO, this could be from design_params.weight.W_F
+    W_F = weight_results["W_F"]
 
     moment_payload = W_PL * params.cg.x_cg_payload
     moment_fuel = W_F * params.cg.x_cg_fuel
@@ -110,23 +110,6 @@ def calculate_cg_longitudinal(params: DesignParameters, weight_results: dict) ->
     for condition, (weight, moment) in conditions.items():
         cg = moment / weight if weight > 0 else None
         cg_positions[condition] = cg
-    #     print(f"{condition}: CG = {cg:.2f} m, Weight = {weight:.2f} N") # TODO, uncomment for running the loop
-
-    # # Plotting CG Excursion
-    # plt.figure(figsize=(10, 5))
-    # labels = list(cg_positions.keys())
-    # cg_values = [cg_positions[k] for k in labels]
-    # weights = [conditions[k][0] for k in labels]
-
-    # plt.plot(cg_values, weights, marker='o', linestyle='-', color='navy')
-    # plt.title("CG Excursion Plot")
-    # plt.xlabel("CG Position from Nose (m)")
-    # plt.ylabel("Aircraft Weight (N)")
-    # plt.grid(True)
-    # for i, txt in enumerate(labels):
-    #     plt.annotate(txt, (cg_values[i], weights[i]), textcoords="offset points", xytext=(0,10), ha='center')
-    # plt.tight_layout()
-    # plt.show()
 
     return cg_positions
 
@@ -142,8 +125,7 @@ def estimate_mac_leading_edge(cg_OEW: float, target_CG_percent_MAC: float, mac_l
     Returns:
         dict: MAC leading edge position
     """
-    x_LE_MAC = cg_OEW - target_CG_percent_MAC *  mac_length # TODO, change for params.wing.mac and see what happens
-    print(f"Estimated MAC Leading Edge location: {x_LE_MAC:.2f} m (to place CG at {target_CG_percent_MAC*100:.0f}% MAC)")
+    x_LE_MAC = cg_OEW - target_CG_percent_MAC * mac_length
     return {"x_LE_MAC": x_LE_MAC}
 
 def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: float = None) -> dict:
@@ -151,16 +133,12 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
     Perform Class II analysis on the design parameters.
     
     This function orchestrates the detailed design phase including:
+    - Class II wing sizing (using delta method for t/c)
     - Tail sizing
     - Landing gear positioning  
     - Improved drag estimation
     - Detailed component weight estimation with convergence
     - Center of gravity analysis
-    
-    Note: Wing optimization is NOT included here due to concerns about:
-    - Unrealistic wing loadings
-    - Conflicting MTOW calculations
-    - Poor integration with iterative design approach
     
     Parameters:
         params (DesignParameters): Design parameters object
@@ -181,13 +159,49 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
     
     combined_results = {}
     
-    # 1. Tail Sizing
+    # 1. Class II Wing Sizing (using delta method)
+    print("\n1. Class II Wing Sizing...")
+    try:
+        from class2.class_II_wing_sizing import run_class_II_wing_sizing
+        
+        wing_class_ii_results = run_class_II_wing_sizing(params)
+        combined_results.update(wing_class_ii_results)
+        
+        # Update wing parameters directly with refined results (inline, no separate function)
+        if 'Lambda_025c_w_refined' in wing_class_ii_results:
+            params.wing.Lambda_025c_w = wing_class_ii_results['Lambda_025c_w_refined']
+        if 'Lambda_05c_w_refined' in wing_class_ii_results:
+            params.wing.Lambda_05_w = wing_class_ii_results['Lambda_05c_w_refined'] 
+        if 'Lambda_LE_w_refined' in wing_class_ii_results:
+            params.wing.Lambda_0_w = wing_class_ii_results['Lambda_LE_w_refined']
+        if 'lambda_w_refined' in wing_class_ii_results:
+            params.wing.lambda_w = wing_class_ii_results['lambda_w_refined']
+        if 'root_chord_refined' in wing_class_ii_results:
+            params.wing.root_chord = wing_class_ii_results['root_chord_refined']
+        if 'tip_chord_refined' in wing_class_ii_results:
+            params.wing.tip_chord = wing_class_ii_results['tip_chord_refined']
+        if 'mac_refined' in wing_class_ii_results:
+            params.wing.mac = wing_class_ii_results['mac_refined']
+        if 'y_LEMAC_refined' in wing_class_ii_results:
+            params.wing.y_LEMAC = wing_class_ii_results['y_LEMAC_refined']
+        if 't_c_w_refined' in wing_class_ii_results:
+            params.wing.t_c_w_max = wing_class_ii_results['t_c_w_refined']
+            params.wing.t_c_w_r = wing_class_ii_results['t_c_w_refined']  # Assume root = max for now
+        if 'Gamma_w_refined' in wing_class_ii_results:
+            params.wing.Gamma_w = wing_class_ii_results['Gamma_w_refined']
+        
+        print(f"   ✅ Class II wing sizing complete. Refined t/c = {wing_class_ii_results.get('t_c_w_refined', 'N/A'):.3f}")
+    except Exception as e:
+        print(f"   ⚠️  Class II wing sizing failed: {e}")
+        wing_class_ii_results = {}
+    
+    # 2. Tail Sizing
     print("\n1. Tail Sizing...")
     try:
         tail_results = run_preliminary_sizing_tail(params)
         combined_results.update(tail_results)
         
-        # Update parameters directly with tail results # TODO, is there a better way to do this?
+        # Update parameters directly with tail results
         if 'S_h' in tail_results:
             params.empennage.S_h = tail_results['S_h']
         if 'S_v' in tail_results:
@@ -198,27 +212,19 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
             params.empennage.b_v = tail_results['b_t']
         if 'dihedral_rad (gamma)' in tail_results:
             params.empennage.vtail_dihedral = tail_results['dihedral_rad (gamma)']
-        if 'S_h' in tail_results:
-            params.empennage.S_h = tail_results['S_h']
-        if 'S_v' in tail_results:
-            params.empennage.S_v = tail_results['S_v']
-        if 'S_t' in tail_results:
-            params.empennage.S_t = tail_results['S_t']
-        if 'b_t' in tail_results:
-            params.empennage.b_v = tail_results['b_t']
+        if 'Lambda_025c_t' in tail_results:
+            params.empennage.Lambda_t_025c = tail_results['Lambda_025c_t']
+        if 'aspect_ratio_t' in tail_results:
+            params.empennage.A_t = tail_results['aspect_ratio_t']
+        if 'taper_ratio_t' in tail_results:
+            params.empennage.lambda_t = tail_results['taper_ratio_t']
+        if 't_c_t' in tail_results:
+            params.empennage.t_c_t = tail_results['t_c_t']
         if 'c_root_t' in tail_results:
             params.empennage.c_r = tail_results['c_root_t']
         if 'c_tip_t' in tail_results:
             params.empennage.c_t = tail_results['c_tip_t']
-        if 'taper_ratio_t' in tail_results:
-            params.empennage.lambda_t = tail_results['taper_ratio_t']
-        if 'Lambda_025c_t' in tail_results:
-            params.empennage.Lambda_t_025c = tail_results['Lambda_025c_t']
-        if 't_c_t' in tail_results:
-            params.empennage.t_c_t = tail_results['t_c_t']
-        if 'dihedral_rad (gamma)' in tail_results:
-            params.empennage.vtail_dihedral = tail_results['dihedral_rad (gamma)']
-            
+
         print(f"   ✅ Tail sizing complete. S_t = {tail_results.get('S_t', 'N/A'):.2f} m²")
     except Exception as e:
         print(f"   ⚠️  Tail sizing failed: {e}")
@@ -290,7 +296,7 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
         if 'OEW' in cg_results and hasattr(params.wing, 'mac'):
             mac_results = estimate_mac_leading_edge(
                 cg_OEW=cg_results['OEW'],
-                target_CG_percent_MAC=0.30,  # 30% MAC is typical # TODO, hardocded, change to params.wing.CG_percent_MAC
+                target_CG_percent_MAC=0.30,  # 30% MAC is typical
                 mac_length=params.wing.mac
             )
             combined_results.update(mac_results)
