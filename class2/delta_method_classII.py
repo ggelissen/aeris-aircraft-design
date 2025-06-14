@@ -63,7 +63,7 @@ def calculate_tc_from_delta_method(target_cruise_mach, aspect_ratio, sweep_deg, 
         t_c = _get_tc_from_mdd2d(required_mdd2d, cl_des)
         return t_c if t_c > 0.05 else 0
     except (ValueError, IndexError):
-        return 0
+        return None  # Return None for invalid inputs, instead of 0 to indicate failure
     
 
 # --- Main block for plotting ---
