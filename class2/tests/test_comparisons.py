@@ -62,7 +62,7 @@ def run_comparison():
     print(f"Simulated Tail: S_h={params.empennage.S_h:.2f}, S_v={params.empennage.S_v:.2f}")
     
     # A placeholder for total fuel weight, required by propulsion calculations
-    params.weight.W_F = params.weight.W_TO * (1 - params.weight.M_ff)
+    params.weight.W_F = params.weight.W_TO * (params.weight.M_ff)
     
     # --- Step 3: Run and Compare Each Component ---
     print("\n" + "-"*60)
