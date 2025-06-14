@@ -206,19 +206,14 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         # Restore original values even if failed
         try:
             for key, value in original_values.items():
-                if '.' in key:
-                    obj_name, attr_name = key.split('.')
-                    obj = getattr(params, obj_name)
-                    setattr(obj, attr_name, value)
-                else:
-                    if hasattr(params.wing, key):
-                        setattr(params.wing, key, value)
-                    elif hasattr(params.weight, key):
-                        setattr(params.weight, key, value)
+                if hasattr(params.wing, key):
+                    setattr(params.wing, key, value)
+                elif hasattr(params.weight, key):
+                    setattr(params.weight, key, value)
         except:
             pass
         
-        return 1e6  # High penalty for failed calculation
+        return 1e6
 
 
 def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
