@@ -76,6 +76,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         # Store original values to restore later
         original_values = {
             'A_w_actual': params.wing.A_w_actual,
+            'A_w_target': params.wing.A_w_target,            
             'S_w': params.wing.S_w,
             'b_w': params.wing.b_w,
             'Lambda_025c_w': params.wing.Lambda_025c_w,
@@ -95,6 +96,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         
         # Update params with trial wing parameters
         params.wing.A_w_actual = A_w
+        params.wing.A_w_target = A_w  # Keep both consistent        
         params.wing.S_w = S_w
         params.wing.b_w = math.sqrt(A_w * S_w)
         params.wing.Lambda_025c_w = np.deg2rad(sweep_deg) # Todo, supposed to be in radians, ok.
