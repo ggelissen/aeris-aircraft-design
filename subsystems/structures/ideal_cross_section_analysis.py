@@ -641,6 +641,10 @@ def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray
         "centroid_y": yc,
         "A_m": A_m_calc,
         "perimeter": np.sum(panel_s),
+        'web_length': np.sum([np.linalg.norm(spar_points[sparindex][0] - spar_points[sparindex][1]) for sparindex in
+                              range(len(spar_points))]),
+        'wingskin_length': np.sum(panel_s) - np.sum([np.linalg.norm(spar_points[sparindex][0] - spar_points[sparindex][1]) for sparindex in
+                              range(len(spar_points))]),
         "Ixx": Ixx,
         "Iyy": Iyy,
         "Ixy": Ixy,
@@ -656,3 +660,5 @@ def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray
         "boom_areas_sorted": boom_areas_sorted.tolist()
     }
     return results
+
+
