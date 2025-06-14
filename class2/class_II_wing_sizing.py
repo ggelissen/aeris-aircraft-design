@@ -1,4 +1,3 @@
-
 """
 Class II Wing Optimization Module - Fuel Burn Penalty Function
 
@@ -184,10 +183,11 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M10_descent2_reserve")
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M11_land_taxi_shutdown")
         
+        #print(f"     Total fuel fraction M_ff_total: {M_ff_total:.6f} (includes all mission segments)")
         # Step 5: Calculate total fuel weight
         # From initial_weight_estimations.py: W_F_total = (1 - M_ff_total) * W_TO
         W_F_total_N = (1.0 - M_ff_total) * W_TO_adjusted
-        
+        params.weight.M_ff = M_ff_total  # Update params with total fuel weight
         # Restore wing parameters
         wing_params = ['A_w_actual', 'A_w_target', 'S_w', 'b_w', 'Lambda_025c_w', 
                     'Lambda_05_w', 'Lambda_0_w', 't_c_w_r', 't_c_w_max', 
@@ -283,7 +283,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
     
     # Define optimization ranges (reasonable for business jet UAV)
     A_w_range = np.linspace(7, 12, 15)           # Aspect ratio
-    S_w_range = np.linspace(10,15 , 15)          # Wing area (m²)  
+    S_w_range = np.linspace(5,15 , 35)          # Wing area (m²)  
     sweep_deg_range = np.linspace(25, 40, 15)    # Sweep angle (deg)
     
     # Initialize best solution tracking
@@ -301,7 +301,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
             params.wing.S_w = S_w  # Update wing area
             # Check wing loading constraint first (quick elimination)
             wing_loading = W_TO_baseline / S_w
-            if wing_loading < 1500 or wing_loading > 10000:  # N/m² - reasonable bounds
+            if wing_loading < 1500 or wing_loading > 4000:  # N/m² - reasonable bounds
                 continue
                 
             for sweep_deg in sweep_deg_range:
@@ -340,6 +340,13 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
 
                 # Calculate fuel burn penalty for this configuration
                 try:
+                    # from class1.initial_weight_estimations import (
+                    #     calculate_L_D_cruise_jet, 
+                    #     calculate_cruise_fuel_fraction_jet,
+                    #     get_statistical_fuel_fractions,
+                    #     calculate_loiter_fuel_fraction_jet
+                    # )
+                    # from class1.initial_weight_estimations import calculate_L_D_loiter
                     fuel_weight = calculate_fuel_burn_penalty(
                         A_w, S_w, sweep_deg, t_c, params, W_TO_baseline
                     )
@@ -349,6 +356,31 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                         L_D_opt = calculate_L_D_cruise_jet(
                             baseline_CD0, A_w * 1.15, e_oswald
                         )
+                        # L_D_loiter = calculate_L_D_loiter(
+                        #     baseline_CD0,  A_w * 1.15, e_oswald)
+
+                        # M_ff_opt = get_statistical_fuel_fractions(
+                        #     aircraft_type, "M1_eng_start_warmup"
+                        # ) * get_statistical_fuel_fractions(
+                        #     aircraft_type, "M2_taxi_out"
+                        # ) * get_statistical_fuel_fractions(
+                        #     aircraft_type, "M3_take_off"
+                        # ) * get_statistical_fuel_fractions(
+                        #     aircraft_type, "M4_climb1"
+                        # ) * baseline_cruise_fuel_fraction
+                        # M_ff_opt *= get_statistical_fuel_fractions(
+                        #     aircraft_type, "M6_descent1"
+                        # ) * get_statistical_fuel_fractions(
+                        #     aircraft_type, "M7_climb2_reserve"
+                        # ) * calculate_cruise_fuel_fraction_jet(
+                        #     params.diversion_distance, V_cruise_ms, L_D_opt, c_j_kg_Ns
+                        # ) * calculate_loiter_fuel_fraction_jet(
+                        #     params.loiter_time, L_D_loiter, c_j_kg_Ns
+                        # ) * get_statistical_fuel_fractions(
+                        #     aircraft_type, "M10_descent2_reserve"
+                        # ) * get_statistical_fuel_fractions(
+                        #     aircraft_type, "M11_land_taxi_shutdown"
+                        # )
                         best_fuel_weight = fuel_weight
                         best_params = {
                             'A_w_optimal': A_w,
