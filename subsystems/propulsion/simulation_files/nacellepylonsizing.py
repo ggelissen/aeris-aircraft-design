@@ -17,7 +17,6 @@ def nacelle_pylon_sizing(params: DesignParameters):
     a = (1.4 * 287.05 * 288.15) ** 0.5  # m/s, speed of sound at sea level at ISA + 15C
     T_to = params.engine.T_TO
     D_fan = 0.508 # m, fan diameter
-    L_eng = 1.397 # m, engine length
     Bpr = params.engine.Bpr # bypass ratio
     eta_ft = params.engine.eta_fanturb # fan/turbine efficiency
     tt4to = params.engine.tt4to # tt4 temp at takeoff

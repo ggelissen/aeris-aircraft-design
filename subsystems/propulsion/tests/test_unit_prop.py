@@ -333,16 +333,15 @@ def test_nacelle_pylon_sizing_nominal(mock_design_params):
     eta_nozz = mock_design_params.engine.eta_nozz
 
     G = (tt4to / 600) - 1.25
-    expected_mdot_air = (T_to / a) * ((1 + Bpr) / (5 * eta_nozz * G * (1 + (eta_ft * Bpr))**0.5))
+    expected_mdot_air = (T_to / a) * ((1 + Bpr) / (5 * eta_nozz * G * (1 + (eta_ft * Bpr)))**0.5)
 
     D_fan = 0.508
     # Correctly calculate l_nacelle first
-    expected_l_nacelle = 1.397 + 0.2
+    expected_l_nacelle = 9.8 *(((expected_mdot_air/(1.225*a))*((1+0.2*Bpr)/(1+Bpr)))**0.5 +0.05)
     expected_D_inlet = D_fan
 
     # CORRECTED: Use expected_l_nacelle and remove the 0.75 multiplier
-    expected_D_n = D_fan + (0.06 * expected_l_nacelle) + 0.03
-
+    expected_D_n = expected_D_inlet + (0.06**0.75*expected_l_nacelle) +0.03 #max nacelle diameter, m
     # D_ef depends on the corrected D_n
     expected_D_ef = expected_D_n * (1 - (1/3) * 0.75**2)
 

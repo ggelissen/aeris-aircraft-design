@@ -15,8 +15,10 @@ def data_object():
     to avoid code duplication and manage test setup.
     """
     # Moved the import inside the fixture to prevent potential circular import issues.
-    from design_variables import Data
-    return Data()
+    # Corrected the import from 'Data' to 'DesignParameters'
+    from design_variables import DesignParameters
+    # Corrected the class instantiation
+    return DesignParameters()
 
 def test_mission_simulation_run(data_object):
     """
