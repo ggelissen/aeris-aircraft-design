@@ -307,11 +307,11 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                 # Your formula for C_L_design:
                 W_S_start_cruise = W_start_cruise / S_w
                 W_S_end_cruise = W_end_cruise / S_w  
-                C_L_design = 1.1 / q_cruise * 0.5 * (W_S_start_cruise + W_S_end_cruise)
+                C_L_design = 1.1 / q_cruise * 0.5 * (W_S_start_cruise + W_S_end_cruise) # It 
                 
                 # print(f" C_L_design (before delta method) = {C_L_design:.3f} ")
-                # Karman-Tsien correction for sweep TODO, big difference whether this is included or not!
-                C_L_design_corrected = C_L_design / np.cos(np.deg2rad(sweep_deg))**2  # Not including, Delta method already accounts for this!
+                # Correction for sweep TODO, big difference whether this is included or not!
+                C_L_design_corrected = C_L_design / np.cos(np.deg2rad(sweep_deg))**2  # Not sure if Delta method does this internally, but let's be safe
                 #print(f"C_L_design = {C_L_design:.3f} (sweep={sweep_deg:.1f}°), CL_design_corrected = {C_L_design_corrected:.3f}")
                 t_c = dm.calculate_tc_from_delta_method(
                     target_cruise_mach=params.cruise_mach,
@@ -320,15 +320,15 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     cl_des=C_L_design_corrected
                 )
 
+
+                total_evaluations += 1
+                
                 # Check t/c ratio
                 if t_c < 0.05 or t_c > 0.20:  # Reasonable bounds for UAV wing
-                    successful_evaluations -= 1  # Count this as a failed evaluation 
                     #print(f"    ❌ Skipping configuration: A_w={A_w:.1f}, S_w={S_w:.1f} m², "
                     #      f"sweep={sweep_deg:.1f}°, t/c={t_c:.3f} (out of bounds), C_L_design={C_L_design_corrected:.3f}")
                     continue  # Skip this configuration, move on to next! 
 
-                total_evaluations += 1
-                
                 # Calculate fuel burn penalty for this configuration
                 try:
                     fuel_weight = calculate_fuel_burn_penalty(
