@@ -35,7 +35,7 @@ from utils.unit_conversions import *
 # Import delta method
 #try:
 import delta_method_classII as dm
-DELTA_METHOD_AVAILABLE = True
+#DELTA_METHOD_AVAILABLE = True
 #except ImportError:
   #  print("Warning: Delta method not available")
    # DELTA_METHOD_AVAILABLE = False
@@ -89,7 +89,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
             'W_TO': params.weight.W_TO
         }
         
-        # Calculate current wing weight (to subtract from baseline W_TO)
+        # Calculate current wing weight (to subtract from baseline W_TO), before updating params with trial values
         from class2.component_weights import wing_weight_N
         W_wing_current = wing_weight_N(params)
         
@@ -105,7 +105,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         taper_ratio = psw.calculate_taper_ratio(params.wing.Lambda_025c_w)
         params.wing.lambda_w = taper_ratio
         
-        c_root, c_tip = psw.calculate_chord_lengths(S_w, params.wing.b_w, taper_ratio)
+        c_root, c_tip = psw.calculate_chord_lengths(params.wing.S_w, params.wing.b_w, taper_ratio)
         params.wing.root_chord = c_root
         params.wing.tip_chord = c_tip
         
@@ -120,6 +120,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         
         # Adjust W_TO: remove current wing, add trial wing
         W_TO_adjusted = W_TO_baseline - W_wing_current + W_wing_trial
+        #print(f"Difference in W_TO due to wing weight: {W_wing_trial - W_wing_current:.2f} N")
         params.weight.W_TO = W_TO_adjusted
         
         # Step 1: Calculate CD0 using improved_drag with trial parameters
@@ -341,8 +342,8 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                             'fuel_fraction_optimal': fuel_weight / W_TO_baseline
                         }
                         
-                        print(f"    New best: A_w={A_w:.1f}, S_w={S_w:.1f}m², sweep={sweep_deg:.1f}°")
-                        print(f"    Fuel weight: {fuel_weight:.0f} N ({fuel_weight/W_TO_baseline:.1%} of W_TO)")
+                        #print(f"    New best: A_w={A_w:.1f}, S_w={S_w:.1f}m², sweep={sweep_deg:.1f}°")
+                        #print(f"    Fuel weight: {fuel_weight:.0f} N ({fuel_weight/W_TO_baseline:.1%} of W_TO)")
                         
                 except Exception as e:
                     # Skip failed evaluations
