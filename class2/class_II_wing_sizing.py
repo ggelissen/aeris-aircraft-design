@@ -115,7 +115,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         # Calculate sweep angles using existing functions TODO check this.
         Lambda_LE = psw.calculate_sweep_angle_LE(params.wing.Lambda_025c_w, c_root, params.wing.b_w, taper_ratio)
         params.wing.Lambda_0_w = Lambda_LE
-        Lambda_05c = psw.calculate_sweep_angle_x_c(Lambda_LE, c_root, params.wing.b_w, 0.5, taper_ratio)
+        Lambda_05c = psw.calculate_sweep_angle_x_c(params.wing.Lambda_0_w, params.wing.root_chord, params.wing.b_w, 0.5, params.wing.lambda_w)
         params.wing.Lambda_05_w = Lambda_05c
         
         # Calculate new wing weight with trial parameters
@@ -133,8 +133,10 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         #print(f"     Calculated CD0: {CD0:.6f} (from improved_drag)")
         # Step 2: Calculate L/D using existing function from initial_weight_estimations.py
         # Assume reasonable Oswald efficiency for modern wing
-        e_oswald = 0.9 *1.15 # Typical value for clean wing # for winglets TODO check
-        L_D_cruise = calculate_L_D_cruise_jet(CD0, A_w, e_oswald)
+        e_oswald = 0.9 # Typical value for clean wing # for winglets TODO Torenbeek said that Induced drag 
+        #is reduced by 15% with winglets, so thought we could use 1.15 factor here. Not sure
+        A_w_winglets = params.wing.A_w_actual * 1.15  # Adjusted aspect ratio with winglets
+        L_D_cruise = calculate_L_D_cruise_jet(CD0, A_w_winglets, e_oswald)
         
         # Step 3: Calculate cruise fuel fraction using existing function
         R_cruise_m = params.range  # Mission range
@@ -172,7 +174,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         
         # Reserve loiter - use loiter L/D
         from class1.initial_weight_estimations import calculate_L_D_loiter
-        L_D_loiter = calculate_L_D_loiter(CD0, A_w, e_oswald)
+        L_D_loiter = calculate_L_D_loiter(CD0, A_w_winglets, e_oswald)
         from class1.initial_weight_estimations import calculate_loiter_fuel_fraction_jet
         M_loiter = calculate_loiter_fuel_fraction_jet(
             params.loiter_time, L_D_loiter, c_j_kg_Ns
@@ -186,17 +188,17 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         # From initial_weight_estimations.py: W_F_total = (1 - M_ff_total) * W_TO
         W_F_total_N = (1.0 - M_ff_total) * W_TO_adjusted
         
-        # Restore original values TODO, why
-        for key, value in original_values.items():
-            if '.' in key:
-                obj_name, attr_name = key.split('.')
-                obj = getattr(params, obj_name)
-                setattr(obj, attr_name, value)
-            else:
-                if hasattr(params.wing, key):
-                    setattr(params.wing, key, value)
-                elif hasattr(params.weight, key):
-                    setattr(params.weight, key, value)
+        # Restore wing parameters
+        wing_params = ['A_w_actual', 'A_w_target', 'S_w', 'b_w', 'Lambda_025c_w', 
+                    'Lambda_05_w', 'Lambda_0_w', 't_c_w_r', 't_c_w_max', 
+                    'lambda_w', 'root_chord', 'tip_chord']
+        for param in wing_params:
+            if param in original_values:
+                setattr(params.wing, param, original_values[param])
+
+        # Restore weight parameters  
+        if 'W_TO' in original_values:
+            params.weight.W_TO = original_values['W_TO']
         
         # Ensure fuel weight is positive and reasonable
         if W_F_total_N <= 0 or W_F_total_N > W_TO_adjusted * 0.8:
@@ -209,11 +211,17 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         
         # Restore original values even if failed
         try:
-            for key, value in original_values.items():
-                if hasattr(params.wing, key):
-                    setattr(params.wing, key, value)
-                elif hasattr(params.weight, key):
-                    setattr(params.weight, key, value)
+            # Restore wing parameters
+            wing_params = ['A_w_actual', 'A_w_target', 'S_w', 'b_w', 'Lambda_025c_w', 
+                        'Lambda_05_w', 'Lambda_0_w', 't_c_w_r', 't_c_w_max', 
+                        'lambda_w', 'root_chord', 'tip_chord']
+            for param in wing_params:
+                if param in original_values:
+                    setattr(params.wing, param, original_values[param])
+
+            # Restore weight parameters  
+            if 'W_TO' in original_values:
+                params.weight.W_TO = original_values['W_TO']
         except:
             pass
         
@@ -243,8 +251,11 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
     baseline_drag = run_improved_drag_estimations(params)
     baseline_CD0 = baseline_drag.get('CD0', 0.020)
     baseline_A_w = params.wing.A_w_target
-    e_oswald = 0.9 * 1.15  # Typical Oswald efficiency for clean wing with winglets
-    baseline_L_D = calculate_L_D_cruise_jet(baseline_CD0, baseline_A_w, e_oswald)
+    e_oswald = 0.9   # Typical Oswald efficiency for clean wing with winglets
+    # Typical value for clean wing # for winglets TODO Torenbeek said that Induced drag 
+    #is reduced by 15% with winglets, so thought we could use 1.15 factor here. Not sure
+    A_w_winglets_baseline = baseline_A_w * 1.15  # Adjusted aspect ratio with winglets
+    baseline_L_D = calculate_L_D_cruise_jet(baseline_CD0, A_w_winglets_baseline, e_oswald)
     
     # Calculate baseline cruise fuel fraction
     R_cruise_m = params.range
@@ -272,7 +283,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
     
     # Define optimization ranges (reasonable for business jet UAV)
     A_w_range = np.linspace(7, 12, 15)           # Aspect ratio
-    S_w_range = np.linspace(5, 22, 15)          # Wing area (m²)  
+    S_w_range = np.linspace(10,15 , 15)          # Wing area (m²)  
     sweep_deg_range = np.linspace(25, 40, 15)    # Sweep angle (deg)
     
     # Initialize best solution tracking
@@ -281,7 +292,6 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
     
     total_evaluations = 0
     successful_evaluations = 0
-    failed_configurations = {}
     print(f"    🔍 Evaluating {len(A_w_range) * len(S_w_range) * len(sweep_deg_range)} design points...")
     
     # Grid search optimization
@@ -291,7 +301,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
             params.wing.S_w = S_w  # Update wing area
             # Check wing loading constraint first (quick elimination)
             wing_loading = W_TO_baseline / S_w
-            if wing_loading < 1500 or wing_loading > 7000:  # N/m² - reasonable bounds
+            if wing_loading < 1500 or wing_loading > 10000:  # N/m² - reasonable bounds
                 continue
                 
             for sweep_deg in sweep_deg_range:
@@ -307,19 +317,18 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                 # Your formula for C_L_design:
                 W_S_start_cruise = W_start_cruise / S_w
                 W_S_end_cruise = W_end_cruise / S_w  
-                C_L_design = 1.1 / q_cruise * 0.5 * (W_S_start_cruise + W_S_end_cruise) # It 
+                C_L_design = 1.1 * 0.5 * (W_S_start_cruise + W_S_end_cruise) / q_cruise # From ADSEE II, TODO, document safety factor.
                 
                 # print(f" C_L_design (before delta method) = {C_L_design:.3f} ")
-                # Correction for sweep TODO, big difference whether this is included or not!
-                C_L_design_corrected = C_L_design / np.cos(np.deg2rad(sweep_deg))**2  # Not sure if Delta method does this internally, but let's be safe
+                # Correction for sweep, no longer doing it as the delta method takes in airfoil Cl directly, not section Cl, or aifoil Cl
+                #C_L_design_corrected = C_L_design / np.cos(np.deg2rad(sweep_deg))**2  
                 #print(f"C_L_design = {C_L_design:.3f} (sweep={sweep_deg:.1f}°), CL_design_corrected = {C_L_design_corrected:.3f}")
                 t_c = dm.calculate_tc_from_delta_method(
                     target_cruise_mach=params.cruise_mach,
                     aspect_ratio=A_w,
                     sweep_deg=sweep_deg,
-                    cl_des=C_L_design_corrected
+                    cl_des=C_L_design
                 )
-
 
                 total_evaluations += 1
                 
@@ -337,6 +346,9 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     successful_evaluations += 1
                     
                     if fuel_weight < best_fuel_weight:
+                        L_D_opt = calculate_L_D_cruise_jet(
+                            baseline_CD0, A_w * 1.15, e_oswald
+                        )
                         best_fuel_weight = fuel_weight
                         best_params = {
                             'A_w_optimal': A_w,
@@ -345,7 +357,9 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                             't_c_optimal': t_c,
                             'fuel_weight_N': fuel_weight,
                             'wing_loading_optimal': W_TO_baseline / S_w,
-                            'fuel_fraction_optimal': fuel_weight / W_TO_baseline
+                            'fuel_fraction_optimal': fuel_weight / W_TO_baseline,
+                            'C_L_design_optimal': C_L_design,
+                            'L_D_optimal': L_D_opt
                         }
                         
                         #print(f"    New best: A_w={A_w:.1f}, S_w={S_w:.1f}m², sweep={sweep_deg:.1f}°")
