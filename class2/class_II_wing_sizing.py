@@ -92,6 +92,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         
         # Calculate current wing weight (to subtract from baseline W_TO), before updating params with trial values
         from class2.component_weights import wing_weight_N
+        #print("     Calculating current wing weight before trial parameters...")
         W_wing_current = wing_weight_N(params)
         
         # Update params with trial wing parameters
@@ -118,6 +119,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         params.wing.Lambda_05_w = Lambda_05c
         
         # Calculate new wing weight with trial parameters
+        #print(f"     Calculating wing weight with trial parameters: A_w={A_w:.2f}, S_w={S_w:.2f} m², sweep={sweep_deg:.1f}°, t/c={t_c:.4f}")
         W_wing_trial = wing_weight_N(params)
         
         # Adjust W_TO: remove current wing, add trial wing
@@ -279,7 +281,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
     
     total_evaluations = 0
     successful_evaluations = 0
-    
+    failed_configurations = {}
     print(f"    🔍 Evaluating {len(A_w_range) * len(S_w_range) * len(sweep_deg_range)} design points...")
     
     # Grid search optimization
@@ -317,7 +319,14 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     sweep_deg=sweep_deg,
                     cl_des=C_L_design_corrected
                 )
-                    
+
+                # Check t/c ratio
+                if t_c < 0.05 or t_c > 0.20:  # Reasonable bounds for UAV wing
+                    successful_evaluations -= 1  # Count this as a failed evaluation 
+                    #print(f"    ❌ Skipping configuration: A_w={A_w:.1f}, S_w={S_w:.1f} m², "
+                    #      f"sweep={sweep_deg:.1f}°, t/c={t_c:.3f} (out of bounds), C_L_design={C_L_design_corrected:.3f}")
+                    continue  # Skip this configuration, move on to next! 
+
                 total_evaluations += 1
                 
                 # Calculate fuel burn penalty for this configuration
@@ -347,7 +356,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     continue
     
     success_rate = successful_evaluations / total_evaluations if total_evaluations > 0 else 0
-    print(f"    Optimization complete: {successful_evaluations}/{total_evaluations} evaluations successful ({success_rate:.1%})")
+    print(f"    Optimization complete: {successful_evaluations}/{total_evaluations} evaluations successful ({success_rate:.1%}) Most likely due to Cl of airfoil being out of Delta method bounds.")
     
     if best_params:
         print(f"        Optimal wing configuration:")
@@ -401,6 +410,7 @@ if __name__ == "__main__":
     print("Testing Wing Optimization for Fuel Burn...")
     results = optimize_wing_for_fuel_burn(params)
     
+    print(f"Failed configurations sweep angles: {results.get('failed_configurations', [])}")
     print("\n--- Fuel Burn Optimization Results ---")
     for key, value in results.items():
         if isinstance(value, float):
