@@ -1,15 +1,15 @@
 # AIRFOIL METADATA CSV FILE
 
-Airfoil File Directory, c:\Users\Arthur\OneDrive - Delft University of Technology\Documents\TU Delft\Year 3\DSE\DSEGroup17
+Airfoil File Directory, C:\Users\Arthur\OneDrive - Delft University of Technology\Documents\TU Delft\Year 3\DSE\DSEGroup17
 
 ########################################
-Airfoil File Name, WingGeom_SBXVCUAUAH_0.dat
+Airfoil File Name, WingGeom_LQRPXSHOBX_0.dat
 Geom Name, WingGeom
-Geom ID, SBXVCUAUAH
+Geom ID, LQRPXSHOBX
 Airfoil Index, 0
 XSec Flag, 1
 XSec Index, 0
-XSecSurf ID, LAHRAPDCCP
+XSecSurf ID, LYIAJTGLYH
 FoilSurf u Value, 0.000000
 Global u Value, 0.333333
 Leading Edge Point, 0.000000, 0.000000, 0.000000
@@ -18,9 +18,9 @@ Chord, 4.000000
 ########################################
 
 ########################################
-Airfoil File Name, WingGeom_SBXVCUAUAH_1.dat
+Airfoil File Name, WingGeom_LQRPXSHOBX_1.dat
 Geom Name, WingGeom
-Geom ID, SBXVCUAUAH
+Geom ID, LQRPXSHOBX
 Airfoil Index, 1
 XSec Flag, 0
 FoilSurf u Value, 0.200000
@@ -31,9 +31,9 @@ Chord, 3.400000
 ########################################
 
 ########################################
-Airfoil File Name, WingGeom_SBXVCUAUAH_2.dat
+Airfoil File Name, WingGeom_LQRPXSHOBX_2.dat
 Geom Name, WingGeom
-Geom ID, SBXVCUAUAH
+Geom ID, LQRPXSHOBX
 Airfoil Index, 2
 XSec Flag, 0
 FoilSurf u Value, 0.400000
@@ -44,9 +44,9 @@ Chord, 2.800000
 ########################################
 
 ########################################
-Airfoil File Name, WingGeom_SBXVCUAUAH_3.dat
+Airfoil File Name, WingGeom_LQRPXSHOBX_3.dat
 Geom Name, WingGeom
-Geom ID, SBXVCUAUAH
+Geom ID, LQRPXSHOBX
 Airfoil Index, 3
 XSec Flag, 0
 FoilSurf u Value, 0.600000
@@ -57,9 +57,9 @@ Chord, 2.200000
 ########################################
 
 ########################################
-Airfoil File Name, WingGeom_SBXVCUAUAH_4.dat
+Airfoil File Name, WingGeom_LQRPXSHOBX_4.dat
 Geom Name, WingGeom
-Geom ID, SBXVCUAUAH
+Geom ID, LQRPXSHOBX
 Airfoil Index, 4
 XSec Flag, 0
 FoilSurf u Value, 0.800000
@@ -70,13 +70,13 @@ Chord, 1.600000
 ########################################
 
 ########################################
-Airfoil File Name, WingGeom_SBXVCUAUAH_5.dat
+Airfoil File Name, WingGeom_LQRPXSHOBX_5.dat
 Geom Name, WingGeom
-Geom ID, SBXVCUAUAH
+Geom ID, LQRPXSHOBX
 Airfoil Index, 5
 XSec Flag, 1
 XSec Index, 1
-XSecSurf ID, LAHRAPDCCP
+XSecSurf ID, LYIAJTGLYH
 FoilSurf u Value, 1.000000
 Global u Value, 0.666667
 Leading Edge Point, 5.196152, 9.000000, 0.000000

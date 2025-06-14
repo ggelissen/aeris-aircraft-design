@@ -342,7 +342,7 @@ class WingParameters:
                 continue  # Skip if either value is missing
 
             # Euclidean distance in (tcratio, designcl) space
-            distance = ((tcratio -  self.t_c_w) ** 2 + (designcl - parent.performance.C_L_hat) ** 2) ** 0.5
+            distance = ((tcratio -  self.t_c_w) ** 2 + (designcl - parent.performance.C_L_hat) ** 2) ** 0.5 # TODO. No definition for this.
 
             if distance < min_distance:
                 min_distance = distance
@@ -359,6 +359,7 @@ class WingParameters:
         self.Gamma_w = 0.0175                         # Wing Dihedral Angle in radians
         self.root_chord = 1.819  # Wing Root Chord in m
         self.tip_chord = 0.4916  # Wing Tip Chord in m
+        self.C_m_ac = None       # Wing moment coefficient at aerodynamic center
         self.t_r = self.t_c_w_r * self.root_chord   # Wing Root Thickness in m
         self.planform_points = None  # 2D Numpy array with points forming the planform, is calculated by create_wing()
         self.threeDpoints = None # 3D Numpy array with points forming the wing, is calculated by create_wing()
@@ -517,7 +518,7 @@ class EngineParameters:
         self.nacelle_diameter = None
         self.nacelle_length = None
         self.fuel_density = None                    # Fuel density depending on fuel type (A1, SAF, etc)
-        self.cruise_tsfc = None                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h
+        self.cruise_tsfc = 68                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h # TODO, it is now in lb/hr, all code did this
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
         self.nacelle_blend_par = -0.4               # Parameter specifying the blend of the nacelle with the fuselage
         self.nacelle_inlet_tan_angles = np.deg2rad(np.array([20., 20., 20., 20.]))  # Nacelle Inlet Tangent Angles in radians
@@ -526,8 +527,8 @@ class EngineParameters:
         self.engine_y_pos = 0.0                     # Engine Y-Position in m
         self.engine_z_pos = -1.1                    # Engine Z-Position in m
         self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
-        self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
-        self.eta_fanturb = 0.9  
+        self.eta_nozz = 0.97                   # Nozzle Efficiency, used for engine sizing
+        self.eta_fanturb = 0.75  
         self.tt4to = 1400 #tt4 temp at takeoff   
         self.prfan = 1.9           
         self.prlpc = 1.5
@@ -538,7 +539,7 @@ class EngineParameters:
         self.tt4cruise = 1200
         self.tt4descent = 900
         self.tt4landing = 1000
-        self.lhv = 43.e6
+        self.lhv = 44.2e6
         self.etafan = 0.915
         self.etalpc = 0.9
         self.etahpc = 0.9
@@ -706,7 +707,8 @@ class CGParameters:
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.z_cg = 1.5                          # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
-
+        self.z_cg_propulsion = None              # Z CG pos of the propulsion system in m
+        
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
             if hasattr(self, key):

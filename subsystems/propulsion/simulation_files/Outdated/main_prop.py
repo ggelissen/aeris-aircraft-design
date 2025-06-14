@@ -1,38 +1,6 @@
 import numpy as np
 
-#ADVANCED AIRCRAFT DESIGN
-#   - PROPULSION INTEGRATION
-#       - L.17 PROPELLER SLIPSTREAM EFFECTS: Not relevant
-#       - L.18 Engine Intakes: Relevant
-#       - L.19 Exhaust & Thrust reversers: Relevant
-#       - L.20 Wing integration: Relevant
 
-#High-speed design requirements:
-#MFR (mass flow ratio) <=1
-#Super velocities outside intake critical
-#Cross section engine flow indep. inlet shape
-#Mass flow varies w/ engine setting, altitude & airspeed
-#Intake area closely to req. mass flow
-#Extern. cowling shd. prevent shock waves
-#    
-#Design conditions:
-#Stream tube diameter <= throat diameter
-#Typical mach 0.85: thicker engine
-#Typical mach 0.98: Thin lip/low external curvature
-#    
-#Low-speed design requirements:  
-#MFR > 1.0
-#Highest super velocities near throat area
-#Velocity distribution over throat area ot uniform
-#M_TH > 0.8 -> large decrease in tot. press. recov. & efficiency
-#Max. M_TH is crit. at low speed due req. engine mass flow largest @ take-off & init. climb
-#Ave. limited M_TH < 0.8 to prevent shock waves
-
-
-#One dimensional isentropic flow relation:
-#Note:  High mf (given A_TH) leads to high throat Mach numbers
-#       M_TH <= 1
-#       If M_TH > 0.8 -> shock waves/total press. loss
 
 m_dot = 0
 # T_TO = 7000 # Take-off thrust in N - This will be taken as input in main()
@@ -43,11 +11,6 @@ R = 287 # Specific gas constant for air J/(kgK)
 A_INF = 0
 A_HL = 0
 
-# MFR = A_INF / A_HL
-# The formula for A_TH was causing a runtime error due to (1-gamma) in the exponent.
-# For a typical turbojet/turbofan, this part of the formula might be different or M_TH is usually less than 1.
-# A_TH = m_dot * np.sqrt(T_T_global) / p_T_stagnation * (M_TH*(1+(gamma-1)/2*M_TH**2)**((gamma+1)/(2*(1-gamma)))*np.sqrt(gamma/R))**(-1)
-# Placeholder for A_TH to avoid error if not directly used in this modification:
 A_TH = 0
 
 
