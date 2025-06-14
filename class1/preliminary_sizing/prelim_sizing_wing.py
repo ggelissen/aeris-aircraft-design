@@ -21,11 +21,12 @@ def calculate_sweep_angle_025c_rad(Mach_cruise: float, Mach_cross: float = 0.935
     Returns:
     float: Sweep angle in radians
     """
-    Mach_dd = Mach_cruise + 0.03
+    Mach_dd = Mach_cruise + 0.015
     if Mach_cruise < 0.7:
         return np.arccos(1)
     else:
-        return np.arccos(0.75 * (Mach_cross / Mach_dd))
+        #return np.arccos(0.75 * (Mach_cross / Mach_dd))
+        np.arccos(((1.16)  / Mach_dd + 0.5))
     
 
 def calculate_taper_ratio(Lambda_025c: float) -> float:
