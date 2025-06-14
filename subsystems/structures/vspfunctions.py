@@ -242,6 +242,8 @@ def create_wing(designvars: DesignParameters = None):
         vsp.SetParmVal(wing_id, "X_Rel_Location", "XForm", x_pos)
         vsp.SetParmVal(wing_id, "Z_Rel_Location", "XForm", -wingpars.z_LEMAC)
         vsp.UpdateGeom(wing_id)
+        wingpars.Gamma_w = np.deg2rad(vsp.GetParmVal(wing_id, "Dihedral", "XSec_1"))
+
 
 def create_V_tail(designvars: DesignParameters = None):
     hstab_id = vsp.AddGeom("WING")

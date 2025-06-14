@@ -280,6 +280,11 @@ def plot_Mohrs_circle_subplots(sigma_x: float, sigma_y: float, sigma_z: float, t
     axs[2].set_xlim(sigma_2_yz - 1 * tau_max_yz, sigma_1_yz + 1 * tau_max_yz)
     axs[2].set_ylim(-1.5 * tau_max_yz, 1.5 * tau_max_yz)
 
+    # Check stresses that should be equal (but measured in different planes)
+    assert np.isclose(sigma_1_yz, sigma_2_xy)
+    assert np.isclose(sigma_1_xz, sigma_1_xy)
+    assert np.isclose(sigma_2_yz, sigma_2_xz )
+
     # Add markers and dotted lines for XY Plane (axs[0])
     center_xy = (sigma_1_xy + sigma_2_xy) / 2
     radius_xy = tau_max_xy
@@ -367,9 +372,18 @@ def plot_Mohrs_circle_complete(sigma_x: float, sigma_y: float, sigma_z: float, t
     tau_yz (float): Shear stress in the yz-plane.
     """
 
-    xy_sigma_1, xy_sigma_2, xy_tau_max = calculate_Mohrs_circle_stress(sigma_x, sigma_y, tau_xy) 
-    xz_sigma_1, xz_sigma_2, xz_tau_max = calculate_Mohrs_circle_stress(sigma_x, sigma_z, tau_xz) 
-    yz_sigma_1, yz_sigma_2, yz_tau_max = calculate_Mohrs_circle_stress(sigma_y, sigma_z, tau_yz)
+    cauchy_stress_tensor = np.array([[sigma_x, tau_yz, tau_xz],
+                                        [tau_xy, sigma_y, tau_yz],
+                                        [tau_xz, tau_yz, sigma_z]
+    ])
+    principal_stresses, _ = np.linalg.eigh(cauchy_stress_tensor)
+    idx = np.argsort(principal_stresses)[::-1]
+    principal_stresses = principal_stresses[idx]
+
+    xy_sigma_1, xy_sigma_2, xy_tau_max = calculate_Mohrs_circle_stress(principal_stresses[0], principal_stresses[1], 0)
+    xz_sigma_1, xz_sigma_2, xz_tau_max = calculate_Mohrs_circle_stress(principal_stresses[0], principal_stresses[2], 0)
+    yz_sigma_1, yz_sigma_2, yz_tau_max = calculate_Mohrs_circle_stress(principal_stresses[1], principal_stresses[2], 0)
+
 
     sigma_1_min = min(xy_sigma_1, xz_sigma_1, yz_sigma_1)
     sigma_1_max = max(xy_sigma_1, xz_sigma_1, yz_sigma_1)
@@ -396,22 +410,24 @@ def plot_Mohrs_circle_complete(sigma_x: float, sigma_y: float, sigma_z: float, t
     
     plt.grid()
     plt.gca().set_aspect('equal', adjustable='box')
+    #plt.scatter(np.array([sigma_x, sigma_x, sigma_y, sigma_y, sigma_z, sigma_z])/1e6, np.array([tau_xy, tau_xz, tau_xy, tau_yz, tau_xz, tau_yz])/1e6, color='black', label='Stresses')
     plt.show()
+    return principal_stresses
 
 
 if __name__ == "__main__":
     # Example usage
     sigma_x = 100e6     # Pa
-    sigma_y = 0         # Pa
-    sigma_z = 50e6      # Pa
-    tau_xy = 10e6          # Pa
-    tau_xz = 10e6          # Pa
-    tau_yz = 0          # Pa
+    sigma_y = 60e6         # Pa
+    sigma_z = 10e6      # Pa
+    tau_xy = 40e6          # Pa
+    tau_xz = 55e6          # Pa
+    tau_yz = 35e6          # Pa
 
     E = 200e9  # Pa
     nu = 0.3
     alpha = 1.2e-5  # /K
     dT = 50  # K
 
-    plot_Mohrs_circle_subplots(sigma_x, sigma_y, sigma_z, tau_xy, tau_xz, tau_yz)
+    #plot_Mohrs_circle_subplots(sigma_x, sigma_y, sigma_z, tau_xy, tau_xz, tau_yz)
     plot_Mohrs_circle_complete(sigma_x, sigma_y, sigma_z, tau_xy, tau_xz, tau_yz)

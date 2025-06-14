@@ -380,7 +380,6 @@ class WingParameters:
         self.C_D0 = 0.017196 
         self.e = 0.9         #oswald efficiency factor
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
-        self.skin_thickness = 0.0015  # Wing Skin Thickness in m
         self.Mach_cross = 0.935
         self.epsilon_t = 0         # Wing twist angle [degrees]
         self.weight_distribution = None
