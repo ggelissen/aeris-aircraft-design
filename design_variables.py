@@ -342,7 +342,7 @@ class WingParameters:
                 continue  # Skip if either value is missing
 
             # Euclidean distance in (tcratio, designcl) space
-            distance = ((tcratio -  self.t_c_w) ** 2 + (designcl - parent.performance.C_L_hat) ** 2) ** 0.5
+            distance = ((tcratio -  self.t_c_w) ** 2 + (designcl - parent.performance.C_L_hat) ** 2) ** 0.5 # TODO. No definition for this.
 
             if distance < min_distance:
                 min_distance = distance
@@ -519,7 +519,7 @@ class EngineParameters:
         self.nacelle_diameter = None
         self.nacelle_length = None
         self.fuel_density = None                    # Fuel density depending on fuel type (A1, SAF, etc)
-        self.cruise_tsfc = None                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h
+        self.cruise_tsfc = 68                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h # TODO, it is now in lb/hr, all code did this
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
         self.nacelle_blend_par = -0.4               # Parameter specifying the blend of the nacelle with the fuselage
         self.nacelle_inlet_tan_angles = np.deg2rad(np.array([20., 20., 20., 20.]))  # Nacelle Inlet Tangent Angles in radians
