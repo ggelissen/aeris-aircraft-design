@@ -15,9 +15,9 @@ class TestGroundRun(unittest.TestCase):
         FS = FlightSim()
         self.T1 = FS.ground_run2(7000, 5000, 12, 0.017, 10, 0.9, 14, 1)
         self.T2 = FS.ground_run2(7000, 4000, 12, 0.017, 10, 0.9, 14, 1)
-        self.Cm1 = calculate_Cm(1, 4000, 12, 4, 6, 1, 7, 6, 1, 1, 1, 1, 2, 0.017, 10, 0.9, 14, 1)
-        self.Cm2 = calculate_Cm(1, 4000, 12, 4, 6, 1, 7, 6, 1, 1, -1, 1, 2, 0.017, 10, 0.9, 14, 1)
-        self.Cm3 = calculate_Cm(1, 5000, 12, 4, 6, 1, 7, 6, 1, 1, 1, 1, 2, 0.017, 10, 0.9, 14, 1)
+        self.Cm1 = calculate_Cm(1, 4000, 12, 4, 6, 1, 7, 6, 1,  1, 1, 2, 0.017, 10, 0.9, 14, 1)
+        self.Cm2 = calculate_Cm(1, 4000, 12, 4, 6, 1, 7, 6, 1, -1, 1, 2, 0.017, 10, 0.9, 14, 1)
+        self.Cm3 = calculate_Cm(1, 5000, 12, 4, 6, 1, 7, 6, 1,  1, 1, 2, 0.017, 10, 0.9, 14, 1)
 
     def test_groundrun(self):
         self.assertGreater(self.T1[0], self.T2[0]) # larger weight should require larger thrust to take-off
@@ -94,6 +94,14 @@ class TestFlightPerformance(unittest.TestCase):
         self.D, self.D0, self.Di = self.fp.__drag__(0.02, 1.225, 100, 20, 5000, 10, 0.9)
         self.range = self.fp.__range__(20*(10**-6), 50000, 30000, 10, 0.9, 0.01, 0.3108, 12)
         self.payload_range_min, self.payload_range_max = self.fp.payload_range(20*(10**-6), 10, 0.9, 0.01, 50000, 20000, 20000, 0.3108, 12)
+        self.ROC1 = self.fp.ROC(0.017, 1.225, np.arange(1, 500, 1), 20, 50000, 10, 0.9, 7000)
+        self.ROC2 = self.fp.ROC(0.017, 1.225, np.arange(1, 500, 1), 20, 50000, 10, 0.9, 4000)
+        self.ROC3 = self.fp.ROC(0.017, 0.5, np.arange(1, 500, 1), 20, 50000, 10, 0.9, 7000*(0.5/1.225))
+        self.stall_speed = self.fp.stall_speed(560000*9.81, 845, 1.225, 2)
+        self.endurance = self.fp.endurance(20000, 50000, 0.02, 10, 0.88, 14*(10**-6))
+        self.hmax1, self.vmax1 = self.fp.performance_limit(50000, 15, 1.1, 7000, 0.02, 10, 0.88)
+        self.hmax2, self.vmax2 = self.fp.performance_limit(35000, 15, 1.1, 7000, 0.02, 10, 0.88)
+        self.hmax3, self.vmax3 = self.fp.performance_limit(50000, 15, 1.1, 10000, 0.02, 10, 0.88)
 
     def testDrag1(self):
         self.assertAlmostEqual(self.D,2457.217911, 5)
@@ -114,4 +122,34 @@ class TestFlightPerformance(unittest.TestCase):
     def test_min_payload_range(self):
         self.assertAlmostEqual(self.payload_range_min, self.fp.__range__(20*(10**-6), 50000, 30000, 10, 0.9, 0.01, 0.3108, 12)[0],0)
 
+    def test_ROC_less_thrust1(self):
+        self.assertGreater(self.ROC1[0], self.ROC2[0])
+    def test_ROC_less_thrust2(self):
+        self.assertEqual(self.ROC1[1], self.ROC2[1])
+    def test_ROC_less_thrust3(self):
+        self.assertGreater(self.ROC1[2], self.ROC2[2])
+    def test_ROC_less_thrust4(self):
+        self.assertGreater(self.ROC1[3], self.ROC2[3])
+        
+    def test_ROC_higher_alt1(self):
+        self.assertGreater(self.ROC1[0], self.ROC3[0])
+    def test_ROC_higher_alt2(self):
+        self.assertLess(self.ROC1[1], self.ROC3[1])
+    def test_ROC_higher_alt3(self):
+        self.assertGreater(self.ROC1[2], self.ROC3[2])
+    def test_ROC_higher_alt4(self):
+        self.assertLess(self.ROC1[3], self.ROC3[3])
+        
+    def test_stall_speed(self):
+        self.assertAlmostEqual(self.stall_speed, 72.8504298)
+        
+    def test_endurance(self):
+        self.assertAlmostEqual(self.endurance, 46888.34014, 5)
     
+    def test_limit_low_weight(self):
+        self.assertGreater(self.hmax2, self.hmax1)
+        self.assertGreater(self.vmax2, self.vmax1)
+        
+    def test_limit_high_thrust(self):
+        self.assertGreater(self.hmax3, self.hmax1)
+        self.assertGreater(self.vmax3, self.vmax1)

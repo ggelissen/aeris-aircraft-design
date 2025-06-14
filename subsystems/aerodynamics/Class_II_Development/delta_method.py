@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
     # --- MODIFICATION START: Corrected Plotting Logic ---
     # Plot 3: Advanced Airfoil Performance with correct non-linear curve
-    axs[2].set_title('Figure 3: Advanced Airfoil Performance (Mdd vs t/c)')
+    #axs[2].set_title('Figure 3: Advanced Airfoil Performance (Mdd vs t/c)')
     
     for cl, data in ADVANCED_AIRFOIL_DATA.items():
         # Step 1: Create a dense set of points in the *original, theoretical* units

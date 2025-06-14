@@ -21,11 +21,12 @@ def calculate_sweep_angle_025c_rad(Mach_cruise: float, Mach_cross: float = 0.935
     Returns:
     float: Sweep angle in radians
     """
-    Mach_dd = Mach_cruise + 0.03
+    Mach_dd = Mach_cruise + 0.015
     if Mach_cruise < 0.7:
         return np.arccos(1)
     else:
-        return np.arccos(0.75 * (Mach_cross / Mach_dd))
+        #return np.arccos(0.75 * (Mach_cross / Mach_dd))
+        np.arccos(1.16  / (Mach_dd + 0.5)) # TODO, equation from PJ thesis
     
 
 def calculate_taper_ratio(Lambda_025c: float) -> float:
@@ -108,6 +109,7 @@ def calculate_thickness_ratio(h: float, Mach_cruise: float, W_TO: float, S: floa
     C_L = W_TO / (q * S)
     Mach_dd = Mach_cruise + 0.03
 
+    # Calculate thickness-to-chord ratio using the Korn-Lock formula for Mdd
     t_c = min(((np.cos(Lambda_05c))**3 * (Mach_cross - Mach_dd * np.cos(Lambda_05c)) - 0.115 * C_L**(1.5))/((np.cos(Lambda_05c))**2), 0.18)
     return t_c
 

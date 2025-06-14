@@ -16,7 +16,7 @@ def wing_weight_N(params: DesignParameters):
     Source: Torenbeek, "Advanced Aircraft Design", Appendix C.
     NOTE: This formula is empirical and requires imperial units (lbf, ft).
     """
-    print("  - Calculating Wing Weight (Torenbeek)...")
+    #print("  - Calculating Wing Weight (Torenbeek)...") # Removed so that it doesnt print in iterations.
     W_TO_lb = N_to_lbf(params.weight.W_TO)
     b_w_ft = m_to_ft(params.wing.b_w)
     S_w_ft2 = m2_to_ft2(params.wing.S_w)
@@ -25,7 +25,7 @@ def wing_weight_N(params: DesignParameters):
         print("    - WARNING: Wing root chord or t/c ratio not defined. Cannot calculate wing weight.")
         return 0
     # Correctly calculates root thickness in feet
-    t_r_ft = m_to_ft(params.wing.root_chord * params.wing.t_c_w_r)
+    t_r_ft = m_to_ft(params.wing.root_chord * params.wing.t_c_w_r) # This is a parameter on design_parameters, but goot to calculate it here for clarity.
     
     if any(v is None for v in [W_TO_lb, b_w_ft, params.wing.Lambda_05_w, params.max_load_factor, S_w_ft2, t_r_ft]):
         print("    - WARNING: Missing parameters for wing weight calculation. Returning 0.")
@@ -62,7 +62,7 @@ def fuselage_weight_N(params: DesignParameters):
         0.5257 * F_MG * F_NG * F_press * F_VT * F_matl
         * (L_struct_ft ** 0.3796)
         * ((W_carried_lbf * N_Z) ** 0.4863)
-        * (V_EqMax_kts / 100.0)**2
+        * (V_EqMax_kts / 100.0)**2 # TODO, do not understand why this is divided by 100, but impossible to get a sensible result without it.
     )
     return lbf_to_N(W_fus_lb)
 
@@ -151,7 +151,7 @@ def get_final_weight_breakdown(params: DesignParameters) -> dict:
     }
 
     W_E_calc = sum(weights.values())
-    W_OE_calc = W_E_calc + params.weight.W_crew
+    W_OE_calc = W_E_calc + params.weight.W_crew # Operating Empty Weight includes crew weight, but it's 0 as it's a UAS
     weights["W_E_calculated"] = W_E_calc
     weights["W_OE_calculated"] = W_OE_calc
     
@@ -160,80 +160,80 @@ def get_final_weight_breakdown(params: DesignParameters) -> dict:
     
     return weights
 
-# ==============================================================================
-# CLASS II WEIGHT ESTIMATION LOOP (MOVED FROM main_class_II.py)
-# ==============================================================================
-def class_II_weight_estimation(params: DesignParameters,
-                               initial_W_TO_N_guess: float,
-                               max_iterations: int = 100,
-                               tolerance: float = 0.005) -> dict:
-    """
-    Iteratively calculates the MTOW based on detailed component weight estimations (Class II).
-    This loop continues until the calculated MTOW converges.
+# # ==============================================================================
+# # CLASS II WEIGHT ESTIMATION LOOP (MOVED FROM main_class_II.py)
+# # ==============================================================================
+# def class_II_weight_estimation(params: DesignParameters,
+#                                initial_W_TO_N_guess: float,
+#                                max_iterations: int = 100,
+#                                tolerance: float = 0.005) -> dict:
+#     """
+#     Iteratively calculates the MTOW based on detailed component weight estimations (Class II).
+#     This loop continues until the calculated MTOW converges.
 
-    Parameters:
-        params (DesignParameters): The main design parameters object.
-        initial_W_TO_N_guess (float): An initial guess for the MTOW in Newtons.
-        max_iterations (int): The maximum number of iterations to perform.
-        tolerance (float): The convergence tolerance for the relative difference in MTOW.
+#     Parameters:
+#         params (DesignParameters): The main design parameters object.
+#         initial_W_TO_N_guess (float): An initial guess for the MTOW in Newtons.
+#         max_iterations (int): The maximum number of iterations to perform.
+#         tolerance (float): The convergence tolerance for the relative difference in MTOW.
 
-    Returns:
-        dict: A dictionary containing the final converged weights and convergence status.
-    """
-    if initial_W_TO_N_guess is None:
-        print("Error: Initial W_TO guess is None. Aborting weight estimation.")
-        return {"W_TO": 0, "converged": False}
+#     Returns:
+#         dict: A dictionary containing the final converged weights and convergence status.
+#     """
+#     if initial_W_TO_N_guess is None:
+#         print("Error: Initial W_TO guess is None. Aborting weight estimation.")
+#         return {"W_TO": 0, "converged": False}
 
-    W_TO_N_current = initial_W_TO_N_guess
-    params.weight.W_TO = W_TO_N_current
-    print(f"Starting Class II Weight Estimation with initial WTO: {W_TO_N_current:.2f} N")
+#     W_TO_N_current = initial_W_TO_N_guess
+#     params.weight.W_TO = W_TO_N_current
+#     print(f"Starting Class II Weight Estimation with initial WTO: {W_TO_N_current:.2f} N")
 
-    for i in range(max_iterations):
-        print(f"\nWeight Iteration {i+1}:")
-        # Recalculate empty weight based on the current W_TO_N_current
-        W_empty_N_calculated = (
-            wing_weight_N(params) +
-            landing_gear_weight_N(params) +
-            empennage_weight_N(params) +
-            propulsion_weight_N(params) +
-            fixed_equipment_weight_N(params) +
-            fuselage_weight_N(params)
-        )
+#     for i in range(max_iterations):
+#         print(f"\nWeight Iteration {i+1}:")
+#         # Recalculate empty weight based on the current W_TO_N_current
+#         W_empty_N_calculated = (
+#             wing_weight_N(params) +
+#             landing_gear_weight_N(params) +
+#             empennage_weight_N(params) +
+#             propulsion_weight_N(params) +
+#             fixed_equipment_weight_N(params) +
+#             fuselage_weight_N(params)
+#         )
 
-        W_OE_N = W_empty_N_calculated + params.weight.W_crew
+#         W_OE_N = W_empty_N_calculated + params.weight.W_crew
         
-        if params.weight.M_ff is None or params.weight.M_ff <= 0 or params.weight.M_ff >= 1:
-            print("Error: Invalid M_ff value for weight calculation. Aborting.")
-            return {"W_TO": W_TO_N_current, "converged": False}
+#         if params.weight.M_ff is None or params.weight.M_ff <= 0 or params.weight.M_ff >= 1:
+#             print("Error: Invalid M_ff value for weight calculation. Aborting.")
+#             return {"W_TO": W_TO_N_current, "converged": False}
         
-        W_TO_N_new = (W_OE_N + params.weight.W_PL) / params.weight.M_ff
+#         W_TO_N_new = (W_OE_N + params.weight.W_PL) / params.weight.M_ff
 
-        relative_difference = abs(W_TO_N_new - W_TO_N_current) / W_TO_N_current
-        print(f"  - Iteration {i+1} Summary: W_TO_current = {W_TO_N_current:.2f} N, W_empty_calc = {W_empty_N_calculated:.2f} N, W_OE_calc = {W_OE_N:.2f}, W_TO_new = {W_TO_N_new:.2f} N, Rel_Diff = {relative_difference:.6f}")
+#         relative_difference = abs(W_TO_N_new - W_TO_N_current) / W_TO_N_current
+#         print(f"  - Iteration {i+1} Summary: W_TO_current = {W_TO_N_current:.2f} N, W_empty_calc = {W_empty_N_calculated:.2f} N, W_OE_calc = {W_OE_N:.2f}, W_TO_new = {W_TO_N_new:.2f} N, Rel_Diff = {relative_difference:.6f}")
         
-        if relative_difference < tolerance:
-            print(f"\nClass II WTO converged in {i+1} iterations.")
-            params.weight.W_TO = W_TO_N_new
-            return {
-                "W_TO": W_TO_N_new,
-                "W_E": W_empty_N_calculated,
-                "W_OE": W_OE_N,
-                "W_F": W_TO_N_new * (1 - params.weight.M_ff),
-                "converged": True,
-                "iterations": i + 1
-            }
+#         if relative_difference < tolerance:
+#             print(f"\nClass II WTO converged in {i+1} iterations.")
+#             params.weight.W_TO = W_TO_N_new
+#             return {
+#                 "W_TO": W_TO_N_new,
+#                 "W_E": W_empty_N_calculated,
+#                 "W_OE": W_OE_N,
+#                 "W_F": W_TO_N_new * (1 - params.weight.M_ff),
+#                 "converged": True,
+#                 "iterations": i + 1
+#             }
         
-        W_TO_N_current = W_TO_N_new
-        params.weight.W_TO = W_TO_N_current
+#         W_TO_N_current = W_TO_N_new
+#         params.weight.W_TO = W_TO_N_current
 
-    print(f"Class II WTO did not converge after {max_iterations} iterations.")
-    params.weight.W_TO = W_TO_N_current
-    return {
-        "W_TO": W_TO_N_current,
-        "W_E": W_empty_N_calculated,
-        "W_OE": W_OE_N,
-        "W_F": W_TO_N_current * (1 - params.weight.M_ff),
-        "converged": False,
-        "iterations": max_iterations
-    }
+#     print(f"Class II WTO did not converge after {max_iterations} iterations.")
+#     params.weight.W_TO = W_TO_N_current
+#     return {
+#         "W_TO": W_TO_N_current,
+#         "W_E": W_empty_N_calculated,
+#         "W_OE": W_OE_N,
+#         "W_F": W_TO_N_current * (1 - params.weight.M_ff),
+#         "converged": False,
+#         "iterations": max_iterations
+#     }
 
