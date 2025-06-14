@@ -142,18 +142,18 @@ def test_emissions_logic():
     Unit test for the main 'emissions' function.
     Verifies correct calculation of emission mass and checks for NaN propagation.
     """
-    mdot_f = 0.4  # kg/s fuel flow
+    mdot_f = 1  # kg/s fuel flow
     ei_nox = 0.012 # kg/kg NOx emission index
     dt = 30 * 60  # 30 minutes in seconds
 
     result = emissions(mdot_f, ei_nox, dt=dt)
 
     # Verify CO2 calculation (mdot_f * ei_co2 * dt)
-    assert result["m_co2"] == pytest.approx(0.4 * 3.16 * 1800)
+    assert result["m_co2"] == pytest.approx(1 * 3.16 * 1800)
     # Verify NOx calculation (mdot_f * ei_nox * dt)
-    assert result["m_nox"] == pytest.approx(0.4 * 0.012 * 1800)
+    assert result["m_nox"] == pytest.approx(1 * 0.012 * 1800)
     # Verify Water calculation (mdot_f * ei_h2o * dt)
-    assert result["m_h2o"] == pytest.approx(0.4 * 1.26 * 1800)
+    assert result["m_h2o"] == pytest.approx(1 * 1.26 * 1800)
 
     # Test that if fuel flow is NaN, all outputs are NaN
     nan_result = emissions(nan, ei_nox, dt=dt)
@@ -180,11 +180,12 @@ def test_turbofan_analysis_sanity():
 
     # We don't check for exact values, as they depend on the mock.
     # We check that the results are valid numbers and are within a plausible range.
-    assert not isnan(sf) and sf > 0
-    assert not isnan(tsfc) and tsfc > 0
+    assert not isnan(sf) and sf > 0 
+    assert not isnan(tsfc) and tsfc > 0 and tsfc < 1e-3, "TSFC should be a small positive number"
     assert not isnan(eta_overall) and 0 < eta_overall < 1.0, "Overall efficiency should be between 0 and 1"
     assert not isnan(eta_thermal) and 0 < eta_thermal < 1.0, "Thermal efficiency should be between 0 and 1"
     assert not isnan(eta_propulsive) and 0 < eta_propulsive < 1.0, "Propulsive efficiency should be between 0 and 1"
+    # assert not isnan(pt_4) and pt_4 > 1000, "Pressure at turbine exit should be above 1000K"
 
 @patch('simulation_files.Mission_Simulation.turbofan_parametric_analysis')
 def test_run_mission_simulation_integration(mock_tf_analysis, mock_design_params):
@@ -279,10 +280,6 @@ def test_with_zero_values_in_dependent_calcs(mock_design_params):
     This is a conceptual test, as the function currently uses hardcoded values.
     To properly test this, the function should be refactored to take inputs.
     """
-
-    # To properly test this, we would need to refactor the original function
-    # to accept parameters instead of using hardcoded values.
-    # For now, this test serves as a placeholder to show how it would be done.
 
     # Example refactoring of the original function:
     def calculate_propulsion_weight_refactored(We_lbs, T_to_N, L_d_ft, A_inl_sqft, W_fuel_kg, L_fus_m, W_e_kg):
@@ -421,6 +418,59 @@ def test_NOx_simulation_mission_simulation_logic(mock_tf_analysis, mock_design_p
     print(f"Actual Total Fuel (kg) from sim: {results['Total Fuel Used (kg)']:.2f}")
     print(f"--- End Test ---")
 
+
+from simulation_files.Outdated.exhaust_cone import fuselage_exhaust_cone_analysis
+@patch('simulation_files.Outdated.exhaust_cone.DesignParameters')
+def test_fuselage_exhaust_cone_analysis_logic(mock_design_parameters_class):
+    """
+    Unit tests the fuselage_exhaust_cone_analysis function to ensure its
+    calculations are correct based on a controlled set of inputs.
+
+    It mocks the `DesignParameters` dependency to isolate the function, ensuring
+    that the test is independent of the actual parameter values.
+    """
+    # 1. Arrange: Set up the mock environment
+    # Create a mock instance that will be returned by the patched DesignParameters class
+    mock_aircraft = Mock()
+    mock_fuselage = Mock()
+    mock_aircraft.fuselage = mock_fuselage
+
+    # Define the mock data that the function will use. This makes the test predictable.
+    mock_fuselage.crosssections = {
+        'crosssection_2': {'Dimensions': {'Width': 2.2}},
+        'crosssection_3': {'Dimensions': {'Width': 2.0}}
+    }
+    # These attributes are also accessed but don't affect the final calculation in this test
+    mock_fuselage.l_f = 25.0
+    mock_fuselage.D_f = 2.5
+    mock_fuselage.lf_df = 10.0
+
+    # Configure the mock DesignParameters class to return our mock instance whenever it's called
+    mock_design_parameters_class.return_value = mock_aircraft
+
+    # Calculate the expected results based on the function's internal logic and our mock data
+    # These values are hardcoded in the original `exhaust_cone.py` script
+    cs3_width = 2.0
+    eng_nozz_diameter = 0.49
+    cone_angle_deg = 15
+
+    expected_distance_to_edge = (cs3_width / 2) - (eng_nozz_diameter / 2)
+    expected_x_eng = expected_distance_to_edge / np.tan(np.radians(cone_angle_deg))
+
+    # 2. Act: Execute the function under test
+    results = fuselage_exhaust_cone_analysis()
+
+    # 3. Assert: Verify that the output matches the expected values
+    assert results['distance_to_edge'] == pytest.approx(expected_distance_to_edge)
+    assert results['x_eng'] == pytest.approx(expected_x_eng)
+
+    # Also, verify that the DesignParameters class was instantiated exactly once
+    mock_design_parameters_class.assert_called_once()
+    # Print results for manual verification
+    print(f"\n--- Test: test_fuselage_exhaust_cone_analysis_logic ---")
+    print(f"Distance from fuselage edge to engine nozzle edge: {results['distance_to_edge']:.2f} m")
+    print(f"Maximum distance engine can be placed from end of v-tail: {results['x_eng']:.2f} m")
+    
 
 if __name__ == "__main__":
 

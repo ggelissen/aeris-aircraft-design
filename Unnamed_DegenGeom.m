@@ -5,7 +5,7 @@
 degenGeom = [];
 degenGeom(end+1).type = 'BODY';
 degenGeom(end).name = 'PodGeom';
-degenGeom(end).geom_id = 'ATCXCQSCXY';
+degenGeom(end).geom_id = 'CUFEJKDRCD';
 degenGeom(end).surf_index = 0;
 degenGeom(end).main_surf_index = 0;
 degenGeom(end).sym_copy_index = 0;

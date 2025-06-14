@@ -527,8 +527,8 @@ class EngineParameters:
         self.engine_y_pos = 0.0                     # Engine Y-Position in m
         self.engine_z_pos = -1.1                    # Engine Z-Position in m
         self.Bpr = 3.3                            # Bypass Ratio, used for engine sizing
-        self.eta_nozz = 0.98                   # Nozzle Efficiency, used for engine sizing
-        self.eta_fanturb = 0.9  
+        self.eta_nozz = 0.97                   # Nozzle Efficiency, used for engine sizing
+        self.eta_fanturb = 0.75  
         self.tt4to = 1400 #tt4 temp at takeoff   
         self.prfan = 1.9           
         self.prlpc = 1.5
@@ -539,7 +539,7 @@ class EngineParameters:
         self.tt4cruise = 1200
         self.tt4descent = 900
         self.tt4landing = 1000
-        self.lhv = 43.e6
+        self.lhv = 44.2e6
         self.etafan = 0.915
         self.etalpc = 0.9
         self.etahpc = 0.9

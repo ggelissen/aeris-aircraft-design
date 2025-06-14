@@ -50,5 +50,7 @@ def fuselage_exhaust_cone_analysis():
         'distance_to_edge': distance_to_edge,
         'x_eng': x_eng
     }
-print("Fuselage Exhaust Cone Analysis Results:")
-results = fuselage_exhaust_cone_analysis()
+
+if __name__ == "__main__":
+    print("Fuselage Exhaust Cone Analysis Results:")
+    results = fuselage_exhaust_cone_analysis()
