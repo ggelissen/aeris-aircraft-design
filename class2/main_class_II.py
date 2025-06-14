@@ -23,7 +23,7 @@ def calculate_cg_longitudinal(params: DesignParameters, W_empty_N_calculated: fl
     moment_fixed_equipment = cw.fixed_equipment_weight_N(params) * params.cg.x_cg_fixed_equipment
     moment_propulsion = cw.propulsion_weight_N(params) * params.cg.x_cg_propulsion
 
-    W_OE = W_empty_N_calculated
+    W_OE = W_empty_N_calculated # Why is this not calculated on the spot? But taken as input?
     moment_OE = (moment_wing + moment_fuselage + moment_landing_gear +
                  moment_empennage + moment_fixed_equipment + moment_propulsion)
     
