@@ -32,7 +32,7 @@ def class_II_weight_estimation(params: DesignParameters,
             cw.fuselage_weight_N(params) 
         )
 
-        W_TO_N_new = (W_empty_N_calculated + params.weight.W_PL) / (1 - params.weight.M_ff) # TODO, double check this equation
+        W_TO_N_new = (W_empty_N_calculated + params.weight.W_PL) / (params.weight.M_ff) #equation TODO, double check this 
 
         
         relative_difference = abs(W_TO_N_new - W_TO_N_current) / W_TO_N_new

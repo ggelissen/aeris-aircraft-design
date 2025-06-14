@@ -47,7 +47,7 @@ def class_II_weight_estimation(params: DesignParameters,
             cw.fuselage_weight_N(params) 
         )
 
-        W_TO_N_new = (W_empty_N_calculated + params.weight.W_PL) / (1 - params.weight.M_ff)
+        W_TO_N_new = (W_empty_N_calculated + params.weight.W_PL) / (params.weight.M_ff)
 
         
         relative_difference = abs(W_TO_N_new - W_TO_N_current) / W_TO_N_new
@@ -162,35 +162,35 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
     # 1. Class II Wing Sizing (using delta method)
     print("\n1. Class II Wing Sizing...")
     try:
-        from class2.class_II_wing_sizing import run_class_II_wing_sizing
+        from class2.class_II_wing_sizing import optimize_wing_for_fuel_burn
         
-        wing_class_ii_results = run_class_II_wing_sizing(params)
+        wing_class_ii_results = optimize_wing_for_fuel_burn(params)
         combined_results.update(wing_class_ii_results)
         
         # Update wing parameters directly with refined results (inline, no separate function)
-        if 'Lambda_025c_w_refined' in wing_class_ii_results:
-            params.wing.Lambda_025c_w = wing_class_ii_results['Lambda_025c_w_refined']
-        if 'Lambda_05c_w_refined' in wing_class_ii_results:
-            params.wing.Lambda_05_w = wing_class_ii_results['Lambda_05c_w_refined'] 
-        if 'Lambda_LE_w_refined' in wing_class_ii_results:
-            params.wing.Lambda_0_w = wing_class_ii_results['Lambda_LE_w_refined']
-        if 'lambda_w_refined' in wing_class_ii_results:
-            params.wing.lambda_w = wing_class_ii_results['lambda_w_refined']
-        if 'root_chord_refined' in wing_class_ii_results:
-            params.wing.root_chord = wing_class_ii_results['root_chord_refined']
-        if 'tip_chord_refined' in wing_class_ii_results:
-            params.wing.tip_chord = wing_class_ii_results['tip_chord_refined']
-        if 'mac_refined' in wing_class_ii_results:
-            params.wing.mac = wing_class_ii_results['mac_refined']
-        if 'y_LEMAC_refined' in wing_class_ii_results:
-            params.wing.y_LEMAC = wing_class_ii_results['y_LEMAC_refined']
-        if 't_c_w_refined' in wing_class_ii_results:
-            params.wing.t_c_w_max = wing_class_ii_results['t_c_w_refined']
-            params.wing.t_c_w_r = wing_class_ii_results['t_c_w_refined']  # Assume root = max for now
-        if 'Gamma_w_refined' in wing_class_ii_results:
-            params.wing.Gamma_w = wing_class_ii_results['Gamma_w_refined']
+        if 'Lambda_025c_w_optimal' in wing_class_ii_results:
+            params.wing.Lambda_025c_w = wing_class_ii_results['Lambda_025c_w_optimal']
+        if 'Lambda_05c_w_optimal' in wing_class_ii_results:
+            params.wing.Lambda_05_w = wing_class_ii_results['Lambda_05c_w_optimal'] 
+        if 'Lambda_LE_w_optimal' in wing_class_ii_results:
+            params.wing.Lambda_0_w = wing_class_ii_results['Lambda_LE_w_optimal']
+        if 'lambda_w_optimal' in wing_class_ii_results:
+            params.wing.lambda_w = wing_class_ii_results['lambda_w_optimal']
+        if 'root_chord_optimal' in wing_class_ii_results:
+            params.wing.root_chord = wing_class_ii_results['root_chord_optimal']
+        if 'tip_chord_optimal' in wing_class_ii_results:
+            params.wing.tip_chord = wing_class_ii_results['tip_chord_optimal']
+        if 'mac_optimal' in wing_class_ii_results:
+            params.wing.mac = wing_class_ii_results['mac_optimal']
+        if 'y_LEMAC_optimal' in wing_class_ii_results:
+            params.wing.y_LEMAC = wing_class_ii_results['y_LEMAC_optimal']
+        if 't_c_w_optimal' in wing_class_ii_results:
+            params.wing.t_c_w_max = wing_class_ii_results['t_c_w_optimal']
+            params.wing.t_c_w_r = wing_class_ii_results['t_c_w_optimal']  # Assume root = max for now
+        if 'Gamma_w_optimal' in wing_class_ii_results:
+            params.wing.Gamma_w = wing_class_ii_results['Gamma_w_optimal']
         
-        print(f"   ✅ Class II wing sizing complete. Refined t/c = {wing_class_ii_results.get('t_c_w_refined', 'N/A'):.3f}")
+        print(f"   ✅ Class II wing sizing complete. Refined t/c = {wing_class_ii_results.get('t_c_w_optimal', 'N/A'):.3f}")
     except Exception as e:
         print(f"   ⚠️  Class II wing sizing failed: {e}")
         wing_class_ii_results = {}
