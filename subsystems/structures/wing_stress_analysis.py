@@ -199,12 +199,35 @@ def run_structures(designvars):
         length_between_ribs = (closest_rib_over - closest_rib_under) * designvars.wing.b_w * np.cos(
             designvars.wing.Gamma_w)
 
-        for stringer_stress, stringer_number, stringer_x, stringer_y, stringer_area in zip(results['bending_stresses'], bottom_stringer_indices.tolist() + top_stringer_indices.tolist(), results['boom_x_coords_sorted'], results['boom_y_coords_sorted'], results['boom_areas_sorted']):
-            if np.abs(stringer_stress) > designvars.materials.material_sigma_yield:
-                print(f"Warning: Stringer {stringer_number} at spanwise position {spanwise_position:.2f} exceeds yield strength with stress {stringer_stress:.2f} MPa at Stringer{stringer_number+1}")
-            crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E, designvars.wing.wingsection.stringers[f'Stringer{1+stringer_number}']['area_moment_of_inertia_m4'], designvars.wing.wingsection.stringers[f'Stringer{1+stringer_number}']["crosssectionalarea_mm2"]/1000000, length_between_ribs, designvars.wing.wingsection.stringers[f'Stringer{1+stringer_number}']['K'] )
-            if np.abs(stringer_stress) > crit_stringer_buckling:
-                print(f"Warning: Stringer {stringer_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with stress {stringer_stress:.2f} MPa at Stringer{stringer_number+1}")
+        for boom_stress, boom_number, boom_x, boom_y, boom_area in zip(results['bending_stresses'][:-1], ['Spar1'] + [f'Stringer{index+1}' for index in bottom_stringer_indices.tolist()] + ['Spar2', 'Spar2'] + [f'Stringer{index+1}' for index in top_stringer_indices.tolist()] + ['Spar1'], results['boom_x_coords_sorted'][:-1], results['boom_y_coords_sorted'][:-1], results['boom_areas_sorted'][:-1]):
+            if np.abs(boom_stress) > designvars.materials.material_sigma_yield:
+                print(f"Warning: Boom {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield strength with {100*(boom_stress-designvars.materials.material_sigma_yield)/boom_stress} % ")
+                if (np.abs(boom_stress)-designvars.materials.material_sigma_yield)/boom_stress > 0.3:
+                    if boom_number == 'Spar1' or boom_number == 'Spar2':
+                        designvars.structure_results.should_increase_sparcap_thickness_by_30_percent_in_nextround = True
+                    else:
+                        if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
+                            designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround.append(boom_number)
+                else:
+                    if boom_number == 'Spar1' or boom_number == 'Spar2':
+                        designvars.structure_results.should_increase_sparcap_thickness_by_10_percent_in_nextround = True
+                    else:
+                        if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
+                            designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(boom_number)
+            if not (boom_number == 'Spar1' or boom_number == 'Spar2'):
+                crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E, designvars.wing.wingsection.stringers[boom_number]['area_moment_of_inertia_m4'], designvars.wing.wingsection.stringers[boom_number]["crosssectionalarea_mm2"]/1000000, length_between_ribs, designvars.wing.wingsection.stringers[boom_number]['K'] )
+                if np.abs(boom_stress) > crit_stringer_buckling:
+                    print(f"Warning: Stringer {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(boom_stress-crit_stringer_buckling)/boom_stress} % ")
+                    if (np.abs(boom_stress)-crit_stringer_buckling)/boom_stress > 0.3:
+                        if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
+                            designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround.append(boom_number)
+                    else:
+                        if boom_number == 'Spar1' or boom_number == 'Spar2':
+                            designvars.structure_results.should_increase_sparcap_thickness_by_10_percent_in_nextround = True
+                        else:
+                            if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
+                                designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(
+                                    boom_number)
 
         # TODO: Check shearstress vs max shearstress
 
@@ -246,11 +269,13 @@ def run_structures(designvars):
 
     if designvars.structure_results.max_displacement_x > designvars.wing.max_allowed_x_displacement:
         print(f"Warning: Maximum x displacement {designvars.structure_results.max_displacement_x:.4f} m exceeds allowed limit {designvars.wing.max_allowed_x_displacement:.4f} m.")
+        designvars.structure_results.should_increase_sparweb_thickness_by_10_percent_in_nextround = True
     if designvars.structure_results.max_displacement_z > designvars.wing.max_allowed_z_displacement:
         print(f"Warning: Maximum z displacement {designvars.structure_results.max_displacement_z:.4f} m exceeds allowed limit {designvars.wing.max_allowed_z_displacement:.4f} m.")
+        designvars.structure_results.should_increase_sparcap_thickness_by_10_percent_in_nextround = True
     if designvars.structure_results.max_twist_angle > designvars.wing.max_allowed_twist_angle:
         print(f"Warning: Maximum twist angle {designvars.structure_results.max_twist_angle:.4f} rad exceeds allowed limit {designvars.wing.max_allowed_twist_angle:.4f} rad.")
-
+        designvars.structure_results.should_increase_wingskin_thickness_by_10_percent_in_nextround = True
 
 if __name__ == "__main__":
     designvars = DesignParameters()
@@ -268,3 +293,14 @@ if __name__ == "__main__":
 
     print(designvars.structure_results.W_Wing)
 
+    designvars.structure_results.update_wing_structure()
+
+    run_structures()
+
+    print(designvars.structure_results.W_Wing)
+
+    designvars.structure_results.update_wing_structure()
+
+    run_structures()
+
+    print(designvars.structure_results.W_Wing)
