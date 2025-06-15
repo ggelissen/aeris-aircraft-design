@@ -121,23 +121,41 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
     print(f"    📝 Updating parameters from Class I results...")
     updates = 0
     
-    # Weight parameters
+    # Weight parameters (and performance, but coming from initial weight estimations)
     if 'W_TO' in class_i_results:
         params.weight.W_TO = class_i_results['W_TO']
         updates += 1
     if 'W_E' in class_i_results:
         params.weight.W_E = class_i_results['W_E']
         updates += 1
+    if 'W_OE' in class_i_results:
+        params.weight.W_OE = class_i_results['W_OE']
+        updates += 1
+    if 'L_D_cruise' in class_i_results:
+        params.performance.L_D_cruise = class_i_results['L_D_cruise']
+        updates += 1
+    if 'L_D_loiter' in class_i_results:
+        params.performance.L_D_loiter = class_i_results['L_D_loiter']
+        updates += 1
+    if 'W_F_used' in class_i_results:
+        params.weight.W_F = class_i_results['W_F_used']
+        updates += 1
+    if 'W_F_res' in class_i_results:
+        params.weight.W_F_res = class_i_results['W_F_res']
+        updates += 1
+    if 'M_ff' in class_i_results:
+        params.weight.M_ff = class_i_results['M_ff']
+        print(f"        ⚠️  M_ff updated to {params.weight.M_ff} (from Class I results)")
+        updates += 1
+    
+    # Thrust and wing loading parameters
     if 'T_W' in class_i_results:
         params.weight.T_W = class_i_results['T_W']
         updates += 1
     if 'W_S' in class_i_results:
         params.weight.W_S = class_i_results['W_S']
         updates += 1
-    if 'M_ff' in class_i_results:
-        params.weight.M_ff = class_i_results['M_ff']
-        print(f"        ⚠️  M_ff updated to {params.weight.M_ff} (from Class I results)")
-        updates += 1
+
     
     # Wing parameters  
     if 'Lambda_025c_w' in class_i_results:
@@ -145,6 +163,12 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         updates += 1
     if 'lambda_w' in class_i_results:
         params.wing.lambda_w = class_i_results['lambda_w']
+        updates += 1
+    if 'Lambda_05c_w' in class_i_results:
+        params.wing.Lambda_05_w = class_i_results['Lambda_05c_w']
+        updates += 1
+    if 'Lambda_LE_w' in class_i_results:
+        params.wing.Lambda_0_w = class_i_results['Lambda_LE_w']
         updates += 1
     if 'root_chord' in class_i_results:
         params.wing.root_chord = class_i_results['root_chord']
@@ -159,17 +183,19 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         params.wing.t_c_w_max = class_i_results['t_c_w_max']
         params.wing.t_c_w_r = class_i_results['t_c_w_max']  # Assume root = max
         updates += 1
-    
-    # Performance parameters
-    if 'L_D_cruise' in class_i_results:
-        params.performance.L_D_cruise = class_i_results['L_D_cruise']
+    if 'y_LEMAC' in class_i_results:
+        params.wing.y_LEMAC = class_i_results['y_LEMAC']
         updates += 1
-    if 'L_D_loiter' in class_i_results:
-        params.performance.L_D_loiter = class_i_results['L_D_loiter']
+    if 'Gamma_w' in class_i_results:
+        params.wing.Gamma_w = class_i_results['Gamma_w']
         updates += 1
     
-    print(f"        ✅ Updated {updates} parameters from Class I")
-
+    print(f"        ✅ Updated {updates} parameters from Class  out of {len(class_i_results)} Class I results")
+    # Check which parameters were not updated
+    # if updates < len(class_i_results): # commented as its not working properly
+    #     not_updated = [key for key in class_i_results.keys() if key not in params.__dict__]
+    #     if not_updated:
+    #         print(f"        ⚠️  The following Class I results were not used to update parameters: {', '.join(not_updated)}")
 
 def update_parameters_from_wing_optimization(params: DesignParameters, wing_results: Dict) -> None:
     """Update parameters with wing optimization results (inline)."""
@@ -225,10 +251,16 @@ def update_parameters_from_wing_optimization(params: DesignParameters, wing_resu
         updates += 1
     if 'M_ff_optimal' in wing_results:
         params.weight.M_ff = wing_results['M_ff_optimal']
-        print(f"        ⚠️  M_ff updated to {params.weight.M_ff} (from wing optimization results)")
         updates += 1
     if 'W_S_optimal' in wing_results:
         params.weight.W_S = wing_results['W_S_optimal']
+        updates += 1
+    if 'C_L_design_optimal' in wing_results:
+        params.wing.CL = wing_results['C_L_design_optimal']
+        updates += 1
+    if 'L_D_optimal' in wing_results:
+        params.performance.L_D_cruise = wing_results['L_D_optimal']
+        #params.performance.L_D_loiter = wing_results['L_D_optimal']
         updates += 1
     print(f"        ✅ Updated {updates} parameters from wing optimization")
 
