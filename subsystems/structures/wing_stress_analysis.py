@@ -113,11 +113,7 @@ def plot_twist_distribution(spanwise_position_lst: np.ndarray, twist_distributio
     plt.grid()
     plt.show()
 
-
-
-if __name__ == "__main__":
-    designvars = DesignParameters()
-    designvars.load_from_yaml("design_config.yaml")
+def run_structures(designvars):
     vsp.ClearVSPModel()
 
     #### Add fuselage and change fuselage shape to make room for payload. This is done by changing the cross-sections of the fuselage.
@@ -159,17 +155,12 @@ if __name__ == "__main__":
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
 
+    spanwise_position_lst = np.linspace(0.0, 1.0, len(designvars.wing.CL_distribution))
 
-    spanwise_position_lst = np.linspace(0.0, 1.0, 1000)
 
-    #### TODO: REPLACE THIS FOR AERODYNAMICS CALCULATED LOADS
-    designvars.wing.CL_distribution = np.ones(np.shape(spanwise_position_lst))
-    designvars.wing.CD_distribution = np.ones(np.shape(spanwise_position_lst))
-    designvars.wing.CM_distribution = np.ones(np.shape(spanwise_position_lst))
     wing_loading = WingLoadingDiagrams(designvars)
 
     wing_loading = wing_loading.run_analysis(PLOT=False)
-
 
     cross_sectional_results = []
     for i, spanwise_position in enumerate(spanwise_position_lst):
@@ -181,15 +172,24 @@ if __name__ == "__main__":
     y_twist_distribution = np.array([])
     z_bending_distribution = np.array([])
 
-    x_bending = calculate_bending_distribution(np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]), np.array([cross_sectional_results[i]["Ixx"] for i in range(len(spanwise_position_lst))]),
-                                               designvars.materials.material_E,
-                                               designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
-    y_twist = calculate_angle_of_twist(np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]), np.array([cross_sectional_results[i]["A_m"] for i in range(len(spanwise_position_lst))]),
-                                       designvars.materials.material_G, designvars.wing.wingsection.wingskin['thicness']/1000, designvars.wing.wingsection.spars["Spar1"]["t_web_mm"]/1000,
-                                       np.array([cross_sectional_results[i]["wingskin_length"] for i in range(len(spanwise_position_lst))]), np.array([cross_sectional_results[i]['web_length'] for i in range(len(spanwise_position_lst))]), designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
-    z_bending = calculate_bending_distribution(np.array([wing_loading[i]["moment_z"] for i in range(len(spanwise_position_lst))]), np.array([cross_sectional_results[i]["Iyy"] for i in range(len(spanwise_position_lst))]),
-                                               designvars.materials.material_E,
-                                               designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
+    x_bending = calculate_bending_distribution(
+        np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]),
+        np.array([cross_sectional_results[i]["Ixx"] for i in range(len(spanwise_position_lst))]),
+        designvars.materials.material_E,
+        designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
+    y_twist = calculate_angle_of_twist(
+        np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]),
+        np.array([cross_sectional_results[i]["A_m"] for i in range(len(spanwise_position_lst))]),
+        designvars.materials.material_G, designvars.wing.wingsection.wingskin['thicness'] / 1000,
+        designvars.wing.wingsection.spars["Spar1"]["t_web_mm"] / 1000,
+        np.array([cross_sectional_results[i]["wingskin_length"] for i in range(len(spanwise_position_lst))]),
+        np.array([cross_sectional_results[i]['web_length'] for i in range(len(spanwise_position_lst))]),
+        designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
+    z_bending = calculate_bending_distribution(
+        np.array([wing_loading[i]["moment_z"] for i in range(len(spanwise_position_lst))]),
+        np.array([cross_sectional_results[i]["Iyy"] for i in range(len(spanwise_position_lst))]),
+        designvars.materials.material_E,
+        designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
     x_bending_distribution = x_bending
     y_twist_distribution = y_twist
     z_bending_distribution = z_bending
@@ -197,3 +197,16 @@ if __name__ == "__main__":
     # Plotting the bending distributions
     plot_bending_distribution(spanwise_position_lst, x_bending_distribution, axis='x')
     plot_bending_distribution(spanwise_position_lst, z_bending_distribution, axis='z')
+
+if __name__ == "__main__":
+    designvars = DesignParameters()
+    designvars.load_from_yaml("design_config.yaml")
+
+    #### TODO: REPLACE THIS FOR AERODYNAMICS CALCULATED LOADS
+    designvars.wing.CL_distribution = np.ones(1000)
+    designvars.wing.CD_distribution = np.ones(1000)
+    designvars.wing.CM_distribution = np.ones(1000)
+
+    run_structures(designvars)
+
+
