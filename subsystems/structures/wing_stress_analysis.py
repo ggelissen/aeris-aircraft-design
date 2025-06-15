@@ -12,6 +12,7 @@ try:
     from subsystems.structures.ideal_cross_section_analysis import run_cross_section_analysis
     from subsystems.structures.loading_diagrams import WingLoadingDiagrams
     from subsystems.structures.utils_struct import *
+    from subsystems.structures.buckling2 import import *
 except:
     from wing_structure_generation import *
     from vspfunctions import *
@@ -20,6 +21,7 @@ except:
     from ideal_cross_section_analysis import run_cross_section_analysis
     from loading_diagrams import WingLoadingDiagrams
     from utils_struct import *
+    from buckling2 import *
 
 
 
@@ -167,8 +169,12 @@ def run_structures(designvars):
     for i, spanwise_position in enumerate(spanwise_position_lst):
         results = perform_cross_section_analysis(designvars, wing_loading[i], spanwise_position)
         cross_sectional_results.append(results)
+
+        crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E, )
         if np.max(np.array(results["bending_stresses"])) > designvars.materials.material_sigma_yield:
             print(f"Warning: Bending stress exceeds yield strength) at spanwise position {spanwise_position:.2f}, stringer {np.argmax(np.array(results['bending_stresses']))}")
+
+
         # TODO: Check shearstress vs max shearstress
 
     x_bending_distribution = np.array([])

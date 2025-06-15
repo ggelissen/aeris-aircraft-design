@@ -98,24 +98,24 @@ def plot_panel_strength_vs_spacing(E, nu, skin_thickness, K_c, sigma_cc_stiffene
     plt.tight_layout()
     plt.savefig("Figures/Structures/panel_strength_vs_spacing.png")
 
-# Constants for plots
-E_material = 70e9
-nu_material = 0.33
-skin_t = 0.0015
-K_c_values = [3.0, 4.0, 5.0]
-thickness_range = np.linspace(0.0005, 0.005, 50)
-spacing_range = np.linspace(0.05, 0.5, 20)
-sigma_cc_stiffener = 250e6
-A_stiffener = 1.2e-4
+# # Constants for plots
+# E_material = 70e9
+# nu_material = 0.33
+# skin_t = 0.0015
+# K_c_values = [3.0, 4.0, 5.0]
+# thickness_range = np.linspace(0.0005, 0.005, 50)
+# spacing_range = np.linspace(0.05, 0.5, 20)
+# sigma_cc_stiffener = 250e6
+# A_stiffener = 1.2e-4
 
-# Output critical stress calculations
-print("--- Critical Stress Outputs ---")
-print(f"Spar Buckling Stress: {calculate_critical_spar_buckling_stress(E_material, 1e-7, 2e-4, 1.0, 1.0) / 1e6:.2f} MPa")
-print(f"Stringer Buckling Stress: {calculate_critical_stringer_buckling_stress(E_material, 5e-9, 1e-4, 0.5, 1.0) / 1e6:.2f} MPa")
-print(f"Spar Web Compression Buckling Stress: {calculate_critical_sparweb_buckling_stress_compression(E_material, nu_material, 0.002, 0.15, 4.0) / 1e6:.2f} MPa")
-print(f"Skin Shear Buckling Stress: {calculate_critical_skin_buckling_stress_shear(E_material, nu_material, 0.001, 0.10, 6.3) / 1e6:.2f} MPa")
-print(f"Stiffened Panel Strength: {calculate_stiffened_skin_compressive_strength(E_material, nu_material, skin_t, 0.10, 4.0, sigma_cc_stiffener, A_stiffener) / 1e6:.2f} MPa")
-
-# Plotting
-plot_buckling_vs_thickness(E_material, nu_material, 0.15, K_c_values, thickness_range)
-plot_panel_strength_vs_spacing(E_material, nu_material, skin_t, 4.0, sigma_cc_stiffener, A_stiffener, spacing_range)
+# # Output critical stress calculations
+# print("--- Critical Stress Outputs ---")
+# print(f"Spar Buckling Stress: {calculate_critical_spar_buckling_stress(E_material, 1e-7, 2e-4, 1.0, 1.0) / 1e6:.2f} MPa")
+# print(f"Stringer Buckling Stress: {calculate_critical_stringer_buckling_stress(E_material, 5e-9, 1e-4, 0.5, 1.0) / 1e6:.2f} MPa")
+# print(f"Spar Web Compression Buckling Stress: {calculate_critical_sparweb_buckling_stress_compression(E_material, nu_material, 0.002, 0.15, 4.0) / 1e6:.2f} MPa")
+# print(f"Skin Shear Buckling Stress: {calculate_critical_skin_buckling_stress_shear(E_material, nu_material, 0.001, 0.10, 6.3) / 1e6:.2f} MPa")
+# print(f"Stiffened Panel Strength: {calculate_stiffened_skin_compressive_strength(E_material, nu_material, skin_t, 0.10, 4.0, sigma_cc_stiffener, A_stiffener) / 1e6:.2f} MPa")
+#
+# # Plotting
+# plot_buckling_vs_thickness(E_material, nu_material, 0.15, K_c_values, thickness_range)
+# plot_panel_strength_vs_spacing(E_material, nu_material, skin_t, 4.0, sigma_cc_stiffener, A_stiffener, spacing_range)
