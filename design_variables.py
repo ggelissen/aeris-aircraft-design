@@ -46,6 +46,7 @@ class DesignParameters:
         self.control_surface = ControlSurfaceParameters()
         self.stability_aero = StabilityAerodynamicParameters()
         self.inertia = IntertiaParameters()
+        self.structure_results = StructuresResults(self)
 
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
@@ -157,9 +158,9 @@ class WeightParameters:
         self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 2562.814                             # Wing Loading in N/m^2
         self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
-        self.M_ff = 0.588                         # Maximum Fuel Fraction
+        self.M_ff = 0.66                         # Maximum Fuel Fraction TODO, changed by Alejandro from 0.588 to 0.66
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
-        self.M_tfo = 0.05                           # Maximum Trapped Fuel and Oil Fraction
+        self.M_tfo = 0.05                           # 0.001 on the initial sizing script!! Maximum Trapped Fuel and Oil Fraction TODO, why is this here? Does it need to be accounted? Though it is just part of OEW? This is not contingency fuel, value yes, but not the description
         self.W_tfo = 1890.384                           # Trapped Fuel and Oil Fraction
         self.W_F_used = 10879.29                     # Used Fuel Weight in N
         self.W_F_res = 2976.371                         # Reserve Fuel Weight in N
@@ -380,10 +381,12 @@ class WingParameters:
         self.C_D0 = 0.017196 
         self.e = 0.9         #oswald efficiency factor
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
-        self.skin_thickness = 0.0015  # Wing Skin Thickness in m
         self.Mach_cross = 0.935
         self.epsilon_t = 0         # Wing twist angle [degrees]
         self.weight_distribution = None
+        self.max_allowed_x_displacement = 0.10 # m
+        self.max_allowed_z_displacement = 0.10
+        self.max_allowed_twist_angle = np.pi / 20 # rad
 
 
         # Aerodynamics Loads Distribution
@@ -932,3 +935,13 @@ class MaterialsParameters():
         """
         attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
         return json.dumps(attrs, indent=4, default=lambda o: str(o))
+
+class StructuresResults():
+    def __init__(self, parent):
+        self.W_Wing = parent.weight.W_wing
+        self.x_bending_distribution = None
+        self.z_bending_distribution = None
+        self.twist_distribution = None
+        self.max_displacement_x = None
+        self.max_displacement_z = None
+        self.max_twist_angle = None

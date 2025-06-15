@@ -1,24 +1,35 @@
+"""
+Class II Analysis Main Script - Updated for Master Design Process Integration
+
+This module performs detailed Class II analysis including:
+- Tail sizing and geometry
+- Landing gear positioning  
+- Improved drag estimation
+- Detailed component weight estimation with convergence
+- Center of gravity analysis
+
+Integrates seamlessly with the master design process for iterative design convergence.
+"""
+
 import math
-import yaml
 import os
 import sys
-import matplotlib.pyplot as plt
+from typing import Dict, Tuple
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from design_variables import DesignParameters
-from class2.component_weights import get_final_weight_breakdown  # Only import this function
 from class2.prelim_sizing_tail import run_preliminary_sizing_tail
 from class2.prelim_sizing_undercarriage import perform_undercarriage_positioning
 from class2.improved_drag import run_improved_drag_estimations
 from utils.unit_conversions import *
 
+
 def class_II_weight_estimation(params: DesignParameters,
                                initial_W_TO_N_guess: float,
                                max_iterations: int = 100,
-                               tolerance: float = 0.005): 
+                               tolerance: float = 0.005) -> Tuple[float, bool, int, float]:
     """
     Iterative Class II weight estimation using detailed component weight calculations.
-    This is the original implementation from main_class_II.py.
     
     Parameters:
         params (DesignParameters): Design parameters object
@@ -33,7 +44,7 @@ def class_II_weight_estimation(params: DesignParameters,
     
     W_TO_N_current = initial_W_TO_N_guess
     params.weight.W_TO = W_TO_N_current 
-    print(f"Starting Class II Weight Estimation with initial WTO: {W_TO_N_current:.2f} N")
+    print(f"    Starting Class II Weight Estimation with initial WTO: {W_TO_N_current:.2f} N")
 
     for i in range(max_iterations):
         
@@ -47,24 +58,30 @@ def class_II_weight_estimation(params: DesignParameters,
             cw.fuselage_weight_N(params) 
         )
 
+        print(f"    Iteration {i+1}: Calculated W_empty = {W_empty_N_calculated:.2f} N")
         W_TO_N_new = (W_empty_N_calculated + params.weight.W_PL) / (params.weight.M_ff)
-
-        
+        print(f"    Iteration {i+1}: New W_TO = {W_TO_N_new:.2f} N")
         relative_difference = abs(W_TO_N_new - W_TO_N_current) / W_TO_N_new
-        print(f"Iteration {i+1}: W_TO_current = {W_TO_N_current:.2f} N, W_empty_calc = {W_empty_N_calculated:.2f} N, W_TO_new = {W_TO_N_new:.2f} N, Rel_Diff = {relative_difference:.6f}")        
+        
+        if i < 5 or i % 5 == 0:  # Print first 5 iterations, then every 5th
+            print(f"    Iteration {i+1}: W_TO_current = {W_TO_N_current:.2f} N, "
+                  f"W_empty_calc = {W_empty_N_calculated:.2f} N, "
+                  f"W_TO_new = {W_TO_N_new:.2f} N, Rel_Diff = {relative_difference:.6f}")
+        
         if relative_difference < tolerance:
-            print(f"Class II WTO converged in {i+1} iterations.")
+            print(f"    ✅ Class II WTO converged in {i+1} iterations.")
             params.weight.W_TO = W_TO_N_new # Final update to params
             return W_TO_N_new, True, i + 1, W_empty_N_calculated
         
         W_TO_N_current = W_TO_N_new
         params.weight.W_TO = W_TO_N_current # Update WTO in params for the next iteration's component calculations
 
-    print(f"Class II WTO did not converge after {max_iterations} iterations.")
+    print(f"    ⚠️  Class II WTO did not converge after {max_iterations} iterations.")
     params.weight.W_TO = W_TO_N_current 
     return W_TO_N_current, False, max_iterations, W_empty_N_calculated
 
-def calculate_cg_longitudinal(params: DesignParameters, weight_results: dict) -> dict:
+
+def calculate_cg_longitudinal(params: DesignParameters, weight_results: Dict) -> Dict:
     """
     Calculates CG locations for various aircraft loading conditions.
     
@@ -75,18 +92,36 @@ def calculate_cg_longitudinal(params: DesignParameters, weight_results: dict) ->
     Returns:
         dict: CG positions for different loading conditions
     """
-    print("  - Calculating longitudinal CG positions...")
+    #print("    - Calculating longitudinal CG positions...")
     
-    # Get component weights from the final weight breakdown
-    weight_breakdown = get_final_weight_breakdown(params)
+    # Get component weights from component_weights functions
+    import class2.component_weights as cw
     
+    W_wing = cw.wing_weight_N(params)
+    W_fuselage = cw.fuselage_weight_N(params)
+    W_landing_gear = cw.landing_gear_weight_N(params)
+    W_empennage = cw.empennage_weight_N(params)
+    W_fixed_equipment = cw.fixed_equipment_weight_N(params)
+    W_propulsion = cw.propulsion_weight_N(params)
+    
+    print(f"    - Component weights: "
+          f"W_wing = {W_wing:.2f} N, "
+            f"W_fuselage = {W_fuselage:.2f} N, "
+            f"W_landing_gear = {W_landing_gear:.2f} N, "
+            f"W_empennage = {W_empennage:.2f} N, "
+            f"W_fixed_equipment = {W_fixed_equipment:.2f} N, "
+            f"W_propulsion = {W_propulsion:.2f} N")
+    # Calculate total weights
+    W_total = (W_wing + W_fuselage + W_landing_gear +
+               W_empennage + W_fixed_equipment + W_propulsion)
+    print(f"    - Total weight (OEW): {W_total:.2f} N")
     # Calculate moments for OEW (Operating Empty Weight)
-    moment_wing = weight_breakdown["W_wing"] * params.cg.x_cg_wing
-    moment_fuselage = weight_breakdown["W_fuselage"] * params.cg.x_cg_fuselage
-    moment_landing_gear = weight_breakdown["W_landing_gear"] * params.cg.x_cg_landing_gear
-    moment_empennage = weight_breakdown["W_empennage"] * params.cg.x_cg_empennage
-    moment_fixed_equipment = weight_breakdown["W_fixed_equipment"] * params.cg.x_cg_fixed_equipment
-    moment_propulsion = weight_breakdown["W_propulsion"] * params.cg.x_cg_propulsion
+    moment_wing = W_wing * params.cg.x_cg_wing
+    moment_fuselage = W_fuselage * params.cg.x_cg_fuselage
+    moment_landing_gear = W_landing_gear * params.cg.x_cg_landing_gear
+    moment_empennage = W_empennage * params.cg.x_cg_empennage
+    moment_fixed_equipment = W_fixed_equipment * params.cg.x_cg_fixed_equipment
+    moment_propulsion = W_propulsion * params.cg.x_cg_propulsion
 
     W_OE = weight_results["W_OE"]
     moment_OE = (moment_wing + moment_fuselage + moment_landing_gear +
@@ -113,7 +148,8 @@ def calculate_cg_longitudinal(params: DesignParameters, weight_results: dict) ->
 
     return cg_positions
 
-def estimate_mac_leading_edge(cg_OEW: float, target_CG_percent_MAC: float, mac_length: float) -> dict:
+
+def estimate_mac_leading_edge(cg_OEW: float, target_CG_percent_MAC: float, mac_length: float) -> Dict:
     """
     Estimates the MAC leading edge position to place CG at target location.
     
@@ -128,13 +164,13 @@ def estimate_mac_leading_edge(cg_OEW: float, target_CG_percent_MAC: float, mac_l
     x_LE_MAC = cg_OEW - target_CG_percent_MAC * mac_length
     return {"x_LE_MAC": x_LE_MAC}
 
-def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: float = None) -> dict:
+
+def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: float = None) -> Dict:
     """
     Perform Class II analysis on the design parameters.
     
     This function orchestrates the detailed design phase including:
-    - Class II wing sizing (using delta method for t/c)
-    - Tail sizing
+    - Tail sizing and geometry
     - Landing gear positioning  
     - Improved drag estimation
     - Detailed component weight estimation with convergence
@@ -159,49 +195,13 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
     
     combined_results = {}
     
-    # 1. Class II Wing Sizing (using delta method)
-    print("\n1. Class II Wing Sizing...")
-    try:
-        from class2.class_II_wing_sizing import optimize_wing_for_fuel_burn
-        
-        wing_class_ii_results = optimize_wing_for_fuel_burn(params)
-        combined_results.update(wing_class_ii_results)
-        
-        # Update wing parameters directly with refined results (inline, no separate function)
-        if 'Lambda_025c_w_optimal' in wing_class_ii_results:
-            params.wing.Lambda_025c_w = wing_class_ii_results['Lambda_025c_w_optimal']
-        if 'Lambda_05c_w_optimal' in wing_class_ii_results:
-            params.wing.Lambda_05_w = wing_class_ii_results['Lambda_05c_w_optimal'] 
-        if 'Lambda_LE_w_optimal' in wing_class_ii_results:
-            params.wing.Lambda_0_w = wing_class_ii_results['Lambda_LE_w_optimal']
-        if 'lambda_w_optimal' in wing_class_ii_results:
-            params.wing.lambda_w = wing_class_ii_results['lambda_w_optimal']
-        if 'root_chord_optimal' in wing_class_ii_results:
-            params.wing.root_chord = wing_class_ii_results['root_chord_optimal']
-        if 'tip_chord_optimal' in wing_class_ii_results:
-            params.wing.tip_chord = wing_class_ii_results['tip_chord_optimal']
-        if 'mac_optimal' in wing_class_ii_results:
-            params.wing.mac = wing_class_ii_results['mac_optimal']
-        if 'y_LEMAC_optimal' in wing_class_ii_results:
-            params.wing.y_LEMAC = wing_class_ii_results['y_LEMAC_optimal']
-        if 't_c_w_optimal' in wing_class_ii_results:
-            params.wing.t_c_w_max = wing_class_ii_results['t_c_w_optimal']
-            params.wing.t_c_w_r = wing_class_ii_results['t_c_w_optimal']  # Assume root = max for now
-        if 'Gamma_w_optimal' in wing_class_ii_results:
-            params.wing.Gamma_w = wing_class_ii_results['Gamma_w_optimal']
-        
-        print(f"   ✅ Class II wing sizing complete. Refined t/c = {wing_class_ii_results.get('t_c_w_optimal', 'N/A'):.3f}")
-    except Exception as e:
-        print(f"   ⚠️  Class II wing sizing failed: {e}")
-        wing_class_ii_results = {}
-    
-    # 2. Tail Sizing
+    # 1. Tail Sizing
     print("\n1. Tail Sizing...")
     try:
         tail_results = run_preliminary_sizing_tail(params)
         combined_results.update(tail_results)
         
-        # Update parameters directly with tail results
+        # Update ALL relevant tail parameters directly (inline, simple approach)
         if 'S_h' in tail_results:
             params.empennage.S_h = tail_results['S_h']
         if 'S_v' in tail_results:
@@ -212,19 +212,19 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
             params.empennage.b_v = tail_results['b_t']
         if 'dihedral_rad (gamma)' in tail_results:
             params.empennage.vtail_dihedral = tail_results['dihedral_rad (gamma)']
-        if 'Lambda_025c_t' in tail_results:
-            params.empennage.Lambda_t_025c = tail_results['Lambda_025c_t']
-        if 'aspect_ratio_t' in tail_results:
-            params.empennage.A_t = tail_results['aspect_ratio_t']
-        if 'taper_ratio_t' in tail_results:
-            params.empennage.lambda_t = tail_results['taper_ratio_t']
-        if 't_c_t' in tail_results:
-            params.empennage.t_c_t = tail_results['t_c_t']
         if 'c_root_t' in tail_results:
             params.empennage.c_r = tail_results['c_root_t']
         if 'c_tip_t' in tail_results:
             params.empennage.c_t = tail_results['c_tip_t']
-
+        if 'taper_ratio_t' in tail_results:
+            params.empennage.lambda_t = tail_results['taper_ratio_t']
+        if 'aspect_ratio_t' in tail_results:
+            params.empennage.A_t = tail_results['aspect_ratio_t']
+        if 'Lambda_025c_t' in tail_results:
+            params.empennage.Lambda_t_025c = tail_results['Lambda_025c_t']
+        if 't_c_t' in tail_results:
+            params.empennage.t_c_t = tail_results['t_c_t']
+        
         print(f"   ✅ Tail sizing complete. S_t = {tail_results.get('S_t', 'N/A'):.2f} m²")
     except Exception as e:
         print(f"   ⚠️  Tail sizing failed: {e}")

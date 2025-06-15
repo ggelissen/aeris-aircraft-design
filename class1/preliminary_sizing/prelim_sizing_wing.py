@@ -26,7 +26,7 @@ def calculate_sweep_angle_025c_rad(Mach_cruise: float, Mach_cross: float = 0.935
         return np.arccos(1)
     else:
         #return np.arccos(0.75 * (Mach_cross / Mach_dd))
-        np.arccos(1.16  / (Mach_dd + 0.5)) # TODO, equation from PJ thesis
+        return np.arccos(1.16  / (Mach_dd + 0.5)) # TODO, equation from PJ thesis
     
 
 def calculate_taper_ratio(Lambda_025c: float) -> float:
@@ -177,6 +177,7 @@ def run_preliminary_sizing_wing(params: DesignParameters) -> dict: # pragma: no 
     Mach_cruise = params.cruise_mach
     Mach_cross = 0.935
     Lambda_025c = calculate_sweep_angle_025c_rad(Mach_cruise, Mach_cross)
+    #print(f"Calculated sweep angle at 0.25c (Lambda_025c): {(Lambda_025c)} degrees")
     taper_ratio = calculate_taper_ratio(Lambda_025c)
     
     S = params.wing.S_w 
