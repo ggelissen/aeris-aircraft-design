@@ -129,7 +129,7 @@ def calculate_dihedral_angle_rad(Lambda_025c: float) -> float:
     Returns:
     float: Dihedral angle in radians
     """
-    Gamma_deg =  3 -  1 * np.round(np.rad2deg(Lambda_025c) / 10, 0) + 2
+    Gamma_deg =  3 -  1 * np.round(np.rad2deg(Lambda_025c) / 10, 0) + 0
     return np.deg2rad(Gamma_deg)
 
 

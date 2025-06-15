@@ -233,15 +233,16 @@ def run_flight_performance(params: DesignParameters): # pragma: no cover
     C_N_h = params.empennage.CL_h
     z_cg = params.cg.z_cg
     z_p = params.cg.z_cg_propulsion
+    X_TO = params.take_off_distance
     # Example usage of calculate_range method
-    T, X, M = fs.ground_run2(T0,Wtotal/9.81,S,cd0,AR,oswald,cT*1000000,CLmax_TO)
+    T, X, M = fs.ground_run2(T0,Wtotal/9.81,S,cd0,AR,oswald,cT*1000000,CLmax_TO, X_TO)
     endurance = fp.endurance(Wfuel, Wtotal, cd0, AR, oswald, cT)
     min_range, max_range = fp.payload_range(params.cruise_speed, cT, AR, oswald, cd0, Wtotal, Wfuel, OEW)
     ceiling, vmax = fp.performance_limit(Wtotal, S, CLmax_cruise, T0, cd0, AR, oswald)
     stall_speed_cruise = fp.stall_speed(Wtotal, S, params.cruise_density, CLmax_cruise)
     stall_speed_takeoff = fp.stall_speed(Wtotal, S, 1.225, CLmax_TO)
     ROC_sea_level = fp.ROC(cd0, params.cruise_density, params.stall_speed_land, S, Wtotal, AR, oswald, T0)[2]
-    take_off_requirement = calculate_Cm(C_m_ac, Wtotal/9.81, S, S_h, l_h, V_h_V, x_cg, x_w, c, C_N_h, z_cg, z_p, cd0, AR, oswald, cT*1000000, CLmax_TO)
+    take_off_requirement = calculate_Cm(C_m_ac, Wtotal/9.81, S, S_h, l_h, V_h_V, x_cg, x_w, c, C_N_h, z_cg, z_p, cd0, AR, oswald, cT*1000000, CLmax_TO, X_TO)
     
     result = {
         "endurance [s]": endurance,
