@@ -7,10 +7,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
 from design_variables import DesignParameters
 
-# Use Arial font for better readability
-plt.rcParams['font.family'] = 'Arial'
-plt.rcParams['font.size'] = 13
-
 # --- Constants ---
 G = 9.80665  # Gravity constant in m/s^2
 

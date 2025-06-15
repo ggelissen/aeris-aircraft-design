@@ -244,7 +244,7 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
             plt.vlines(x=constr['W_S_max'], ymin=TW_min_for_plot, ymax=TW_max_for_plot, label=constr['label'], colors=color, linestyles=constr.get('style', '--'))
 
     if design_point:
-        plt.plot(design_point['W_S'], design_point['T_W'], 'ko', markersize=4, label=f"Design Point ({design_point['label']})")        # Place box around design point text
+        plt.plot(design_point['W_S'], design_point['T_W'], 'ko', markersize=6, label=f"Design Point ({design_point['label']})")        # Place box around design point text
         plt.gca().text(design_point['W_S']*0.87, design_point['T_W']*1.1, f" W/S={design_point['W_S']:.0f}\n T/W={design_point['T_W']:.3f}",
                        fontsize=14, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 
