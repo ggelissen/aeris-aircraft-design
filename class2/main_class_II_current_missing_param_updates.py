@@ -60,6 +60,7 @@ def class_II_weight_estimation(params: DesignParameters,
 
         print(f"    Iteration {i+1}: Calculated W_empty = {W_empty_N_calculated:.2f} N")
         W_TO_N_new = (W_empty_N_calculated + params.weight.W_PL) / (params.weight.M_ff)
+        #print(params.weight.M_ff)
         print(f"    Iteration {i+1}: New W_TO = {W_TO_N_new:.2f} N")
         relative_difference = abs(W_TO_N_new - W_TO_N_current) / W_TO_N_new
         
@@ -264,7 +265,6 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
             max_iterations=100,
             tolerance=0.005
         )
-        
         # Store weight results
         weight_results = {
             "W_TO": final_W_TO,

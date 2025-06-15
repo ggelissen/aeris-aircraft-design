@@ -286,6 +286,7 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
         updates += 1
     
     # Empennage parameters
+    # Update ALL relevant tail parameters directly (inline, simple approach)
     if 'S_h' in class_ii_results:
         params.empennage.S_h = class_ii_results['S_h']
         updates += 1
@@ -301,6 +302,27 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
     if 'dihedral_rad (gamma)' in class_ii_results:
         params.empennage.vtail_dihedral = class_ii_results['dihedral_rad (gamma)']
         updates += 1
+    if 'c_root_t' in class_ii_results:
+        params.empennage.c_r = class_ii_results['c_root_t']
+        updates += 1
+    if 'c_tip_t' in class_ii_results:
+        params.empennage.c_t = class_ii_results['c_tip_t']
+        updates += 1
+    if 'taper_ratio_t' in class_ii_results:
+        params.empennage.lambda_t = class_ii_results['taper_ratio_t']
+        updates += 1
+    if 'aspect_ratio_t' in class_ii_results:
+        params.empennage.A_t = class_ii_results['aspect_ratio_t']
+        updates += 1
+    if 'Lambda_025c_t' in class_ii_results:
+        params.empennage.Lambda_t_025c = class_ii_results['Lambda_025c_t']
+        updates += 1
+    if 't_c_t' in class_ii_results:
+        if class_ii_results['t_c_t'] <= 0.0:
+            print(f"        ⚠️  t_c_t is non-positive ({class_ii_results['t_c_t']:.4f}), not updating") # TODO! Currently negative
+        params.empennage.t_c_t = class_ii_results['t_c_t']
+        updates += 1
+        
     
     # Drag parameters
     if 'CD0' in class_ii_results:
@@ -311,7 +333,7 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
     if 'x_mlg' in class_ii_results:
         params.cg.x_cg_landing_gear = class_ii_results['x_mlg']
         updates += 1
-    
+    # TODO, add the rest of the landing gear parameters if needed
     print(f"        ✅ Updated {updates} parameters from Class II")
 
 
