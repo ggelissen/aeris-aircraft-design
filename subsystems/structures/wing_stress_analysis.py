@@ -184,16 +184,22 @@ def run_structures(designvars):
         top_stringer_indices = np.array(filtered_stringers_top)[np.flip(np.array([designvars.wing.wingsection.stringers[f'Stringer{1+stringer_i}']["pos_along_airfoil_side"] for stringer_i in filtered_stringers_top]).argsort())]
         bottom_stringer_indices = np.array(filtered_stringers_bottom)[np.array([designvars.wing.wingsection.stringers[f'Stringer{1+stringer_i}']["pos_along_airfoil_side"] for stringer_i in filtered_stringers_bottom]).argsort()]
 
-        closest_rib_under = np.argmax(
-            [designvars.wing.wingribs[rib]['y_pos_frac'] for rib in designvars.wing.wingribs.keys() if
-             designvars.wing.wingribs[rib]['y_pos_frac'] <= spanwise_position])
-        closest_rib_over = np.argmin(
-            [designvars.wing.wingribs[rib]['y_pos_frac'] for rib in designvars.wing.wingribs.keys() if
-             designvars.wing.wingribs[rib]['y_pos_frac'] >= spanwise_position])
+        if spanwise_position > np.min([designvars.wing.wingribs.ribs[rib]['y_pos_frac'] for rib in designvars.wing.wingribs.ribs.keys()]):
+            closest_rib_under = np.max(
+                [designvars.wing.wingribs.ribs[rib]['y_pos_frac'] for rib in designvars.wing.wingribs.ribs.keys() if
+                 designvars.wing.wingribs.ribs[rib]['y_pos_frac'] <= spanwise_position])
+        else:
+            closest_rib_under = 0
+        if spanwise_position < np.max([designvars.wing.wingribs.ribs[rib]['y_pos_frac'] for rib in designvars.wing.wingribs.ribs.keys()]):
+            closest_rib_over = np.min(
+                [designvars.wing.wingribs.ribs[rib]['y_pos_frac'] for rib in designvars.wing.wingribs.ribs.keys() if
+                 designvars.wing.wingribs.ribs[rib]['y_pos_frac'] >= spanwise_position])
+        else:
+            closest_rib_over = 1.0
         length_between_ribs = (closest_rib_over - closest_rib_under) * designvars.wing.b_w * np.cos(
             designvars.wing.Gamma_w)
 
-        for stringer_stress, stringer_number, stringer_x, stringer_y in zip(results['bending_stresses'], bottom_stringer_indices + top_stringer_indices, results['boom_x_coords_sorted'], results['boom_y_coords_sorted'], results['boom_areas_sorted']):
+        for stringer_stress, stringer_number, stringer_x, stringer_y, stringer_area in zip(results['bending_stresses'], bottom_stringer_indices.tolist() + top_stringer_indices.tolist(), results['boom_x_coords_sorted'], results['boom_y_coords_sorted'], results['boom_areas_sorted']):
             if np.abs(stringer_stress) > designvars.materials.material_sigma_yield:
                 print(f"Warning: Stringer {stringer_number} at spanwise position {spanwise_position:.2f} exceeds yield strength with stress {stringer_stress:.2f} MPa at Stringer{stringer_number+1}")
             crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E, designvars.wing.wingsection.stringers[f'Stringer{1+stringer_number}']['area_moment_of_inertia_m4'], designvars.wing.wingsection.stringers[f'Stringer{1+stringer_number}']["crosssectionalarea_mm2"]/1000000, length_between_ribs, designvars.wing.wingsection.stringers[f'Stringer{1+stringer_number}']['K'] )
