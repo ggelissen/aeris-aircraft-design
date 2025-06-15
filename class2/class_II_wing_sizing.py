@@ -204,7 +204,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         if W_F_total_N <= 0 or W_F_total_N > W_TO_adjusted * 0.8:
             return 1e6  # High penalty for unrealistic fuel weight
         
-        return W_F_total_N, L_D_cruise, M_ff_total
+        return W_F_total_N, L_D_cruise, M_ff_total, CD0
         
     except Exception as e:
         print(f"    ⚠️  Fuel burn calculation failed: {e}")
@@ -347,12 +347,13 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     #     calculate_loiter_fuel_fraction_jet
                     # )
                     # from class1.initial_weight_estimations import calculate_L_D_loiter
-                    fuel_weight, L_D_opt, M_ff_opt = calculate_fuel_burn_penalty(
+                    fuel_weight, L_D_opt, M_ff_opt, CDO_opt = calculate_fuel_burn_penalty(
                         A_w, S_w, sweep_deg, t_c, params, W_TO_baseline
                     )
                     successful_evaluations += 1
                     
                     if fuel_weight < best_fuel_weight:
+                        #print(f"CD0_opt = {CDO_opt:.6f}, L/D_opt = {L_D_opt:.2f}, M_ff_opt = {M_ff_opt:.4f}")
                         # L_D_loiter = calculate_L_D_loiter(
                         #     baseline_CD0,  A_w * 1.15, e_oswald)
 
@@ -398,7 +399,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                 except Exception as e:
                     # Skip failed evaluations
                     continue
-    
+
     success_rate = successful_evaluations / total_evaluations if total_evaluations > 0 else 0
     print(f"    Optimization complete: {successful_evaluations}/{total_evaluations} evaluations successful ({success_rate:.1%}) Most likely due to Cl of airfoil being out of Delta method bounds.")
     
