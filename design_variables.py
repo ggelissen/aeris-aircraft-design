@@ -46,6 +46,7 @@ class DesignParameters:
         self.control_surface = ControlSurfaceParameters()
         self.stability_aero = StabilityAerodynamicParameters()
         self.inertia = IntertiaParameters()
+        self.structure_results = StructuresResults(self)
 
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
@@ -383,6 +384,9 @@ class WingParameters:
         self.Mach_cross = 0.935
         self.epsilon_t = 0         # Wing twist angle [degrees]
         self.weight_distribution = None
+        self.max_allowed_x_displacement = 0.10 # m
+        self.max_allowed_z_displacement = 0.10
+        self.max_allowed_twist_angle = np.pi / 20 # rad
 
 
         # Aerodynamics Loads Distribution
@@ -931,3 +935,13 @@ class MaterialsParameters():
         """
         attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
         return json.dumps(attrs, indent=4, default=lambda o: str(o))
+
+class StructuresResults():
+    def __init__(self, parent):
+        self.W_Wing = parent.weight.W_wing
+        self.x_bending_distribution = None
+        self.z_bending_distribution = None
+        self.twist_distribution = None
+        self.max_displacement_x = None
+        self.max_displacement_z = None
+        self.max_twist_angle = None

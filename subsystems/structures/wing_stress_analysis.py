@@ -154,6 +154,7 @@ def run_structures(designvars):
     data = pd.read_csv("data/DegenGeom.csv", header=None, skiprows=10, nrows=2211)
     datanp = data.to_numpy()
     designvars.structurecoords = np.round(datanp, decimals=6)
+    weight_distribution(designvars)
 
     spanwise_position_lst = np.linspace(0.0, 1.0, len(designvars.wing.CL_distribution))
 
@@ -164,9 +165,11 @@ def run_structures(designvars):
 
     cross_sectional_results = []
     for i, spanwise_position in enumerate(spanwise_position_lst):
-        print(spanwise_position)
         results = perform_cross_section_analysis(designvars, wing_loading[i], spanwise_position)
         cross_sectional_results.append(results)
+        if np.max(np.array(results["bending_stresses"])) > designvars.materials.material_sigma_yield:
+            print(f"Warning: Bending stress exceeds yield strength) at spanwise position {spanwise_position:.2f}, stringer {np.argmax(np.array(results['bending_stresses']))}")
+        # TODO: Check shearstress vs max shearstress
 
     x_bending_distribution = np.array([])
     y_twist_distribution = np.array([])
@@ -197,16 +200,34 @@ def run_structures(designvars):
     # Plotting the bending distributions
     plot_bending_distribution(spanwise_position_lst, x_bending_distribution, axis='x')
     plot_bending_distribution(spanwise_position_lst, z_bending_distribution, axis='z')
+    designvars.structure_results.x_bending_distribution = x_bending_distribution
+    designvars.structure_results.z_bending_distribution = z_bending_distribution
+    designvars.structure_results.twist_distribution = y_twist_distribution
+    designvars.structure_results.max_displacement_x = np.max(np.abs(designvars.structure_results.x_bending_distribution))
+    designvars.structure_results.max_displacement_z = np.max(np.abs(designvars.structure_results.z_bending_distribution))
+    designvars.structure_results.max_twist_angle = np.max(np.abs(designvars.structure_results.twist_distribution))
+
+    if designvars.structure_results.max_displacement_x > designvars.wing.max_allowed_x_displacement:
+        print(f"Warning: Maximum x displacement {designvars.structure_results.max_displacement_x:.4f} m exceeds allowed limit {designvars.wing.max_allowed_x_displacement:.4f} m.")
+    if designvars.structure_results.max_displacement_z > designvars.wing.max_allowed_z_displacement:
+        print(f"Warning: Maximum z displacement {designvars.structure_results.max_displacement_z:.4f} m exceeds allowed limit {designvars.wing.max_allowed_z_displacement:.4f} m.")
+    if designvars.structure_results.max_twist_angle > designvars.wing.max_allowed_twist_angle:
+        print(f"Warning: Maximum twist angle {designvars.structure_results.max_twist_angle:.4f} rad exceeds allowed limit {designvars.wing.max_allowed_twist_angle:.4f} rad.")
+
 
 if __name__ == "__main__":
     designvars = DesignParameters()
     designvars.load_from_yaml("design_config.yaml")
+
 
     #### TODO: REPLACE THIS FOR AERODYNAMICS CALCULATED LOADS
     designvars.wing.CL_distribution = np.ones(1000)
     designvars.wing.CD_distribution = np.ones(1000)
     designvars.wing.CM_distribution = np.ones(1000)
 
+    print(designvars.weight.W_wing)
+
     run_structures(designvars)
 
+    print(designvars.structure_results.W_Wing)
 

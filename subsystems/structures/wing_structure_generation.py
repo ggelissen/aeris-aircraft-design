@@ -10,6 +10,7 @@ except:
 import scipy
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
+from scipy.integrate import simpson
 
 #from ideal_cross_section_analysis import run_cross_section_analysis
 
@@ -399,5 +400,6 @@ def weight_distribution(designvars: DesignParameters = None, num_points: int = 1
 
         weight_dist.append(stringer_weight + spar_weight + wingskin_weight + rib_weight + fuel_tank_weight + flap_weight)
     designvars.wing.weight_distribution = np.array(weight_dist)
+    designvars.weight.W_wing = simpson(np.array(weight_dist), np.linspace(0, designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w), num_points)) * 2  # kg
     return np.array(weight_dist)
 
