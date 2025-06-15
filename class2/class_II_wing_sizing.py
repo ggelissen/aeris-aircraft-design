@@ -123,6 +123,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         
         # Adjust W_TO: remove current wing, add trial wing
         W_TO_adjusted = W_TO_baseline - W_wing_current + W_wing_trial
+        W_TO_adjusted_no_fuel = W_TO_adjusted - params.weight.W_F  # Adjust for fuel weight
         #print(f"Difference in W_TO due to wing weight: {W_wing_trial - W_wing_current:.2f} N")
         params.weight.W_TO = W_TO_adjusted
         
@@ -188,6 +189,11 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         # From initial_weight_estimations.py: W_F_total = (1 - M_ff_total) * W_TO
         W_F_total_N = (1.0 - M_ff_total) * W_TO_adjusted
         params.weight.M_ff = M_ff_total  # Update params with total fuel weight
+
+        # Updated W_TO after fuel burn calculation
+        W_TO_adjusted2 = W_TO_adjusted_no_fuel + W_F_total_N
+        W_S_adjusted = W_TO_adjusted2 / params.wing.S_w  # Update wing loading
+        # print(f"     Updated W_TO after fuel burn: {W_TO_adjusted2:.2f} N, W/S = {W_S_adjusted:.2f} N/m²")
         # Restore wing parameters
         wing_params = ['A_w_actual', 'A_w_target', 'S_w', 'b_w', 'Lambda_025c_w', 
                     'Lambda_05_w', 'Lambda_0_w', 't_c_w_r', 't_c_w_max', 
@@ -204,7 +210,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         if W_F_total_N <= 0 or W_F_total_N > W_TO_adjusted * 0.8:
             return 1e6  # High penalty for unrealistic fuel weight
         
-        return W_F_total_N, L_D_cruise, M_ff_total, CD0
+        return W_F_total_N, L_D_cruise, M_ff_total, CD0, W_S_adjusted
         
     except Exception as e:
         print(f"    ⚠️  Fuel burn calculation failed: {e}")
@@ -301,7 +307,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
             params.wing.S_w = S_w  # Update wing area
             # Check wing loading constraint first (quick elimination)
             wing_loading = W_TO_baseline / S_w
-            if wing_loading < 1500 or wing_loading > params.weight.W_S:  # N/m² - reasonable bounds
+            if wing_loading < 1500 or wing_loading > 1.2*params.weight.W_S:  # N/m² - reasonable bounds
                 continue
             # CALCULATE C_L_DESIGN BEFORE DELTA METHOD CALL
             # Using baseline fuel fractions and trial S_w
@@ -347,7 +353,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     #     calculate_loiter_fuel_fraction_jet
                     # )
                     # from class1.initial_weight_estimations import calculate_L_D_loiter
-                    fuel_weight, L_D_opt, M_ff_opt, CDO_opt = calculate_fuel_burn_penalty(
+                    fuel_weight, L_D_opt, M_ff_opt, CDO_opt, W_S_opt = calculate_fuel_burn_penalty(
                         A_w, S_w, sweep_deg, t_c, params, W_TO_baseline
                     )
                     successful_evaluations += 1
@@ -386,7 +392,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                             'sweep_deg_optimal': sweep_deg,
                             't_c_optimal': t_c,
                             'fuel_weight_N': fuel_weight,
-                            'wing_loading_optimal': W_TO_baseline / S_w,
+                            'wing_loading_optimal': W_S_opt,
                             'fuel_fraction_optimal': fuel_weight / W_TO_baseline,
                             'C_L_design_optimal': C_L_design,
                             'L_D_optimal': L_D_opt,

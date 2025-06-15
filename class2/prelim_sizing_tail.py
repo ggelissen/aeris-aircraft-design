@@ -107,6 +107,9 @@ def run_preliminary_sizing_tail(params: DesignParameters) -> dict:
     
     t_c_t = psw.calculate_thickness_ratio(params.cruise_altitude, Mach_cruise_tail, params.weight.W_TO, S_t, Lambda_05c_t, Mach_cross)
 
+    if t_c_t < 0.05: # TODO, this needs to be properly addressed.
+        print(f"Warning: Calculated t/c ratio for tail ({t_c_t:.4f}) is less than 0.05. Adjusting to 0.05.")
+    t_c_t = max(t_c_t, 0.05)  # Ensure t/c ratio is not less than 0.05
     results = {
         "S_h": S_h,
         "S_v": S_v,

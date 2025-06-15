@@ -156,7 +156,8 @@ class WeightParameters:
         self.W_F = 11483.09                 # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
-        self.W_S = 3218.59                             # Wing Loading in N/m^2
+        self.W_S = 3218.59                             # Wing Loading in N/m^2, can be updated by class II 
+        self.W_S_max = 3218.59                      # Maximum Wing Loading in N/m^2, set by class I analysis
         self.T_W = 0.305                           # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.588                         # Maximum Fuel Fraction TODO, changed by Alejandro from 0.588 to 0.66
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
@@ -939,6 +940,7 @@ class MaterialsParameters():
 
 class StructuresResults():
     def __init__(self, parent):
+        self.parent = parent
         self.W_Wing = parent.weight.W_wing
         self.x_bending_distribution = None
         self.z_bending_distribution = None
@@ -946,3 +948,46 @@ class StructuresResults():
         self.max_displacement_x = None
         self.max_displacement_z = None
         self.max_twist_angle = None
+        self.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround = []
+        self.should_increase_sparcap_thickness_by_30_percent_in_nextround = False
+        self.should_increase_sparweb_thickness_by_30_percent_in_nextround = False
+        self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround = []
+        self.should_increase_sparcap_thickness_by_10_percent_in_nextround = False
+        self.should_increase_sparweb_thickness_by_10_percent_in_nextround = False
+        self.should_increase_wingskin_thickness_by_10_percent_in_nextround = False
+
+    def update_wing_structure(self):
+        for stringer in self.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
+            self.parent.wing.wingsection.stringers[stringer]["crosssectionalarea_mm2"] *= 1.14
+            self.parent.wing.wingsection.stringers[stringer]['area_moment_of_inertia_m4'] *= 1.14
+            if stringer in self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
+                self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.remove(stringer)
+        for stringer in self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
+            self.parent.wing.wingsection.stringers[stringer]["crosssectionalarea_mm2"] *= 1.05
+            self.parent.wing.wingsection.stringers[stringer]['area_moment_of_inertia_m4'] *= 1.05
+        if self.should_increase_sparcap_thickness_by_30_percent_in_nextround:
+            self.parent.wing.wingsection.spars['Spar1']['t_flange_1_mm'] *= 1.3
+            self.parent.wing.wingsection.spars['Spar1']['t_flange_2_mm'] *= 1.3
+            self.parent.wing.wingsection.spars['Spar2']['t_flange_1_mm'] *= 1.3
+            self.parent.wing.wingsection.spars['Spar2']['t_flange_2_mm'] *= 1.3
+        elif self.should_increase_sparcap_thickness_by_10_percent_in_nextround:
+            self.parent.wing.wingsection.spars['Spar1']['t_flange_1_mm'] *= 1.1
+            self.parent.wing.wingsection.spars['Spar1']['t_flange_2_mm'] *= 1.1
+            self.parent.wing.wingsection.spars['Spar2']['t_flange_1_mm'] *= 1.1
+            self.parent.wing.wingsection.spars['Spar2']['t_flange_2_mm'] *= 1.1
+        if self.should_increase_sparweb_thickness_by_30_percent_in_nextround:
+            self.parent.wing.wingsection.spars['Spar1']['t_web_mm'] *= 1.3
+            self.parent.wing.wingsection.spars['Spar2']['t_web_mm'] *= 1.3
+        elif self.should_increase_sparweb_thickness_by_10_percent_in_nextround:
+            self.parent.wing.wingsection.spars['Spar1']['t_web_mm'] *= 1.1
+            self.parent.wing.wingsection.spars['Spar2']['t_web_mm'] *= 1.1
+        if  self.should_increase_wingskin_thickness_by_10_percent_in_nextround:
+            self.parent.wing.wingsection.wingskin['thicness'] * 1.1
+
+        self.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround = []
+        self.should_increase_sparcap_thickness_by_30_percent_in_nextround = False
+        self.should_increase_sparweb_thickness_by_30_percent_in_nextround = False
+        self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround = []
+        self.should_increase_sparcap_thickness_by_10_percent_in_nextround = False
+        self.should_increase_sparweb_thickness_by_10_percent_in_nextround = False
+        self.should_increase_wingskin_thickness_by_10_percent_in_nextround = False
