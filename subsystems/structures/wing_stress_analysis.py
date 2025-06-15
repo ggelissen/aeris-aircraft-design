@@ -231,9 +231,7 @@ def run_structures(designvars):
 
         # TODO: Check shearstress vs max shearstress
 
-    x_bending_distribution = np.array([])
-    y_twist_distribution = np.array([])
-    z_bending_distribution = np.array([])
+
 
     x_bending = calculate_bending_distribution(
         np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]),
@@ -291,16 +289,4 @@ if __name__ == "__main__":
 
     run_structures(designvars)
 
-    print(designvars.structure_results.W_Wing)
-
-    designvars.structure_results.update_wing_structure()
-
-    run_structures()
-
-    print(designvars.structure_results.W_Wing)
-
-    designvars.structure_results.update_wing_structure()
-
-    run_structures()
-
-    print(designvars.structure_results.W_Wing)
+    print(designvars.structure_results)
