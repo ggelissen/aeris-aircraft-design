@@ -54,12 +54,12 @@ def calculate_bending_distribution(M: np.ndarray, I: np.ndarray, E: float, half_
     Returns:
     - Bending stress distribution along the span.
     """
-    deflection_der = -1 / E *   cumulative_simpson(M/I, dx=half_span / (len(M) - 1), initial=0)
-    deflection = cumulative_simpson(deflection_der, dx=half_span / (len(M) - 1), initial=0)
+    deflection_der = -1 / E *   cumulative_simpson(M/I, dx=half_span / (np.shape(M)[0] - 1), initial=0)
+    deflection = cumulative_simpson(deflection_der, dx=half_span / (np.shape(M)[0] - 1), initial=0)
     return deflection
 
 
-def calculate_angle_of_twist(T: np.ndarray, A_m: np.ndarray, G: float, skin_thickness: float, web_thickness: float, wingskin_length: float, web_length:float, half_span: float) -> np.ndarray:
+def calculate_angle_of_twist(T: np.ndarray, A_m: np.ndarray, G: float, skin_thickness: float, web_thickness: float, wingskin_length: np.ndarray, web_length:np.ndarray, half_span: float) -> np.ndarray:
     """
     Calculates the angle of twist for a wing section based on the applied torque and structural properties.
 
@@ -73,7 +73,7 @@ def calculate_angle_of_twist(T: np.ndarray, A_m: np.ndarray, G: float, skin_thic
     Returns:
     - Angle of twist distribution in radians.
     """
-    twist_angle = 1 / (4*G) * cumulative_simpson(((T ) / (A_m)) * (wingskin_length/skin_thickness + web_length/web_thickness), dx=half_span / (len(T) - 1), initial=0)
+    twist_angle = 1 / (4*G) * cumulative_simpson(np.array([((T[i] ) / (A_m[i])) * (wingskin_length[i]/skin_thickness + web_length[i]/web_thickness) for i in range(len(T))]), dx=half_span / (np.shape(T)[0] - 1), initial=0)
     return twist_angle
 
 
@@ -181,19 +181,18 @@ if __name__ == "__main__":
     y_twist_distribution = np.array([])
     z_bending_distribution = np.array([])
 
-    for i in range(len(spanwise_position_lst)):
-        x_bending = calculate_bending_distribution(wing_loading[i]["moment_x"], cross_sectional_results[i]["Ixx"],
-                                                   designvars.materials.material_E,
-                                                   designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
-        y_twist = calculate_angle_of_twist(wing_loading[i]["torque_y"], cross_sectional_results[i]["A_m"],
-                                           designvars.materials.shear_modulus, designvars.wing.wingsection.wingskin['thicness']/1000, designvars.wing.wingsection.spars["Spar1"]["t_web_mm"]/1000,
-                                           cross_sectional_results[i]["wingskin_length"], cross_sectional_results[i]['web_length'], designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
-        z_bending = calculate_bending_distribution(wing_loading[i]["moment_z"], cross_sectional_results[i]["Iyy"],
-                                                   designvars.materials.material_E,
-                                                   designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
-        x_bending_distribution = np.append(x_bending_distribution, x_bending)
-        y_twist_distribution = np.append(y_twist_distribution, y_twist)
-        z_bending_distribution = np.append(z_bending_distribution, z_bending)
+    x_bending = calculate_bending_distribution(np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]), np.array([cross_sectional_results[i]["Ixx"] for i in range(len(spanwise_position_lst))]),
+                                               designvars.materials.material_E,
+                                               designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
+    y_twist = calculate_angle_of_twist(np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]), np.array([cross_sectional_results[i]["A_m"] for i in range(len(spanwise_position_lst))]),
+                                       designvars.materials.material_G, designvars.wing.wingsection.wingskin['thicness']/1000, designvars.wing.wingsection.spars["Spar1"]["t_web_mm"]/1000,
+                                       np.array([cross_sectional_results[i]["wingskin_length"] for i in range(len(spanwise_position_lst))]), np.array([cross_sectional_results[i]['web_length'] for i in range(len(spanwise_position_lst))]), designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
+    z_bending = calculate_bending_distribution(np.array([wing_loading[i]["moment_z"] for i in range(len(spanwise_position_lst))]), np.array([cross_sectional_results[i]["Iyy"] for i in range(len(spanwise_position_lst))]),
+                                               designvars.materials.material_E,
+                                               designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
+    x_bending_distribution = x_bending
+    y_twist_distribution = y_twist
+    z_bending_distribution = z_bending
 
     # Plotting the bending distributions
     plot_bending_distribution(spanwise_position_lst, x_bending_distribution, axis='x')
