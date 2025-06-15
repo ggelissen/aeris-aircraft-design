@@ -5,6 +5,7 @@ from math import sqrt, nan, isnan, log
 import sys 
 import os 
 import numpy as np
+import matplotlib.pyplot as plt
 
 # --- Corrected Path Setup ---
 # This adds the project's root directory ('DSEGroup17') to the Python path,
@@ -129,97 +130,229 @@ def turbofan_parametric_analysis(mach_0, ts_0, ps_0, bpr, pr_fan, pr_lpc, pr_hpc
     return sf, tsfc, nan, nan, nan, output_dict
 
 # --- Main Simulation Runner ---
-def run_mission_simulation(aircraft_name: str, config: dict):
-    print(f"--- Running Simulation for: {aircraft_name.upper()} ---")
-    num_engines = config["num_engines"]
-    engine_params = config["baseline_engine_config"]
-    mission_segments = config["mission_segments"]
-    
-    total_fuel = 0.0
-    total_emissions = {"m_nox": 0.0, "m_co2": 0.0, "m_h2o": 0.0}
-    all_segments_valid = True
+def run_mission_simulation_comparison():
+    """
+    Runs a mission simulation for multiple aircraft with their specific engine
+    configurations and missions to compare performance.
+    """
+    print("Starting Aircraft Mission Comparison Simulation with specific engine models...\n")
 
-    for seg in mission_segments:
-        print(f"  Processing Segment: {seg['name']}")
-        current_params = engine_params.copy()
-        current_params.update(seg["flight_conditions"])
-        if "engine_params_override" in seg:
-            current_params.update(seg["engine_params_override"])
-        
-        analysis_args = {k: v for k, v in current_params.items() if k not in ['mach_0', 'ts_0', 'ps_0']}
-        
-        try:
-            sf, tsfc, _, _, _, results_dict = turbofan_parametric_analysis(
-                mach_0=current_params["mach_0"], ts_0=current_params["ts_0"], ps_0=current_params["ps_0"], **analysis_args
-            )
-            if isnan(tsfc) or tsfc <= 0: raise ValueError("Invalid TSFC calculated")
-        except Exception as e:
-            print(f"    ERROR: Calculation failed for this segment. {e}")
-            all_segments_valid = False
-            continue
-
-        thrust_per_engine = seg["target_thrust_N"]
-        mdot_f_per_engine = thrust_per_engine * tsfc
-        fuel_per_engine = mdot_f_per_engine * seg["duration_minutes"] * 60
-
-        h_est = atmosphere.get_altitude_from_pressure(current_params["ps_0"])
-        ei_nox = ei_nox_dallara(results_dict.get('pt_3', nan), results_dict.get('tt_3', nan), h_est)
-        
-        emissions_per_engine = emissions(mdot_f_per_engine, ei_nox, dt=seg["duration_minutes"] * 60)
-        
-        total_fuel += fuel_per_engine * num_engines
-        for key in total_emissions:
-            if not isnan(emissions_per_engine[key]):
-                total_emissions[key] += emissions_per_engine[key] * num_engines
-            else:
-                total_emissions[key] = nan
-
-        # *** NEW PRINT STATEMENTS ADDED HERE ***
-        print(f"    Thrust: {thrust_per_engine:.0f} N/eng, TSFC: {tsfc*1e6:.2f} mg/Ns, EI NOx: {ei_nox*1000:.2f} g/kg")
-        print(f"    Fuel burnt (per engine): {fuel_per_engine:.2f} kg")
-        if num_engines > 1:
-            print(f"    Fuel burnt (total for segment): {fuel_per_engine * num_engines:.2f} kg")
-        # **************************************
-
-    print(f"\n--- TOTALS for {aircraft_name.upper()} ({num_engines} engines) ---")
-    if not all_segments_valid: print("  WARNING: Some segments failed, totals are incomplete.")
-    print(f"  Total Fuel: {total_fuel:.2f} kg")
-    print(f"  Total NOx: {total_emissions['m_nox']:.2f} kg")
-    print(f"  Total CO2: {total_emissions['m_co2']:.2f} kg")
-    print("="*50 + "\n")
-
-if __name__ == '__main__':
-    T_TAKEOFF_ORIGINAL_PER_ENGINE = 7535
-    
+    # --- Thrust Parameters as specified ---
+    T_TO = 7535          # N for AERIS
+    T_TOHALO = 121478.211     # N for HALO (MTOW* 0.3)
+    T_TOPH_LAB = 19423    # N for PH-LAB (MTOW * 0.3)
+    T_cruise = 1800  # N for AERIS cruise thrust
+    # --- Aircraft Configurations with Specific Engine Params and Missions ---
     aircraft_configs = {
         "AERIS": {
-            "num_engines": 1, 
+            "num_engines": 1,
             "baseline_engine_config": { "bpr": 3.3, "pr_fan": 1.9, "pr_lpc": 1.5, "pr_hpc": 5.65, "tt_4": 1400., "eta_fan": 0.915, "eta_lpc": 0.9, "eta_hpc": 0.9, "eta_hpt": 0.93, "eta_lpt": 0.93, "lhv": 43.e6 },
             "mission_segments": [
-                {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1450, "pr_fan": 2.0, "pr_hpc": 6.0}},
-                {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.65, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1350}},
-                {"name": "Cruise", "duration_minutes": 120, "target_thrust_N": 0.30 * T_TAKEOFF_ORIGINAL_PER_ENGINE, "flight_conditions": {"mach_0": 0.80, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1250}},
+                {"name": "Engine Start & Warm-Up", "duration_minutes": 10, "target_thrust_N": 0.07 * T_TO, "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 850}},
+                {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TO, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 900}},
+                {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TO, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1450}},
+                {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TO, "flight_conditions": {"mach_0": 0.65, "ts_0": 242.7, "ps_0": 55720}, "engine_params_override": {"tt_4": 1350}},
+                {"name": "Cruise", "duration_minutes": 400, "target_thrust_N": T_cruise, "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 22632}, "engine_params_override": {"tt_4": 1250}},
+                {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TO, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 950}},
+                {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TO, "flight_conditions": {"mach_0": 0.30, "ts_0": 282.65, "ps_0": 89880}, "engine_params_override": {"tt_4": 920}},
+                {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TO, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1000}},
+                {"name": "Taxi & Shutdown", "duration_minutes": 15, "target_thrust_N": 0.07 * T_TO, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 850}},
             ]
         },
         "HALO": {
-            "num_engines": 2, 
+            "num_engines": 2,
             "baseline_engine_config": { "bpr": 4.2, "pr_fan": 1.5, "pr_lpc": 1.2, "pr_hpc": 24.0, "tt_4": 1500., "eta_fan": 0.92, "eta_lpc": 0.91, "eta_hpc": 0.90, "eta_hpt": 0.93, "eta_lpt": 0.94, "lhv": 43.e6, "cooling_h": 0.05, "cooling_l": 0.03 },
             "mission_segments": [
-                { "name": "Take-off HALO", "duration_minutes": 5, "target_thrust_N": 26220, "flight_conditions": {"mach_0": 0.25, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1550}},
-                { "name": "Climb HALO", "duration_minutes": 20, "target_thrust_N": 22287, "flight_conditions": {"mach_0": 0.70, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1450}},
-                { "name": "Cruise HALO", "duration_minutes": 400, "target_thrust_N": 7866.15, "flight_conditions": {"mach_0": 0.82, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1300}},
+                {"name": "Engine Start & Warm-Up", "duration_minutes": 10, "target_thrust_N": 0.07 * T_TOHALO, "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 900}},
+                {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TOHALO, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 950}},
+                {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TOHALO, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1600}},
+                {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.90 * T_TOHALO, "flight_conditions": {"mach_0": 0.65, "ts_0": 235.2, "ps_0": 34567}, "engine_params_override": {"tt_4": 1500}},
+                {"name": "Cruise", "duration_minutes": 400, "target_thrust_N": 0.3*T_TOHALO, "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 16580}, "engine_params_override": {"tt_4": 1400}},
+                {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TOHALO, "flight_conditions": {"mach_0": 0.55, "ts_0": 242.7, "ps_0": 55720}, "engine_params_override": {"tt_4": 1000}},
+                {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TOHALO, "flight_conditions": {"mach_0": 0.35, "ts_0": 268.65, "ps_0": 75271}, "engine_params_override": {"tt_4": 980}},
+                {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TOHALO, "flight_conditions": {"mach_0": 0.28, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1100}},
+                {"name": "Taxi & Shutdown", "duration_minutes": 15, "target_thrust_N": 0.07 * T_TOHALO, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 900}},
             ]
         },
-        "PH_LAB": {
-            "num_engines": 2, 
+        "PH-LAB (Citation II)": {
+            "num_engines": 2,
             "baseline_engine_config": { "bpr": 2.6, "pr_fan": 1.5, "pr_lpc": 1.2, "pr_hpc": 7, "tt_4": 1200, "eta_fan": 0.915, "eta_lpc": 0.9, "eta_hpc": 0.9, "eta_hpt": 0.93, "eta_lpt": 0.93, "lhv": 43.e6 },
             "mission_segments": [
-                { "name": "Take-off PH_LAB", "duration_minutes": 5, "target_thrust_N": 9711.9, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1650}},
-                { "name": "Climb PH_LAB", "duration_minutes": 20, "target_thrust_N": 8255.115, "flight_conditions": {"mach_0": 0.4, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1500}},
-                { "name": "Cruise PH-LAB", "duration_minutes": 120, "target_thrust_N": 2913.57, "flight_conditions": {"mach_0": 0.7, "ts_0": 230.0, "ps_0": 35000.0}, "engine_params_override": {"tt_4": 1200}},
+                {"name": "Engine Start & Warm-Up", "duration_minutes": 10, "target_thrust_N": 0.07 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 800}},
+                {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 850}},
+                {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TOPH_LAB, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1300}},
+                {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.60, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1200}},
+                {"name": "Cruise", "duration_minutes": 120, "target_thrust_N": 0.3*T_TOPH_LAB, "flight_conditions": {"mach_0": 0.7, "ts_0": 216.65, "ps_0": 18753}, "engine_params_override": {"tt_4": 1100}},
+                {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 900}},
+                {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.28, "ts_0": 285.2, "ps_0": 95970}, "engine_params_override": {"tt_4": 880}},
+                {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 950}},
+                {"name": "Taxi & Shutdown", "duration_minutes": 15, "target_thrust_N": 0.07 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 800}},
             ]
         }
     }
 
-    for name, config in aircraft_configs.items():
-        run_mission_simulation(name, config)
+    results_per_aircraft = {}
+
+    for aircraft_name, config in aircraft_configs.items():
+        print(f"\n===== Simulating: {aircraft_name} =====\n")
+        
+        total_fuel_kg = 0.0
+        total_emissions = {"m_co2": 0.0, "m_h2o": 0.0, "m_nox": 0.0, "m_so4": 0.0, "m_soot": 0.0}
+        
+        num_engines = config["num_engines"]
+        
+        for i, segment in enumerate(config["mission_segments"]):
+            print(f"--- Processing Segment {i+1}/{len(config['mission_segments'])}: {segment['name']} ---")
+            dt_seconds = segment["duration_minutes"] * 60.0
+
+            # Start with the specific baseline config for the aircraft
+            current_engine_params = config["baseline_engine_config"].copy()
+            # Add general efficiencies/parameters if not in the specific config
+            current_engine_params.setdefault("eta_com", 0.99)
+            current_engine_params.setdefault("eta_mech_l", 0.99)
+            current_engine_params.setdefault("eta_mech_h", 0.99)
+            current_engine_params.setdefault("pr_com", 0.95)
+            current_engine_params.setdefault("pr_inl", 0.98)
+            current_engine_params.setdefault("bleed_to", 0.0)
+            current_engine_params.setdefault("power_tol", 0.0)
+            current_engine_params.setdefault("power_toh", 0.0)
+            current_engine_params.setdefault("cooling_l", 0.0)
+            current_engine_params.setdefault("cooling_h", 0.0)
+            current_engine_params.setdefault("full_output", True)
+            
+            # Update with flight conditions and segment-specific overrides
+            current_engine_params.update(segment["flight_conditions"])
+            if "engine_params_override" in segment:
+                current_engine_params.update(segment["engine_params_override"])
+
+            analysis_params = {k: v for k, v in current_engine_params.items() if k not in ['mach_0', 'ts_0', 'ps_0']}
+            
+            try:
+                tf_results = turbofan_parametric_analysis(
+                    mach_0=current_engine_params["mach_0"],
+                    ts_0=current_engine_params["ts_0"],
+                    ps_0=current_engine_params["ps_0"],
+                    **analysis_params
+                )
+                tsfc = tf_results[1]
+                
+                if isnan(tsfc) or tsfc <= 0:
+                    print(f"  Warning: Invalid TSFC ({tsfc}) for {segment['name']}. Skipping segment.")
+                    continue
+
+                # TSFC is per Newton, so total fuel flow is just TSFC * total thrust
+                mdot_f_total_aircraft = segment["target_thrust_N"] * tsfc
+                segment_fuel_kg = mdot_f_total_aircraft * dt_seconds
+                total_fuel_kg += segment_fuel_kg
+
+                output_dict = tf_results[5]
+                tt_3 = output_dict.get('tt_3', 600)
+                pt_3 = output_dict.get('pt_3', 10e5)
+                ei_nox = (2 + 28.5 * ((pt_3 / 1000) / 3100)**0.5 * np.exp((tt_3 - 825) / 250)) / 1000
+                
+                segment_emissions_data = emissions(mdot_f_total_aircraft, ei_nox, dt=dt_seconds)
+                for key in total_emissions:
+                    if not isnan(segment_emissions_data.get(key, nan)):
+                        total_emissions[key] += segment_emissions_data[key]
+
+                print(f"  Thrust: {segment['target_thrust_N']:.0f} N, TSFC: {tsfc:.4e}, Fuel: {segment_fuel_kg:.2f} kg")
+
+            except Exception as e:
+                print(f"  ERROR during analysis for segment {segment['name']}: {e}")
+
+        results_per_aircraft[aircraft_name] = {
+            "Total Fuel (kg)": total_fuel_kg,
+            "Total Emissions (kg)": total_emissions
+        }
+        print(f"\n--- Total for {aircraft_name} ---")
+        print(f"  Total Fuel Used: {total_fuel_kg:.2f} kg")
+        for species, mass in total_emissions.items():
+            print(f"  Total {species.replace('m_', '').upper()}: {mass:.2f} kg")
+
+    # --- Emissions Comparison Calculation and Printout ---
+    print("\n\n" + "="*50)
+    print("===== Emissions Reduction Comparison vs. AERIS =====")
+    print("="*50 + "\n")
+
+    aeris_emissions = results_per_aircraft.get("AERIS", {}).get("Total Emissions (kg)")
+
+    if aeris_emissions:
+        for aircraft_name, results in results_per_aircraft.items():
+            if aircraft_name == "AERIS":
+                continue
+
+            print(f"--- Comparison: AERIS vs. {aircraft_name} ---")
+            other_emissions = results.get("Total Emissions (kg)")
+            if not other_emissions:
+                print("  Could not retrieve emissions data for comparison.")
+                continue
+
+            # Compare Fuel
+            aeris_fuel = results_per_aircraft["AERIS"]["Total Fuel (kg)"]
+            other_fuel = results["Total Fuel (kg)"]
+            if other_fuel > 0:
+                fuel_reduction = ((other_fuel - aeris_fuel) / other_fuel) * 100
+                print(f"  Fuel Consumption: {fuel_reduction:.2f}% lower")
+
+
+            # Compare Emissions
+            for species, aeris_mass in aeris_emissions.items():
+                other_mass = other_emissions.get(species)
+                if other_mass is not None and other_mass > 0:
+                    percentage_diff = ((other_mass - aeris_mass) / other_mass) * 100
+                    species_name = species.replace('m_', '').upper()
+                    print(f"  {species_name} Emissions: {percentage_diff:.2f}% lower")
+            print("-" * 20)
+
+    # --- Plotting Results ---
+    plot_comparison_results(results_per_aircraft)
+
+    return results_per_aircraft
+
+
+def plot_comparison_results(results):
+    """
+    Plots the total fuel consumption and emissions for the simulated aircraft.
+    """
+    aircraft_names = list(results.keys())
+    fuel_data = [res["Total Fuel (kg)"] for res in results.values()]
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
+    
+    # Fuel Consumption Plot
+    ax1.bar(aircraft_names, fuel_data, color=['#004c6d', '#4d7c9a', '#8bafc7'])
+    ax1.set_ylabel('Total Fuel Consumption (kg)')
+    ax1.set_title('Mission Fuel Comparison')
+    ax1.grid(axis='y', linestyle='--', alpha=0.7)
+    for i, v in enumerate(fuel_data):
+        ax1.text(i, v + 50, f"{v:,.0f} kg", ha='center', va='bottom')
+
+    # Emissions Plot
+    emissions_data = {
+        'CO2': [res["Total Emissions (kg)"]["m_co2"] for res in results.values()],
+        'H2O': [res["Total Emissions (kg)"]["m_h2o"] for res in results.values()],
+        'NOx': [res["Total Emissions (kg)"]["m_nox"] for res in results.values()],
+    }
+    
+    width = 0.25
+    x = np.arange(len(aircraft_names))
+    rects1 = ax2.bar(x - width, emissions_data['CO2'], width, label='CO2')
+    rects2 = ax2.bar(x, emissions_data['H2O'], width, label='H2O')
+    rects3 = ax2.bar(x + width, emissions_data['NOx'], width, label='NOx')
+
+    ax2.set_ylabel('Total Emissions (kg) - Log Scale')
+    ax2.set_title('Mission Emissions Comparison')
+    ax2.set_xticks(x)
+    ax2.set_xticklabels(aircraft_names, rotation=10, ha="right")
+    ax2.legend()
+    ax2.grid(axis='y', linestyle='--', alpha=0.7)
+    ax2.set_yscale('log')
+    
+    fig.tight_layout()
+    plt.suptitle('Aircraft Mission Performance Comparison', fontsize=16)
+    plt.subplots_adjust(top=0.92)
+    plt.show()
+
+
+if __name__ == '__main__':
+    run_mission_simulation_comparison()
