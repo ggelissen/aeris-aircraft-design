@@ -63,7 +63,7 @@ def fuselage_weight_N(params: DesignParameters):
         0.5257 * F_MG * F_NG * F_press * F_VT * F_matl
         * (L_struct_ft ** 0.3796)
         * ((W_carried_lbf * N_Z) ** 0.4863)
-        * (1.3 * V_dive_Eq_kts / 100.0)**2 # Equation 6.40 on Gundlach is incorrect! Elise found the corrected and it's like this.
+        * (1.3 * 160 / 100.0)**2 # Equation 6.40 on Gundlach is incorrect! Elise found the corrected and it's like this.
     )
     #print(f"V_dive_Eq_kts: {V_dive_Eq_kts}, V_EqMax_kts: {V_EqMax_kts}, V_dive_kts: {V_dive_kts}")
     return lbf_to_N(W_fus_lb)
