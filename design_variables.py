@@ -156,7 +156,8 @@ class WeightParameters:
         self.W_F = 11483.09                 # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
-        self.W_S = 3218.59                             # Wing Loading in N/m^2
+        self.W_S = 3218.59                             # Wing Loading in N/m^2, can be updated by class II 
+        self.W_S_max = 3218.59                      # Maximum Wing Loading in N/m^2, set by class I analysis
         self.T_W = 0.305                           # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.588                         # Maximum Fuel Fraction TODO, changed by Alejandro from 0.588 to 0.66
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage

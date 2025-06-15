@@ -153,13 +153,14 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
     if 'W_tfo' in class_i_results:
         params.weight.W_tfo = class_i_results['W_tfo']
         updates += 1
-        
+
     # Thrust and wing loading parameters
     if 'T_W' in class_i_results:
         params.weight.T_W = class_i_results['T_W']
         updates += 1
     if 'W_S' in class_i_results:
         params.weight.W_S = class_i_results['W_S']
+        params.wing.W_S_max = class_i_results['W_S']  # Assume max W/S is same as design W/S, as its given by the TW_SW graph
         updates += 1
 
     
