@@ -1,8 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d, CubicSpline
-from design_variables import *
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '...')))
+from design_variables import DesignParameters
 from class1.preliminary_sizing.prelim_sizing_wing import calculate_sweep_angle_LE
+
+
 
 params = DesignParameters()
 params.load_from_yaml("design_config.yaml")
