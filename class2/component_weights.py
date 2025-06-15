@@ -52,7 +52,7 @@ def fuselage_weight_N(params: DesignParameters):
     F_matl = 1.0   # Carbon fiber/metal
 
     L_struct_ft = m_to_ft(params.fuselage.l_f)
-    W_carried_lbf = N_to_lbf(params.weight.W_PL)
+    W_carried_lbf = N_to_lbf(params.weight.W_PL) + landing_gear_weight_N(params) + fixed_equipment_weight_N(params) + propulsion_weight_N(params)
     N_Z = params.max_load_factor
     V_EqMax_kts = params.max_eq_velocity
     V_cruise_kts = ms_to_kts(params.cruise_speed)
