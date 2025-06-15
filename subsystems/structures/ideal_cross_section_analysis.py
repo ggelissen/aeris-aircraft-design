@@ -572,17 +572,19 @@ def run_cross_section_analysis(params: DesignParameters, spar_points: np.ndarray
     spar_boom_y = convert_arrays_to_coordinates(spar_points, stringer_points)['spar_y_coords']
     stringer_boom_y = convert_arrays_to_coordinates(spar_points, stringer_points)['stringer_y_coords']
 
-    spar_boom_areas = np.zeros(params.wing.wingsection.num_spars*2)
+    spar_boom_areas = np.zeros(len(spar_points)*2)
     spar1 = params.wing.wingsection.spars["Spar1"]
     spar2 = params.wing.wingsection.spars["Spar2"]
     spar_boom_areas[0] = spar1["t_flange_1_mm"] * spar1["flange_width_mm"]
     spar_boom_areas[1] = spar1["t_flange_2_mm"] * spar1["flange_width_mm"]
-    spar_boom_areas[2] = spar2["t_flange_1_mm"] * spar2["flange_width_mm"]
-    spar_boom_areas[3] = spar2["t_flange_2_mm"] * spar2["flange_width_mm"]
+    if len(spar_boom_areas) >= 3:
+        spar_boom_areas[2] = spar2["t_flange_1_mm"] * spar2["flange_width_mm"]
+        spar_boom_areas[3] = spar2["t_flange_2_mm"] * spar2["flange_width_mm"]
 
-    stringer_boom_areas = np.zeros(params.wing.wingsection.num_stringers)
+    stringer_boom_areas = np.zeros(len(stringer_boom_x))
     for i, stringer in enumerate(params.wing.wingsection.stringers.values()):
-        stringer_boom_areas[i] = stringer["crosssectionalarea_mm2"]
+        if i < len(stringer_boom_x):
+            stringer_boom_areas[i] = stringer["crosssectionalarea_mm2"]
 
     boom_x_sorted, boom_y_sorted, boom_areas_sorted = filter_and_sort_coordinates(
         spar_boom_x, spar_boom_y, stringer_boom_x, stringer_boom_y, spar_boom_areas, stringer_boom_areas)

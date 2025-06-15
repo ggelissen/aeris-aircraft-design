@@ -173,6 +173,7 @@ if __name__ == "__main__":
 
     cross_sectional_results = []
     for i, spanwise_position in enumerate(spanwise_position_lst):
+        print(spanwise_position)
         results = perform_cross_section_analysis(designvars, wing_loading[i], spanwise_position)
         cross_sectional_results.append(results)
 
@@ -182,13 +183,13 @@ if __name__ == "__main__":
 
     for i in range(len(spanwise_position_lst)):
         x_bending = calculate_bending_distribution(wing_loading[i]["moment_x"], cross_sectional_results[i]["Ixx"],
-                                                   designvars.materials.elastic_modulus,
+                                                   designvars.materials.material_E,
                                                    designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
         y_twist = calculate_angle_of_twist(wing_loading[i]["torque_y"], cross_sectional_results[i]["A_m"],
                                            designvars.materials.shear_modulus, designvars.wing.wingsection.wingskin['thicness']/1000, designvars.wing.wingsection.spars["Spar1"]["t_web_mm"]/1000,
                                            cross_sectional_results[i]["wingskin_length"], cross_sectional_results[i]['web_length'], designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
         z_bending = calculate_bending_distribution(wing_loading[i]["moment_z"], cross_sectional_results[i]["Iyy"],
-                                                   designvars.materials.elastic_modulus,
+                                                   designvars.materials.material_E,
                                                    designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
         x_bending_distribution = np.append(x_bending_distribution, x_bending)
         y_twist_distribution = np.append(y_twist_distribution, y_twist)
