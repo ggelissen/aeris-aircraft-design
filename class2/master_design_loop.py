@@ -51,7 +51,93 @@ def get_key_parameters(params: DesignParameters) -> Dict[str, float]:
         'CD0': params.wing.C_D0 if params.wing.C_D0 is not None else 0.020
     }
 
-
+def perform_wing_loading_consistency_check(params: DesignParameters, 
+                                          class_i_results: Dict,
+                                          iteration: int) -> Tuple[bool, str]:
+    """
+    Smart consistency check that recalculates W_S and checks constraints.
+    
+    This implements your approach:
+    1. Recalculate W_S = W_TO / S_w with latest knowledge
+    2. Compare with wing optimization result
+    3. If different, update to recalculated value
+    4. Check if within Class I constraints
+    5. Force re-iteration if needed for re-optimization
+    
+    Returns:
+        (needs_reoptimization, reason)
+    """
+    print(f"\n    🔍 SMART CONSISTENCY CHECK - ITERATION {iteration}")
+    print(f"    {'='*50}")
+    
+    # Get current values
+    current_W_TO = params.weight.W_TO
+    current_S_w = params.wing.S_w
+    wing_opt_W_S = params.weight.W_S  # From wing optimization
+    
+    # Recalculate W_S with latest knowledge
+    recalculated_W_S = current_W_TO / current_S_w
+    
+    print(f"    📊 Wing Loading Analysis:")
+    print(f"       Current W_TO: {current_W_TO:.0f} N")
+    print(f"       Current S_w:  {current_S_w:.3f} m²")
+    print(f"       Wing Opt W_S: {wing_opt_W_S:.1f} N/m²")
+    print(f"       Recalc W_S:   {recalculated_W_S:.1f} N/m²")
+    
+    # Calculate discrepancy
+    discrepancy = abs(recalculated_W_S - wing_opt_W_S) / wing_opt_W_S
+    print(f"       Discrepancy:  {discrepancy:.1%}")
+    
+    # Check if significant discrepancy exists
+    SIGNIFICANT_THRESHOLD = 0.02  # 2% threshold for re-optimization
+    
+    if discrepancy > SIGNIFICANT_THRESHOLD:
+        print(f"    🔄 SIGNIFICANT DISCREPANCY DETECTED ({discrepancy:.1%} > {SIGNIFICANT_THRESHOLD:.1%})")
+        
+        # Update to recalculated value
+        old_W_S = params.weight.W_S
+        params.weight.W_S = recalculated_W_S
+        print(f"       ✅ Updated W_S: {old_W_S:.1f} → {recalculated_W_S:.1f} N/m²")
+        
+        # Check constraint from Class I (maximum allowable W_S)
+        W_S_max = params.weight.W_S_max
+        
+        if W_S_max is not None:
+            print(f"       📋 Class I W_S constraint: ≤ {W_S_max:.1f} N/m²")
+            
+            if recalculated_W_S <= W_S_max:
+                print(f"       ✅ Within Class I constraint ({recalculated_W_S:.1f} ≤ {W_S_max:.1f})")
+                
+                # Higher wing loading is better (smaller wing), so this is good
+                if recalculated_W_S > wing_opt_W_S:
+                    reason = f"Higher W_S achievable ({recalculated_W_S:.1f} > {wing_opt_W_S:.1f}) - re-optimize for smaller wing"
+                    print(f"       🎯 {reason}")
+                    return True, reason
+                else:
+                    reason = f"Lower W_S required ({recalculated_W_S:.1f} < {wing_opt_W_S:.1f}) - re-optimize for constraint compliance"
+                    print(f"       ⚠️  {reason}")
+                    return True, reason
+                    
+            else:
+                print(f"       ❌ EXCEEDS Class I constraint ({recalculated_W_S:.1f} > {W_S_max:.1f})")
+                
+                # Constrain to maximum and force re-optimization
+                params.weight.W_S = W_S_max
+                params.wing.S_w = current_W_TO / W_S_max  # Update wing area accordingly
+                
+                reason = f"W_S constrained to Class I limit ({W_S_max:.1f}) - re-optimize with constraint"
+                print(f"       🔧 {reason}")
+                print(f"       ✅ Updated S_w: {current_S_w:.3f} → {params.wing.S_w:.3f} m²")
+                return True, reason
+        else:
+            print(f"       ⚠️  No Class I W_S constraint found - proceeding with recalculated value")
+            reason = f"W_S updated to consistent value ({recalculated_W_S:.1f}) - re-optimize"
+            return True, reason
+    
+    else:
+        print(f"    ✅ WING LOADING CONSISTENT ({discrepancy:.1%} ≤ {SIGNIFICANT_THRESHOLD:.1%})")
+        return False, "Wing loading consistent"
+    
 def check_convergence(params_previous: Dict[str, float], params_current: Dict[str, float], 
                      tolerance: float = 0.01) -> Tuple[bool, Dict[str, float]]:
     """
@@ -456,6 +542,9 @@ def master_design_process(config_file: str = 'design_config.yaml',
                 print(f"    ✅ Class II analysis completed successfully")
                 if 'W_TO' in class_ii_results:
                     print(f"    📊 Converged W_TO: {class_ii_results['W_TO']:.0f} N")
+                # Update wing loading consistency check
+                W_S_post_class_ii = params.weight.W_TO / params.wing.S_w
+                params.weight.W_S = W_S_post_class_ii
             else:
                 print(f"    ⚠️  Class II analysis returned empty results")
         except Exception as e:
