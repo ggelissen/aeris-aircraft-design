@@ -150,11 +150,11 @@ def run_mission_simulation_comparison():
             "mission_segments": [
                 {"name": "Engine Start & Warm-Up", "duration_minutes": 10, "target_thrust_N": 0.07 * T_TO, "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 850}},
                 {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TO, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 900}},
-                {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TO, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1450}},
-                {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TO, "flight_conditions": {"mach_0": 0.65, "ts_0": 242.7, "ps_0": 55720}, "engine_params_override": {"tt_4": 1350}},
-                {"name": "Cruise", "duration_minutes": 400, "target_thrust_N": T_cruise, "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 22632}, "engine_params_override": {"tt_4": 1250}},
-                {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TO, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 950}},
-                {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TO, "flight_conditions": {"mach_0": 0.30, "ts_0": 282.65, "ps_0": 89880}, "engine_params_override": {"tt_4": 920}},
+                {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TO, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1400}},
+                {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TO, "flight_conditions": {"mach_0": 0.55, "ts_0": 242.7, "ps_0": 46560}, "engine_params_override": {"tt_4": 1300}},
+                {"name": "Cruise", "duration_minutes": 120, "target_thrust_N": T_cruise, "flight_conditions": {"mach_0": 0.7, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1200}},
+                {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TO, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 900}},
+                {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TO, "flight_conditions": {"mach_0": 0.30, "ts_0": 282.65, "ps_0": 95970}, "engine_params_override": {"tt_4": 950}},
                 {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TO, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1000}},
                 {"name": "Taxi & Shutdown", "duration_minutes": 15, "target_thrust_N": 0.07 * T_TO, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 850}},
             ]
@@ -167,7 +167,7 @@ def run_mission_simulation_comparison():
                 {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TOHALO, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 950}},
                 {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TOHALO, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1600}},
                 {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.90 * T_TOHALO, "flight_conditions": {"mach_0": 0.65, "ts_0": 235.2, "ps_0": 34567}, "engine_params_override": {"tt_4": 1500}},
-                {"name": "Cruise", "duration_minutes": 400, "target_thrust_N": 0.3*T_TOHALO, "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 16580}, "engine_params_override": {"tt_4": 1400}},
+                {"name": "Cruise", "duration_minutes": 400, "target_thrust_N": 0.3*T_TOHALO, "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1400}},
                 {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TOHALO, "flight_conditions": {"mach_0": 0.55, "ts_0": 242.7, "ps_0": 55720}, "engine_params_override": {"tt_4": 1000}},
                 {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TOHALO, "flight_conditions": {"mach_0": 0.35, "ts_0": 268.65, "ps_0": 75271}, "engine_params_override": {"tt_4": 980}},
                 {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TOHALO, "flight_conditions": {"mach_0": 0.28, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1100}},
@@ -182,7 +182,7 @@ def run_mission_simulation_comparison():
                 {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 850}},
                 {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TOPH_LAB, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1300}},
                 {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.60, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1200}},
-                {"name": "Cruise", "duration_minutes": 120, "target_thrust_N": 0.3*T_TOPH_LAB, "flight_conditions": {"mach_0": 0.7, "ts_0": 216.65, "ps_0": 18753}, "engine_params_override": {"tt_4": 1100}},
+                {"name": "Cruise", "duration_minutes": 120, "target_thrust_N": 0.3*T_TOPH_LAB, "flight_conditions": {"mach_0": 0.7, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1100}},
                 {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 900}},
                 {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.28, "ts_0": 285.2, "ps_0": 95970}, "engine_params_override": {"tt_4": 880}},
                 {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 950}},
@@ -269,89 +269,42 @@ def run_mission_simulation_comparison():
         for species, mass in total_emissions.items():
             print(f"  Total {species.replace('m_', '').upper()}: {mass:.2f} kg")
 
-    # --- Emissions Comparison Calculation and Printout ---
-    print("\n\n" + "="*50)
-    print("===== Emissions Reduction Comparison vs. AERIS =====")
-    print("="*50 + "\n")
+    # # --- Emissions Comparison Calculation and Printout ---
+    # print("\n\n" + "="*50)
+    # print("===== Emissions Reduction Comparison vs. AERIS =====")
+    # print("="*50 + "\n")
 
-    aeris_emissions = results_per_aircraft.get("AERIS", {}).get("Total Emissions (kg)")
+    # aeris_emissions = results_per_aircraft.get("AERIS", {}).get("Total Emissions (kg)")
 
-    if aeris_emissions:
-        for aircraft_name, results in results_per_aircraft.items():
-            if aircraft_name == "AERIS":
-                continue
+    # if aeris_emissions:
+    #     for aircraft_name, results in results_per_aircraft.items():
+    #         if aircraft_name == "AERIS":
+    #             continue
 
-            print(f"--- Comparison: AERIS vs. {aircraft_name} ---")
-            other_emissions = results.get("Total Emissions (kg)")
-            if not other_emissions:
-                print("  Could not retrieve emissions data for comparison.")
-                continue
+    #         print(f"--- Comparison: AERIS vs. {aircraft_name} ---")
+    #         other_emissions = results.get("Total Emissions (kg)")
+    #         if not other_emissions:
+    #             print("  Could not retrieve emissions data for comparison.")
+    #             continue
 
-            # Compare Fuel
-            aeris_fuel = results_per_aircraft["AERIS"]["Total Fuel (kg)"]
-            other_fuel = results["Total Fuel (kg)"]
-            if other_fuel > 0:
-                fuel_reduction = ((other_fuel - aeris_fuel) / other_fuel) * 100
-                print(f"  Fuel Consumption: {fuel_reduction:.2f}% lower")
+    #         # Compare Fuel
+    #         aeris_fuel = results_per_aircraft["AERIS"]["Total Fuel (kg)"]
+    #         other_fuel = results["Total Fuel (kg)"]
+    #         if other_fuel > 0:
+    #             fuel_reduction = ((other_fuel - aeris_fuel) / other_fuel) * 100
+    #             print(f"  Fuel Consumption: {fuel_reduction:.2f}% lower")
 
 
-            # Compare Emissions
-            for species, aeris_mass in aeris_emissions.items():
-                other_mass = other_emissions.get(species)
-                if other_mass is not None and other_mass > 0:
-                    percentage_diff = ((other_mass - aeris_mass) / other_mass) * 100
-                    species_name = species.replace('m_', '').upper()
-                    print(f"  {species_name} Emissions: {percentage_diff:.2f}% lower")
-            print("-" * 20)
-
-    # --- Plotting Results ---
-    plot_comparison_results(results_per_aircraft)
+    #         # Compare Emissions
+    #         for species, aeris_mass in aeris_emissions.items():
+    #             other_mass = other_emissions.get(species)
+    #             if other_mass is not None and other_mass > 0:
+    #                 percentage_diff = ((other_mass - aeris_mass) / other_mass) * 100
+    #                 species_name = species.replace('m_', '').upper()
+    #                 print(f"  {species_name} Emissions: {percentage_diff:.2f}% lower")
+    #         print("-" * 20)
 
     return results_per_aircraft
-
-
-def plot_comparison_results(results):
-    """
-    Plots the total fuel consumption and emissions for the simulated aircraft.
-    """
-    aircraft_names = list(results.keys())
-    fuel_data = [res["Total Fuel (kg)"] for res in results.values()]
-    
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
-    
-    # Fuel Consumption Plot
-    ax1.bar(aircraft_names, fuel_data, color=['#004c6d', '#4d7c9a', '#8bafc7'])
-    ax1.set_ylabel('Total Fuel Consumption (kg)')
-    ax1.set_title('Mission Fuel Comparison')
-    ax1.grid(axis='y', linestyle='--', alpha=0.7)
-    for i, v in enumerate(fuel_data):
-        ax1.text(i, v + 50, f"{v:,.0f} kg", ha='center', va='bottom')
-
-    # Emissions Plot
-    emissions_data = {
-        'CO2': [res["Total Emissions (kg)"]["m_co2"] for res in results.values()],
-        'H2O': [res["Total Emissions (kg)"]["m_h2o"] for res in results.values()],
-        'NOx': [res["Total Emissions (kg)"]["m_nox"] for res in results.values()],
-    }
-    
-    width = 0.25
-    x = np.arange(len(aircraft_names))
-    rects1 = ax2.bar(x - width, emissions_data['CO2'], width, label='CO2')
-    rects2 = ax2.bar(x, emissions_data['H2O'], width, label='H2O')
-    rects3 = ax2.bar(x + width, emissions_data['NOx'], width, label='NOx')
-
-    ax2.set_ylabel('Total Emissions (kg) - Log Scale')
-    ax2.set_title('Mission Emissions Comparison')
-    ax2.set_xticks(x)
-    ax2.set_xticklabels(aircraft_names, rotation=10, ha="right")
-    ax2.legend()
-    ax2.grid(axis='y', linestyle='--', alpha=0.7)
-    ax2.set_yscale('log')
-    
-    fig.tight_layout()
-    plt.suptitle('Aircraft Mission Performance Comparison', fontsize=16)
-    plt.subplots_adjust(top=0.92)
-    plt.show()
 
 
 if __name__ == '__main__':
