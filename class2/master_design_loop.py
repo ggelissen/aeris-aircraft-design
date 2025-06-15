@@ -147,7 +147,13 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         params.weight.M_ff = class_i_results['M_ff']
         print(f"        ⚠️  M_ff updated to {params.weight.M_ff} (from Class I results)")
         updates += 1
-    
+    if 'W_F' in class_i_results:
+        params.weight.W_F = class_i_results['W_F']
+        updates += 1
+    if 'W_tfo' in class_i_results:
+        params.weight.W_tfo = class_i_results['W_tfo']
+        updates += 1
+        
     # Thrust and wing loading parameters
     if 'T_W' in class_i_results:
         params.weight.T_W = class_i_results['T_W']
