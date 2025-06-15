@@ -244,14 +244,14 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
             plt.vlines(x=constr['W_S_max'], ymin=TW_min_for_plot, ymax=TW_max_for_plot, label=constr['label'], colors=color, linestyles=constr.get('style', '--'))
 
     if design_point:
-        plt.plot(design_point['W_S'], design_point['T_W'], 'ko', markersize=4, label=f"Design Point ({design_point['label']})")
-        plt.text(design_point['W_S']*1.02, design_point['T_W']*1.02, f" W/S={design_point['W_S']:.0f}\n T/W={design_point['T_W']:.3f}", fontsize=9)
+        plt.plot(design_point['W_S'], design_point['T_W'], 'ko', markersize=4, label=f"Design Point ({design_point['label']})")        # Place box around design point text
+        plt.gca().text(design_point['W_S']*0.87, design_point['T_W']*1.1, f" W/S={design_point['W_S']:.0f}\n T/W={design_point['T_W']:.3f}",
+                       fontsize=14, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.3'))
 
-
-    plt.xlabel("Wing Loading (W/S) $[N/m^2]$")
-    plt.ylabel("Thrust-to-Weight Ratio (T/W)")
+    plt.xlabel("Wing Loading (W/S) $[N/m^2]$", fontsize=14)
+    plt.ylabel("Thrust-to-Weight Ratio (T/W)", fontsize=14)
     #plt.title(title)
-    plt.legend(loc='center left', bbox_to_anchor=(1.01, 0.5), fontsize='small')
+    plt.legend(loc='center left', bbox_to_anchor=(1.01, 0.5), fontsize=14)
     plt.grid(True)
     # Sensible auto-limits or user-defined
     y_min = min(c['T_W_values'].min() for c in constraints_data_pd if c.get('T_W_values', None) is not None and np.any(np.isfinite(c['T_W_values']))) if any(c.get('T_W_values', None) is not None for c in constraints_data_pd) else 0
@@ -261,10 +261,12 @@ def plot_TW_WS_diagram_pd(wing_loading_Npm2, constraints_data_pd, title="T/W vs 
     if finite_tw_values:
         plt.ylim(max(0, min(finite_tw_values) * 0.8), min(0.8, max(finite_tw_values) * 1.2))
     else:
-        plt.ylim(0, 0.6)
+        plt.ylim(0, 0.5)
 
-    plt.ylim(0, 0.6)
+    plt.ylim(0, 0.5)
     plt.xlim(wing_loading_Npm2[0], 4000)
+    plt.xticks(np.arange(wing_loading_Npm2[0], 4001, 500), fontsize=14)
+    plt.yticks(np.arange(0, 0.51, 0.05), fontsize=14)
     plt.tight_layout(w_pad=0.5)
     plt.savefig("Figures/Performance Diagrams/TW_WS_Diagram.pdf")
     print("\nPerformance Diagram saved as TW_WS_Diagram.pdf")
@@ -336,12 +338,12 @@ def run_performance_diagram(params: DesignParameters) -> dict: # Alejandro, adde
         constraints_list_pd.append({'label': f'Take-Off Distance $S_{{TO}}$ @ $(C_L)_{{max}} = {clmax_to}$', 'T_W_values': tw_to, 'style': '-'})
 
     # 3. Landing
-    ws_land_18 = None
-    for clmax_l in [1.8, 2.1, C_Lmax_l_cfg_base]: # C_Lmax_l_cfg_base is 2.4 from P12 example
+    ws_land_20 = None
+    for clmax_l in [2.0, 2.2, C_Lmax_l_cfg_base]: # C_Lmax_l_cfg_base is 2.4 from P12 example
         ws_land = constraint_landing_distance_pd(W_S_range_Npm2_pd, S_L_req_m_pd, clmax_l, W_L_over_W_TO_uav_pd, rho_SL_pd, "CS25")
         constraints_list_pd.append({'label': f'Landing Distance $S_L$ @ $(C_L)_{{max}} = {clmax_l}$', 'W_S_max': ws_land, 'style': '--'})
-        if clmax_l == 1.8:
-            ws_land_18 = ws_land
+        if clmax_l == 2.0:
+            ws_land_20 = ws_land
 
     # 4. Cruise Speed
     tw_cruise = constraint_cruise_speed_uav_pd(W_S_range_Npm2_pd, cruise_V_ms_pd, cruise_alt_m_pd, C_D0_cruise_cfg, e_cruise_cfg, uav_A_perf, cruise_W_frac_pd, cruise_thrust_setting_pd)
@@ -351,9 +353,9 @@ def run_performance_diagram(params: DesignParameters) -> dict: # Alejandro, adde
     tw_roc = constraint_climb_rate_uav_pd(W_S_range_Npm2_pd, climb_rate_req_ms_pd, climb_rate_alt_m_pd, C_D0_cruise_cfg, e_cruise_cfg, uav_A_perf, W_climb_frac_W_TO=climb_rate_W_frac_pd)
     constraints_list_pd.append({'label': f'Rate of Climb c (AEO)', 'T_W_values': tw_roc, 'style': '-'})
 
-    # --- Find intersection of rate of climb curve and landing distance (clmax=1.8) ---
-    if ws_land_18 is not None:
-        idx_land = np.argmin(np.abs(W_S_range_Npm2_pd - ws_land_18))
+    # --- Find intersection of rate of climb curve and landing distance (clmax=2.0) ---
+    if ws_land_20 is not None:
+        idx_land = np.argmin(np.abs(W_S_range_Npm2_pd - ws_land_20))
         ws_intersect = W_S_range_Npm2_pd[idx_land]
         tw_intersect = tw_roc[idx_land]
         ws_intersect_rounded = int(round(ws_intersect, -2))

@@ -439,31 +439,6 @@ def run_initial_weight_estimations(params: DesignParameters) -> dict:
 
     results = class1_weight_estimation(uav_aircraft_params, uav_mission_params, uav_reserve_params, verbose=False)
 
-    # if uav_results:
-    #     W_P_max = uav_mission_params["W_PL_N"] 
-    #     W_F_max = uav_results["W_F_total_N"] 
-
-    #     pr_mission_config = {"V_cruise_ms": uav_mission_params["V_cruise_ms"],
-    #                          "R_cruise1_m": uav_mission_params["R_cruise1_m"]}
-
-    #     pr_data = calculate_payload_range_points(
-    #         uav_results,
-    #         uav_aircraft_params,
-    #         pr_mission_config,
-    #         W_P_max_structural_N = W_P_max,
-    #         W_F_max_capacity_N = W_F_max,
-    #     )
-    #     plot_payload_range_diagram(pr_data, export_path="Figures/Performance Diagrams/payload_range_diagram.pdf")
-
-        # ranges_to_test_km = [6000, 6500, 7000, 7500, 8000, 8500]
-        # ranges_to_test_m = [km_to_m(r) for r in ranges_to_test_km]
-        
-        # sensitivity_results = perform_sensitivity_study(
-        #     uav_aircraft_params, uav_mission_params, uav_reserve_params,
-        #     param_to_vary="mission_params.R_cruise1_m",
-        #     values_to_test=ranges_to_test_m
-        # )
-
     return results
 
 
