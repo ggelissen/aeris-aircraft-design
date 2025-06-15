@@ -153,7 +153,7 @@ class WeightParameters:
         self.W_TO = 37807.7                         # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
         self.W_OE = 16352.775                         # Operational Empty Weight (OEW) in N
-        self.W_F = 15570.915                          # Total Fuel weight in N
+        self.W_F = 13855.661                          # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 2562.814                             # Wing Loading in N/m^2
@@ -162,7 +162,7 @@ class WeightParameters:
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # 0.001 on the initial sizing script!! Maximum Trapped Fuel and Oil Fraction TODO, why is this here? Does it need to be accounted? Though it is just part of OEW? This is not contingency fuel, value yes, but not the description
         self.W_tfo = 1890.384                           # Trapped Fuel and Oil Fraction
-        self.W_F_used = 12594.544                        # Used Fuel Weight in N
+        self.W_F_used = 10879.29                     # Used Fuel Weight in N
         self.W_F_res = 2976.371                         # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
         self.W_fus = None                           # Fuselage weight in N
@@ -543,7 +543,7 @@ class EngineParameters:
         self.tt4cruise = 1200
         self.tt4descent = 900
         self.tt4landing = 1000
-        self.lhv = 44.2e6
+        self.lhv = 43.e6
         self.etafan = 0.915
         self.etalpc = 0.9
         self.etahpc = 0.9

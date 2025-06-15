@@ -38,7 +38,7 @@ def perform_class_I_analysis(params: DesignParameters) -> dict:
     print("\n3. Wing Preliminary Sizing...")
     results_wing_sizing = run_preliminary_sizing_wing(params)
     
-    print("\n4. Fuselage Preliminary Sizing...")
+    print("\n4. Fuselage Preliminary Sizing...") # Empty function, and will remain empty, done in class II
     results_fuselage_sizing = run_preliminary_sizing_fuselage(params)
 
     # Combine all results

@@ -605,9 +605,9 @@ def run_mission_simulation(params: DesignParameters):
         },
         {
             "name": "Loiter (2 hours)", "duration_minutes": 120,
-            "target_thrust_N": 800, # Estimated for loiter
+            "target_thrust_N": 1000, # Estimated for loiter
             "flight_conditions": {"mach_0": 0.25, "ts_0": 285.2, "ps_0": 95970}, # 1500ft
-            "engine_params_override": {"tt_4": 880},
+            "engine_params_override": {"tt_4": 950},
             "ei_nox": 0.005
         },
         {
