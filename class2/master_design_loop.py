@@ -29,7 +29,7 @@ from class1.main_class_I import perform_class_I_analysis
 from class2.class_II_wing_sizing import optimize_wing_for_fuel_burn
 
 # Import Class II modules
-from class2.main_class_II_current_missing_param_updates import perform_class_II_analysis
+from class2.main_class_II import perform_class_II_analysis
 
 # Import utilities
 from utils.unit_conversions import *
