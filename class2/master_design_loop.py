@@ -614,7 +614,7 @@ def print_final_design_summary(params: DesignParameters) -> None:
     
     print(f"\n🎯 AIRCRAFT WEIGHTS:")
     print(f"    Take-off Weight (W_TO):     {params.weight.W_TO:.0f} N ({N_to_kg(params.weight.W_TO):.0f} kg)")
-    print(f"    Empty Weight (W_E):         {params.weight.W_E if params.weight.W_E else 'N/A'}")
+    #print(f"    Empty Weight (W_E):         {params.weight.W_E if params.weight.W_E else 'N/A'}")
     print(f"    Operating Empty (W_OE):     {params.weight.W_OE:.0f} N")
     print(f"    Fuel Weight (W_F):          {params.weight.W_F:.0f} N")
     print(f"    Payload Weight (W_PL):      {params.weight.W_PL:.0f} N")

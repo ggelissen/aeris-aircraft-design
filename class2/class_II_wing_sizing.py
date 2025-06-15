@@ -307,7 +307,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
             params.wing.S_w = S_w  # Update wing area
             # Check wing loading constraint first (quick elimination)
             wing_loading = W_TO_baseline / S_w
-            if wing_loading < 1500 or wing_loading > 1.2*params.weight.W_S:  # N/m² - reasonable bounds
+            if wing_loading < 1500 or wing_loading > 1.25*params.weight.W_S:  # N/m² - reasonable bounds
                 continue
             # CALCULATE C_L_DESIGN BEFORE DELTA METHOD CALL
             # Using baseline fuel fractions and trial S_w
