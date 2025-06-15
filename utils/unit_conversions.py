@@ -61,6 +61,12 @@ def kts_to_ms(knots):
     """
     return knots * 0.514444
 
+def ms_to_kts(meters_per_second):
+    """
+    Convert meters per second to knots.
+    """
+    return meters_per_second / 0.514444
+
 def psf_to_Npm2(psf):
     """
     Convert pounds per square foot to Newtons per square meter.
