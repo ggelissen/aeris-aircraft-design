@@ -25,6 +25,10 @@ def ms_to_kmh(speed_ms):
     """Converts m/s to km/h."""
     return speed_ms * 3.6
 
+def kmh_to_kts(speed_kmh):
+    """Converts km/h to knots."""
+    return speed_kmh / 1.852
+
 def min_to_s(time_min):
     """Converts minutes to seconds."""
     return time_min * 60
