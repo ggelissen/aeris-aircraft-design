@@ -204,7 +204,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         if W_F_total_N <= 0 or W_F_total_N > W_TO_adjusted * 0.8:
             return 1e6  # High penalty for unrealistic fuel weight
         
-        return W_F_total_N
+        return W_F_total_N, L_D_cruise, M_ff_total
         
     except Exception as e:
         print(f"    ⚠️  Fuel burn calculation failed: {e}")
@@ -301,24 +301,24 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
             params.wing.S_w = S_w  # Update wing area
             # Check wing loading constraint first (quick elimination)
             wing_loading = W_TO_baseline / S_w
-            if wing_loading < 1500 or wing_loading > 4000:  # N/m² - reasonable bounds
+            if wing_loading < 1500 or wing_loading > params.weight.W_S:  # N/m² - reasonable bounds
                 continue
-                
+            # CALCULATE C_L_DESIGN BEFORE DELTA METHOD CALL
+            # Using baseline fuel fractions and trial S_w
+            W_start_cruise = W_TO_baseline * fuel_fraction_before_cruise
+            W_end_cruise = W_start_cruise * baseline_cruise_fuel_fraction
+            # print(f" Using fuel fractions: "
+            #       f"before cruise = {fuel_fraction_before_cruise:.3f}, "
+            #       f"cruise = {baseline_cruise_fuel_fraction:.3f}")
+            # Your formula for C_L_design:
+            W_S_start_cruise = W_start_cruise / S_w
+            W_S_end_cruise = W_end_cruise / S_w  
+            C_L_design = 1.1 * 0.5 * (W_S_start_cruise + W_S_end_cruise) / q_cruise # From ADSEE II, TODO, document safety factor.
+            
             for sweep_deg in sweep_deg_range:
                 params.wing.Lambda_025c_w = np.deg2rad(sweep_deg)
                 
-                # CALCULATE C_L_DESIGN BEFORE DELTA METHOD CALL
-                # Using baseline fuel fractions and trial S_w
-                W_start_cruise = W_TO_baseline * fuel_fraction_before_cruise
-                W_end_cruise = W_start_cruise * baseline_cruise_fuel_fraction
-                # print(f" Using fuel fractions: "
-                #       f"before cruise = {fuel_fraction_before_cruise:.3f}, "
-                #       f"cruise = {baseline_cruise_fuel_fraction:.3f}")
-                # Your formula for C_L_design:
-                W_S_start_cruise = W_start_cruise / S_w
-                W_S_end_cruise = W_end_cruise / S_w  
-                C_L_design = 1.1 * 0.5 * (W_S_start_cruise + W_S_end_cruise) / q_cruise # From ADSEE II, TODO, document safety factor.
-                
+
                 # print(f" C_L_design (before delta method) = {C_L_design:.3f} ")
                 # Correction for sweep, no longer doing it as the delta method takes in airfoil Cl directly, not section Cl, or aifoil Cl
                 #C_L_design_corrected = C_L_design / np.cos(np.deg2rad(sweep_deg))**2  
@@ -347,15 +347,12 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     #     calculate_loiter_fuel_fraction_jet
                     # )
                     # from class1.initial_weight_estimations import calculate_L_D_loiter
-                    fuel_weight = calculate_fuel_burn_penalty(
+                    fuel_weight, L_D_opt, M_ff_opt = calculate_fuel_burn_penalty(
                         A_w, S_w, sweep_deg, t_c, params, W_TO_baseline
                     )
                     successful_evaluations += 1
                     
                     if fuel_weight < best_fuel_weight:
-                        L_D_opt = calculate_L_D_cruise_jet(
-                            baseline_CD0, A_w * 1.15, e_oswald
-                        )
                         # L_D_loiter = calculate_L_D_loiter(
                         #     baseline_CD0,  A_w * 1.15, e_oswald)
 
@@ -391,7 +388,8 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                             'wing_loading_optimal': W_TO_baseline / S_w,
                             'fuel_fraction_optimal': fuel_weight / W_TO_baseline,
                             'C_L_design_optimal': C_L_design,
-                            'L_D_optimal': L_D_opt
+                            'L_D_optimal': L_D_opt,
+                            'M_ff_optimal': M_ff_opt,
                         }
                         
                         #print(f"    New best: A_w={A_w:.1f}, S_w={S_w:.1f}m², sweep={sweep_deg:.1f}°")
