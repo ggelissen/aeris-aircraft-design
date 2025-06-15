@@ -64,6 +64,8 @@ def calculate_propulsion_system_weight(params: DesignParameters):
         'propulsion_system_weight_kg': W_prop_sys_kg,
         'engine_weight_kg': We_kg,
         'fuel_system_weight_kg': W_fs_kg,
+        'engine_control_weight_kg': W_ec * lbs_to_kg,
+        'engine_starter_weight_kg': W_ess * lbs_to_kg,
         'nacelle_weight_kg': W_nacelle_kg,
         'electrical_system_weight_kg': W_electrical
     }
