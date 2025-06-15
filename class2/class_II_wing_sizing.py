@@ -334,7 +334,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                 
                 # Check t/c ratio
                 if t_c < 0.05 or t_c > 0.20:  # Reasonable bounds for UAV wing
-                    #print(f"    ❌ Skipping configuration: A_w={A_w:.1f}, S_w={S_w:.1f} m², "
+                    #print(f"    Skipping configuration: A_w={A_w:.1f}, S_w={S_w:.1f} m², "
                     #      f"sweep={sweep_deg:.1f}°, t/c={t_c:.3f} (out of bounds), C_L_design={C_L_design_corrected:.3f}")
                     continue  # Skip this configuration, move on to next! 
 
@@ -418,7 +418,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
         S_w_opt = best_params['S_w_optimal']
         b_w_opt = math.sqrt(A_w_opt * S_w_opt)
         Lambda_025c_opt = np.deg2rad(best_params['sweep_deg_optimal'])
-        
+        W_s_optimal = best_params['wing_loading_optimal']
         # Add complete geometry to results using existing functions
         taper_ratio_opt = psw.calculate_taper_ratio(Lambda_025c_opt)
         c_root_opt, c_tip_opt = psw.calculate_chord_lengths(S_w_opt, b_w_opt, taper_ratio_opt)
@@ -438,7 +438,8 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
             'tip_chord_optimal': c_tip_opt,
             'MAC_optimal': MAC_opt,
             'y_LEMAC_optimal': y_LEMAC_opt,
-            'dihedral_optimal': dihedral_opt
+            'dihedral_optimal': dihedral_opt,
+            'W_S_optimal': W_s_optimal,
         })
         
     else:
