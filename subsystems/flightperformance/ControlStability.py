@@ -372,7 +372,13 @@ class Control:
         
         #self.scissor_plot(True)
         #self.calculate_range(OEW, Wpayload, Xpayload, Wfuel, Wwing, Wfuselage, Xfuselage, False)
-        return self.x_ac, result["Sh/S"], self.x_lemac_lfus, self.lh
+        result = {
+            "x_ac": self.x_ac,
+            "Sh/S": result["Sh/S"],
+            "x_lemac/l_fus": self.x_lemac_lfus,
+            "lh": self.lh
+        }
+        return result
             
         
 
@@ -389,24 +395,24 @@ def run_control_stability(params: DesignParameters): # pragma: no cover
         CLah=params.empennage.Cl_alpha,
         CLaA_h=params.wing.airfoil_clalpha,
         de_da=params.wing.de_da,
-        lh=params.fuselage.lh,
         mac=params.wing.mac,
         Vh_V=params.empennage.Vh_v,
-        x_ac=params.fuselage.x_ac,
         CLh=params.empennage.CL_h,
         CLA_h=params.wing.CL,
-        C_m_ac=params.fuselage.C_m_ac
+        C_m_ac=params.fuselage.C_m_ac,
+        l_fus=params.fuselage.l_f,
+        x_lemac=params.fuselage.x_ac -params.wing.mac/4
     )
     
     # Example usage of calculate_range method
-    results = control.calculate_range(
-        W_OEW=params.weight.W_OE,
-        W_payload=params.weight.W_PL,
-        X_payload=params.fuselage.x_payload,
-        W_fuel=params.weight.W_F,
-        W_wing=params.weight.W_wing,
-        W_fuselage=params.weight.W_fus,
-        X_fuselage=params.fuselage.x_fuselage
+    results = control.scissor_loop(
+        OEW=params.weight.W_OE,
+        Wpayload=[params.weight.W_PL],
+        Xpayload=[params.fuselage.x_payload],
+        Wfuel=[params.weight.W_F],
+        Wwing=params.weight.W_wing,
+        Wfuselage=params.weight.W_fus,
+        Xfuselage=params.cg.x_cg_fuselage
     )
 
     return results
