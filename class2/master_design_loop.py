@@ -14,7 +14,8 @@ import os
 import sys
 import time
 from typing import Dict, Tuple, List
-
+import matplotlib
+matplotlib.use('Agg')
 # Add project paths
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

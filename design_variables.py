@@ -373,7 +373,7 @@ class WingParameters:
         self.wingribs = Wingribs(parent)  # Wing ribs parameters, such as thickness, are stored here
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
-        self.yehudi_area = 7.0 # Yehudi area m2
+        self.yehudi_area = 4.0 # Yehudi area m2
         self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4) # First two span, second one chord
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]

@@ -5,6 +5,7 @@ import subprocess
 import os
 import numpy as np
 import shutil
+from class2.master_design_loop import *
 
 # RUN IN DOCKER: https://hub.docker.com/r/lhuirne/dsewithaero . Use launch.json (ask google what that means)
 
@@ -278,8 +279,7 @@ def vfp_analysis(designvars : DesignParameters = None):
 
 
 if __name__ == '__main__':
-    AERIS = DesignParameters()
-    AERIS.load_from_yaml("design_config.yaml")
+    AERIS = master_design_process("design_config.yaml")[0]
     struct_main(AERIS, show_3d=False)
     #aerodynamic_analysis(AERIS)
     vfp_analysis(AERIS)
