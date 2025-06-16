@@ -33,6 +33,9 @@ def parse_case_name(case_name):
         if match:
             wing_id, mach_id, alpha_id, re_id = match.groups()
             
+            # Extract Mach number
+            mach_val = float(mach_id[1:]) / 100  # Convert m025 to 0.25
+            
             # Handle alpha values with improved parsing
             alpha_val = None
             if alpha_id.startswith('am'):  # Negative angles
@@ -45,6 +48,7 @@ def parse_case_name(case_name):
             return {
                 "wing_id": wing_id,
                 "mach_id": mach_id,
+                "mach_val": mach_val,
                 "alpha_id": alpha_id,
                 "re_id": re_id,
                 "alpha_val": alpha_val,
@@ -170,7 +174,7 @@ plt.rcParams.update({
     'lines.linewidth': 1.5
 })
 
-def plot_spanwise_loading(wing_name, all_case_data):
+def plot_spanwise_loading(wing_name, all_case_data, mach_number):
     """
     Generates and displays plots from a dictionary of NumPy arrays.
     """
@@ -183,14 +187,14 @@ def plot_spanwise_loading(wing_name, all_case_data):
     colors = sns.color_palette("colorblind", n_colors)
     
     fig, axes = plt.subplots(3, 1, figsize=(10, 12))
-    fig.suptitle(f'Spanwise Loading Distributions\n{wing_name.upper()}', 
+    fig.suptitle(f'Spanwise Loading Distributions\nWing Case: {wing_name.upper()}, M = {mach_number:.3f}', 
                  fontsize=16, y=0.95, fontweight='bold')
     
     # Sort cases by alpha value
     sorted_cases = sorted(all_case_data.items())
 
     for i, (alpha, data_array) in enumerate(sorted_cases):
-        label = f'α = {alpha:+.1f}°'
+        label = f'alpha = {alpha:+.1f}°'
         color = colors[i]
         
         y_s = data_array[:, 0]
@@ -253,14 +257,14 @@ def plot_spanwise_loading(wing_name, all_case_data):
 
     # plt.show()
 
-def plot_aero_curves(wing_name, all_case_data):
+def plot_aero_curves(wing_name, all_case_data, mach_number):
     """Plots lift curve, moment curve, and drag polar."""
     if not all_case_data:
         print("No data to plot.")
         return
     
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
-    fig.suptitle(f'Aerodynamic Characteristics\n{wing_name.upper()}', 
+    fig.suptitle(f'Aerodynamic Characteristics\nWing Case: {wing_name.upper()}, M = {mach_number:.3f}', 
                  fontsize=16, y=1.05, fontweight='bold')
     
     # Extract data for plotting
@@ -331,11 +335,15 @@ if __name__ == "__main__":
         print(f"Analyzing results for wing: {wing_name_to_plot}")
         
         all_case_numpy_data = {}
+        mach_number = None  # Will store the Mach number from the first valid case
+        
         for item in os.listdir(wing_results_dir):
             item_path = os.path.join(wing_results_dir, item)
             if os.path.isdir(item_path) and item not in ["geometry_master", "ANALYSIS_RESULTS"]:
                 case_data = parse_case_name(item)
                 if case_data:
+                    if mach_number is None:
+                        mach_number = case_data['mach_val']
                     forces_file_path = os.path.join(item_path, f"{case_data['full_name']}.forces")
                     if os.path.exists(forces_file_path):
                         numpy_data = parse_forces_file_to_numpy(forces_file_path)
@@ -372,8 +380,8 @@ if __name__ == "__main__":
                                 all_case_forces[case_data['alpha_val']] = forces
             
             # Generate both sets of plots
-            plot_spanwise_loading(wing_name_to_plot, all_case_numpy_data)
-            plot_aero_curves(wing_name_to_plot, all_case_forces)
+            plot_spanwise_loading(wing_name_to_plot, all_case_numpy_data, mach_number)
+            plot_aero_curves(wing_name_to_plot, all_case_forces, mach_number)
         
         else:
             print("\n❌ No valid .forces files were found to plot.")
