@@ -167,7 +167,7 @@ class WeightParameters:
         self.W_F_res = 1379.7765        # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
         self.W_fus = None                           # Fuselage weight in N
-        self.W_wing = 3000                          # Wing weight in N
+        self.W_wing = 1665.24                         # Wing weight in N
 
 
     def load_from_dict(self, param_dict):
