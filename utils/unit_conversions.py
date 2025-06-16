@@ -89,6 +89,24 @@ def lbf_to_N(weight_lbf):
     """
     return weight_lbf * 4.44822
 
+def Pa_to_lbf_ft2(pressure_Pa: float) -> float:
+    """
+    Convert dynamic pressure from Pascals (N/m²) to pounds per square foot (lbf/ft²).
+    
+    Parameters:
+    pressure_Pa (float): Pressure in Pascals (Pa)
+    
+    Returns:
+    float: Pressure in lbf/ft²
+    
+    Conversion factors:
+    1 Pa = 1 N/m²
+    1 lbf = 4.44822 N
+    1 m² = 10.764 ft²
+    Therefore: 1 Pa = 0.02089 lbf/ft²
+    """
+    return pressure_Pa * 0.020885434273039
+
 def m2_to_ft2(area_m2):
     """
     Convert square meters to square feet.
