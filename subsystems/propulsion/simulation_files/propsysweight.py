@@ -56,7 +56,7 @@ def calculate_propulsion_system_weight(params: DesignParameters):
     #print nacelle weight
     print(f"Nacelle Weight: {W_nacelle:.2f} lbs / {W_nacelle_kg:.2f} kg")
 
-    W_electrical = 140 # kg, electrical system weight
+    W_electrical = 149 # kg, electrical system weight
     W_electrical_lbs = W_electrical * kg_to_lbs  # convert to lbs
     print(f"Electrical System Weight: {W_electrical_lbs:.2f} lbs / {W_electrical:.2f} kg")
 
