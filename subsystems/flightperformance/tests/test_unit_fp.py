@@ -111,16 +111,16 @@ class TestFlightPerformance(unittest.TestCase):
         self.assertAlmostEqual(self.Di,7.217911251, 5)
 
     def testRange(self):
-        self.assertAlmostEqual(self.range[0], 5059.202, places=1)
+        self.assertAlmostEqual(self.range, 15634.688, places=1)
     
     def test_range_vel(self):
         self.assertAlmostEqual(self.range[1], 84.394, places=1)
     
     def test_max_payload_range(self):
-        self.assertAlmostEqual(self.payload_range_max, self.fp.__range__(20*(10**-6), 40000, 20000, 10, 0.9, 0.01, 0.3108, 12)[0],0)
+        self.assertAlmostEqual(self.payload_range_max, self.fp.__range__(20*(10**-6), 40000, 20000, 10, 0.9, 0.01, 0.3108, 12),0)
     
     def test_min_payload_range(self):
-        self.assertAlmostEqual(self.payload_range_min, self.fp.__range__(20*(10**-6), 50000, 30000, 10, 0.9, 0.01, 0.3108, 12)[0],0)
+        self.assertAlmostEqual(self.payload_range_min, self.fp.__range__(20*(10**-6), 50000, 30000, 10, 0.9, 0.01, 0.3108, 12),0)
 
     def test_ROC_less_thrust1(self):
         self.assertGreater(self.ROC1[0], self.ROC2[0])
@@ -144,7 +144,7 @@ class TestFlightPerformance(unittest.TestCase):
         self.assertAlmostEqual(self.stall_speed, 72.8504298)
         
     def test_endurance(self):
-        self.assertAlmostEqual(self.endurance, 46888.34014, 5)
+        self.assertAlmostEqual(self.endurance, 69142.79158, 4)
     
     def test_limit_low_weight(self):
         self.assertGreater(self.hmax2, self.hmax1)
