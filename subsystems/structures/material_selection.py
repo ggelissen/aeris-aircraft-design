@@ -252,7 +252,9 @@ def run_material_selection_analysis(designvars: DesignParameters):
 
 
     for t_skin in t_skin_lst:
+        print("im here")
         for t_spar in t_spar_lst:
+            print("im here")
             if t_skin > t_spar:
                 print(f"Skipping: t_skin ({t_skin:.3f} m) > t_spar ({t_spar:.3f} m)")
                 continue
@@ -260,6 +262,7 @@ def run_material_selection_analysis(designvars: DesignParameters):
             tau_max_lst = np.array([])
             panel_areas_lst = np.array([])
             for i in range(len(span_lst)):
+                
                 panel_lengths, enclosed_area = calculate_panel_lengths_and_enclosed_area(x_coords[i], y_coords[i])
                 panel_areas = np.array([panel_lengths[0] * t_skin, panel_lengths[1] * t_spar, panel_lengths[2] * t_skin, panel_lengths[3] * t_spar])
                 panel_angles = calculate_panel_angles(x_coords[i], y_coords[i])
