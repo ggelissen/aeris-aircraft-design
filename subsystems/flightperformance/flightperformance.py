@@ -68,7 +68,8 @@ class FlightPerformance:
         
         
         if plot: # pragma: no cover
-            plt.plot(range, (Wpayload)/9.81)
+            plt.plot(range, (Wpayload)/9.81, color="blue")
+            plt.plot(np.arange(0, min(range)), len(np.arange(0, min(range)))*[max(Wpayload)/9.81], color="blue")
             plt.xlabel("range [km]")
             plt.ylabel("payload [kg]")
             plt.show()
@@ -278,7 +279,7 @@ if __name__ == "__main__": # pragma: no cover
     
     #print(FlightPerformance().__range__(200, 0.00020, 4000*9.81, 3000*9.81, 12, 0.85, 0.017))
     
-    #FlightPerformance().payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
+    FlightPerformance().payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
     #endurance = FlightPerformance().endurance(12000, 35000, 0.017, 10, 0.88, 14*(10**-6))
     #print(endurance)
     
@@ -287,6 +288,6 @@ if __name__ == "__main__": # pragma: no cover
     #print(FlightPerformance().performance_limit(35000, 15, 1.6, 7000, 0.017, 12, 0.88, True))
 
     #print(FlightPerformance().stall_speed(35000, 15, 1.225, 1.6))
-    FlightSim().ground_run2(7000, 35000/9.81, 15, 0.017, 12, 0.88, 14, 1.6, 1800)
+    #FlightSim().ground_run2(7000, 35000/9.81, 15, 0.017, 12, 0.88, 14, 1.6, 1800)
         
         
