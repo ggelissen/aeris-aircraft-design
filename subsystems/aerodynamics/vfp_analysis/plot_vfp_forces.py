@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from vfp_sweep import wing_name
+from vfp_aoa_sweep import wing_name
 
 # ==============================================================================
 # 1. DEFINE PLOTTING PARAMETERS
@@ -13,7 +13,7 @@ from vfp_sweep import wing_name
 
 # --- Main Control ---
 # Specify the name of the wing you want to plot the results for.
-wing_name_to_plot = "w11-multi-airfoil"  # Reference the wing name from vfp_sweep.py
+wing_name_to_plot = "w14"  # Reference the wing name from vfp_sweep.py
 
 # --- Plotting Options ---
 save_plots = True # Set to True to save the plots as image files
@@ -26,8 +26,8 @@ plot_file_format = 'png' # 'png', 'pdf', 'svg', etc.
 def parse_case_name(case_name):
     """Parses a run folder name to extract wing_name, mach, alpha, and re identifiers."""
     try:
-        # Updated pattern to handle underscores between components
-        pattern = r"(.+?)_(m\d+(?:\.\d+)?)_(a[m]?\d+(?:_?\d+)?(?:p\d+)?)_(re\d+(?:m\d+)?)"
+        # Updated pattern to handle optional underscores between components and enforce full string match
+        pattern = r"^(.+?)_?(m\d+(?:\.\d+)?)_?(a[m]?\d+(?:_?\d+)?(?:p\d+)?)_?(re\d+(?:m\d+)?)$"
         match = re.match(pattern, case_name)
         
         if match:
@@ -242,8 +242,12 @@ def plot_spanwise_loading(wing_name, all_case_data):
     plt.tight_layout(rect=[0, 0, 0.9, 0.95])
     
     if save_plots:
-        save_path = os.path.join(os.getcwd(), "results", wing_name, 
-                                f"{wing_name}_spanwise_plots.{plot_file_format}")
+        # Create directory if it doesn't exist
+        script_root = os.path.dirname(os.path.abspath(__file__))
+        save_dir = os.path.join(script_root, "results", wing_name)
+        os.makedirs(save_dir, exist_ok=True)
+        
+        save_path = os.path.join(save_dir, f"{wing_name}_spanwise_plots.{plot_file_format}")
         plt.savefig(save_path, bbox_inches='tight', dpi=300)
         print(f"\nPlots saved to: {save_path}")
 
@@ -303,8 +307,12 @@ def plot_aero_curves(wing_name, all_case_data):
     plt.tight_layout()
     
     if save_plots:
-        save_path = os.path.join(os.getcwd(), "results", wing_name, 
-                                f"{wing_name}_aero_curves.{plot_file_format}")
+        # Create directory if it doesn't exist
+        script_root = os.path.dirname(os.path.abspath(__file__))
+        save_dir = os.path.join(script_root, "results", wing_name)
+        os.makedirs(save_dir, exist_ok=True)
+        
+        save_path = os.path.join(save_dir, f"{wing_name}_aero_curves.{plot_file_format}")
         plt.savefig(save_path, bbox_inches='tight', dpi=300)
         print(f"Aero curves saved to: {save_path}")
 

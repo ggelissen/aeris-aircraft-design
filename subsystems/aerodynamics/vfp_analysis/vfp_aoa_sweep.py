@@ -6,7 +6,7 @@ import shutil
 # 1. DEFINE SIMULATION PARAMETERS
 # ==============================================================================
 # --- Main Simulation Control ---
-wing_name = "w13" # Base name for the wing
+wing_name = "w14" # Base name for the wing
 fpcon_source_dir = os.path.join(os.path.dirname(__file__), "vpwin_fpv20")
 vfp_source_dir = os.path.join(os.path.dirname(__file__), "vpwin_vfphv20")
 # Directory where your airfoil .DAT files are stored
@@ -45,9 +45,9 @@ NSECT1 = 2
 #   'twsin': Twist angle in degrees (positive is nose-up).
 #   'airfoil': The filename of the airfoil .DAT file for this section.
 section_data = [
-    {'etas': 0.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 3.0, 'airfoil': 'sc20712.dat'},
-    {'etas': 0.4, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 1.0, 'airfoil': 'sc20712.dat'},
-    {'etas': 1.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 0.0, 'airfoil': 'sc20712.dat'},
+    {'etas': 0.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 4.0, 'airfoil': '0412vgk.dat'},
+    {'etas': 0.4, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 2.0, 'airfoil': '0412vgk.dat'},
+    {'etas': 1.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 0.0, 'airfoil': '0412vgk.dat'},
 ]
 
 # --- Fuselage Parameters ---
