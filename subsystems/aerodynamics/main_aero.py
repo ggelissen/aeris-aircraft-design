@@ -226,6 +226,57 @@ def parasite_drag_2D(designvars : DesignParameters = None):
     # Placeholder for 2D airfoil data calculation
     return 0
 
+def vfp_analysis(designvars : DesignParameters = None):
+    """
+    Perform VFP analysis using the provided design parameters.
+    Begins by run_vfp_mach_alpha_sweep.py for vfp simulation
+    Then plot_vfp_forces.py to obtain loading distribution.
+
+    Inputs:     A_g, crank_c0_taper_ratio, tip_c0_taper_ratio, 
+                eta_sc, Lambda_lei, Lambda_leo, 
+                body_radius, fuselage_length, forebody_length,
+                aftbody_length, wing_root_le_pos
+    
+    Outputs:    mach_data (Dict of format {mach_number: {alpha: numpy_data}})
+                numpy_data (array([[y_pos, cl, cd_wake, cd_te, cm], ...]))
+    """
+
+    from vfp_analysis import run_vfp_mach_alpha_sweep as vfp_sweep
+
+    vfp_sweep.alpha_sweep = [0.0, 0.5, 1.0, 1.25, 1.5, 1.75]   # Angle of attack sweep in degrees
+    vfp_sweep.start_mach = 0.70       # The stable Mach number to begin the sweep from.
+    vfp_sweep.end_mach = 0.85         # The final target Mach number.
+    vfp_sweep.mach_increment = 0.02   # The step size for the Mach sweep.
+
+    vfp_sweep.A_g = vsp.GetParmVal(designvars.wing.wingid, 'TotalAR', 'WingGeom')  # Aspect ratio of the wing
+    vfp_sweep.tip_c0_taper_ratio = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))  # Taper ratio at the wingtip
+    vfp_sweep.crank_c0_taper_ratio = {vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),2), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))}
+    vfp_sweep.eta_sc = vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') / (vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') + vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_2'))
+    
+    root_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))
+    
+    # Fuselage parameters in terms of the root chord
+    vfp_sweep.body_radius = (designvars.fuselage.D_f / 2)/root_chord
+    vfp_sweep.fuselage_length = vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/root_chord
+    vfp_sweep.fore_body_length = vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_1')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/root_chord
+    vfp_sweep.aft_body_length = vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/root_chord - vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_3')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/root_chord
+    vfp_sweep.wing_root_le_pos = (designvars.wing.xpos - np.tan(designvars.wing.Lambda_0_w) * designvars.fuselage.D_f/2)/root_chord
+    
+    vfp_sweep.Lambda_lei = vsp.GetParmVal(designvars.wing.wingid, 'Lambda_0_w')  # Leading edge sweep angle at the root
+    vfp_sweep.Lambda_leo = vfp_sweep.Lambda_lei # Assuming the leading edge sweep angle at the tip is the same as at the root for simplicity
+
+    wing_name = 'WingA'
+    # Pass above parameters to run_vfp_mach_alpha_sweep.py
+    vfp_sweep.run_simulation()
+
+    # And then run plot_vfp_forces.py to obtain loading distribution
+    from vfp_analysis import plot_vfp_forces
+    plot_vfp_forces.wing_name_to_plot = wing_name   # Override the default wing name.
+    plot_vfp_forces.run_plots()   # Run the plotting routine
+
+    return 0
+
+
 if __name__ == '__main__':
     AERIS = DesignParameters()
     AERIS.load_from_yaml("design_config.yaml")
