@@ -53,28 +53,28 @@ class TestISA(unittest.TestCase):
 
 class TestStability(unittest.TestCase):
     def setUp(self):
-        control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=2, Vh_V=1, x_ac=0.55, CLh=-2, CLA_h=0.6, C_m_ac=-0.5)
-        control2 = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=2, Vh_V=1, x_ac=0.55, CLh=-2, CLA_h=0.7, C_m_ac=-0.5)
-        control3 = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=6, mac=2, Vh_V=1, x_ac=0.55, CLh=-2, CLA_h=0.6, C_m_ac=-0.5)
+        control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=2, Vh_V=1, CLh=-2, CLA_h=0.6, C_m_ac=-0.5, x_lemac=6, l_fus=12)
+        control2 = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=2, Vh_V=1, CLh=-2, CLA_h=0.7, C_m_ac=-0.5, x_lemac=6, l_fus=12)
+        control3 = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=2, Vh_V=1, CLh=-2, CLA_h=0.6, C_m_ac=-0.5, x_lemac=6, l_fus=15)
         self.ShS_stable = control.__stability_curve__(0.5)
         self.ShS_control = control.__control_curve__(0.5)
         self.xcg = control.__calculate_X_stability__(0.2)
         self.xcg_oew = control.xcg_OEW_estimation(1000, 0.5, 1000, 0.5)
         self.cg_min, self.cg_max = control.cg_range(2500, 0.65, [100, 500], [0.8, 0.1], [800, 200], [0.65, 0.8])
-        self.cg_range1 = control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[0.3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=0.7)
-        self.cg_range2 = control2.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[0.3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=0.7)
-        self.cg_range3 = control3.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[0.3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=0.7)
-        self.cg_range4 = control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[0.7], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=0.7)
+        self.cg_range1 = control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=7)
+        self.cg_range2 = control2.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=7)
+        self.cg_range3 = control3.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=7)
+        self.cg_range4 = control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[7], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=7)
         plt.close('all')
         
     def testcontrol(self):
-        self.assertAlmostEqual(self.ShS_control, 53/500)
+        self.assertAlmostEqual(self.ShS_control, 0.063636363)
 
     def teststability(self):
-        self.assertAlmostEqual(self.ShS_stable, 0.0)
+        self.assertAlmostEqual(self.ShS_stable, 0.12121212)
 
     def test_cg_mac(self):
-        self.assertEqual(self.xcg, 19/20)
+        self.assertAlmostEqual(self.xcg, 0.695)
 
     def test_cg_oew(self):
         self.assertEqual(self.xcg_oew, 1/2)
@@ -86,7 +86,7 @@ class TestStability(unittest.TestCase):
     def test_cg_range2(self):
         self.assertGreater(self.cg_range1["cg_range"], self.cg_range2["cg_range"])
         self.assertGreater(self.cg_range1["Sh/S"], self.cg_range3["Sh/S"])
-        self.assertGreater(self.cg_range1["x_lemac/lh"], self.cg_range4["x_lemac/lh"])
+        self.assertLess(self.cg_range1["x_lemac/lfus"], self.cg_range4["x_lemac/lfus"])
 
 class TestFlightPerformance(unittest.TestCase):
     def setUp(self):
