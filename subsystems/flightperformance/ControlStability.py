@@ -7,7 +7,7 @@ class Control:
     """
     A class to perform aircraft control and stability analysis, including generating scissor plots and calculating CG range.
     """
-    def __init__(self, CLah, CLaA_h, de_da, lh, mac, Vh_V, x_ac, CLh, CLA_h, C_m_ac):
+    def __init__(self, CLah, CLaA_h, de_da, mac, Vh_V, x_lemac, CLh, CLA_h, C_m_ac, l_fus):
         """
         Initializes the Control class with aerodynamic and geometric parameters.
 
@@ -15,26 +15,30 @@ class Control:
         CLah (float): Lift coefficient slope of the horizontal tail.
         CLaA_h (float): Lift coefficient slope of the aircraft less tail.
         de_da (float): Downwash effect on the lift coefficient.
-        lh (float): Horizontal tail moment arm.
         mac (float): Mean aerodynamic chord.
         Vh_V (float): Ratio of tail speed to free stream speed.
         x_ac (float): Aerodynamic center of the aircraft.
         CLh (float): Lift coefficient of the horizontal tail.
         CLA_h (float): Lift coefficient of the aircraft less tail (used in controllability).
         C_m_ac (float): Moment coefficient at the aerodynamic center.
+        l_fus (float): Length of fuselage [m]
         """
         self.CLah = CLah
         self.CLaA_h = CLaA_h
         self.de_da = de_da
-        self.lh = lh
         self.mac = mac
         self.Vh_V = Vh_V
-        self.x_ac = x_ac
+        self.x_lemac = x_lemac
+        self.x_ac = x_lemac + mac / 4
+        self.lh = l_fus - self.x_ac
         self.CLh = CLh
         self.CLA_h = CLA_h
         self.C_m_ac = C_m_ac
+        self.x_lemac_lfus = 1
+        self.l_fus = l_fus
         # Define a range for xcg/mac for plotting
-        self.X = np.arange(0, 1, 0.0001)
+        self.cg_list = np.arange(0, 1, 0.001)
+        self.x_lemac_lfus_list = np.arange(0,1, 0.001)
 
     def __plot_result__(self, x, y, legend, x_label="x", y_label='y', y_limit=[None, None]): # pragma: no cover
         """
@@ -55,6 +59,9 @@ class Control:
         plt.ylim(y_limit[0], y_limit[1])
         plt.legend()
         plt.show()
+            
+    def __normalise_coordinate__(self, x, lemac):
+        return (x - lemac) / self.mac
 
     def __stability_curve__(self, X, plot=False):
         """
@@ -70,8 +77,9 @@ class Control:
         # Calculate the denominator term for the stability equation
         den = (self.CLah / self.CLaA_h) * (1 - self.de_da) * self.lh / self.mac * ((self.Vh_V)**2)
         # Calculate the stability curve (Sh/S vs xcg/mac)
-        Y = (1 / den) * X - ((self.x_ac - 0.05) / den) # Assuming a stability margin of 0.05
-
+        Y = (1 / den) * X - ((self.__normalise_coordinate__(self.x_ac, self.x_lemac) - 0.05) / den) # Assuming a stability margin of 0.05
+        #print('stability',Y)
+        #print('stab den',den)
         if plot: # pragma: no cover
             self.__plot_result__([X], [Y], ["Stability"], "xcg/mac", "Sh/S")
 
@@ -91,7 +99,7 @@ class Control:
         # Calculate the denominator term for the controllability equation
         den = self.CLh / self.CLA_h * self.lh / self.mac * (self.Vh_V**2)
         # Calculate the controllability curve (Sh/S vs xcg/mac)
-        Y = (1 / den) * X + ((self.C_m_ac / self.CLA_h) - self.x_ac) / den
+        Y = (1 / den) * X + ((self.C_m_ac / self.CLA_h) - self.__normalise_coordinate__(self.x_ac, self.x_lemac)) / den
 
         if plot: # pragma: no cover
             self.__plot_result__([X], [Y], ["Controllability"], "xcg/mac", "Sh/S")
@@ -109,7 +117,7 @@ class Control:
         float: xcg/mac value on the stability curve.
         """
         den = (self.CLah / self.CLaA_h) * (1 - self.de_da) * self.lh / self.mac * ((self.Vh_V)**2)
-        X = (Y + ((self.x_ac - 0.05) / den)) * den
+        X = (Y + ((self.__normalise_coordinate__(self.x_ac, self.x_lemac) - 0.05) / den)) * den
         return X
 
     def scissor_plot(self, plot=False):
@@ -122,10 +130,10 @@ class Control:
         Returns:
         tuple: Arrays of Sh/S values for the stability and controllability curves.
         """
-        stability = self.__stability_curve__(self.X)
-        controllability = self.__control_curve__(self.X)
+        stability = self.__stability_curve__(self.cg_list)
+        controllability = self.__control_curve__(self.cg_list)
         if plot: # pragma: no cover
-            self.__plot_result__([self.X, self.X], [stability, controllability], y_limit=[0, None], y_label="Sh/S", x_label="xcg/mac", legend=["Stability", "Controllability"])
+            self.__plot_result__([self.cg_list, self.cg_list], [stability, controllability], y_limit=[0, None], y_label="Sh/S", x_label="xcg/mac", legend=["Stability", "Controllability"])
 
         return stability, controllability
 
@@ -241,6 +249,24 @@ class Control:
         fig.legend()
         plt.show()
         
+    def __cg_range__plot__(self, W_wing, W_fuselage, X_fuselage, W_OEW, W_payload, X_payload, W_fuel):
+        Y1 = [] # List to store minimum CG values
+        Y2 = [] # List to store maximum CG values
+        # Calculate CG range for different x_lemac/lh values
+        for i in self.x_lemac_lfus_list:
+            # Estimate OEW CG based on wing and fuselage weights and locations
+            x_oew = self.xcg_OEW_estimation(W_wing, i*self.l_fus + self.mac/4, W_fuselage, X_fuselage)
+            # Calculate the CG range for the current OEW CG
+            result = self.cg_range(W_OEW, x_oew, W_payload, X_payload, W_fuel, [i*self.l_fus + self.mac/4]) # Assuming fuel is at x_lemac
+            #print(i, x_oew, result[0], result[1], self.__normalise_coordinate__(result[0], i*self.l_fus), self.__normalise_coordinate__(result[1], i*self.l_fus))
+            Y1.append(self.__normalise_coordinate__(result[0], i*self.l_fus))
+            Y2.append(self.__normalise_coordinate__(result[1], i*self.l_fus))
+        
+        plt.plot(Y1, self.x_lemac_lfus_list, label="min")
+        plt.plot(Y2, self.x_lemac_lfus_list, label="max")
+        plt.legend()
+        plt.show()
+        
 
     def calculate_range(self, W_OEW, W_payload, X_payload, W_fuel, W_wing, W_fuselage, X_fuselage, plot=False):
         """
@@ -261,48 +287,100 @@ class Control:
         Y1 = [] # List to store minimum CG values
         Y2 = [] # List to store maximum CG values
         # Calculate CG range for different x_lemac/lh values
-        for i in self.X:
+        for i in self.x_lemac_lfus_list:
             # Estimate OEW CG based on wing and fuselage weights and locations
-            x_oew = self.xcg_OEW_estimation(W_wing, i, W_fuselage, X_fuselage)
+            x_oew = self.xcg_OEW_estimation(W_wing, i*self.l_fus + self.mac/4, W_fuselage, X_fuselage)
             # Calculate the CG range for the current OEW CG
-            result = self.cg_range(W_OEW, x_oew, W_payload, X_payload, W_fuel, [i]) # Assuming fuel is at x_lemac
-            Y1.append(result[0])
-            Y2.append(result[1])
+            result = self.cg_range(W_OEW, x_oew, W_payload, X_payload, W_fuel, [i*self.l_fus + self.mac/4]) # Assuming fuel is at x_lemac
+            Y1.append(self.__normalise_coordinate__(result[0], i*self.l_fus))
+            Y2.append(self.__normalise_coordinate__(result[1], i*self.l_fus))
+
 
         # Find the intersection of the CG range with the stability and controllability requirements
         Sh_S = None
-        x_lemac = None
+        # if plot:
+        #     print("Y1", Y1, "Y2", Y2)
         for i in range(len(Y1)):
             # Calculate the required Sh/S for controllability at the minimum CG
             required_Sh_S_controllability = self.__control_curve__(Y1[i])
+            # print('SH',required_Sh_S_controllability)
             # Calculate the xcg/mac on the stability curve for this Sh/S
             xcg_stability = self.__calculate_X_stability__(required_Sh_S_controllability)
-
+            # print('xcg',xcg_stability)
+            # print('Y1',Y1[i])
+            # print('Ý2',Y2[i])
+            # print('cond',(xcg_stability - Y1[i]), (Y2[i] - Y1[i]))
             # Check if the CG range is within the stable and controllable region
-            if (xcg_stability - Y1[i]) > (Y2[i] - Y1[i]):
+            if (xcg_stability - Y1[i]) < 0 or (xcg_stability - Y1[i]) < (Y2[i] - Y1[i]) or required_Sh_S_controllability < 0:
                 # If the stability point is aft of the max CG, the range is not fully stable/controllable
+                # print("continue")
                 continue
             else:
                 # Found a suitable Sh/S and x_lemac/lh
                 Sh_S = required_Sh_S_controllability
-                x_lemac = self.X[i]
+                self.x_lemac_lfus = self.x_lemac_lfus_list[i]
+                # print("suitable")
+                # print('range', Y2[i] - Y1[i])
+                # print('ShS',Sh_S)
                 result = {
                     "cg_range": Y2[i] - Y1[i],
                     "Sh/S": Sh_S,
-                    "x_lemac/lh": x_lemac
+                    "x_lemac/lfus": self.x_lemac_lfus
                 }
+                #print('Y1',Y1, "Y2",Y2)
                 break
 
         # Overlay the graphs if a solution was found
-        if Sh_S is not None and x_lemac is not None:
+        if Sh_S is not None and self.x_lemac_lfus is not None:
             if plot == True: # pragma: no cover
-                self.__overlay_graphs__(self.X, Y1, Y2, stability, controllability, Sh_S, x_lemac)
+                self.__overlay_graphs__(self.x_lemac_lfus_list, Y1, Y2, stability, controllability, Sh_S, self.x_lemac_lfus)
         else:
-            print("No suitable Sh/S and x_lemac/lh found for the given parameters.")
+            print("No suitable Sh/S and x_lemac/lfus found for the given parameters.")
             return None
 
         return result
 
+
+    def scissor_loop(self, OEW, Wpayload, Xpayload, Wfuel, Wwing, Wfuselage, Xfuselage):
+        i = 0 
+        while True:
+            old_xlemac_fus = self.x_lemac_lfus
+            print(self.lh)
+            result = self.calculate_range(OEW, Wpayload, Xpayload, Wfuel, Wwing, Wfuselage, Xfuselage, False)
+            
+            self.x_lemac = self.x_lemac_lfus * self.l_fus
+            self.x_ac = (self.x_lemac + self.mac/4)
+            self.lh = self.l_fus - self.x_ac
+            #print('x_lemac_fus',self.x_lemac_lfus)
+            #print('old xlemac fus', old_xlemac_fus)
+            if i == 20:
+                break
+            i += 1
+
+        
+            # self.x_lemac_lfus = result["x_lemac/lfus"]
+            # self.x_lemac = self.x_lemac_lfus * self.l_fus
+            # old_xac = self.x_ac
+            # self.x_ac = (self.x_lemac + self.mac/4)
+            # self.lh += old_xac - self.x_ac
+            
+            # print('x_lemac_fus',self.x_lemac_lfus)
+            # print('lh',self.lh)
+            
+            # if abs(self.x_ac - old_xac) < 0.01:
+            #     break
+        
+        #self.scissor_plot(True)
+        #self.calculate_range(OEW, Wpayload, Xpayload, Wfuel, Wwing, Wfuselage, Xfuselage, False)
+        result = {
+            "x_ac": self.x_ac,
+            "Sh/S": result["Sh/S"],
+            "x_lemac/l_fus": self.x_lemac_lfus,
+            "lh": self.lh
+        }
+        return result
+            
+        
 
 
 def run_control_stability(params: DesignParameters): # pragma: no cover
@@ -317,24 +395,24 @@ def run_control_stability(params: DesignParameters): # pragma: no cover
         CLah=params.empennage.Cl_alpha,
         CLaA_h=params.wing.airfoil_clalpha,
         de_da=params.wing.de_da,
-        lh=params.fuselage.lh,
         mac=params.wing.mac,
         Vh_V=params.empennage.Vh_v,
-        x_ac=params.fuselage.x_ac,
         CLh=params.empennage.CL_h,
         CLA_h=params.wing.CL,
-        C_m_ac=params.fuselage.C_m_ac
+        C_m_ac=params.fuselage.C_m_ac,
+        l_fus=params.fuselage.l_f,
+        x_lemac=params.fuselage.x_ac -params.wing.mac/4
     )
     
     # Example usage of calculate_range method
-    results = control.calculate_range(
-        W_OEW=params.weight.W_OE,
-        W_payload=params.weight.W_PL,
-        X_payload=params.fuselage.x_payload,
-        W_fuel=params.weight.W_F,
-        W_wing=params.weight.W_wing,
-        W_fuselage=params.weight.W_fus,
-        X_fuselage=params.fuselage.x_fuselage
+    results = control.scissor_loop(
+        OEW=params.weight.W_OE,
+        Wpayload=[params.weight.W_PL],
+        Xpayload=[params.fuselage.x_payload],
+        Wfuel=[params.weight.W_F],
+        Wwing=params.weight.W_wing,
+        Wfuselage=params.weight.W_fus,
+        Xfuselage=params.cg.x_cg_fuselage
     )
 
     return results
@@ -350,9 +428,15 @@ if __name__ == "__main__": # pragma: no cover
     #control.cg_range(2500, 0.65, [100, 500], [0.8, 0.1], [800, 200], [0.65, 0.8])
 
     # Example of plotting scissor plot separately
-    control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)
-    stability, controllability = control.scissor_plot(True)
+    control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=1, Vh_V=1, x_lemac=6, CLh=-1, CLA_h=1, C_m_ac=-0.5, l_fus=12)
+    #stability, controllability = control.scissor_plot(True)
+    result = control.scissor_loop(OEW=2000, Wpayload=[600], Xpayload=[4], Wfuel=[1000], Wwing=1000, Wfuselage=1000, Xfuselage=6)
+    #control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=7, plot=True)
+    print(result)
 
+    #control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=1, Vh_V=1, x_lemac=7, CLh=-1, CLA_h=1, C_m_ac=-0.5, l_fus=12)
+    #control.__cg_range__plot__(1000, 1000, 7, 2000, [600], [7], [1000])
+    
     # Example of calculating CG range separately
     # control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)
     # print(control.cg_range(W_OEW=2000, X_OEW=0.5, W_payload=[400, 200], X_payload=[0.2, 0.7], W_fuel=[800, 200], X_fuel=[0.5, 0.25]))

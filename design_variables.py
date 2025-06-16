@@ -159,7 +159,7 @@ class WeightParameters:
         self.W_S = 3218.59                             # Wing Loading in N/m^2, can be updated by class II 
         self.W_S_max = 3218.59                      # Maximum Wing Loading in N/m^2, set by class I analysis
         self.T_W = 0.305                           # Thrust-to-Weight ratio in N/N
-        self.M_ff = 0.588                         # Maximum Fuel Fraction TODO, changed by Alejandro from 0.588 to 0.66
+        self.M_ff = 0.588                         # Maximum Fuel Fraction 
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # 0.001 on the initial sizing script!! Maximum Trapped Fuel and Oil Fraction TODO, why is this here? Does it need to be accounted? Though it is just part of OEW? This is not contingency fuel, value yes, but not the description
         self.W_tfo = 1890.384                           # Trapped Fuel and Oil Fraction
@@ -167,7 +167,7 @@ class WeightParameters:
         self.W_F_res = 1379.7765        # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
         self.W_fus = None                           # Fuselage weight in N
-        self.W_wing = 3000                          # Wing weight in N
+        self.W_wing = 1665.24                         # Wing weight in N
 
 
     def load_from_dict(self, param_dict):
@@ -373,8 +373,8 @@ class WingParameters:
         self.wingribs = Wingribs(parent)  # Wing ribs parameters, such as thickness, are stored here
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
-        self.yehudi_area = 7.0 # Yehudi area m2
-        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4)
+        self.yehudi_area = 4.0 # Yehudi area m2
+        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4) # First two span, second one chord
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
         self.airfoil_clalpha = 1.5
