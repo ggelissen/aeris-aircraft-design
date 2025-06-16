@@ -1,6 +1,6 @@
 from subsystems.flightperformance.FlightSim import FlightSim
 
-def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_h,z_cg,z_p, Cd0, AR, oswald, TSFC, C_L):
+def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_h,z_cg,z_p, Cd0, AR, oswald, TSFC, C_L, X_TO):
     '''
     Returns (float, boolean) = calculated Cm, lower/higher than 0
     
@@ -23,17 +23,16 @@ def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_h,z_cg,z_p, Cd0, AR
     cd0: zero-lift drag coefficient
     AR: wing aspect ratio
     oswald: oswald efficiency factor of wing
-    TSFC: Thrust specific fuel consumption of wing
+    TSFC: Thrust specific fuel consumption of engine
+    D: diamater of engine
     '''
     
-    T, _, V = FlightSim().ground_run2(mass0*2,mass0, S, Cd0, AR, oswald, TSFC, C_L)
+    T, _, V = FlightSim().ground_run2(mass0*2,mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO)
     rho = 1.225
-
-    T_c = T / (0.5*rho*V**2*S)
     
     #print('Tc',T_c*(z_p - z_cg)/c)
     
-    C_m = C_m_ac + C_L*(x_cg-x_w)/c - C_N_h*(V_h_V**2)*S_h*l_h/(S*c) - T_c*(z_p - z_cg)/c
+    C_m = C_m_ac + C_L*(x_cg-x_w)/c - C_N_h*(V_h_V**2)*S_h*l_h/(S*c) + 2*T/(rho*(V**2)*S)*((z_cg - z_p)/c)
     
     if C_m > 0:
         return C_m, True
@@ -41,5 +40,5 @@ def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_h,z_cg,z_p, Cd0, AR
         return C_m, False
     
 if __name__ == "__main__": # pragma: no cover
-    Cm, _ = calculate_Cm(1, 4000, 12, 4, 6, 1, 7, 6, 1, 1, 0, 1, 2)
+    Cm, _ = calculate_Cm(-1, 35000/9.81, 15, 4, 4, 1, 6, 6, 1, 1, 1, 2, 0.017, 10, 0.88, 14, 1.6, 1800)
     print('Cm',Cm)

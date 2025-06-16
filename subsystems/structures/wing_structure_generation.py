@@ -10,6 +10,7 @@ except:
 import scipy
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
+from scipy.integrate import simpson
 
 #from ideal_cross_section_analysis import run_cross_section_analysis
 
@@ -346,6 +347,12 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
 def weight_distribution(designvars: DesignParameters = None, num_points: int = 1000):
     # kg/m
     weight_dist = []
+    stringer_weight_dist = []
+    spar_weight_dist = []
+    wingskin_weight_dist = []
+    rib_weight_dist = []
+    fuel_tank_weight_dist = []
+    flap_weight_dist = []
     for indexxx, spanwise_pos_frac in enumerate(np.linspace(0, 1, num_points)):
         crosssection = cross_sectional_structure_along_span(designvars, spanwise_pos_frac, plot=False)
         stringer_weight = designvars.wing.wingsection.stringers['Stringer1']['crosssectionalarea_mm2'] * designvars.wing.wingsection.stringers['Stringer1']['material_density_kgm3'] / 1000000
@@ -396,8 +403,15 @@ def weight_distribution(designvars: DesignParameters = None, num_points: int = 1
                 flap_weight =  (flap.flapwidth) *  flap.density_kgm2
             else:
                 flap_weight = 0
-
+        stringer_weight_dist.append(stringer_weight)
+        spar_weight_dist.append(spar_weight)
+        wingskin_weight_dist.append(wingskin_weight)
+        rib_weight_dist.append(rib_weight)
+        fuel_tank_weight_dist.append(fuel_tank_weight)
+        flap_weight_dist.append(flap_weight)
         weight_dist.append(stringer_weight + spar_weight + wingskin_weight + rib_weight + fuel_tank_weight + flap_weight)
     designvars.wing.weight_distribution = np.array(weight_dist)
+    designvars.weight.W_wing = simpson(np.array(weight_dist), np.linspace(0, designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w), num_points)) * 2  # kg
+    designvars.structure_results.W_Wing = designvars.weight.W_wing
     return np.array(weight_dist)
 

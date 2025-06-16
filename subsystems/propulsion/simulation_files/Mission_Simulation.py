@@ -591,35 +591,35 @@ def run_mission_simulation(params: DesignParameters):
         },
         {
             "name": "Cruise", "duration_minutes": 400,
-            "target_thrust_N": T_cruise, # Approx 30% of 9220N
+            "target_thrust_N": T_cruise, 
             "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 18753.9}, # 40000ft
             "engine_params_override": {"tt_4": 1200}, 
             "ei_nox": 0.012
         },
         {
-            "name": "Diversion Cruise (460km)", "duration_minutes": 34, # Approx. for 460km @ M0.75 / 30000ft
+            "name": "Diversion Cruise ", "duration_minutes": 30, # Approx. for 460km @ M0.75 / 30000ft
             "target_thrust_N": T_cruise, # Estimated for diversion cruise
-            "flight_conditions": {"mach_0": 0.75, "ts_0": 228.7, "ps_0": 30090}, # 30000ft
+            "flight_conditions": {"mach_0": 0.85, "ts_0": 228.7, "ps_0": 30090}, # 30000ft
             "engine_params_override": {"tt_4": 1200},
             "ei_nox": 0.011
         },
         {
-            "name": "Loiter (2 hours)", "duration_minutes": 120,
-            "target_thrust_N": 800, # Estimated for loiter
+            "name": "Loiter (2 hours)", "duration_minutes":120,
+            "target_thrust_N": 0.15*T_to, 
             "flight_conditions": {"mach_0": 0.25, "ts_0": 285.2, "ps_0": 95970}, # 1500ft
-            "engine_params_override": {"tt_4": 880},
+            "engine_params_override": {"tt_4": 950},
             "ei_nox": 0.005
         },
         {
             "name": "Descent (to Diversion Airport)", "duration_minutes": 15,
-            "target_thrust_N": 0.08*T_to, # Approx 8% of 9220N
+            "target_thrust_N": 0.08*T_to,
             "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, # Avg 20000ft
             "engine_params_override": {"tt_4": 900},
             "ei_nox": 0.006
         },
         {
             "name": "Landing (at Diversion Airport)", "duration_minutes": 5,
-            "target_thrust_N": 0.18*T_to, # Approx 18% of 9220N
+            "target_thrust_N": 0.30*T_to, 
             "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, 
             "engine_params_override": {"tt_4": 1000},
             "ei_nox": 0.008

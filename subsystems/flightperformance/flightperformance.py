@@ -60,14 +60,17 @@ class FlightPerformance:
         weight in N!
         '''
         
-        Wpayload = np.arange(Wtotal-Wfuel-OEW, 0, -1*9.81)
+        Wpayload = np.arange(0, Wtotal-Wfuel-OEW,  1*9.81)
         range = []
         for payload in Wpayload:
-            range.append(self.__range__(cT, Wtotal - payload , Wtotal-Wfuel -payload ,A, oswald, cd0, rho, S)[0])
+            range1 = self.__range__(cT, OEW + Wfuel + payload , OEW- Wfuel + payload ,A, oswald, cd0, rho, S)[0]
+            range.append(range1)
         
         
         if plot: # pragma: no cover
-            plt.plot(range, (Wtotal-Wpayload)/9.81)
+            plt.plot(range, (Wpayload)/9.81)
+            plt.xlabel("range [km]")
+            plt.ylabel("payload [kg]")
             plt.show()
         
         return (min(range), max(range))
@@ -91,6 +94,8 @@ class FlightPerformance:
             plt.plot(V,D,label='drag')
             plt.plot(V,[T]*len(V),label='thrust')
             plt.ylim(0, T*1.1)
+            plt.xlabel("Velocity [m/s]")
+            plt.ylabel("Force [N]")
             plt.legend()
             plt.show()
         
@@ -110,6 +115,8 @@ class FlightPerformance:
             plt.plot(V,DV,label='drag')
             plt.plot(V,TV,label='thrust')
             plt.ylim(0, max(TV)*1.1)
+            plt.ylabel("Force * Velocity [Nm/s]")
+            plt.xlabel("Velocity [m/s]")
             plt.legend()
             plt.show()
         
@@ -194,8 +201,10 @@ class FlightPerformance:
             
             
         if plot: # pragma: no cover
-            plt.plot(Vmin, actual_h)
-            plt.plot(Vmax, actual_h)
+            plt.plot(Vmin, actual_h, color="blue")
+            plt.plot(Vmax, actual_h, color="blue")
+            plt.xlabel("Velocity [m/s]")
+            plt.ylabel("Altitude [m]")
             plt.show()
         
         return (hmax, max(Vmax))
@@ -233,15 +242,16 @@ def run_flight_performance(params: DesignParameters): # pragma: no cover
     C_N_h = params.empennage.CL_h
     z_cg = params.cg.z_cg
     z_p = params.cg.z_cg_propulsion
+    X_TO = params.take_off_distance
     # Example usage of calculate_range method
-    T, X, M = fs.ground_run2(T0,Wtotal/9.81,S,cd0,AR,oswald,cT*1000000,CLmax_TO)
+    T, X, M = fs.ground_run2(T0,Wtotal/9.81,S,cd0,AR,oswald,cT*1000000,CLmax_TO, X_TO)
     endurance = fp.endurance(Wfuel, Wtotal, cd0, AR, oswald, cT)
     min_range, max_range = fp.payload_range(params.cruise_speed, cT, AR, oswald, cd0, Wtotal, Wfuel, OEW)
     ceiling, vmax = fp.performance_limit(Wtotal, S, CLmax_cruise, T0, cd0, AR, oswald)
     stall_speed_cruise = fp.stall_speed(Wtotal, S, params.cruise_density, CLmax_cruise)
     stall_speed_takeoff = fp.stall_speed(Wtotal, S, 1.225, CLmax_TO)
     ROC_sea_level = fp.ROC(cd0, params.cruise_density, params.stall_speed_land, S, Wtotal, AR, oswald, T0)[2]
-    take_off_requirement = calculate_Cm(C_m_ac, Wtotal/9.81, S, S_h, l_h, V_h_V, x_cg, x_w, c, C_N_h, z_cg, z_p, cd0, AR, oswald, cT*1000000, CLmax_TO)
+    take_off_requirement = calculate_Cm(C_m_ac, Wtotal/9.81, S, S_h, l_h, V_h_V, x_cg, x_w, c, C_N_h, z_cg, z_p, cd0, AR, oswald, cT*1000000, CLmax_TO, X_TO)
     
     result = {
         "endurance [s]": endurance,
@@ -268,10 +278,15 @@ if __name__ == "__main__": # pragma: no cover
     
     #print(FlightPerformance().__range__(200, 0.00020, 4000*9.81, 3000*9.81, 12, 0.85, 0.017))
     
-    #FlightPerformance().payload_range(200, 0.00020, 12, 0.85, 0.017, 4000*9.81, 2000*9.81, 1000*9.81)
+    #FlightPerformance().payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
+    #endurance = FlightPerformance().endurance(12000, 35000, 0.017, 10, 0.88, 14*(10**-6))
+    #print(endurance)
     
-    #FlightPerformance().ROC(0.017, 0.3, np.arange(1,300,1), 12, 4000*9.81, 12, 0.85, 2265)
+    #FlightPerformance().ROC(0.017, 1.225, np.arange(1,300,1), 15, 35000, 10, 0.85, 7000, True)
     
-    FlightPerformance().performance_limit(4000*9.81, 12, 1.5, 8000, 0.017, 12, 0.9)
+    #print(FlightPerformance().performance_limit(35000, 15, 1.6, 7000, 0.017, 12, 0.88, True))
+
+    #print(FlightPerformance().stall_speed(35000, 15, 1.225, 1.6))
+    FlightSim().ground_run2(7000, 35000/9.81, 15, 0.017, 12, 0.88, 14, 1.6, 1800)
         
         

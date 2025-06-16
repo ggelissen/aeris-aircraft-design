@@ -52,18 +52,20 @@ def fuselage_weight_N(params: DesignParameters):
     F_matl = 1.0   # Carbon fiber/metal
 
     L_struct_ft = m_to_ft(params.fuselage.l_f)
-    W_carried_lbf = N_to_lbf(params.weight.W_PL)
+    W_carried_lbf = N_to_lbf(params.weight.W_PL) + landing_gear_weight_N(params) + fixed_equipment_weight_N(params) + propulsion_weight_N(params)
     N_Z = params.max_load_factor
     V_EqMax_kts = params.max_eq_velocity
-
-    # CORRECTED FORMULA: Reverting to the normalized velocity term as it is
-    # required to get a sensible result from this empirical formula.
+    V_cruise_kts = ms_to_kts(params.cruise_speed)
+    V_dive_kts = 1.05 * V_cruise_kts  # Dive speed is 1.25 times cruise speed -> Would be supersonic, change to 1.0
+    V_dive_Eq_kts = true_to_equivalent_air_speed(V_dive_kts, params.cruise_density, 1.225)
+    # CORRECTED FORMULA: As per Elise's findings, EQ on book was incorrect.
     W_fus_lb = (
         0.5257 * F_MG * F_NG * F_press * F_VT * F_matl
         * (L_struct_ft ** 0.3796)
         * ((W_carried_lbf * N_Z) ** 0.4863)
-        * (V_EqMax_kts / 100.0)**2 # TODO, do not understand why this is divided by 100, but impossible to get a sensible result without it.
+        * (1.3 * 140 / 100.0)**2 # Equation 6.40 on Gundlach is incorrect! Elise found the corrected and it's like this.
     )
+    #print(f"V_dive_Eq_kts: {V_dive_Eq_kts}, V_EqMax_kts: {V_EqMax_kts}, V_dive_kts: {V_dive_kts}")
     return lbf_to_N(W_fus_lb)
 
 def landing_gear_weight_N(params: DesignParameters):

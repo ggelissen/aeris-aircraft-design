@@ -343,15 +343,15 @@ def run_control_stability(params: DesignParameters): # pragma: no cover
 if __name__ == "__main__": # pragma: no cover
     # Example usage
     # Initialize the Control class with example parameters
-    control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=2, Vh_V=1, x_ac=0.55, CLh=-2, CLA_h=0.6, C_m_ac=-0.5)
+    #control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=2, Vh_V=1, x_ac=0.55, CLh=-2, CLA_h=0.6, C_m_ac=-0.5)
     # Calculate and plot the range
-    control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[0.3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=0.7)
+    #control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[0.3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=0.7)
     
     #control.cg_range(2500, 0.65, [100, 500], [0.8, 0.1], [800, 200], [0.65, 0.8])
 
     # Example of plotting scissor plot separately
-    # control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)
-    # stability, controllability = control.scissor_plot(True)
+    control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)
+    stability, controllability = control.scissor_plot(True)
 
     # Example of calculating CG range separately
     # control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, lh=5, mac=1, Vh_V=1, x_ac=0.4, CLh=-1, CLA_h=1, C_m_ac=-0.5)

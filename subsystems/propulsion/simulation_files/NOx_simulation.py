@@ -606,16 +606,16 @@ def run_mission_simulation(params: DesignParameters):
             "engine_params_override": {"tt_4": 1200},
         },
         {
-            "name": "Diversion Cruise (460km)", "duration_minutes": 34, # Approx. for 460km @ M0.75 / 30000ft
+            "name": "Diversion Cruise (460km)", "duration_minutes": 30, # Approx. for 460km @ M0.75 / 30000ft
             "target_thrust_N": T_Cruise, # Estimated for diversion cruise
-            "flight_conditions": {"mach_0": 0.75, "ts_0": 228.7, "ps_0": 30090}, # 30000ft
+            "flight_conditions": {"mach_0": 0.85, "ts_0": 228.7, "ps_0": 30090}, # 30000ft
             "engine_params_override": {"tt_4": 1200},
         },
         {
-            "name": "Loiter (2 hours)", "duration_minutes": 120,
-            "target_thrust_N": 800, # Estimated for loiter
+            "name": "Loiter ", "duration_minutes": 120,
+            "target_thrust_N": 0.15*T_to, # Estimated for loiter
             "flight_conditions": {"mach_0": 0.25, "ts_0": 285.2, "ps_0": 95970}, # 1500ft
-            "engine_params_override": {"tt_4": 880},
+            "engine_params_override": {"tt_4": 950},
         },
         {
             "name": "Descent", "duration_minutes": 15,
@@ -625,7 +625,7 @@ def run_mission_simulation(params: DesignParameters):
         },
         {
             "name": "Landing", "duration_minutes": 5,
-            "target_thrust_N": 0.18*T_to,
+            "target_thrust_N": 0.30*T_to,
             "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, 
             "engine_params_override": {"tt_4": 1000},
         },

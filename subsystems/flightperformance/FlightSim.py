@@ -271,7 +271,7 @@ class FlightSim:
         #print(V_history)
 
 
-    def ground_run2(self, T0, mass0, S, Cd0, AR, oswald, TSFC, C_L):
+    def ground_run2(self, T0, mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO):
         """
         Simulates ground run (takeoff roll) with a focus on reaching takeoff speed.
         This function appears to use a recursive approach to find the required thrust for a target takeoff distance.
@@ -334,18 +334,18 @@ class FlightSim:
             # Check for takeoff condition (Lift >= Weight)
             if (L >= W):
                 # Check if takeoff distance is close to the target (1800m)
-                if 1800*0.9999< X < 1800*1.0001:
+                if X_TO*0.9999< X < X_TO*1.0001:
                     # If close, print results and return
                     print(T0)
                     print(X)
                     print(V/sos)
                     return T0,X,V
                 # If takeoff distance is greater than target, reduce thrust and rerun
-                if X > 1800:
-                    return self.ground_run2(T0+(X-1800), mass0, S, Cd0, AR, oswald, TSFC, C_L)
+                if X > X_TO:
+                    return self.ground_run2(T0+(X-X_TO), mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO)
                 # If takeoff distance is less than target, increase thrust and rerun
                 else:
-                    return self.ground_run2(T0-(1800-X), mass0, S, Cd0, AR, oswald, TSFC, C_L)
+                    return self.ground_run2(T0-(X_TO-X), mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO)
 
 
             # Update state variables using Euler integration
@@ -672,7 +672,8 @@ class FlightSim:
 
 if __name__ == "__main__": # pragma: no cover
     #FlightSim().level_flight(1500, 12000)
-    FlightSim().ground_run(6000)
+    #FlightSim().ground_run(6000)
+    FlightSim().ground_run2()
     # FlightSim().ground_run2(7000,4000)
     # FlightSim().ground_run2(8000,5000)
     # FlightSim().ground_run2(1000,4000)

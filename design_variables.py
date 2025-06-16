@@ -46,6 +46,7 @@ class DesignParameters:
         self.control_surface = ControlSurfaceParameters()
         self.stability_aero = StabilityAerodynamicParameters()
         self.inertia = IntertiaParameters()
+        self.structure_results = StructuresResults(self)
 
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
@@ -152,17 +153,18 @@ class WeightParameters:
         self.W_TO = 37807.7                         # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
         self.W_OE = 16352.775                         # Operational Empty Weight (OEW) in N
-        self.W_F = 15570.915                          # Total Fuel weight in N
+        self.W_F = 11483.09                 # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
-        self.W_S = 2562.814                             # Wing Loading in N/m^2
-        self.T_W = 0.244                            # Thrust-to-Weight ratio in N/N
-        self.M_ff = 0.66                         # Maximum Fuel Fraction TODO, changed by Alejandro from 0.588 to 0.66
+        self.W_S = 3218.59                             # Wing Loading in N/m^2, can be updated by class II 
+        self.W_S_max = 3218.59                      # Maximum Wing Loading in N/m^2, set by class I analysis
+        self.T_W = 0.305                           # Thrust-to-Weight ratio in N/N
+        self.M_ff = 0.588                         # Maximum Fuel Fraction TODO, changed by Alejandro from 0.588 to 0.66
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # 0.001 on the initial sizing script!! Maximum Trapped Fuel and Oil Fraction TODO, why is this here? Does it need to be accounted? Though it is just part of OEW? This is not contingency fuel, value yes, but not the description
         self.W_tfo = 1890.384                           # Trapped Fuel and Oil Fraction
-        self.W_F_used = 12594.544                        # Used Fuel Weight in N
-        self.W_F_res = 2976.371                         # Reserve Fuel Weight in N
+        self.W_F_used = 10103.319            # Used Fuel Weight in N
+        self.W_F_res = 1379.7765        # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
         self.W_fus = None                           # Fuselage weight in N
         self.W_wing = 3000                          # Wing weight in N
@@ -383,6 +385,9 @@ class WingParameters:
         self.Mach_cross = 0.935
         self.epsilon_t = 0         # Wing twist angle [degrees]
         self.weight_distribution = None
+        self.max_allowed_x_displacement = 0.10 # m
+        self.max_allowed_z_displacement = 0.10
+        self.max_allowed_twist_angle = np.pi / 20 # rad
 
 
         # Aerodynamics Loads Distribution
@@ -539,7 +544,7 @@ class EngineParameters:
         self.tt4cruise = 1200
         self.tt4descent = 900
         self.tt4landing = 1000
-        self.lhv = 44.2e6
+        self.lhv = 43.e6
         self.etafan = 0.915
         self.etalpc = 0.9
         self.etahpc = 0.9
@@ -730,26 +735,27 @@ class WingSectionParameters:
         }
         self.num_spars = len(self.spars)
         self.stringers = {
-            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density},
-            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density},
-            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density},
-            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density},
-            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
-            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
-            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
-            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
-            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
-            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
-            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
-            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
-            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
-            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density},
+            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
         }
         self.num_stringers = len(self.stringers)
         self.wingskin = {
             'thicness': 1, # mm
             'material_density_kgm3': parent.materials.material_density # kg/m^3
         }
+
 
 class Wingribs:
     def __init__(self, parent):
@@ -931,3 +937,57 @@ class MaterialsParameters():
         """
         attrs = {key: value for key, value in self.__dict__.items() if not key.startswith('_')}
         return json.dumps(attrs, indent=4, default=lambda o: str(o))
+
+class StructuresResults():
+    def __init__(self, parent):
+        self.parent = parent
+        self.W_Wing = parent.weight.W_wing
+        self.x_bending_distribution = None
+        self.z_bending_distribution = None
+        self.twist_distribution = None
+        self.max_displacement_x = None
+        self.max_displacement_z = None
+        self.max_twist_angle = None
+        self.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround = []
+        self.should_increase_sparcap_thickness_by_30_percent_in_nextround = False
+        self.should_increase_sparweb_thickness_by_30_percent_in_nextround = False
+        self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround = []
+        self.should_increase_sparcap_thickness_by_10_percent_in_nextround = False
+        self.should_increase_sparweb_thickness_by_10_percent_in_nextround = False
+        self.should_increase_wingskin_thickness_by_10_percent_in_nextround = False
+
+    def update_wing_structure(self):
+        for stringer in self.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
+            self.parent.wing.wingsection.stringers[stringer]["crosssectionalarea_mm2"] *= 1.14
+            self.parent.wing.wingsection.stringers[stringer]['area_moment_of_inertia_m4'] *= 1.14
+            if stringer in self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
+                self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.remove(stringer)
+        for stringer in self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
+            self.parent.wing.wingsection.stringers[stringer]["crosssectionalarea_mm2"] *= 1.05
+            self.parent.wing.wingsection.stringers[stringer]['area_moment_of_inertia_m4'] *= 1.05
+        if self.should_increase_sparcap_thickness_by_30_percent_in_nextround:
+            self.parent.wing.wingsection.spars['Spar1']['t_flange_1_mm'] *= 1.3
+            self.parent.wing.wingsection.spars['Spar1']['t_flange_2_mm'] *= 1.3
+            self.parent.wing.wingsection.spars['Spar2']['t_flange_1_mm'] *= 1.3
+            self.parent.wing.wingsection.spars['Spar2']['t_flange_2_mm'] *= 1.3
+        elif self.should_increase_sparcap_thickness_by_10_percent_in_nextround:
+            self.parent.wing.wingsection.spars['Spar1']['t_flange_1_mm'] *= 1.1
+            self.parent.wing.wingsection.spars['Spar1']['t_flange_2_mm'] *= 1.1
+            self.parent.wing.wingsection.spars['Spar2']['t_flange_1_mm'] *= 1.1
+            self.parent.wing.wingsection.spars['Spar2']['t_flange_2_mm'] *= 1.1
+        if self.should_increase_sparweb_thickness_by_30_percent_in_nextround:
+            self.parent.wing.wingsection.spars['Spar1']['t_web_mm'] *= 1.3
+            self.parent.wing.wingsection.spars['Spar2']['t_web_mm'] *= 1.3
+        elif self.should_increase_sparweb_thickness_by_10_percent_in_nextround:
+            self.parent.wing.wingsection.spars['Spar1']['t_web_mm'] *= 1.1
+            self.parent.wing.wingsection.spars['Spar2']['t_web_mm'] *= 1.1
+        if  self.should_increase_wingskin_thickness_by_10_percent_in_nextround:
+            self.parent.wing.wingsection.wingskin['thicness'] * 1.1
+
+        self.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround = []
+        self.should_increase_sparcap_thickness_by_30_percent_in_nextround = False
+        self.should_increase_sparweb_thickness_by_30_percent_in_nextround = False
+        self.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround = []
+        self.should_increase_sparcap_thickness_by_10_percent_in_nextround = False
+        self.should_increase_sparweb_thickness_by_10_percent_in_nextround = False
+        self.should_increase_wingskin_thickness_by_10_percent_in_nextround = False

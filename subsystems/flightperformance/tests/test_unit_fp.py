@@ -13,11 +13,11 @@ class TestGroundRun(unittest.TestCase):
 
     def setUp(self):
         FS = FlightSim()
-        self.T1 = FS.ground_run2(7000, 5000, 12, 0.017, 10, 0.9, 14, 1)
-        self.T2 = FS.ground_run2(7000, 4000, 12, 0.017, 10, 0.9, 14, 1)
-        self.Cm1 = calculate_Cm(1, 4000, 12, 4, 6, 1, 7, 6, 1,  1, 1, 2, 0.017, 10, 0.9, 14, 1)
-        self.Cm2 = calculate_Cm(1, 4000, 12, 4, 6, 1, 7, 6, 1, -1, 1, 2, 0.017, 10, 0.9, 14, 1)
-        self.Cm3 = calculate_Cm(1, 5000, 12, 4, 6, 1, 7, 6, 1,  1, 1, 2, 0.017, 10, 0.9, 14, 1)
+        self.T1 = FS.ground_run2(7000, 5000, 12, 0.017, 10, 0.9, 14, 1, 1800)
+        self.T2 = FS.ground_run2(7000, 4000, 12, 0.017, 10, 0.9, 14, 1, 1800)
+        self.Cm1 = calculate_Cm(1, 4000, 12, 4, 6, 1, 7, 6, 1,  1, 1, 2, 0.017, 10, 0.9, 14, 1, 1800)
+        self.Cm2 = calculate_Cm(1, 4000, 12, 4, 6, 1, 7, 6, 1, -1, 1, 2, 0.017, 10, 0.9, 14, 1, 1800)
+        self.Cm3 = calculate_Cm(1, 5000, 12, 4, 6, 1, 7, 6, 1,  1, 1, 2, 0.017, 10, 0.9, 14, 1, 1800)
 
     def test_groundrun(self):
         self.assertGreater(self.T1[0], self.T2[0]) # larger weight should require larger thrust to take-off

@@ -4,11 +4,11 @@
 22264 Total Num Tris
 
 Theo_Area   Wet_Area   Theo_Vol    Wet_Vol  Name
-    3.719      3.719      0.001      0.001  ConformalGeom  
-    3.719      3.719      0.001      0.001  ConformalGeom  
+    2.999      2.999      0.012      0.012  ConformalGeom  
+    2.999      2.999      0.012      0.012  ConformalGeom  
 -------------------------------------------------
-    7.439      7.439      0.002      0.002  Totals         
+    5.998      5.998      0.023      0.023  Totals         
 
 Tag_Theo_Area   Tag_Wet_Area    Tag_Name
-        3.719          3.719    ConformalGeom_S_Surf0
-        3.719          3.719    ConformalGeom_S_Surf1
+        2.999          2.999    ConformalGeom_S_Surf0
+        2.999          2.999    ConformalGeom_S_Surf1
