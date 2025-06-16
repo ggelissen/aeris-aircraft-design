@@ -3,7 +3,7 @@ import numpy as np
 from scipy.interpolate import interp1d, CubicSpline
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '...')))
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '...')))
 from design_variables import DesignParameters
 from class1.preliminary_sizing.prelim_sizing_wing import calculate_sweep_angle_LE
 
@@ -95,3 +95,4 @@ def flaps_TE_sizing(params):
     return placement[0],placement[1],placement[2],placement[3], c_ave*CF_to_C
     
 
+flaps_TE_sizing(params)

@@ -1,0 +1,2140 @@
+
+  FLOWVM7b : COMPUTED AT 10:26:42 ON 16-JUN-25     w14m65a2p0re9m5                                                                 
+
+ NUMBER OF FINITE BODY MACH NUMBER INCREMENTS=   20
+
+      Y       DELTA M
+    1.29168   0.00320
+    1.39366   0.00268
+    1.49563   0.00223
+    1.59760   0.00185
+    1.69958   0.00151
+    1.80155   0.00123
+    1.90353   0.00100
+    2.00550   0.00081
+    2.10748   0.00065
+    2.20945   0.00052
+    2.31143   0.00041
+    2.41340   0.00033
+    2.51538   0.00026
+    2.61735   0.00020
+    2.71933   0.00015
+    2.82130   0.00011
+    2.92328   0.00008
+    3.02525   0.00006
+    3.12723   0.00004
+    3.22920   0.00002
+
+ OPTIONS=23000011002001100001
+
+ NITS=   50 MACH NO=  0.6500 INCIDENCE=  2.000 XCM=   0.45000
+
+ ROVR=  1.6000 RNDR=  1.0000 EPS=  0.9000 LAMBDA=  0.2500
+
+ JAVE=    6 KAVE=    6 JAVE1=    0 KAVE1=    0 jave2=    0 kave2=    0
+
+ ITTY OPTNS=0000000000000000000000000000000000000000000000000000000
+
+ ILPP OPTNS=3333333333333333333333333333333333333333333333333333333
+
+ NTTY=   10 NLPP=   10 JGAM(1)=    3 JGAM(2)=    3 JGAM(3)=    5 JGAM(4)=    7 JGAM(5)=    9
+
+ NUMBER OF ITERATIONS BEFORE CONVERGENCE ACCELERATION (THIS GRID) = 60
+
+ CGCLEV=  0.000001 DIVERG=  1.000000 INPUT WING AREA=  1.000000
+
+ IFGC=    0  NTOL=    0   NTEST=    0   NOUTS=    0   TOLCL=  0.000000   TOLCD  0.000000
+
+ VISCOUS DATA
+
+ IVINC=   50
+
+ RC= 5726536.3 (BASED ON A CHORD OF 0.602793)  MJ=  0  ABC=  0.030000  NK=    0  ILB=    5
+
+ NUTR=    0  NLTR=    0
+
+    SPAN     TRANSITION   INVERSE 
+  0.878411    0.020000    0.100000    0.000041
+  2.902148    0.020000    0.100000    0.000056
+  7.061184    0.020000    0.100000    0.000210
+  0.878411    0.020000    0.150000    0.000041
+  2.902148    0.020000    0.150000    0.000067
+  7.061184    0.020000    0.150000    0.000280
+
+ * START OF INVISCID PROGRAM *
+
+ * INITIAL RUN, AT 10:26:42 ON 16-JUN-25 *
+
+ * SETUP DONE *
+
+ * GRID DONE LEV= 3 *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   50 0.0011045   12    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0007118 0.1413583 0.0017527-0.0007504 0.1527833 0.0017010-0.0007545 0.1481473 0.0016049-0.0006241 0.0902512 0.0012471
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    2   50   50
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    1    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ OPTIONS=03000011001001100010
+
+ NITS=  450 MACH NO=  0.6500 INCIDENCE=  2.000 XCM=   0.45000
+
+ ROVR=  1.6000 RNDR=  1.0000 EPS=  0.9000 LAMBDA=  0.2500
+
+ JAVE=    6 KAVE=    6 JAVE1=    0 KAVE1=    0 jave2=    0 kave2=    0
+
+ ITTY OPTNS=0000000000000000000000000000000000000000000000000000000
+
+ ILPP OPTNS=3333333333333333333333333333333333333333333333333333333
+
+ NTTY=   10 NLPP=   10 JGAM(1)=    3 JGAM(2)=    3 JGAM(3)=    5 JGAM(4)=    7 JGAM(5)=    9
+
+ NUMBER OF ITERATIONS BEFORE CONVERGENCE ACCELERATION (THIS GRID) =460
+
+ CGCLEV=  0.000001 DIVERG=  1.000000 INPUT WING AREA=  1.000000
+
+ IFGC=    0  NTOL=    0   NTEST=    0   NOUTS=    0   TOLCL=  0.000000   TOLCD  0.000000
+
+ VISCOUS DATA
+
+ IVINC=   10
+
+ RC= 5726536.3 (BASED ON A CHORD OF 0.602793)  MJ=  0  ABC=  0.030000  NK=    0  ILB=    5
+
+ NUTR=    0  NLTR=    0
+
+    SPAN     TRANSITION   INVERSE 
+  0.878411    0.020000    0.100000    0.000041
+  2.902148    0.020000    0.100000    0.000056
+  7.061184    0.020000    0.100000    0.000210
+  0.878411    0.020000    0.150000    0.000041
+  2.902148    0.020000    0.150000    0.000067
+  7.061184    0.020000    0.150000    0.000280
+
+ * START OF INVISCID PROGRAM *
+
+ * SETUP DONE *
+
+ * GRID DONE LEV= 3 *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   60 0.0008471    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0006082 0.1567338 0.0014223-0.0006417 0.1674662 0.0013698-0.0006417 0.1618296 0.0012742-0.0005523 0.1013605 0.0010518
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1   60   60
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   70 0.0006769    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0005017 0.1690648 0.0011412-0.0005172 0.1791372 0.0010955-0.0005061 0.1725454 0.0010111-0.0004612 0.1106042 0.0008765
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1   70   70
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   80 0.0005453    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0004141 0.1790172 0.0009267-0.0004255 0.1886115 0.0008912-0.0004128 0.1812202 0.0008227-0.0003900 0.1184041 0.0007385
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1   80   80
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+   90 0.0004421    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0003420 0.1871147 0.0007559-0.0003509 0.1963494 0.0007286-0.0003398 0.1883131 0.0006744-0.0003312 0.1250024 0.0006239
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1   90   90
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  100 0.0003597    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0002841 0.1937305 0.0006195-0.0002908 0.2026954 0.0005983-0.0002819 0.1941442 0.0005555-0.0002819 0.1305853 0.0005275
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  100  100
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  110 0.0002934    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0002369 0.1991546 0.0005092-0.0002419 0.2079137 0.0004925-0.0002347 0.1989517 0.0004588-0.0002402 0.1353050 0.0004458
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  110  110
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  120 0.0002397    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0001980 0.2036121 0.0004195-0.0002019 0.2122129 0.0004062-0.0001961 0.2029219 0.0003795-0.0002048 0.1392893 0.0003764
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  120  120
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  130 0.0001961    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0001660 0.2072821 0.0003461-0.0001690 0.2157598 0.0003355-0.0001643 0.2062032 0.0003142-0.0001746 0.1426466 0.0003173
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  130  130
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  140 0.0001605    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0001395 0.2103083 0.0002860-0.0001418 0.2186901 0.0002775-0.0001379 0.2089164 0.0002602-0.0001487 0.1454699 0.0002670
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  140  140
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  150 0.0001314    3    3   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0001175 0.2128063 0.0002365-0.0001193 0.2211119 0.0002295-0.0001160 0.2111593 0.0002155-0.0001267 0.1478391 0.0002242
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  150  150
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  160-0.0001087   12   10    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000992 0.2148694 0.0001957-0.0001005 0.2231140 0.0001899-0.0000977 0.2130123 0.0001783-0.0001078 0.1498222 0.0001879
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  160  160
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  170-0.0000928   12   10    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000840 0.2165737 0.0001619-0.0000848 0.2247686 0.0001571-0.0000824 0.2145420 0.0001475-0.0000916 0.1514779 0.0001570
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  170  170
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  180-0.0000791   12   10    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000711 0.2179812 0.0001339-0.0000717 0.2261362 0.0001300-0.0000695 0.2158031 0.0001219-0.0000778 0.1528558 0.0001309
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  180  180
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  190-0.0000674   12   11    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000603 0.2191430 0.0001106-0.0000607 0.2272658 0.0001074-0.0000587 0.2168412 0.0001005-0.0000659 0.1539988 0.0001087
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  190  190
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  200-0.0000574   12   11    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000512 0.2201012 0.0000914-0.0000514 0.2281978 0.0000887-0.0000495 0.2176939 0.0000828-0.0000558 0.1549439 0.0000900
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  200  200
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  210-0.0000488   12   11    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000435 0.2208904 0.0000753-0.0000435 0.2289657 0.0000731-0.0000418 0.2183929 0.0000680-0.0000472 0.1557223 0.0000743
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  210  210
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  220-0.0000414   12   11    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000370 0.2215393 0.0000620-0.0000369 0.2295973 0.0000601-0.0000353 0.2189642 0.0000557-0.0000398 0.1563610 0.0000610
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  220  220
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  230-0.0000351   12   11    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000315 0.2220718 0.0000509-0.0000313 0.2301160 0.0000494-0.0000298 0.2194297 0.0000455-0.0000335 0.1568826 0.0000500
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  230  230
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  240-0.0000296   12   11    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000267 0.2225077 0.0000417-0.0000265 0.2305408 0.0000404-0.0000251 0.2198077 0.0000370-0.0000282 0.1573066 0.0000407
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  240  240
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  250-0.0000251   12   12    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000227 0.2228636 0.0000341-0.0000225 0.2308879 0.0000330-0.0000212 0.2201135 0.0000300-0.0000237 0.1576493 0.0000330
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  250  250
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  260-0.0000211   12   12    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000193 0.2231532 0.0000278-0.0000190 0.2311708 0.0000269-0.0000179 0.2203597 0.0000243-0.0000199 0.1579248 0.0000266
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  260  260
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  270-0.0000178   12   12    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000164 0.2233881 0.0000225-0.0000161 0.2314005 0.0000218-0.0000150 0.2205570 0.0000195-0.0000166 0.1581447 0.0000213
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  270  270
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  280-0.0000150   12   12    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000140 0.2235779 0.0000182-0.0000137 0.2315865 0.0000176-0.0000127 0.2207143 0.0000156-0.0000139 0.1583190 0.0000169
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  280  280
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  290-0.0000125   12   12    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000118 0.2237306 0.0000146-0.0000116 0.2317365 0.0000142-0.0000107 0.2208390 0.0000124-0.0000116 0.1584561 0.0000133
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  290  290
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  300-0.0000105   12   12    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000101 0.2238529 0.0000117-0.0000098 0.2318570 0.0000114-0.0000090 0.2209372 0.0000098-0.0000097 0.1585628 0.0000104
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  300  300
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  310 0.0000334   12   16   23  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000085 0.2239504 0.0000093-0.0000083 0.2319535 0.0000091-0.0000075 0.2210140 0.0000077-0.0000080 0.1586452 0.0000081
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  310  310
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  320 0.0000206   12   16   23  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000072 0.2240277 0.0000074-0.0000070 0.2320305 0.0000072-0.0000063 0.2210738 0.0000060-0.0000067 0.1587079 0.0000062
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  320  320
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  330 0.0000206   12   16   23  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000061 0.2240887 0.0000058-0.0000059 0.2320918 0.0000057-0.0000053 0.2211196 0.0000046-0.0000056 0.1587550 0.0000047
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  330  330
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  340 0.0000096   12   16   23  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000052 0.2241367 0.0000046-0.0000050 0.2321403 0.0000045-0.0000045 0.2211546 0.0000035-0.0000046 0.1587898 0.0000035
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  340  340
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  350-0.0000044   12    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000042 0.2241741 0.0000036-0.0000042 0.2321787 0.0000035-0.0000038 0.2211813 0.0000027-0.0000038 0.1588150 0.0000025
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  350  350
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  360-0.0000038   12    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000036 0.2242033 0.0000028-0.0000036 0.2322091 0.0000027-0.0000032 0.2212016 0.0000020-0.0000032 0.1588329 0.0000018
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  360  360
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  370-0.0000032   12    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000031 0.2242259 0.0000021-0.0000031 0.2322332 0.0000021-0.0000027 0.2212169 0.0000015-0.0000027 0.1588451 0.0000013
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  370  370
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  380-0.0000029   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000027 0.2242435 0.0000016-0.0000026 0.2322523 0.0000017-0.0000023 0.2212286 0.0000012-0.0000022 0.1588532 0.0000008
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  380  380
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  390-0.0000027   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000023 0.2242572 0.0000013-0.0000022 0.2322677 0.0000013-0.0000020 0.2212375 0.0000009-0.0000019 0.1588585 0.0000005
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  390  390
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  400-0.0000025   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000020 0.2242681 0.0000010-0.0000019 0.2322803 0.0000010-0.0000017 0.2212446 0.0000007-0.0000016 0.1588617 0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  400  400
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  410-0.0000023   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000017 0.2242768 0.0000008-0.0000016 0.2322908 0.0000008-0.0000014 0.2212505 0.0000005-0.0000013 0.1588636 0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  410  410
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  420-0.0000021   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000015 0.2242839 0.0000006-0.0000014 0.2322998 0.0000007-0.0000013 0.2212556 0.0000004-0.0000011 0.1588647 0.0000001
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  420  420
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  430-0.0000019   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000013 0.2242900 0.0000005-0.0000012 0.2323077 0.0000006-0.0000011 0.2212602 0.0000004-0.0000010 0.1588655 0.0000001
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  430  430
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  440-0.0000017   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000011 0.2242955 0.0000005-0.0000010 0.2323150 0.0000005-0.0000010 0.2212648 0.0000004-0.0000008 0.1588663 0.0000001
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  440  440
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  450-0.0000016   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000009 0.2243005 0.0000004-0.0000009 0.2323219 0.0000005-0.0000009 0.2212695 0.0000004-0.0000007 0.1588672 0.0000001
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  450  450
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  460-0.0000014   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000008 0.2243054 0.0000004-0.0000008 0.2323286 0.0000005-0.0000008 0.2212744 0.0000004-0.0000007 0.1588686 0.0000001
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  460  460
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  470-0.0000013   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000007 0.2243103 0.0000004-0.0000007 0.2323352 0.0000005-0.0000007 0.2212796 0.0000004-0.0000006 0.1588703 0.0000001
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  470  470
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  480-0.0000011   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000006 0.2243154 0.0000004-0.0000006 0.2323419 0.0000005-0.0000006 0.2212852 0.0000004-0.0000005 0.1588726 0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  480  480
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  490-0.0000010   10   15   42  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000006 0.2243206 0.0000004-0.0000006 0.2323488 0.0000005-0.0000006 0.2212912 0.0000005-0.0000005 0.1588755 0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  490  490
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  500 0.0000229   12   16   23  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000005 0.2243260 0.0000005-0.0000005 0.2323559 0.0000005-0.0000005 0.2212976 0.0000005-0.0000005 0.1588789 0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  500  500
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   41   14    9  0.602793  5.726536  0.650000    0    0    0  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    42
+
+ OPTIONS=02000011001001100001
+
+ NITS=  500 MACH NO=  0.6500 INCIDENCE=  2.000 XCM=   0.45000
+
+ ROVR=  1.6500 RNDR=  1.0000 EPS=  0.8000 LAMBDA=  0.2500
+
+ JAVE=    6 KAVE=    6 JAVE1=    6 KAVE1=    6 jave2=   11 kave2=   11
+
+ ITTY OPTNS=0000000000000000000000000000000000000000000000000000000
+
+ ILPP OPTNS=3333333333333333333333333333333333333333333333333333333
+
+ NTTY=   10 NLPP=   10 JGAM(1)=    3 JGAM(2)=    3 JGAM(3)=    5 JGAM(4)=    7 JGAM(5)=    9
+
+ NUMBER OF ITERATIONS BEFORE CONVERGENCE ACCELERATION (THIS GRID) =510
+
+ CGCLEV=  0.000001 DIVERG=  1.000000 INPUT WING AREA=  1.000000
+
+ IFGC=    0  NTOL=    0   NTEST=    0   NOUTS=    0   TOLCL=  0.000000   TOLCD  0.000000
+
+ VISCOUS DATA
+
+ IVINC=   10
+
+ RC= 5726536.3 (BASED ON A CHORD OF 0.602793)  MJ=  0  ABC=  0.030000  NK=    0  ILB=    5
+
+ NUTR=    0  NLTR=    0
+
+    SPAN     TRANSITION   INVERSE 
+  0.878411    0.020000    0.100000    0.000041
+  2.902148    0.020000    0.100000    0.000056
+  7.061184    0.020000    0.100000    0.000210
+  0.878411    0.020000    0.150000    0.000041
+  2.902148    0.020000    0.150000    0.000067
+  7.061184    0.020000    0.150000    0.000280
+
+ * START OF INVISCID PROGRAM *
+
+ * SETUP DONE *
+
+ * GRID DONE LEV= 2 *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  510 0.0002295    3   11   79  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000994 0.2253012 0.0000530-0.0000566 0.2329251 0.0000416-0.0000238 0.2217974 0.0000569 0.0001910 0.1591838 0.0000314
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  510  510
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  520 0.0001108    3    3   41  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000315 0.2256366 0.0000288-0.0000259 0.2331729 0.0000241-0.0000173 0.2220159 0.0000141 0.0000188 0.1593429 0.0000184
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  520  520
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  530 0.0000616    3    3   41  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000214 0.2258267 0.0000182 0.0000168 0.2333097 0.0000144-0.0000114 0.2221577 0.0000079 0.0000080 0.1594500 0.0000124
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  530  530
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  540 0.0000356    3    3   41  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000141 0.2259465 0.0000119 0.0000112 0.2333766 0.0000079-0.0000063 0.2222461 0.0000083-0.0000057 0.1595294 0.0000093
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  540  540
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  550 0.0000211    3    3   41  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000085 0.2260200 0.0000075 0.0000064 0.2333981 0.0000036 0.0000037 0.2222888 0.0000041-0.0000051 0.1595917 0.0000075
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  550  550
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  560 0.0000128    3    3   41  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+-0.0000053 0.2260600 0.0000042 0.0000041 0.2333900 0.0000007 0.0000033 0.2223008 0.0000005-0.0000043 0.1596428 0.0000064
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  560  560
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  570 0.0000079    3    3   41  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000030 0.2260753 0.0000019 0.0000039 0.2333630-0.0000012 0.0000031 0.2222940-0.0000010-0.0000036 0.1596858 0.0000056
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  570  570
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  580 0.0000070   12    9   80  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000029 0.2260729 0.0000001 0.0000036 0.2333245-0.0000024 0.0000034 0.2222748-0.0000019-0.0000030 0.1597225 0.0000049
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  580  580
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  590 0.0000064   12    9   80  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000028 0.2260581-0.0000011 0.0000037 0.2332793-0.0000032 0.0000035 0.2222475-0.0000026 0.0000026 0.1597539 0.0000043
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  590  590
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  600 0.0000058   12    9   80  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000029 0.2260350-0.0000019 0.0000038 0.2332309-0.0000037 0.0000037 0.2222153-0.0000030 0.0000025 0.1597806 0.0000037
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  600  600
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  610 0.0000053   12    9   80  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000031 0.2260067-0.0000024 0.0000040 0.2331816-0.0000039 0.0000039 0.2221802-0.0000032 0.0000025 0.1598030 0.0000033
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  610  610
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  620 0.0000049   12    9   80  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000033 0.2259752-0.0000027 0.0000041 0.2331326-0.0000040 0.0000040 0.2221438-0.0000033 0.0000025 0.1598217 0.0000028
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  620  620
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  630 0.0000044   12    9   80  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000035 0.2259422-0.0000029 0.0000042 0.2330851-0.0000040 0.0000040 0.2221071-0.0000034 0.0000025 0.1598368 0.0000024
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  630  630
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  640 0.0000043   12    6    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000036 0.2259087-0.0000029 0.0000041 0.2330396-0.0000039 0.0000039 0.2220707-0.0000033 0.0000024 0.1598488 0.0000020
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  640  640
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  650 0.0000041   10    6    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000036 0.2258755-0.0000029 0.0000040 0.2329964-0.0000037 0.0000039 0.2220352-0.0000032 0.0000024 0.1598580 0.0000017
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  650  650
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  660 0.0000040   10    6    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000035 0.2258431-0.0000029 0.0000039 0.2329557-0.0000035 0.0000038 0.2220009-0.0000031 0.0000024 0.1598647 0.0000014
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  660  660
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  670 0.0000038   10    6    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000035 0.2258118-0.0000028 0.0000038 0.2329175-0.0000033 0.0000036 0.2219681-0.0000030 0.0000024 0.1598692 0.0000011
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  670  670
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  680 0.0000037   10    6    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000034 0.2257820-0.0000027 0.0000036 0.2328818-0.0000031 0.0000035 0.2219367-0.0000028 0.0000023 0.1598719 0.0000009
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  680  680
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  690 0.0000035   10    6    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000033 0.2257537-0.0000025 0.0000035 0.2328485-0.0000029 0.0000034 0.2219071-0.0000027 0.0000023 0.1598730 0.0000007
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  690  690
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  700 0.0000034   11    6    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000032 0.2257270-0.0000024 0.0000033 0.2328176-0.0000028 0.0000032 0.2218791-0.0000025 0.0000023 0.1598728 0.0000005
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  700  700
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  710 0.0000032   11    6    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000030 0.2257019-0.0000023 0.0000032 0.2327889-0.0000026 0.0000031 0.2218528-0.0000023 0.0000022 0.1598714 0.0000004
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  710  710
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  720 0.0000031   11    6    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000029 0.2256783-0.0000021 0.0000030 0.2327623-0.0000024 0.0000030 0.2218282-0.0000022 0.0000022 0.1598690 0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  720  720
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  730 0.0000029   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000028 0.2256564-0.0000020 0.0000029 0.2327377-0.0000022 0.0000028 0.2218052-0.0000020 0.0000021 0.1598659 0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  730  730
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  740 0.0000028   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000027 0.2256359-0.0000019 0.0000027 0.2327150-0.0000021 0.0000027 0.2217837-0.0000019 0.0000020 0.1598622 0.0000001
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  740  740
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  750 0.0000027   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000026 0.2256169-0.0000017 0.0000026 0.2326940-0.0000019 0.0000026 0.2217638-0.0000018 0.0000020 0.1598579-0.0000000
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  750  750
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  760 0.0000025   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000025 0.2255993-0.0000016 0.0000025 0.2326746-0.0000018 0.0000025 0.2217452-0.0000016 0.0000019 0.1598533-0.0000001
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  760  760
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  770 0.0000024   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000024 0.2255829-0.0000015 0.0000024 0.2326567-0.0000016 0.0000023 0.2217280-0.0000015 0.0000019 0.1598484-0.0000001
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  770  770
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  780 0.0000023   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000022 0.2255678-0.0000014 0.0000022 0.2326402-0.0000015 0.0000022 0.2217121-0.0000014 0.0000018 0.1598434-0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  780  780
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  790 0.0000022   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000021 0.2255538-0.0000013 0.0000021 0.2326250-0.0000014 0.0000021 0.2216974-0.0000013 0.0000017 0.1598381-0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  790  790
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  800 0.0000021   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000020 0.2255408-0.0000012 0.0000020 0.2326109-0.0000013 0.0000020 0.2216837-0.0000012 0.0000017 0.1598329-0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  800  800
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  810 0.0000020   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000020 0.2255288-0.0000011 0.0000019 0.2325980-0.0000012 0.0000019 0.2216711-0.0000011 0.0000016 0.1598275-0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  810  810
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  820 0.0000019   11    7    4  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000019 0.2255177-0.0000010 0.0000018 0.2325860-0.0000011 0.0000018 0.2216595-0.0000010 0.0000015 0.1598223-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  820  820
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  830 0.0000018    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000017 0.2255075-0.0000009 0.0000017 0.2325750-0.0000010 0.0000017 0.2216487-0.0000009 0.0000015 0.1598170-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  830  830
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  840 0.0000017    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000017 0.2254980-0.0000009 0.0000017 0.2325648-0.0000009 0.0000016 0.2216387-0.0000009 0.0000014 0.1598119-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  840  840
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  850 0.0000016    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000016 0.2254892-0.0000008 0.0000016 0.2325554-0.0000009 0.0000015 0.2216295-0.0000008 0.0000013 0.1598068-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  850  850
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  860 0.0000015    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000015 0.2254811-0.0000007 0.0000015 0.2325467-0.0000008 0.0000015 0.2216210-0.0000007 0.0000013 0.1598019-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  860  860
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  870 0.0000015    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000014 0.2254736-0.0000007 0.0000014 0.2325387-0.0000007 0.0000014 0.2216131-0.0000007 0.0000012 0.1597970-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  870  870
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  880 0.0000014    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000014 0.2254666-0.0000006 0.0000013 0.2325312-0.0000007 0.0000013 0.2216058-0.0000006 0.0000012 0.1597924-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  880  880
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  890 0.0000013    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000013 0.2254602-0.0000006 0.0000013 0.2325243-0.0000006 0.0000012 0.2215990-0.0000006 0.0000011 0.1597878-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  890  890
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  900 0.0000013    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000012 0.2254542-0.0000005 0.0000012 0.2325179-0.0000006 0.0000012 0.2215926-0.0000005 0.0000011 0.1597834-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  900  900
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  910 0.0000012    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000012 0.2254486-0.0000005 0.0000012 0.2325119-0.0000005 0.0000011 0.2215867-0.0000005 0.0000010 0.1597792-0.0000003
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  910  910
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  920 0.0000011    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000011 0.2254434-0.0000005 0.0000011 0.2325063-0.0000005 0.0000011 0.2215813-0.0000005 0.0000010 0.1597751-0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  920  920
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  930 0.0000011    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000011 0.2254386-0.0000004 0.0000010 0.2325012-0.0000005 0.0000010 0.2215761-0.0000004 0.0000009 0.1597711-0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  930  930
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  940 0.0000010    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000010 0.2254341-0.0000004 0.0000010 0.2324963-0.0000004 0.0000009 0.2215713-0.0000004 0.0000009 0.1597673-0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  940  940
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+  ITS    ERRMAX IERR JERR KERR IHYP JHYP
+  950 0.0000010    7    3    3  100    0
+
+  ERRM( 3)   GAM( 3)  DGAM( 3)  ERRM( 5)   GAM( 5)  DGAM( 5)  ERRM( 7)   GAM( 7)  DGAM( 7)  ERRM( 9)   GAM( 9)  DGAM( 9)
+ 0.0000010 0.2254299-0.0000004 0.0000009 0.2324917-0.0000004 0.0000009 0.2215668-0.0000004 0.0000008 0.1597636-0.0000002
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  950  950
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+   81   14    9  0.602793  5.726536  0.650000    0    0    1  0.000000
+  VISVN values written to disc (51, I55)                     9
+                    14                    82
+
+ * START OF INVISCID PROGRAM *
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  958  960
+
+ OPTIONS=01111011001001100001
+
+ NITS=  500 MACH NO=  0.6500 INCIDENCE=  2.000 XCM=   0.45000
+
+ ROVR=  1.7000 RNDR=  1.0000 EPS=  0.7000 LAMBDA=  0.2500
+
+ JAVE=   16 KAVE=   16 JAVE1=    6 KAVE1=    6 jave2=   25 kave2=   25
+
+ ITTY OPTNS=0000000000000000000000000000000000000000000000000000000
+
+ ILPP OPTNS=3333333333333333333333333333333333333333333333333333333
+
+ NTTY=   10 NLPP=   10 JGAM(1)=    3 JGAM(2)=    3 JGAM(3)=    7 JGAM(4)=   11 JGAM(5)=   15
+
+ NUMBER OF ITERATIONS BEFORE CONVERGENCE ACCELERATION (THIS GRID) =510
+
+ CGCLEV=  0.000001 DIVERG=  1.000000 INPUT WING AREA=  1.000000
+
+ IFGC=    0  NTOL=    0   NTEST=    0   NOUTS=    0   TOLCL=  0.000000   TOLCD  0.000000
+
+ VISCOUS DATA
+
+ IVINC=   10
+
+ RC= 5726536.3 (BASED ON A CHORD OF 0.602793)  MJ=  0  ABC=  0.030000  NK=    0  ILB=    5
+
+ NUTR=    0  NLTR=    0
+
+    SPAN     TRANSITION   INVERSE 
+  0.878411    0.020000    0.100000    0.000041
+  2.902148    0.020000    0.100000    0.000056
+  7.061184    0.020000    0.100000    0.000210
+  0.878411    0.020000    0.150000    0.000041
+  2.902148    0.020000    0.150000    0.000067
+  7.061184    0.020000    0.150000    0.000280
+
+ * START OF INVISCID PROGRAM *
+
+ * SETUP DONE *
+
+ * GRID DONE LEV= 1 *
+
+ * DONITS DONE *
+
+ * OUTPUT DONE *
+
+ * INVIS DONE *
+    1  968  968
+
+ VISCOUS CALCULATION, INPUT PARAMETERS ARE;
+   nx   ny   nw         C    Re*E-6         M iout ist ngrid     yspan
+  161   28   19  0.602793  5.726536  0.650000    0    0    1  0.000000
+ VINT HAS FAILED H= 0.4109E-10XD= 0.2100E+02X= 0.2089E+02V0=1001
+ VINT HAS FAILED H= 0.4302E-10XD= 0.2200E+02X= 0.2164E+02V0=1001
+ VINT HAS FAILED H= 0.3442E-09XD= 0.2300E+02X= 0.2200E+02V0=1001
+ VINT HAS FAILED H= 0.4418E-10XD= 0.2100E+02X= 0.2040E+02V0=1001
+ VINT HAS FAILED H= 0.4518E-10XD= 0.2100E+02X= 0.2031E+02V0=1001
+ VINT HAS FAILED H= 0.4603E-10XD= 0.2100E+02X= 0.2019E+02V0=1001
+ VINT HAS FAILED H= 0.2342E-10XD= 0.2100E+02X= 0.2007E+02V0=1001
+ VINT HAS FAILED H= 0.2383E-10XD= 0.2000E+02X= 0.1995E+02V0=1001
+ VINT HAS FAILED H= 0.4766E-10XD= 0.2100E+02X= 0.2000E+02V0=1001
+ VINT HAS FAILED H= 0.6061E-11XD= 0.2000E+02X= 0.1994E+02V0=1001
+ VINT HAS FAILED H= 0.3103E-08XD= 0.2100E+02X= 0.2000E+02V0=1001
+ VINT HAS FAILED H= 0.3947E-09XD= 0.2000E+02X= 0.1997E+02V0=1001
+  VISVN values written to disc (51, I55)                    19
+                    28                   162
+
+ * START OF INVISCID PROGRAM *
+
+ *** ERROR  9 HAS OCCURRED - RUN ABORTED ***
+
