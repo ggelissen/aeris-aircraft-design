@@ -7,7 +7,7 @@ import numpy as np
 # 1. DEFINE SIMULATION PARAMETERS
 # ==============================================================================
 # --- Main Simulation Control ---
-wing_name = "w1" # Base name for the wing
+wing_name = "w2" # Base name for the wing
 fpcon_source_dir = os.path.join(os.path.dirname(__file__), "vpwin_fpv20")
 vfp_source_dir = os.path.join(os.path.dirname(__file__), "vpwin_vfphv20")
 
@@ -16,8 +16,8 @@ airfoil_source_dir = os.path.join(os.path.dirname(__file__), "airfoils")
 
 # --- Angle of Attack Sweep ---
 # List of angles of attack (in degrees) to simulate
-# alpha_sweep = [-1.0, 0.0, 0.5, 1.0, 1.25, 1.5, 1.75, 2.0]
-alpha_sweep = [1.0]
+alpha_sweep = [-1.0, 0.0, 0.5, 1.0, 1.25, 1.5, 1.75, 2.0]
+# alpha_sweep = [0.5]
 
 # --- Mach Sweep Settings ---
 # Enable this to run an incremental Mach sweep for each angle of attack.
@@ -29,7 +29,7 @@ mach_increment = 0.02   # The step size for the Mach sweep.
 
 # --- Flow Conditions (Used if Mach sweep is disabled) ---
 Mach_freestream = 0.65 # Freestream Mach number
-Re = 9500000 # Reynolds number based on mean geometric chord
+Re = 8500000 # Reynolds number based on mean geometric chord
 
 # --- Wing Geometry ---
 is_cranked = True # True for a cranked wing, False for a simple swept/tapered wing
@@ -43,9 +43,9 @@ Lambda_leo = 32.0 # Outer panel leading-edge sweep (degrees)
 # --- Wing Sections, Twist, and Airfoils ---
 NSECT1 = 2
 section_data = [
-    {'etas': 0.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 3.0, 'airfoil': 'nac0012.dat'},
-    {'etas': 0.4, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 1.0, 'airfoil': 'nac0012.dat'},
-    {'etas': 1.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 0.0, 'airfoil': 'nac0012.dat'},
+    {'etas': 0.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 3.0, 'airfoil': '0412vgk.dat'},
+    {'etas': 0.4, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 1.0, 'airfoil': '0412vgk.dat'},
+    {'etas': 1.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 0.0, 'airfoil': '0412vgk.dat'},
 ]
 
 # --- Fuselage Parameters ---
@@ -299,10 +299,7 @@ def run_vfp_case(case_run_dir, master_fpcon_dir, current_run_name, current_mach,
         print(f"ERROR during VFP case run for {current_run_name}: {e}")
         return False
 
-# ==============================================================================
-# 4. MAIN EXECUTION BLOCK
-# ==============================================================================
-if __name__ == "__main__":
+def run_simulation():
     script_root = os.path.dirname(os.path.abspath(__file__))
     
     mach_list = []
@@ -363,3 +360,8 @@ if __name__ == "__main__":
         
         print("\nAll simulation sweeps finished.")
 
+# ==============================================================================
+# 4. MAIN EXECUTION BLOCK
+# ==============================================================================
+if __name__ == "__main__":
+    run_simulation()

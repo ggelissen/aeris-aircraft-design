@@ -6,7 +6,7 @@ import shutil
 # 1. DEFINE SIMULATION PARAMETERS
 # ==============================================================================
 # --- Main Simulation Control ---
-wing_name = "w14" # Base name for the wing
+wing_name = "w2" # Base name for the wing
 fpcon_source_dir = os.path.join(os.path.dirname(__file__), "vpwin_fpv20")
 vfp_source_dir = os.path.join(os.path.dirname(__file__), "vpwin_vfphv20")
 # Directory where your airfoil .DAT files are stored
@@ -14,11 +14,11 @@ airfoil_source_dir = os.path.join(os.path.dirname(__file__), "airfoils")
 
 # --- Angle of Attack Sweep ---
 # List of angles of attack (in degrees) to simulate
-alpha_sweep = [0.0, 0.5, 1.0, 1.5, 2.0]
+alpha_sweep = [-2.0, -1.0, 0.0, 0.5, 1.0, 1.5, 2.0]
 
 # --- Flow Conditions ---
-Mach_freestream = 0.65 # Freestream Mach number
-Re = 9500000 # Reynolds number based on mean geometric chord
+Mach_freestream = 0.7 # Freestream Mach number
+Re = 8500000 # Reynolds number based on mean geometric chord
 
 # --- Wing Geometry ---
 is_cranked = True # True for a cranked wing, False for a simple swept/tapered wing
@@ -46,7 +46,7 @@ NSECT1 = 2
 #   'airfoil': The filename of the airfoil .DAT file for this section.
 section_data = [
     {'etas': 0.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 4.0, 'airfoil': '0412vgk.dat'},
-    {'etas': 0.4, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 2.0, 'airfoil': '0412vgk.dat'},
+    {'etas': 0.4, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 3.0, 'airfoil': '0412vgk.dat'},
     {'etas': 1.0, 'hsect': 0.0, 'xtwsec': 0.5, 'twsin': 0.0, 'airfoil': '0412vgk.dat'},
 ]
 

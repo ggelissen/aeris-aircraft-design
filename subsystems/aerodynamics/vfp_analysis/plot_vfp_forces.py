@@ -13,7 +13,7 @@ from vfp_aoa_sweep import wing_name
 
 # --- Main Control ---
 # Specify the name of the wing you want to plot the results for.
-wing_name_to_plot = "w14"  # Reference the wing name from vfp_sweep.py
+wing_name_to_plot = wing_name  # Reference the wing name from vfp_sweep.py
 
 # --- Plotting Options ---
 save_plots = True # Set to True to save the plots as image files
@@ -251,7 +251,7 @@ def plot_spanwise_loading(wing_name, all_case_data, mach_number):
         save_dir = os.path.join(script_root, "results", wing_name)
         os.makedirs(save_dir, exist_ok=True)
         
-        save_path = os.path.join(save_dir, f"{wing_name}_spanwise_plots.{plot_file_format}")
+        save_path = os.path.join(save_dir, f"{wing_name}_m{int(mach_number*100):03d}_spanwise_plots.{plot_file_format}")
         plt.savefig(save_path, bbox_inches='tight', dpi=300)
         print(f"\nPlots saved to: {save_path}")
 
@@ -316,16 +316,13 @@ def plot_aero_curves(wing_name, all_case_data, mach_number):
         save_dir = os.path.join(script_root, "results", wing_name)
         os.makedirs(save_dir, exist_ok=True)
         
-        save_path = os.path.join(save_dir, f"{wing_name}_aero_curves.{plot_file_format}")
+        save_path = os.path.join(save_dir, f"{wing_name}_m{int(mach_number*100):03d}_aero_curves.{plot_file_format}")
         plt.savefig(save_path, bbox_inches='tight', dpi=300)
         print(f"Aero curves saved to: {save_path}")
 
     # plt.show()
 
-# ==============================================================================
-# 4. MAIN EXECUTION BLOCK
-# ==============================================================================
-if __name__ == "__main__":
+def run_plots():
     script_root = os.path.dirname(os.path.abspath(__file__))
     wing_results_dir = os.path.join(script_root, "results", wing_name_to_plot)
 
@@ -334,54 +331,54 @@ if __name__ == "__main__":
     else:
         print(f"Analyzing results for wing: {wing_name_to_plot}")
         
-        all_case_numpy_data = {}
-        mach_number = None  # Will store the Mach number from the first valid case
+        # Group data by Mach number
+        mach_data = {}  # Dict of format {mach_number: {alpha: numpy_data}}
+        mach_forces = {}  # Dict of format {mach_number: {alpha: forces}}
         
         for item in os.listdir(wing_results_dir):
             item_path = os.path.join(wing_results_dir, item)
             if os.path.isdir(item_path) and item not in ["geometry_master", "ANALYSIS_RESULTS"]:
                 case_data = parse_case_name(item)
                 if case_data:
-                    if mach_number is None:
-                        mach_number = case_data['mach_val']
+                    mach = case_data['mach_val']
+                    alpha = case_data['alpha_val']
                     forces_file_path = os.path.join(item_path, f"{case_data['full_name']}.forces")
+                    
                     if os.path.exists(forces_file_path):
+                        # Handle numpy data for spanwise plots
                         numpy_data = parse_forces_file_to_numpy(forces_file_path)
+                        # numpy_data structure: array([[y_pos, cl, cd_wake, cd_te, cm], ...])
+                        #   where: y_pos = spanwise position (y/s)
+                        #         cl = section lift coefficient
+                        #         cd_wake = section viscous drag coefficient (wake)
+                        #         cd_te = section viscous drag coefficient (trailing edge)
+                        #         cm = section moment coefficient
                         if numpy_data is not None:
-                            all_case_numpy_data[case_data['alpha_val']] = numpy_data
-                        else:
-                            print(f"Warning: Could not extract data from '{os.path.basename(forces_file_path)}'. Skipping.")
-                    else:
-                        print(f"Warning: '{os.path.basename(forces_file_path)}' not found. Skipping.")
+                            if mach not in mach_data:
+                                mach_data[mach] = {}
+                            mach_data[mach][alpha] = numpy_data
+                        
+                        # Handle forces data for aero curves
+                        forces = parse_integrated_forces(forces_file_path)
+                        if forces:
+                            if mach not in mach_forces:
+                                mach_forces[mach] = {}
+                            mach_forces[mach][alpha] = forces
         
-        if all_case_numpy_data:
-            # --- Example of accessing the NumPy array for other calculations ---
-            if all_case_numpy_data:
-                first_alpha = sorted(all_case_numpy_data.keys())[0]
-                print(f"\n--- Example: Accessing NumPy data for alpha = {first_alpha}° ---")
-                data_for_structures = all_case_numpy_data[first_alpha]
-                print("Shape of data array:", data_for_structures.shape)
-                print("Columns: y/s, CL, CD_wake, CD_te, CMLocal")
-                print(data_for_structures[:5, :]) # Print first 5 rows
-                print("-" * 20)
-            # --------------------------------------------------------------------
-
-            # Extract integrated forces for each case
-            all_case_forces = {}
-            for item in os.listdir(wing_results_dir):
-                item_path = os.path.join(wing_results_dir, item)
-                if os.path.isdir(item_path) and item not in ["geometry_master", "ANALYSIS_RESULTS"]:
-                    case_data = parse_case_name(item)
-                    if case_data:
-                        forces_file_path = os.path.join(item_path, f"{case_data['full_name']}.forces")
-                        if os.path.exists(forces_file_path):
-                            forces = parse_integrated_forces(forces_file_path)
-                            if forces:
-                                all_case_forces[case_data['alpha_val']] = forces
+        if mach_data:
+            print(f"\nFound data for Mach numbers: {sorted(mach_data.keys())}")
             
-            # Generate both sets of plots
-            plot_spanwise_loading(wing_name_to_plot, all_case_numpy_data, mach_number)
-            plot_aero_curves(wing_name_to_plot, all_case_forces, mach_number)
+            # Generate plots for each Mach number
+            for mach_number in sorted(mach_data.keys()):
+                print(f"\nGenerating plots for Mach {mach_number:.3f}")
+                plot_spanwise_loading(wing_name_to_plot, mach_data[mach_number], mach_number)
+                plot_aero_curves(wing_name_to_plot, mach_forces[mach_number], mach_number)
         
         else:
             print("\n❌ No valid .forces files were found to plot.")
+
+# ==============================================================================
+# 4. MAIN EXECUTION BLOCK
+# ==============================================================================
+if __name__ == "__main__":
+    run_plots()
