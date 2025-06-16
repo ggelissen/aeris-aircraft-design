@@ -43,6 +43,7 @@ def get_key_parameters(params: DesignParameters) -> Dict[str, float]:
     and must converge for a stable solution.
     """
     return {
+        'W_OEW': params.weight.W_OE,
         'W_TO': params.weight.W_TO,
         'W_S': params.weight.W_S, 
         'T_W': params.weight.T_W,
@@ -210,6 +211,7 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
     # Weight parameters (and performance, but coming from initial weight estimations)
     if 'W_TO' in class_i_results:
         params.weight.W_TO = class_i_results['W_TO']
+        print(f"        ⚠️  W_TO updated to {params.weight.W_TO} (from Class I results)")
         updates += 1
     if 'W_E' in class_i_results:
         params.weight.W_E = class_i_results['W_E']
@@ -514,6 +516,7 @@ def master_design_process(config_file: str = 'design_config.yaml',
                 raise
             print(f"    🔄 Continuing with previous iteration parameters")
         
+        params_class_i_key = get_key_parameters(params)
         # ================================================================
         # PHASE 2: WING PLANFORM OPTIMIZATION
         # ================================================================  
@@ -551,6 +554,7 @@ def master_design_process(config_file: str = 'design_config.yaml',
             print(f"    ❌ Class II analysis failed: {e}")
             print(f"    🔄 Continuing with current parameters")
         
+        
         # ================================================================
         # PHASE 4: CONVERGENCE CHECK
         # ================================================================
@@ -558,6 +562,14 @@ def master_design_process(config_file: str = 'design_config.yaml',
         params_end = get_key_parameters(params)
         converged, relative_diffs = check_convergence(params_start, params_end, tolerance)
         
+        # # Check convergence against class I constraints
+        # converged_inner, relative_diffs_inner = check_convergence(params_class_i_key, params_end, tolerance)
+
+        # if not converged_inner:
+        #     print(f"    ❌ Class I constraints not met, re-iterating...")
+        #     converged = False
+        #     relative_diffs.update(relative_diffs_inner)
+
         # Calculate iteration time
         iteration_time = time.time() - iteration_start_time
         
@@ -625,6 +637,7 @@ def print_final_design_summary(params: DesignParameters) -> None:
     print(f"    Aspect Ratio (A_w):         {params.wing.A_w_target:.2f}")
     print(f"    Wing Loading (W_S):         {params.weight.W_S:.0f} N/m²")
     print(f"    Sweep Angle (Λ_0.25c):      {np.rad2deg(params.wing.Lambda_025c_w):.1f}°")
+    print(f"    Design Lift Coefficient (C_L): {params.wing.CL:.3f}")
     print(f"    Taper Ratio (λ):            {params.wing.lambda_w:.3f}")
     print(f"    Thickness-to-Chord (t/c):   {params.wing.t_c_w_max:.3f}")
     print(f"    Root Chord:                 {params.wing.root_chord:.3f} m")
@@ -658,7 +671,7 @@ if __name__ == "__main__":
         # Execute master design process
         final_params, history, converged = master_design_process(
             config_file='design_config.yaml',
-            max_iterations=8, 
+            max_iterations=30, 
             tolerance=0.015,  # 1.5% convergence tolerance
             verbose=True
         )
