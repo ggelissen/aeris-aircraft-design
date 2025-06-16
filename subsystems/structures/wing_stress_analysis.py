@@ -220,7 +220,7 @@ def run_structures(designvars):
                         if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
                             designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(boom_number)
             if not (boom_number == 'Spar1' or boom_number == 'Spar2'):
-                crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E, designvars.wing.wingsection.stringers[boom_number]['area_moment_of_inertia_m4'], designvars.wing.wingsection.stringers[boom_number]["crosssectionalarea_mm2"]/1000000, length_between_ribs, designvars.wing.wingsection.stringers[boom_number]['K'] )
+                crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E*1e9, designvars.wing.wingsection.stringers[boom_number]['area_moment_of_inertia_m4'], designvars.wing.wingsection.stringers[boom_number]["crosssectionalarea_mm2"]/1000000, length_between_ribs, designvars.wing.wingsection.stringers[boom_number]['K'] )
                 if np.abs(boom_stress) > crit_stringer_buckling:
                     print(f"Warning: Stringer {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(boom_stress-crit_stringer_buckling)/boom_stress} % ")
                     if (np.abs(boom_stress)-crit_stringer_buckling)/boom_stress > 0.3:
@@ -241,12 +241,12 @@ def run_structures(designvars):
     x_bending = calculate_bending_distribution(
         np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]),
         np.array([cross_sectional_results[i]["Ixx"] for i in range(len(spanwise_position_lst))]),
-        designvars.materials.material_E,
+        designvars.materials.material_E*1e9,
         designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
     y_twist = calculate_angle_of_twist(
         np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]),
         np.array([cross_sectional_results[i]["A_m"] for i in range(len(spanwise_position_lst))]),
-        designvars.materials.material_G, designvars.wing.wingsection.wingskin['thicness'] / 1000,
+        designvars.materials.material_G * 1e9, designvars.wing.wingsection.wingskin['thicness'] / 1000,
         designvars.wing.wingsection.spars["Spar1"]["t_web_mm"] / 1000,
         np.array([cross_sectional_results[i]["wingskin_length"] for i in range(len(spanwise_position_lst))]),
         np.array([cross_sectional_results[i]['web_length'] for i in range(len(spanwise_position_lst))]),
@@ -254,7 +254,7 @@ def run_structures(designvars):
     z_bending = calculate_bending_distribution(
         np.array([wing_loading[i]["moment_z"] for i in range(len(spanwise_position_lst))]),
         np.array([cross_sectional_results[i]["Iyy"] for i in range(len(spanwise_position_lst))]),
-        designvars.materials.material_E,
+        designvars.materials.material_E * 1e9,
         designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
     x_bending_distribution = x_bending
     y_twist_distribution = y_twist
