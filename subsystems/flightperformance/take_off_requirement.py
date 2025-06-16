@@ -24,7 +24,6 @@ def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_h,z_cg,z_p, Cd0, AR
     AR: wing aspect ratio
     oswald: oswald efficiency factor of wing
     TSFC: Thrust specific fuel consumption of engine
-    D: diamater of engine
     '''
     
     T, _, V = FlightSim().ground_run2(mass0*2,mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO)
