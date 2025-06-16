@@ -262,7 +262,7 @@ def vfp_analysis(designvars : DesignParameters = None):
     vfp_sweep.aft_body_length = vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/root_chord - vsp.GetParmVal(designvars.fuselage.fuseid, 'XLocPercent', 'XSec_3')*vsp.GetParmVal(designvars.fuselage.fuseid, 'Length', 'Design')/root_chord
     vfp_sweep.wing_root_le_pos = (designvars.wing.xpos - np.tan(designvars.wing.Lambda_0_w) * designvars.fuselage.D_f/2)/root_chord
     
-    vfp_sweep.Lambda_lei = vsp.GetParmVal(designvars.wing.wingid, 'Lambda_0_w')  # Leading edge sweep angle at the root
+    vfp_sweep.Lambda_lei = np.rad2deg(designvars.wing.Lambda_0_w)  # Leading edge sweep angle at the root
     vfp_sweep.Lambda_leo = vfp_sweep.Lambda_lei # Assuming the leading edge sweep angle at the tip is the same as at the root for simplicity
 
     wing_name = 'WingA'
@@ -282,5 +282,5 @@ if __name__ == '__main__':
     AERIS.load_from_yaml("design_config.yaml")
     struct_main(AERIS, show_3d=False)
     #aerodynamic_analysis(AERIS)
-    panel_openvsp(AERIS)
+    vfp_analysis(AERIS)
 
