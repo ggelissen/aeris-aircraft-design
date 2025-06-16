@@ -4,7 +4,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from vfp_aoa_sweep import wing_name
+try:
+    from vfp_aoa_sweep import wing_name
+except:
+    from subsystems.aerodynamics.vfp_analysis.vfp_aoa_sweep import wing_name
 
 # ==============================================================================
 # 1. DEFINE PLOTTING PARAMETERS
