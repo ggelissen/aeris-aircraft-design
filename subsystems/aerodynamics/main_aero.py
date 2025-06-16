@@ -248,10 +248,10 @@ def vfp_analysis(designvars : DesignParameters = None):
     vfp_sweep.end_mach = 0.85         # The final target Mach number.
     vfp_sweep.mach_increment = 0.02   # The step size for the Mach sweep.
 
-    vfp_sweep.A_g = vsp.GetParmVal(designvars.wing.wingid, 'TotalAR', 'WingGeom')  # Aspect ratio of the wing
-    vfp_sweep.tip_c0_taper_ratio = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))  # Taper ratio at the wingtip
-    vfp_sweep.crank_c0_taper_ratio = {vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),2), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))}
-    vfp_sweep.eta_sc = vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') / (vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') + vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_2'))
+    vfp_sweep.A_g = np.round(vsp.GetParmVal(designvars.wing.wingid, 'TotalAR', 'WingGeom'), decimals=2)  # Aspect ratio of the wing
+    vfp_sweep.tip_c0_taper_ratio = np.round(vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord')), decimals=2)  # Taper ratio at the wingtip
+    vfp_sweep.crank_c0_taper_ratio = np.round(vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),2), 'Tip_Chord'))/vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord')), decimals=2)
+    vfp_sweep.eta_sc = np.round(vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') / (vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_1') + vsp.GetParmVal(designvars.wing.wingid, 'Span', 'XSec_2')), decimals=2)
     
     root_chord = vsp.GetParmVal(vsp.GetXSecParm(vsp.GetXSec(vsp.GetXSecSurf(designvars.wing.wingid,0),1), 'Root_Chord'))
     

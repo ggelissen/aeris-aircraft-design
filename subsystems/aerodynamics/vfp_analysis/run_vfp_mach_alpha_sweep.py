@@ -193,7 +193,24 @@ def run_fpcon_once(base_dir, wing_name, airfoil_src_dir, mach_for_fpcon):
         f.write(f"{mach_for_fpcon} {alpha_sweep[0]}\n")
     
     try:
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/0412vgk.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/nac0012.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/rae2822.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/sc20412.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/sc20612.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/sc20712.dat', '/root/DSEproject')
         subprocess.run(f'wine "{fpcon_run_dir}/fpcon.exe" < {input_file}', shell=True, check=True)
+        os.remove('/root/DSEproject/0412vgk.dat')
+        os.remove('/root/DSEproject/nac0012.dat')
+        os.remove('/root/DSEproject/rae2822.dat')
+        os.remove('/root/DSEproject/sc20412.dat')
+        os.remove('/root/DSEproject/sc20612.dat')
+        os.remove('/root/DSEproject/sc20712.dat')
+        shutil.move('/root/DSEproject/FLOW.DAT', f'{fpcon_run_dir}/FLOW.DAT')
+        shutil.move('/root/DSEproject/GEO.DAT', f'{fpcon_run_dir}/GEO.DAT')
+        shutil.move('/root/DSEproject/GEOSUP.DAT', f'{fpcon_run_dir}/GEOSUP.DAT')
+        shutil.move('/root/DSEproject/MAP.DAT', f'{fpcon_run_dir}/MAP.DAT')
+        shutil.move('/root/DSEproject/RESPIN.DAT', f'{fpcon_run_dir}/RESPIN.DAT')
         print("FPCON executed successfully.")
         return fpcon_run_dir
     except subprocess.CalledProcessError as e:
