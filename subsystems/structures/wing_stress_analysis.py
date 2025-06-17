@@ -61,7 +61,7 @@ def calculate_bending_distribution(M: np.ndarray, I: np.ndarray, E: float, half_
     Returns:
     - Bending stress distribution along the span.
     """
-    deflection_der = -1 / E *   cumulative_simpson(M/I, dx=half_span / (np.shape(M)[0] - 1), initial=0)
+    deflection_der = -1 / E *   cumulative_simpson(M/I, dx=half_span / (np.shape(M)[0] - 1), initial=0) * 1e3
     deflection = cumulative_simpson(deflection_der, dx=half_span / (np.shape(M)[0] - 1), initial=0)
     return deflection
 
@@ -203,36 +203,38 @@ def run_structures(designvars):
             closest_rib_over = 1.0
         length_between_ribs = (closest_rib_over - closest_rib_under) * designvars.wing.b_w * np.cos(
             designvars.wing.Gamma_w)
-
-        for boom_stress, boom_number, boom_x, boom_y, boom_area in zip(results['bending_stresses'][:-1], ['Spar1'] + [f'Stringer{index+1}' for index in bottom_stringer_indices.tolist()] + ['Spar2', 'Spar2'] + [f'Stringer{index+1}' for index in top_stringer_indices.tolist()] + ['Spar1'], results['boom_x_coords_sorted'][:-1], results['boom_y_coords_sorted'][:-1], results['boom_areas_sorted'][:-1]):
-            if np.abs(boom_stress) > designvars.materials.material_sigma_yield:
-                print(f"Warning: Boom {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield strength with {100*(boom_stress-designvars.materials.material_sigma_yield)/boom_stress} % ")
-                if (np.abs(boom_stress)-designvars.materials.material_sigma_yield)/boom_stress > 0.3:
-                    if boom_number == 'Spar1' or boom_number == 'Spar2':
-                        designvars.structure_results.should_increase_sparcap_thickness_by_30_percent_in_nextround = True
-                    else:
-                        if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
-                            designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround.append(boom_number)
-                else:
-                    if boom_number == 'Spar1' or boom_number == 'Spar2':
-                        designvars.structure_results.should_increase_sparcap_thickness_by_10_percent_in_nextround = True
-                    else:
-                        if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
-                            designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(boom_number)
-            if not (boom_number == 'Spar1' or boom_number == 'Spar2'):
-                crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E*1e9, designvars.wing.wingsection.stringers[boom_number]['area_moment_of_inertia_m4'], designvars.wing.wingsection.stringers[boom_number]["crosssectionalarea_mm2"]/1000000, length_between_ribs, designvars.wing.wingsection.stringers[boom_number]['K'] )
-                if np.abs(boom_stress) > crit_stringer_buckling:
-                    print(f"Warning: Stringer {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(boom_stress-crit_stringer_buckling)/boom_stress} % ")
-                    if (np.abs(boom_stress)-crit_stringer_buckling)/boom_stress > 0.3:
-                        if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
-                            designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround.append(boom_number)
+        nameslist = (['Spar1'] + [f'Stringer{index+1}' for index in bottom_stringer_indices.tolist()] + ['Spar2', 'Spar2'] + [f'Stringer{index+1}' for index in top_stringer_indices.tolist()] + ['Spar1'])
+        nameslist.reverse()
+        for boom_stress, boom_number, boom_x, boom_y, boom_area in zip(results['bending_stresses'][:-1], nameslist, results['boom_x_coords_sorted'][:-1], results['boom_y_coords_sorted'][:-1], results['boom_areas_sorted'][:-1]):
+            if spanwise_position > 0.21:
+                if np.abs(boom_stress) > designvars.materials.material_sigma_yield:
+                    print(f"Warning: Boom {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield strength with {100*(boom_stress-designvars.materials.material_sigma_yield)/boom_stress} % ")
+                    if (np.abs(boom_stress)-designvars.materials.material_sigma_yield)/boom_stress > 0.3:
+                        if boom_number == 'Spar1' or boom_number == 'Spar2':
+                            designvars.structure_results.should_increase_sparcap_thickness_by_30_percent_in_nextround = True
+                        else:
+                            if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
+                                designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround.append(boom_number)
                     else:
                         if boom_number == 'Spar1' or boom_number == 'Spar2':
                             designvars.structure_results.should_increase_sparcap_thickness_by_10_percent_in_nextround = True
                         else:
                             if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
-                                designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(
-                                    boom_number)
+                                designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(boom_number)
+                if not (boom_number == 'Spar1' or boom_number == 'Spar2'):
+                    crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E*1e9, designvars.wing.wingsection.stringers[boom_number]['area_moment_of_inertia_m4'], designvars.wing.wingsection.stringers[boom_number]["crosssectionalarea_mm2"]/1000000, length_between_ribs, designvars.wing.wingsection.stringers[boom_number]['K'] )
+                    if np.abs(boom_stress) > crit_stringer_buckling:
+                        print(f"Warning: Stringer {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(boom_stress-crit_stringer_buckling)/boom_stress} % ")
+                        if (np.abs(boom_stress)-crit_stringer_buckling)/boom_stress > 0.3:
+                            if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
+                                designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround.append(boom_number)
+                        else:
+                            if boom_number == 'Spar1' or boom_number == 'Spar2':
+                                designvars.structure_results.should_increase_sparcap_thickness_by_10_percent_in_nextround = True
+                            else:
+                                if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
+                                    designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(
+                                        boom_number)
 
         # TODO: Check shearstress vs max shearstress
 
@@ -240,8 +242,8 @@ def run_structures(designvars):
 
     x_bending = calculate_bending_distribution(
         np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]),
-        np.array([cross_sectional_results[i]["Ixx"] for i in range(len(spanwise_position_lst))]),
-        designvars.materials.material_E*1e9,
+        np.array([cross_sectional_results[i]["Ixx"] for i in range(len(spanwise_position_lst))]), ##mm4
+        designvars.materials.material_E,
         designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
     y_twist = calculate_angle_of_twist(
         np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]),
@@ -253,8 +255,8 @@ def run_structures(designvars):
         designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
     z_bending = calculate_bending_distribution(
         np.array([wing_loading[i]["moment_z"] for i in range(len(spanwise_position_lst))]),
-        np.array([cross_sectional_results[i]["Iyy"] for i in range(len(spanwise_position_lst))]),
-        designvars.materials.material_E * 1e9,
+        np.array([cross_sectional_results[i]["Iyy"] for i in range(len(spanwise_position_lst))]), #mm4
+        designvars.materials.material_E,
         designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w))
     x_bending_distribution = x_bending
     y_twist_distribution = y_twist
@@ -284,104 +286,28 @@ if __name__ == "__main__":
     designvars = master_design_process('design_config.yaml')[0]
 
     #### TODO: REPLACE THIS FOR AERODYNAMICS CALCULATED LOADS
-    y_array = np.array([0.497939, 0.535395, 0.57604,  0.620787, 0.670717, 0.727033, 0.790755, 0.861757,
-         0.937167, 1.011241, 1.103243, 1.231024, 1.338539, 1.437229, 1.533112, 1.628782,
-         1.72558,  1.824164, 1.924557, 2.02589,  2.125973, 2.221131, 2.307192, 2.381746,
-         2.445554, 2.501704, 0.497939, 0.535395, 0.57604,  0.620787, 0.670717, 0.727033,
-         0.790755, 0.861757, 0.937167, 1.011241, 1.103243, 1.231024, 1.338539, 1.437229,
-         1.533112, 1.628782, 1.72558,  1.824164, 1.924557, 2.02589,  2.125973, 2.221131,
-         2.307192, 2.381746, 2.445554, 2.501704, 0.497939, 0.535395, 0.57604,  0.620787,
-         0.670717, 0.727033, 0.790755, 0.861757, 0.937167, 1.011241, 1.103243, 1.231024,
-         1.338539, 1.437229, 1.533112, 1.628782, 1.72558,  1.824164, 1.924557, 2.02589,
-         2.125973, 2.221131, 2.307192, 2.381746, 2.445554, 2.501704, 0.497939, 0.535395,
-         0.57604,  0.620787, 0.670717, 0.727033, 0.790755, 0.861757, 0.937167, 1.011241,
-         1.103243, 1.231024, 1.338539, 1.437229, 1.533112, 1.628782, 1.72558,  1.824164,
-         1.924557, 2.02589,  2.125973, 2.221131, 2.307192, 2.381746, 2.445554, 2.501704,
-         0.497939, 0.535395, 0.57604,  0.620787, 0.670717, 0.727033, 0.790755, 0.861757,
-         0.937167, 1.011241, 1.103243, 1.231024, 1.338539, 1.437229, 1.533112, 1.628782,
-         1.72558,  1.824164, 1.924557, 2.02589,  2.125973, 2.221131, 2.307192, 2.381746,
-         2.445554, 2.501704, 0.497939, 0.535395, 0.57604,  0.620787, 0.670717, 0.727033,
-         0.790755, 0.861757, 0.937167, 1.011241, 1.103243, 1.231024, 1.338539, 1.437229,
-         1.533112, 1.628782, 1.72558,  1.824164, 1.924557, 2.02589,  2.125973, 2.221131,
-         2.307192, 2.381746, 2.445554, 2.501704, 0.497939, 0.535395, 0.57604,  0.620787,
-         0.670717, 0.727033, 0.790755, 0.861757, 0.937167, 1.011241, 1.103243, 1.231024,
-         1.338539, 1.437229, 1.533112, 1.628782, 1.72558,  1.824164, 1.924557, 2.02589,
-         2.125973, 2.221131, 2.307192, 2.381746, 2.445554, 2.501704])
-    designvars.wing.CL_distribution = np.nan_to_num(interp1d(y_array, np.array([0.333681, 0.342687, 0.352582, 0.363059, 0.374406, 0.386695, 0.399927, 0.413718,
-         0.426826, 0.434217, 0.432003, 0.433442, 0.434596, 0.434468, 0.433142, 0.430456,
-         0.426152, 0.419777, 0.410784, 0.398139, 0.380995, 0.358208, 0.32878,  0.292299,
-         0.247394, 0.185865, 0.380517, 0.390758, 0.401983, 0.413918, 0.426913, 0.441097,
-         0.45655,  0.472926, 0.488994, 0.499721, 0.498431, 0.500764, 0.502754, 0.503329,
-         0.502635, 0.500518, 0.496709, 0.490706, 0.481893, 0.469043, 0.451084, 0.426273,
-         0.393083, 0.350486, 0.295848, 0.220308, 0.428039, 0.439531, 0.452149, 0.465632,
-         0.480366, 0.496562, 0.514391, 0.533563, 0.552802, 0.566924, 0.566585, 0.570025,
-         0.573075, 0.57456,  0.574654, 0.573184, 0.569838, 0.564069, 0.555084, 0.541372,
-         0.521787, 0.49401,  0.456332, 0.407148, 0.343062, 0.253569, 0.451977, 0.464107,
-         0.477402, 0.491659, 0.507263, 0.524471, 0.543503, 0.564094, 0.584966, 0.60091,
-         0.60114,  0.605234, 0.60888,  0.610912, 0.611547, 0.610504, 0.607409, 0.601645,
-         0.59254,  0.578555, 0.558155, 0.52883,  0.488376, 0.435154, 0.36583,  0.26927,
-         0.475923, 0.488701, 0.50269,  0.517756, 0.534225, 0.552449, 0.572676, 0.594681,
-         0.617206, 0.634992, 0.635757, 0.640487, 0.644775, 0.647183, 0.647985, 0.64724,
-         0.644357, 0.638746, 0.62974,  0.61505,  0.59352,  0.56262,  0.519568, 0.462792,
-         0.387713, 0.284271, 0.499921, 0.513338, 0.52802,  0.54378,  0.561084, 0.580283,
-         0.601715, 0.625106, 0.649272, 0.668852, 0.669996, 0.675178, 0.679705, 0.6823,
-         0.683431, 0.682458, 0.679285, 0.67337,  0.663825, 0.648681, 0.626194, 0.59323,
-         0.547466, 0.486999, 0.407026, 0.297361, 0.240343, 0.246839, 0.253991, 0.261459,
-         0.269397, 0.277773, 0.286567, 0.295078, 0.302213, 0.302911, 0.298522, 0.297946,
-         0.297229, 0.295498, 0.292727, 0.288745, 0.283328, 0.276126, 0.266773, 0.254662,
-         0.239477, 0.221054, 0.199605, 0.175849, 0.149349, 0.115475]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
-    designvars.wing.CD_distribution = np.nan_to_num(interp1d(y_array, np.array([0.006946, 0.009942, 0.009848, 0.010294, 0.010359, 0.010329, 0.010131, 0.009778,
- 0.009258, 0.01044,  0.010215, 0.009829, 0.009463, 0.009151, 0.008859, 0.008575,
- 0.008292, 0.008003, 0.007709, 0.007431, 0.007166, 0.006922, 0.006742, 0.0066,
- 0.00656,  0.006525, 0.006517, 0.009591, 0.009568, 0.010078, 0.010203, 0.01024,
- 0.01012,  0.009825, 0.009327, 0.010572, 0.010418, 0.010058, 0.00971,  0.009413,
- 0.009127, 0.00884,  0.008545, 0.008237, 0.007913, 0.007604, 0.007292, 0.006995,
- 0.006758, 0.006542, 0.006616, 0.006682, 0.006085, 0.009299, 0.009244, 0.009723,
- 0.009804, 0.009794, 0.009609, 0.00923,  0.008691, 0.010464, 0.010605, 0.010267,
- 0.009935, 0.009646, 0.009372, 0.009092, 0.008806, 0.008516, 0.008222, 0.007963,
- 0.007667, 0.007392, 0.007153, 0.006883, 0.006944, 0.006998, 0.00594,  0.009234,
- 0.009173, 0.009645, 0.009715, 0.009684, 0.009449, 0.009056, 0.00852,  0.010448,
- 0.010703, 0.010382, 0.010072, 0.0098,   0.009576, 0.009337, 0.009051, 0.008754,
- 0.008476, 0.008079, 0.007878, 0.007592, 0.007409, 0.007195, 0.007409, 0.007597,
- 0.005869, 0.009139, 0.009163, 0.009612, 0.009689, 0.009623, 0.00936,  0.008982,
- 0.008431, 0.0105,   0.01086,  0.010573, 0.010301, 0.01013,  0.009892, 0.009613,
- 0.009562, 0.009302, 0.008892, 0.008551, 0.008368, 0.008078, 0.007794, 0.007695,
- 0.008078, 0.008415, 0.005686, 0.008931, 0.008909, 0.009464, 0.00962,  0.009627,
- 0.009351, 0.008979, 0.008406, 0.010611, 0.011079, 0.010872, 0.010749, 0.010588,
- 0.010629, 0.010454, 0.010182, 0.009882, 0.009583, 0.009375, 0.009011, 0.008697,
- 0.008614, 0.008436, 0.009025, 0.009543, 0.007053, 0.010221, 0.010309, 0.010879,
- 0.011063, 0.011128, 0.010805, 0.010429, 0.009874, 0.010604, 0.010138, 0.009728,
- 0.009355, 0.00904,  0.008749, 0.008469, 0.008191, 0.007911, 0.00763,  0.007347,
- 0.007081, 0.006836, 0.006658, 0.006543, 0.006669, 0.00678]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
-    designvars.wing.CM_distribution = np.nan_to_num(interp1d(y_array, np.array([-0.109932, -0.119723, -0.131979, -0.147105, -0.166202, -0.190691, -0.22254,
- -0.263743, -0.314624, -0.366971, -0.416484, -0.50352, -0.585205, -0.665601,
- -0.748369, -0.835045, -0.926282, -1.02163, -1.119338, -1.214046, -1.297207,
- -1.354081, -1.366448, -1.320033, -1.202251, -0.970036, -0.11549, -0.126469,
- -0.140221, -0.157259, -0.178819, -0.206541, -0.242712, -0.289714, -0.348186,
- -0.409918, -0.468532, -0.569523, -0.664481, -0.75828, -0.855313, -0.957553,
- -1.065993, -1.1804, -1.299093, -1.416149, -1.521703, -1.597246, -1.619652,
- -1.568952, -1.424194, -1.138092, -0.121027, -0.133193, -0.148459, -0.167435,
- -0.191501, -0.222517, -0.263094, -0.316023, -0.382225, -0.453422, -0.521182,
- -0.636424, -0.745055, -0.852712, -0.964468, -1.082672, -1.208605, -1.342194,
- -1.481692, -1.619548, -1.745248, -1.836194, -1.865596, -1.8085, -1.638307,
- -1.298837, -0.123741, -0.136488, -0.152498, -0.172427, -0.197721, -0.230358,
- -0.273111, -0.328968, -0.39901, -0.474983, -0.547433, -0.669925, -0.785536,
- -0.900414, -1.020176, -1.147061, -1.282134, -1.425149, -1.574475, -1.723179,
- -1.859301, -1.958113, -1.989202, -1.925509, -1.740226, -1.373774, -0.126425,
- -0.139751, -0.156482, -0.177341, -0.203844, -0.238076, -0.282974, -0.341715,
- -0.415566, -0.496281, -0.573361, -0.703086, -0.825788, -0.947727, -1.0742,
- -1.20907, -1.353024, -1.50589, -1.666193, -1.825372, -1.969516, -2.075392,
- -2.108467, -2.040888, -1.837733, -1.444575, -0.12905, -0.142954, -0.160412,
- -0.182178, -0.20984, -0.2456, -0.29258, -0.35414, -0.431738, -0.517093,
- -0.598626, -0.735268, -0.864663, -0.993047, -1.127615, -1.269761, -1.421153,
- -1.5821, -1.750635, -1.918235, -2.071932, -2.182104, -2.215152, -2.140987,
- -1.92292, -1.50541, -0.098672, -0.106013, -0.115153, -0.12631, -0.14029,
- -0.158078, -0.181049, -0.210323, -0.245653, -0.2787, -0.309316, -0.367558,
- -0.421828, -0.474521, -0.527851, -0.582518, -0.638535, -0.695066, -0.750358,
- -0.800418, -0.839733, -0.8605, -0.85492, -0.819707, -0.750884, -0.624756]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+    y_array = np.array([-0.167161, -0.181016, -0.19832, -0.220221, -0.248814, -0.285837, -0.330371,
+ -0.395234, -0.490279, -0.539579, -0.59748, -0.657885, -0.72174, -0.78975,
+ -0.862647, -0.94073, -1.02412, -1.110966, -1.199269, -1.281431, -1.347464,
+ -1.384543, -1.374316, -1.304761, -1.164779, -0.918878])
+    designvars.wing.CL_distribution = np.nan_to_num(interp1d(y_array, np.array([0.28188, 0.290282, 0.299745, 0.310382, 0.322649, 0.336443, 0.350593, 0.369578,
+ 0.387962, 0.387545, 0.391251, 0.394771, 0.398051, 0.401018, 0.40362, 0.405645,
+ 0.406848, 0.40646, 0.403992, 0.397873, 0.386845, 0.36981, 0.344648, 0.310145,
+ 0.264228, 0.198729]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+    designvars.wing.CD_distribution = np.nan_to_num(interp1d(y_array, np.array([0.006406, 0.009293, 0.00918, 0.00954, 0.009478, 0.009296, 0.009052, 0.008448,
+    0.009304, 0.009367, 0.009098, 0.008897, 0.008723, 0.008562, 0.008405, 0.008248,
+    0.008088, 0.007936, 0.00778, 0.007644, 0.007521, 0.007345, 0.007193, 0.007059,
+    0.007079, 0.007097]
+       ), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+    designvars.wing.CM_distribution = np.nan_to_num(interp1d(y_array, np.array([-0.167161, -0.181016, -0.19832, -0.220221, -0.248814, -0.285837, -0.330371,
+  -0.395234, -0.490279, -0.539579, -0.59748, -0.657885, -0.72174, -0.78975,
+  -0.862647, -0.94073, -1.02412, -1.110966, -1.199269, -1.281431, -1.347464,
+  -1.384543, -1.374316, -1.304761, -1.164779, -0.918878]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+
 
     print(designvars.weight.W_wing)
 
     run_structures(designvars)
 
     print(designvars.structure_results)
+    generate_wing_structure_3D(designvars)

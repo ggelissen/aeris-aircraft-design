@@ -14,6 +14,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from utils.unit_conversions import *
 from design_variables import *
+from class2.master_design_loop import master_design_process
 
 
 # ==== Flight Envelope for UAV ====
@@ -242,52 +243,124 @@ class FlightEnvelope:
 
         return n_maneuver_pos, n_maneuver_neg
 
-    def plot_vn_diagram(self, velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust):
+    def plot_vn_diagram(self, velocity_aixs, n_pos_limit, n_neg_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust):
 
         plt.figure(figsize=(10, 6))
 
-        # Maneuver limits
-        plt.plot(velocity_aixs, n_maneuver_pos, label='Positive Maneuver Limit', color='blue')
-        plt.plot(velocity_aixs, n_maneuver_neg, label='Negative Maneuver Limit', color='blue')
+        # Plot maneuver limits
+        plt.plot(velocity_aixs, n_maneuver_pos, color='blue')
+        plt.plot(velocity_aixs, n_maneuver_neg, color='blue')
 
-        # Gust loads
-        # plt.plot(velocity_aixs, n_gust_pos, '--', label='Positive Gust Load', color='orange')
-        # plt.plot(velocity_aixs, n_gust_neg, '--', label='Negative Gust Load', color='orange')
+        # Plot gust loads
         V_gust = np.array(velocities_eas_gust)
-        plt.plot(V_gust, n_gust_pos, label="Gust Load", linestyle='--', color='orange')
-        plt.plot(V_gust, n_gust_neg, label="Gust Load", linestyle='--', color='orange')
+        plt.plot(V_gust, n_gust_pos, linestyle='--', color='orange')
+        plt.plot(V_gust, n_gust_neg, linestyle='--', color='orange')
 
-        # Key speeds
-        # Compute VA as the speed at which the parabola hits the flat limit
+        # Compute VA
         VA_index = np.argmax(n_maneuver_pos >= n_pos_limit)
-        VA = velocity_aixs[VA_index] # VA Equivalent Airspeed (EAS) [m/s]
-        VA_TAS = equivalent_to_true_air_speed(VA, self.density_at_altitude[altitude_level], self.density_at_altitude['sea_level'])  # Convert EAS to TAS [m/s]
-        print(f"VA (EAS): {VA} m/s, VA (TAS): {VA_TAS} m/s")
+        VA = velocity_aixs[VA_index]
+        print(f"VA (EAS): {VA} m/s")
+
+        # Compute VA′ (negative)
+        VA_prime_index = np.argmax(n_maneuver_neg <= n_neg_limit)
+        VA_prime = velocity_aixs[VA_prime_index]
+        print(f"VA′ (EAS): {VA_prime} m/s")
+
+        # Plot vertical lines for VS, VA, VC, VD, VA'
+        speeds = [VS, VA, VC, VD, VA_prime]
+        labels = [r'$V_{S}$', r'$V_{A}$', r'$V_{C}$', r'$V_{D}$', r'$V_{A}^{*}$']
+        colors = ['black'] * 5
+
+        for v, label, color in zip(speeds, labels, colors):
+            plt.axvline(x=v, color=color, linestyle=':')
+            plt.text(v + 2, 0.1, label, fontsize=13, ha='left', va='bottom', color=color)
+
+        # Overlay blue segment of VD
+        plt.vlines(x=VD, ymin=0, ymax=n_pos_limit, colors='blue', linestyles='-', linewidth=2.5)
+
+        # Highlight VA and VA′ points on the curve
+        plt.plot(VA, n_pos_limit, 'ko')
+        plt.text(VA + 2, n_pos_limit + 0.2, r'$n =$' + f'{n_pos_limit:.1f}', fontsize=13, color='black')
+
+        plt.plot(VA_prime, n_neg_limit, 'ko')
+        plt.text(VA_prime + 2, n_neg_limit - 0.4, r'n =' + f'{n_neg_limit:.1f}', fontsize=13, color='black')
+
+        # Draw horizontal axis at n = 0
+        plt.axhline(y=0, color='black', linewidth=1)
+
+        # Aesthetics
+        plt.xlabel(r'$V_{EAS}$ [m/s]', fontsize=14, labelpad=0, loc='right')
+        plt.ylabel(r'$n$ [-]', fontsize=14)
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+        plt.grid(axis='y')
         
+        # plt.legend(
+        #     [n_maneuver_pos, n_gust_pos],
+        #     ['Maneuver Envelope', 'Gust Envelope'],
+        #     loc='upper right', fontsize=14
+        # )
 
-        # Custom color map for specific speeds
-        speed_labels = ['VS', 'VA', 'VC', 'VD']
-        speed_values = [VS, VA, VC, VD]
-        color_map = {
-            'VS': 'blue',
-            'VA': 'gray',
-            'VC': 'orange',
-            'VD': 'red'
-        }
+        # Move x-axis label to n = 0 line
+        ax = plt.gca()
+        ax.spines['bottom'].set_position(('data', 0))
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_position(('outward', 0))
 
-        for v, label in zip(speed_values, speed_labels):
-            plt.axvline(x=v, color=color_map[label], linestyle=':', label=label)
-
-        # Labels and aesthetics
-        plt.title(f'V-n Diagram (Flight Envelope)\nWeight: {weight_config}, Altitude: {altitude_level}, CL config: {ac_configuration}')
-        plt.xlabel('Equivalent Airspeed (m/s)')
-        plt.ylabel('Load Factor (n)')
-        plt.grid(True)
-        plt.legend(loc='upper right')
+        plt.legend(loc='upper right', fontsize=14)
         plt.ylim(-4, 5)
         plt.xlim(0, VD + 10)
         plt.tight_layout()
-        plt.show()
+        plt.savefig(f"Figures/VN_diagram")
+
+
+    # def plot_vn_diagram(self, velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust):
+
+    #     plt.figure(figsize=(10, 6))
+
+    #     # Maneuver limits
+    #     plt.plot(velocity_aixs, n_maneuver_pos, label='Positive Maneuver Limit', color='blue')
+    #     plt.plot(velocity_aixs, n_maneuver_neg, label='Negative Maneuver Limit', color='blue')
+
+    #     # Gust loads
+    #     # plt.plot(velocity_aixs, n_gust_pos, '--', label='Positive Gust Load', color='orange')
+    #     # plt.plot(velocity_aixs, n_gust_neg, '--', label='Negative Gust Load', color='orange')
+    #     V_gust = np.array(velocities_eas_gust)
+    #     plt.plot(V_gust, n_gust_pos, label="Gust Load", linestyle='--', color='orange')
+    #     plt.plot(V_gust, n_gust_neg, label="Gust Load", linestyle='--', color='orange')
+
+    #     # Key speeds
+    #     # Compute VA as the speed at which the parabola hits the flat limit
+    #     VA_index = np.argmax(n_maneuver_pos >= n_pos_limit)
+    #     VA = velocity_aixs[VA_index] # VA Equivalent Airspeed (EAS) [m/s]
+    #     VA_TAS = equivalent_to_true_air_speed(VA, self.density_at_altitude[altitude_level], self.density_at_altitude['sea_level'])  # Convert EAS to TAS [m/s]
+    #     print(f"VA (EAS): {VA} m/s, VA (TAS): {VA_TAS} m/s")
+        
+
+    #     # Custom color map for specific speeds
+    #     speed_labels = ['VS', 'VA', 'VC', 'VD']
+    #     speed_values = [VS, VA, VC, VD]
+    #     color_map = {
+    #         'VS': 'blue',
+    #         'VA': 'gray',
+    #         'VC': 'orange',
+    #         'VD': 'red'
+    #     }
+
+    #     for v, label in zip(speed_values, speed_labels):
+    #         plt.axvline(x=v, color=color_map[label], linestyle=':', label=label)
+
+    #     # Labels and aesthetics
+    #     plt.title(f'V-n Diagram (Flight Envelope)\nWeight: {weight_config}, Altitude: {altitude_level}, CL config: {ac_configuration}')
+    #     plt.xlabel('Equivalent Airspeed (m/s)')
+    #     plt.ylabel('Load Factor (n)')
+    #     plt.grid(True)
+    #     plt.legend(loc='upper right')
+    #     plt.ylim(-4, 5)
+    #     plt.xlim(0, VD + 10)
+    #     plt.tight_layout()
+    #     plt.show()
 
     def generate_flight_envelope(self, weight_config: str, altitude_level: str, ac_configuration: str):
         """
@@ -316,7 +389,7 @@ class FlightEnvelope:
         # 5. Calculate maneuver loads
         n_maneuver_pos, n_maneuver_neg = self.calc_maneuver_loads(velocity_aixs, n_pos_limit, n_neg_limit, VS, VD)
         # 6. Plot the V-n diagram
-        self.plot_vn_diagram(velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, self.VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust)
+        self.plot_vn_diagram(velocity_aixs, n_pos_limit, n_neg_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, self.VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust)
 
     def run_all_configurations(self):
         """
@@ -341,11 +414,11 @@ class FlightEnvelope:
 
 
 if __name__ == "__main__":
-    params = DesignParameters()
-    params.load_from_yaml("design_config.yaml")
+
+    params, _, _ = master_design_process("design_config.yaml")
 
     fe = FlightEnvelope(params)
-    fe.generate_flight_envelope("OEW_Payload_Fuselage_Fuel", "cruise", "CLEAN")
+    fe.generate_flight_envelope("MTOW", "cruise", "CLEAN")
     #fe.run_all_configurations()
 
 
