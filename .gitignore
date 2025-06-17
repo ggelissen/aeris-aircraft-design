@@ -172,6 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+subsystems/aerodynamics/vfp_analysis/results
+/root/DSEproject/subsystems/aerodynamics/vfp_analysis/results
 subsystems/aerodynamics/vfp_analysis/results/w1/w1_aero_curves.png
 subsystems/aerodynamics/vfp_analysis/results/w1/w1_m060_aero_curves.png
 subsystems/aerodynamics/vfp_analysis/results/w1/w1_m060_spanwise_plots.png
@@ -8482,3 +8484,4 @@ subsystems/aerodynamics/vfp_analysis/results/w16/w16m70am2p0re8m5/wavedrg74.dat
 subsystems/aerodynamics/vfp_analysis/results/w16/w16m70am2p0re8m5/wavedrg75.dat
 subsystems/aerodynamics/vfp_analysis/results/w16/w16m70am2p0re8m5/wavedrg76.dat
 subsystems/aerodynamics/vfp_analysis/results/w16/w16m70am2p0re8m5/wingfuse.dat
+subsystems/aerodynamics/vfp_analysis/run_vfp_mach_alpha_sweep.py

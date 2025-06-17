@@ -92,7 +92,7 @@ def generate_case_name(wing, mach, alpha, re):
 
 def setup_case_directory(base_dir, wing_name, run_name):
     """Creates a clean, self-contained directory for a single simulation case."""
-    wing_results_dir = os.path.join(base_dir, "/subsystems/aerodynamics/vfp_analysis/results", wing_name)
+    wing_results_dir = os.path.join("/root/DSEproject/subsystems/aerodynamics/vfp_analysis/results", wing_name)
     os.makedirs(wing_results_dir, exist_ok=True)
     
     case_run_dir = os.path.join(wing_results_dir, run_name)
@@ -207,6 +207,7 @@ def run_fpcon_once(base_dir, wing_name, airfoil_src_dir, mach_for_fpcon):
         os.remove('/root/DSEproject/sc20612.dat')
         os.remove('/root/DSEproject/sc20712.dat')
         shutil.move('/root/DSEproject/FLOW.DAT', f'{fpcon_run_dir}/FLOW.DAT')
+        shutil.copy('/root/DSEproject/GEO.DAT', '/root/DSEproject/subsystems/aerodynamics/vfp_analysis/vpwin_vfphv20')
         shutil.move('/root/DSEproject/GEO.DAT', f'{fpcon_run_dir}/GEO.DAT')
         shutil.move('/root/DSEproject/GEOSUP.DAT', f'{fpcon_run_dir}/GEOSUP.DAT')
         shutil.move('/root/DSEproject/MAP.DAT', f'{fpcon_run_dir}/MAP.DAT')
@@ -252,7 +253,7 @@ def run_vfp_case(case_run_dir, master_fpcon_dir, current_run_name, current_mach,
                 for data in lower_transition_data:
                     f.write(f"{data[0]} {data[1]} {data[2]} {data[3]}\n")
             subprocess.run(f'wine "vfptvkbodyv8.exe" < {input_file_body}', shell=True, check=True, cwd=case_run_dir)
-            shutil.copy(os.path.join(case_run_dir, "FLOWdmmean.dat"), os.path.join(case_run_dir, "fort.15"))
+            shutil.copy(f"{case_run_dir}/FLOWdmmean.DAT", os.path.join(case_run_dir, "fort.15"))
         else:
             print("ERROR: Wing-only flow file generation not implemented.")
             return False

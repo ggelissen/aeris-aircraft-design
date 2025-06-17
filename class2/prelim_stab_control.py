@@ -47,20 +47,20 @@ def calculate_Mach_correction_factor(M: float) -> float:
     return math.sqrt(1 - M**2)
 
 
-def calculate_lift_slope(A: float, beta: float, Lambda_05c: float, eta: float) -> float:
+def calculate_lift_slope(A: float, beta: float, Lambda_05_w: float, eta: float) -> float:
     """
     Calculate the lift coefficient slope based on the aspect ratio, beta, sweep angle, and eta.
 
     Parameters:
     A (float): Aspect ratio.
     beta (float): Mach correction factor.
-    Lambda_05c (float): Sweep angle at 0.5c in radians.
+    Lambda_05_w (float): Sweep angle at 0.5c in radians.
     eta (float): Efficiency factor.
 
     Returns:
     float: Lift coefficient slope.
     """
-    return (2 * math.pi * A) / (2 + math.sqrt(4 + ((A * beta / eta) ** 2) * (1 + (math.tan(Lambda_05c) ** 2) / (beta ** 2))))
+    return (2 * math.pi * A) / (2 + math.sqrt(4 + ((A * beta / eta) ** 2) * (1 + (math.tan(Lambda_05_w) ** 2) / (beta ** 2))))
 
 
 def calculate_net_surface_area(S: float, c_r: float, bf: float) -> float:
@@ -218,49 +218,55 @@ def calculate_all_coefficients(params: DesignParameters) -> dict:
     dict: Contains calculated coefficients.
     """
     # TODO Alejandro changed A_h to A_t for consistency with the design_variables class
-    C_L_h = calculate_lift_coefficient_tail(params.empennage.A_t, params.empennage.type)
+    C_L_h = calculate_lift_coefficient_tail(params.empennage.A_t_h, params.empennage.type)
     beta_cruise = calculate_Mach_correction_factor(params.cruise_mach)
     beta_landing = calculate_Mach_correction_factor(params.landing_mach)
     
-    C_L_alpha_h_cruise = calculate_lift_slope(params.empennage.A_t, beta_cruise, params.wing.Lambda_05c, params.wing.eta)
-    C_L_alpha_h_landing = calculate_lift_slope(params.empennage.A_t, beta_landing, params.wing.Lambda_05c, params.wing.eta)
+    C_L_alpha_h_cruise = calculate_lift_slope(params.empennage.A_t_h, beta_cruise, params.wing.Lambda_05_w, params.wing.eta)
+    C_L_alpha_h_landing = calculate_lift_slope(params.empennage.A_t_h, beta_landing, params.wing.Lambda_05_w, params.wing.eta)
     
-    C_L_alpha_w_cruise = calculate_lift_slope(params.wing.A, beta_cruise, params.wing.Lambda_05c, params.wing.eta)
-    C_L_alpha_w_landing = calculate_lift_slope(params.wing.A, beta_landing, params.wing.Lambda_05c, params.wing.eta)
+    C_L_alpha_w_cruise = calculate_lift_slope(params.wing.A_w_target, beta_cruise, params.wing.Lambda_05_w, params.wing.eta)
+    C_L_alpha_w_landing = calculate_lift_slope(params.wing.A_w_target, beta_landing, params.wing.Lambda_05_w, params.wing.eta)
 
-    S_net_val = calculate_net_surface_area(params.wing.S_w, params.wing.c_r, params.fuselage.b_f)
+    S_net_val = calculate_net_surface_area(params.wing.S_w, params.wing.root_chord, params.fuselage.D_f)
     
-    C_LA_A_h_cruise = calculate_lift_slope_less_tail(C_L_alpha_w_cruise, params.wing.b_w, params.fuselage.b_f,
+    C_LA_A_h_cruise = calculate_lift_slope_less_tail(C_L_alpha_w_cruise, params.wing.b_w, params.fuselage.D_f,
                                                      S_net_val, params.wing.S_w)
     
-    C_LA_A_h_landing = calculate_lift_slope_less_tail(C_L_alpha_w_landing, params.wing.b_w, params.fuselage.b_f,
+    C_LA_A_h_landing = calculate_lift_slope_less_tail(C_L_alpha_w_landing, params.wing.b_w, params.fuselage.D_f,
                                                        S_net_val, params.wing.S_w)
-
-    x_ac_cruise = calculate_x_ac(params.cg.x_ac_w, params.fuselage.b_f, params.fuselage.h_f,
-                                 params.fuselage.l_fn, params.engine.b_n, params.engine.l_n,
+    
+    x_ac_cruise = calculate_x_ac(params.cg.x_ac_w, params.fuselage.D_f, params.fuselage.D_f,
+                                 params.fuselage.l_fn, params.engine.nacelle_diameter, params.engine.nacelle_length,
                                  C_LA_A_h_cruise, params.wing.S_w, params.wing.mac,
                                  params.wing.mac, params.wing.b_w, params.wing.lambda_w,
                                  params.wing.Lambda_w)
 
-    x_ac_landing = calculate_x_ac(params.cg.x_ac_w, params.fuselage.b_f, params.fuselage.h_f,
-                                    params.fuselage.l_fn, params.engine.b_n, params.engine.l_n,
+    x_ac_landing = calculate_x_ac(params.cg.x_ac_w, params.fuselage.D_f, params.fuselage.D_f,
+                                    params.fuselage.l_fn, params.engine.nacelle_diameter, params.engine.nacelle_length,
                                     C_LA_A_h_landing, params.wing.S_w, params.wing.mac,
                                     params.wing.mac, params.wing.b_w, params.wing.lambda_w,
                                     params.wing.Lambda_w)
     
-    d_e_d_alpha_val = calculate_downwash_effect(C_L_alpha_w_cruise, params.wing.A_w, params.empennage.h_t, params.wing.b_w)
-
+    d_e_d_alpha_val = calculate_downwash_effect(C_L_alpha_w_cruise, params.wing.A_w_target, params.empennage.L_v/2, params.wing.b_w)
+    '''
     C_m_flaps_val = calculate_moment_coefficient_flaps(params.control_surface.mu2, params.control_surface.mu, params.performance.delta_Cl_max,
                                                          params.control_surface.c_prime_c, C_LA_A_h_landing,
-                                                            params.wing.S_wf, params.wing.S_w, params.wing.A_w,
+                                                            params.wing.S_wf, params.wing.S_w, params.wing.A_w_target,
                                                             params.control_surface.mu3, params.wing.Lambda_w, x_ac_landing,
                                                             params.wing.mac)
     
     CL0 = params.performance.CL_max_TO - C_LA_A_h_landing * params.performance.stall_angle
-    C_m_ac_landing = calculate_moment_coefficient_ac(params.performance.Cm0, params.wing.A_w, params.wing.Lambda_025c,
-                                                        C_m_flaps_val, params.fuselage.b_f, params.fuselage.l_f,
-                                                        params.fuselage.h_f, CL0, params.wing.S_w,
+    C_m_ac_landing = calculate_moment_coefficient_ac(params.wing.cm_025c, params.wing.A_w_target, params.wing.Lambda_025c_w,
+                                                        C_m_flaps_val, params.fuselage.D_f, params.fuselage.l_f,
+                                                        params.fuselage.D_f, CL0, params.wing.S_w,
                                                         params.wing.mac, C_LA_A_h_landing)
+    '''
+    CL0_cruise = params.performance.CL_max_cruise - C_LA_A_h_cruise * params.performance.stall_angle_cruise
+    C_m_ac_cruise = calculate_moment_coefficient_ac(params.wing.cm_025c, params.wing.A_w_target, params.wing.Lambda_025c_w,
+                                                        0, params.fuselage.D_f, params.fuselage.l_f,
+                                                        params.fuselage.D_f, CL0_cruise, params.wing.S_w,
+                                                        params.wing.mac, C_LA_A_h_cruise)
     
     return {
         "C_L_h": C_L_h,
@@ -272,12 +278,14 @@ def calculate_all_coefficients(params: DesignParameters) -> dict:
         "C_L_alpha_w_landing": C_L_alpha_w_landing,
         "C_LA_A_h_cruise": C_LA_A_h_cruise,
         "C_LA_A_h_landing": C_LA_A_h_landing,
-        "x_ac_cruise": x_ac_cruise,
-        "x_ac_landing": x_ac_landing,
+        #"x_ac_cruise": x_ac_cruise,
+        #"x_ac_landing": x_ac_landing,
         "d_e_d_alpha": d_e_d_alpha_val,
-        "C_m_flaps": C_m_flaps_val,
-        "CL0": CL0,
-        "C_m_ac_landing": C_m_ac_landing
+        #"C_m_flaps": C_m_flaps_val,
+        #"CL0_landing": CL0,
+        "CL0_cruise": CL0_cruise,
+        #"C_m_ac_landing": C_m_ac_landing,
+        "C_m_ac_cruise": C_m_ac_cruise
     }
 
 
@@ -398,6 +406,7 @@ if __name__ == "__main__":
     params.load_from_yaml('design_config.yaml')
 
     coefficients = calculate_all_coefficients(params)
+    print(coefficients)
 
     # Create a table
     table = PrettyTable()

@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
 from design_variables import DesignParameters
-
+from class1.thrust_wing_loading import run_performance_diagram
 # --- Constants ---
 G = 9.80665  # Gravity constant in m/s^2
 
@@ -142,8 +142,10 @@ def class1_weight_estimation(
     # --- 1. Calculate L/D ratios ---
     C_D0, oswald_e = get_drag_polar_params(ac_type)
     if "uav" in ac_type:
-        L_D_cruise1 = calculate_L_D_cruise_jet(C_D0, A, oswald_e)
-        L_D_loiter = calculate_L_D_loiter(C_D0, A, oswald_e) # Max L/D for loiter
+        A_winglet = A * 1.15 # Adjusted aspect ratio for UAVs with winglets
+        #print(f"Aspect ratio normally {A}, using {A_winglet} for winglet effect.")
+        L_D_cruise1 = calculate_L_D_cruise_jet(C_D0, A_winglet, oswald_e)
+        L_D_loiter = calculate_L_D_loiter(C_D0, A_winglet, oswald_e) # Max L/D for loiter
         L_D_cruise2 = L_D_cruise1 # Assuming same L/D for alternate cruise
     else:
         raise ValueError(f"Unknown engine type for L/D calculation from aircraft_type: {ac_type}")

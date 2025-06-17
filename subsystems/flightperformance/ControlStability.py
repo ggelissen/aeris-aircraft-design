@@ -346,7 +346,7 @@ class Control:
         while True:
             old_xlemac_fus = self.x_lemac_lfus
             print(self.lh)
-            result = self.calculate_range(OEW, Wpayload, Xpayload, Wfuel, Wwing, Wfuselage, Xfuselage, False)
+            result = self.calculate_range(OEW, Wpayload, Xpayload, Wfuel, Wwing, Wfuselage, Xfuselage, True)
             
             self.x_lemac = self.x_lemac_lfus * self.l_fus
             self.x_ac = (self.x_lemac + self.mac/4)
@@ -393,7 +393,7 @@ def run_control_stability(params: DesignParameters): # pragma: no cover
     # Initialize the Control class with parameters from DesignParameters
     control = Control(
         CLah=params.empennage.Cl_alpha,
-        CLaA_h=params.wing.airfoil_clalpha,
+        CLaA_h=params.wing.CLA_A_h,
         de_da=params.wing.de_da,
         mac=params.wing.mac,
         Vh_V=params.empennage.Vh_v,
@@ -401,14 +401,14 @@ def run_control_stability(params: DesignParameters): # pragma: no cover
         CLA_h=params.wing.CL,
         C_m_ac=params.fuselage.C_m_ac,
         l_fus=params.fuselage.l_f,
-        x_lemac=params.fuselage.x_ac -params.wing.mac/4
+        x_lemac=params.cg.x_cg_wing -params.wing.mac/4
     )
     
     # Example usage of calculate_range method
     results = control.scissor_loop(
         OEW=params.weight.W_OE,
         Wpayload=[params.weight.W_PL],
-        Xpayload=[params.fuselage.x_payload],
+        Xpayload=[params.cg.x_cg_payload],
         Wfuel=[params.weight.W_F],
         Wwing=params.weight.W_wing,
         Wfuselage=params.weight.W_fus,
@@ -428,10 +428,28 @@ if __name__ == "__main__": # pragma: no cover
     #control.cg_range(2500, 0.65, [100, 500], [0.8, 0.1], [800, 200], [0.65, 0.8])
 
     # Example of plotting scissor plot separately
-    control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=1, Vh_V=1, x_lemac=6, CLh=-1, CLA_h=1, C_m_ac=-0.5, l_fus=12)
+    #control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=1, Vh_V=1, x_lemac=6, CLh=-1, CLA_h=1, C_m_ac=-0.5, l_fus=12)
     #stability, controllability = control.scissor_plot(True)
-    result = control.scissor_loop(OEW=2000, Wpayload=[600], Xpayload=[4], Wfuel=[1000], Wwing=1000, Wfuselage=1000, Xfuselage=6)
+    #result = control.scissor_loop(OEW=2000, Wpayload=[600], Xpayload=[4], Wfuel=[1000], Wwing=1000, Wfuselage=1000, Xfuselage=6)
     #control.calculate_range(W_OEW=2000, W_payload=[600], X_payload=[3], W_fuel=[1000], W_wing=1000, W_fuselage=1000, X_fuselage=7, plot=True)
+    #print(result)
+    
+    # {'C_L_h': np.float64(-1.0671740459757366), 
+    # 'beta_cruise': 0.526782687642637, 
+    # 'beta_landing': 0.9797958971132712, 
+    # 'C_L_alpha_h_cruise': np.float64(6.3415720601891845), 
+    # 'C_L_alpha_h_landing': np.float64(4.700592940681083), 
+    # 'C_L_alpha_w_cruise': 5.716090375161979, 
+    # 'C_L_alpha_w_landing': 4.35798807166314, 
+    # 'C_LA_A_h_cruise': 6.449844793626861, 
+    # 'C_LA_A_h_landing': 5.164180521289499, 
+    # 'd_e_d_alpha': 0.24661649214142314, 
+    # 'CL0_cruise': -0.08856541837104315, 
+    # 'C_m_ac_cruise': -0.3584513802937876}
+    
+    params = DesignParameters()
+    params.load_from_yaml('design_config.yaml')
+    result = run_control_stability(params)
     print(result)
 
     #control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=1, Vh_V=1, x_lemac=7, CLh=-1, CLA_h=1, C_m_ac=-0.5, l_fus=12)
