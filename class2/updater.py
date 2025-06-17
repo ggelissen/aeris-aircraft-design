@@ -14,13 +14,13 @@ from design_variables import DesignParameters
 def update_parameters_from_class_i(params: DesignParameters, class_i_results: Dict) -> None:
     """Update parameters with Class I results (inline)."""
     
-    print(f"    📝 Updating parameters from Class I results...")
+    #print(f"    📝 Updating parameters from Class I results...")
     updates = 0
     
     # Weight parameters (and performance, but coming from initial weight estimations)
     if 'W_TO' in class_i_results:
         params.weight.W_TO = class_i_results['W_TO']
-        print(f"        ⚠️  W_TO updated to {params.weight.W_TO} (from Class I results)")
+        #print(f"        ⚠️  W_TO updated to {params.weight.W_TO} (from Class I results)")
         updates += 1
     if 'W_E' in class_i_results:
         params.weight.W_E = class_i_results['W_E']
@@ -42,7 +42,7 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         updates += 1
     if 'M_ff' in class_i_results:
         params.weight.M_ff = class_i_results['M_ff']
-        print(f"        ⚠️  M_ff updated to {params.weight.M_ff} (from Class I results)")
+        #print(f"        ⚠️  M_ff updated to {params.weight.M_ff} (from Class I results)")
         updates += 1
     if 'W_F' in class_i_results:
         params.weight.W_F = class_i_results['W_F']
@@ -94,7 +94,7 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         params.wing.Gamma_w = class_i_results['Gamma_w']
         updates += 1
     
-    print(f"        ✅ Updated {updates} parameters from Class  out of {len(class_i_results)} Class I results")
+    #print(f"        ✅ Updated {updates} parameters from Class  out of {len(class_i_results)} Class I results")
     # Check which parameters were not updated
     # if updates < len(class_i_results): # commented as its not working properly
     #     not_updated = [key for key in class_i_results.keys() if key not in params.__dict__]
@@ -173,7 +173,7 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
         params.cg.x_cg_landing_gear = class_ii_results['x_mlg']
         updates += 1
     # TODO, add the rest of the landing gear parameters if needed
-    print(f"        ✅ Updated {updates} parameters from Class II")
+    #print(f"        ✅ Updated {updates} parameters from Class II")
 
 
 def update_parameters_from_wing_optimization(params: DesignParameters, wing_results: Dict) -> None:
@@ -183,7 +183,7 @@ def update_parameters_from_wing_optimization(params: DesignParameters, wing_resu
         print(f"    ⚠️  No wing optimization results to update")
         return
         
-    print(f"    📝 Updating parameters from wing optimization...")
+    #print(f"    📝 Updating parameters from wing optimization...")
     updates = 0
     
     # Core wing parameters
