@@ -586,8 +586,8 @@ class EmpennageParameters:
         # ^^ no right? V-tail is combination of hor. tail and vert. tail size?
         self.S_h =    1.39                          # Horizontal Stabilizer Area in m^2
         self.S_v =   2.16                          # Vertical Stabilizer Area in m^2
-        self.V_h = 0.7 #estimation                             # V-Tail Volume Coefficient
-        self.V_v = 0.05 #estimation                             # Horizontal Stabilizer Volume Coefficient
+        self.V_h = 0.64 #estimation                             # V-Tail Volume Coefficient
+        self.V_v = 0.07 #estimation                             # Horizontal Stabilizer Volume Coefficient
         self.Cl_alpha = None                          # Hor. Stabilizer cl alpha curve
         self.CL_h = None                              # Design CL of hor. stabilizer.
         self.S_t = 2                             # Total Stabilizer Area in m^2
