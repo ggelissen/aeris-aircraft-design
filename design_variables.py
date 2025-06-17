@@ -738,11 +738,11 @@ class CGParameters:
 class WingSectionParameters:
     def __init__(self, parent):
         self.spars = {
-            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 10, "t_flange_2_mm": 10, "t_web_mm": 30, "flange_width_mm": 75, 'material_density_kgm3': parent.materials.material_density},
-            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 10, "t_flange_2_mm": 10, "t_web_mm": 30, "flange_width_mm": 75, 'material_density_kgm3': parent.materials.material_density},
+            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 14, "t_flange_2_mm": 14, "t_web_mm": 30, "flange_width_mm": 90, 'material_density_kgm3': parent.materials.material_density},
+            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 14, "t_flange_2_mm": 14, "t_web_mm": 30, "flange_width_mm": 90, 'material_density_kgm3': parent.materials.material_density},
         }
         self.num_spars = len(self.spars)
-        stringercross = 1310
+        stringercross = 1610
         self.stringers = {
             "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": stringercross , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
             "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": stringercross , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
@@ -897,8 +897,8 @@ class FuelTank:
         self.dist_from_wingskin = 0.15
         self.frac_pos_chord_min = 0.2537 # 0 = LE + dist_from_wingskin, 1 = TE - dist_from_wingskin
         self.frac_pos_chord_max = 0.85 # See above
-        self.frac_pos_along_span_inboard = 0.1753
-        self.frac_pos_along_span_outboard = 0.7802
+        self.frac_pos_along_span_inboard = 0
+        self.frac_pos_along_span_outboard = 1
         self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
         self.t = None
         self.density_kgm3 = 800 # kg/m^3, density of Jet A1 fuel

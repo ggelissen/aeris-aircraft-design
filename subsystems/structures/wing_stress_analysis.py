@@ -297,32 +297,119 @@ def run_structures(designvars):
         print(f"Warning: Maximum twist angle {designvars.structure_results.max_twist_angle:.4f} rad exceeds allowed limit {designvars.wing.max_allowed_twist_angle:.4f} rad.")
         designvars.structure_results.should_increase_wingskin_thickness_by_10_percent_in_nextround = True
 
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Moment around x axis (Nm)')
+    ax1.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]), label='oment around x axis')
+    ax1.tick_params(axis='x')
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Moment around z axis (Nm)')
+    ax2.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]["moment_z"] for i in range(len(spanwise_position_lst))]), color='orange', label='oment around z axis')
+    ax2.tick_params(axis='y')
+    ax3 = ax1.twinx()
+    ax3.set_ylabel('Torsion around y axis (Nm)')
+    ax3.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]), color='green', label='Torsion around y axis')
+    ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
+    plt.title("Internal Moment Distribution")
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    lines3, labels3 = ax3.get_legend_handles_labels()
+    ax1.legend(lines + lines2+lines3, labels + labels2+labels3, loc=0)
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/internalmoment.pdf', format='pdf')
+
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Shear along x axis (N)')
+    ax1.plot(np.linspace(0, 1, 1000),
+             np.array([wing_loading[i]['shear_x'] for i in range(len(spanwise_position_lst))]),
+             label='Shear along x axis')
+    ax1.tick_params(axis='x')
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Shear along z axis (N)')
+    ax2.plot(np.linspace(0, 1, 1000),
+             np.array([wing_loading[i]["shear_z"] for i in range(len(spanwise_position_lst))]), color='orange',
+             label='Shear along z axis')
+    ax2.tick_params(axis='y')
+    plt.title("Internal Shear Distribution")
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc=0)
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/internalshear.pdf', format='pdf')
+
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Displacement x axis (m)')
+    ax1.plot(np.linspace(0, 1, 1000),
+             np.array([wing_loading[i]['shear_x'] for i in range(len(spanwise_position_lst))]),
+             label='Displacement along x axis')
+    ax1.tick_params(axis='x')
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Displacement along z axis (m)')
+    ax2.plot(np.linspace(0, 1, 1000),
+             np.array([wing_loading[i]["shear_z"] for i in range(len(spanwise_position_lst))]), color='orange',
+             label='Displacement along z axis')
+    ax2.tick_params(axis='y')
+    ax3 = ax1.twinx()
+    ax3.set_ylabel('Twist angle (rad)')
+    ax3.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]), color='green', label='Twist angle')
+    ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
+    plt.title("Displacement of the wing")
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    lines3, labels3 = ax3.get_legend_handles_labels()
+    ax1.legend(lines + lines2+lines3, labels + labels2+labels3, loc=0)
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/displacement.pdf', format='pdf')
+
 if __name__ == "__main__":
     designvars = master_design_process('design_config.yaml')[0]
 
-    #### TODO: REPLACE THIS FOR AERODYNAMICS CALCULATED LOADS
-    y_array = np.array([-0.167161, -0.181016, -0.19832, -0.220221, -0.248814, -0.285837, -0.330371,
- -0.395234, -0.490279, -0.539579, -0.59748, -0.657885, -0.72174, -0.78975,
- -0.862647, -0.94073, -1.02412, -1.110966, -1.199269, -1.281431, -1.347464,
- -1.384543, -1.374316, -1.304761, -1.164779, -0.918878])
+    y_array = np.array([0.498246, 0.536841, 0.580293, 0.630283, 0.688325, 0.754001, 0.822189, 0.902446,
+ 1.010588, 1.105177, 1.192055, 1.276326, 1.36037, 1.445542, 1.532754, 1.622674,
+ 1.715753, 1.812118, 1.911301, 2.011758, 2.11037, 2.202617, 2.284359, 2.354186,
+ 2.413809, 2.466547])
     designvars.wing.CL_distribution = np.nan_to_num(interp1d(y_array, np.array([0.28188, 0.290282, 0.299745, 0.310382, 0.322649, 0.336443, 0.350593, 0.369578,
  0.387962, 0.387545, 0.391251, 0.394771, 0.398051, 0.401018, 0.40362, 0.405645,
  0.406848, 0.40646, 0.403992, 0.397873, 0.386845, 0.36981, 0.344648, 0.310145,
- 0.264228, 0.198729]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+ 0.264228, 0.198729]), fill_value=np.nan, bounds_error=False)(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
     designvars.wing.CD_distribution = np.nan_to_num(interp1d(y_array, np.array([0.006406, 0.009293, 0.00918, 0.00954, 0.009478, 0.009296, 0.009052, 0.008448,
     0.009304, 0.009367, 0.009098, 0.008897, 0.008723, 0.008562, 0.008405, 0.008248,
     0.008088, 0.007936, 0.00778, 0.007644, 0.007521, 0.007345, 0.007193, 0.007059,
     0.007079, 0.007097]
-       ), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+       ), fill_value=np.nan, bounds_error=False)(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
     designvars.wing.CM_distribution = np.nan_to_num(interp1d(y_array, np.array([-0.167161, -0.181016, -0.19832, -0.220221, -0.248814, -0.285837, -0.330371,
   -0.395234, -0.490279, -0.539579, -0.59748, -0.657885, -0.72174, -0.78975,
   -0.862647, -0.94073, -1.02412, -1.110966, -1.199269, -1.281431, -1.347464,
-  -1.384543, -1.374316, -1.304761, -1.164779, -0.918878]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+  -1.384543, -1.374316, -1.304761, -1.164779, -0.918878]), fill_value=np.nan, bounds_error=False)(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Cl (-)')
+    ax1.plot(np.linspace(0,1,1000), designvars.wing.CL_distribution, label='CL distribution')
+    ax1.tick_params(axis='x')
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Cd (-)')
+    ax2.plot(np.linspace(0,1,1000), designvars.wing.CD_distribution, color='orange', label='CD distribution')
+    ax2.tick_params(axis='y')
+    ax3 = ax1.twinx()
+    ax3.set_ylabel('Cm (-)')
+    ax3.plot(np.linspace(0,1,1000), designvars.wing.CM_distribution, color='green', label='CM distribution')
+    ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
+    plt.title("Wing Aerodynamic Distributions")
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    lines3, labels3 = ax3.get_legend_handles_labels()
+    ax1.legend(lines + lines2+lines3, labels + labels2+labels3, loc=0)
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/wingaerodistributions.pdf', format='pdf')
 
 
     print(designvars.weight.W_wing)
 
     run_structures(designvars)
+
 
     print(designvars.structure_results)
     generate_wing_structure_3D(designvars)

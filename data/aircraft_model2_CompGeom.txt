@@ -1,24 +1,24 @@
 ...Comp Geom...
 5 Num Comps
 8 Total Num Meshes
-37000 Total Num Tris
+44680 Total Num Tris
 
 Theo_Area   Wet_Area   Theo_Vol    Wet_Vol  Name
    40.467     40.206     13.207     13.118  FuselageGeom   
    19.121     14.288      0.657      0.491  WingGeom       
-    1.835      0.000      0.000      0.000  ConformalGeom  
-    1.835      0.000      0.000      0.000  ConformalGeom  
+    3.385      0.000     -0.000     -0.000  ConformalGeom  
+    3.385      0.000     -0.000     -0.000  ConformalGeom  
     4.007      3.188      0.035      0.028  Horizontal_Stabilizer
     8.436      8.436      0.744      0.744  Fuselage_Engine
 -------------------------------------------------
-   75.702     66.118     14.643     14.381  Totals         
+   78.803     66.118     14.643     14.381  Totals         
 
 Tag_Theo_Area   Tag_Wet_Area    Tag_Name
        40.467         40.206    FuselageGeom_S_Surf0
         9.561          7.144    WingGeom_S_Surf0
         9.561          7.144    WingGeom_S_Surf1
-        1.835          0.000    ConformalGeom_S_Surf0
-        1.835          0.000    ConformalGeom_S_Surf1
+        3.385          0.000    ConformalGeom_S_Surf0
+        3.385          0.000    ConformalGeom_S_Surf1
         2.004          1.594    Horizontal_Stabilizer_S_Surf0
         2.004          1.594    Horizontal_Stabilizer_S_Surf1
         8.436          8.436    Fuselage_Engine_S_Surf0
