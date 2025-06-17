@@ -98,6 +98,13 @@ def plot_panel_strength_vs_spacing(E, nu, skin_thickness, K_c, sigma_cc_stiffene
     plt.tight_layout()
     plt.savefig("Figures/Structures/panel_strength_vs_spacing.png")
 
+
+def skin_shear_buckling(E, slenderness, thickness, base_height):
+    K = 2.0320 / (slenderness - 1.4489) + 7.8045
+    f_over_eta = K * E * (thickness / base_height)**2
+    return np.log(0.2403*f_over_eta + 1) * 11.4619
+
+
 # # Constants for plots
 # E_material = 70e9
 # nu_material = 0.33

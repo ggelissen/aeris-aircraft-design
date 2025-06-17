@@ -205,7 +205,7 @@ def run_structures(designvars):
             designvars.wing.Gamma_w)
         nameslist = (['Spar1'] + [f'Stringer{index+1}' for index in bottom_stringer_indices.tolist()] + ['Spar2', 'Spar2'] + [f'Stringer{index+1}' for index in top_stringer_indices.tolist()] + ['Spar1'])
         nameslist.reverse()
-        for boom_stress, boom_number, boom_x, boom_y, boom_area in zip(results['bending_stresses'][:-1], nameslist, results['boom_x_coords_sorted'][:-1], results['boom_y_coords_sorted'][:-1], results['boom_areas_sorted'][:-1]):
+        for inddd, (boom_stress, boom_number, boom_x, boom_y, boom_area, boom_shearflow) in enumerate(zip(results['bending_stresses'][:-1], nameslist, results['boom_x_coords_sorted'][:-1], results['boom_y_coords_sorted'][:-1], results['boom_areas_sorted'][:-1], results["final_shear_flows"][:-1])):
             if spanwise_position > 0.21:
                 if np.abs(boom_stress) > designvars.materials.material_sigma_yield:
                     print(f"Warning: Boom {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield strength with {100*(boom_stress-designvars.materials.material_sigma_yield)/boom_stress} % ")
@@ -221,10 +221,16 @@ def run_structures(designvars):
                         else:
                             if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
                                 designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(boom_number)
+                if (nameslist[inddd-1] == 'Spar1' or nameslist[inddd-1] == 'Spar2') and (nameslist[inddd] == 'Spar1' or nameslist[inddd] == 'Spar2'):
+                    if np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.spars['Spar1']["t_web_mm"]) > designvars.materials.material_tau_max*1e6:
+                        print(f"Warning: Spar web {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield shear strength with {100*(boom_shearflow/designvars.wing.wingsection.spars['Spar1']['t_web_mm']-designvars.materials.material_tau_max)/boom_shearflow/designvars.wing.wingsection.spars['Spar1']['t_web_mm']} %")
+                else:
+                    if np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.wingskin['thicness']) > designvars.materials.material_tau_max*1e6:
+                        print(f"Warning: Wing Skin {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield shear strength with {100*(boom_shearflow/designvars.wing.wingsection.wingskin['thicness']-designvars.materials.material_tau_max)/boom_shearflow/designvars.wing.wingsection.wingskin['thicness']} %")
                 if not (boom_number == 'Spar1' or boom_number == 'Spar2'):
                     crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E*1e9, designvars.wing.wingsection.stringers[boom_number]['area_moment_of_inertia_m4'], designvars.wing.wingsection.stringers[boom_number]["crosssectionalarea_mm2"]/1000000, length_between_ribs, designvars.wing.wingsection.stringers[boom_number]['K'] )
-                    if np.abs(boom_stress) > crit_stringer_buckling:
-                        print(f"Warning: Stringer {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(boom_stress-crit_stringer_buckling)/boom_stress} % ")
+                    if np.abs(boom_stress*1e6) > crit_stringer_buckling:
+                        #print(f"Warning: Stringer {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(boom_stress*1e6-crit_stringer_buckling)/(boom_stress*1e6)} % ")
                         if (np.abs(boom_stress)-crit_stringer_buckling)/boom_stress > 0.3:
                             if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
                                 designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround.append(boom_number)
@@ -235,8 +241,17 @@ def run_structures(designvars):
                                 if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
                                     designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(
                                         boom_number)
+                elif (boom_number == 'Spar1' and nameslist[inddd-1] == 'Spar1') or (boom_number == 'Spar2' and nameslist[inddd-1] == 'Spar2'):
+                    slenderness_ratio = length_between_ribs/np.abs(results['boom_y_coords_sorted'][:-1][inddd] - results['boom_y_coords_sorted'][:-1][inddd-1])
+                    base_height = np.abs(results['boom_y_coords_sorted'][:-1][inddd] - results['boom_y_coords_sorted'][:-1][inddd-1])
+                    young = designvars.materials.material_E*1e9
+                    thickness = designvars.wing.wingsection.spars[boom_number]["t_web_mm"] / 1000
 
-        # TODO: Check shearstress vs max shearstress
+                    spar_web_buckling_crit = skin_shear_buckling(young, slenderness_ratio, thickness, base_height)
+                    if np.abs(boom_shearflow + results['torsional_shear_flow']) > spar_web_buckling_crit:
+                        print(f"Warning: Spar web {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(np.abs(boom_shearflow + results['torsional_shear_flow'])/spar_web_buckling_crit-1)} %")
+
+
 
 
 

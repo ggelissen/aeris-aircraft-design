@@ -412,6 +412,6 @@ def weight_distribution(designvars: DesignParameters = None, num_points: int = 1
         weight_dist.append(stringer_weight + spar_weight + wingskin_weight + rib_weight + fuel_tank_weight + flap_weight)
     designvars.wing.weight_distribution = np.array(weight_dist)
     designvars.weight.W_wing = simpson(np.array(weight_dist), np.linspace(0, designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w), num_points)) * 2  # kg
-    designvars.structure_results.W_Wing = designvars.weight.W_wing
+    designvars.structure_results.W_Wing = simpson(np.array(spar_weight_dist) + np.array(wingskin_weight_dist) + np.array(stringer_weight_dist) + np.array(rib_weight_dist), np.linspace(0, designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w), num_points)) * 2  # kg
     return np.array(weight_dist)
 

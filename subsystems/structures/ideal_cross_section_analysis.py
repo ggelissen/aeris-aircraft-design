@@ -200,9 +200,9 @@ def calculate_bending_stress(Mx: float, My: float, I_xx: float, I_yy: float, I_x
         float: Bending stress (sigma_z).
                Returns float('nan') if denominator is zero.
     """
-    I_xx *= 1e-6 # Convert to m^4 for consistency with Mx, My in Nm
-    I_yy *= 1e-6 # Convert to m^4 for consistency with Mx, My in Nm
-    I_xy *= 1e-6 # Convert to m^4 for consistency with Mx, My in Nm
+    # I_xx *= 1e-12 # Convert to m^4 for consistency with Mx, My in Nm
+    # I_yy *= 1e-12 # Convert to m^4 for consistency with Mx, My in Nm
+    # I_xy *= 1e-12 # Convert to m^4 for consistency with Mx, My in Nm
     numerator = (Mx * I_yy - My * I_xy) * y_coord + (My * I_xx - Mx * I_xy) * x_coord
     denominator = I_xx * I_yy - I_xy**2
 
@@ -210,7 +210,7 @@ def calculate_bending_stress(Mx: float, My: float, I_xx: float, I_yy: float, I_x
         print("Warning: Denominator (I_xx*I_yy - I_xy^2) is zero. Bending stress calculation failed.")
         return float('nan')
     
-    sigma_z = numerator / denominator
+    sigma_z = (numerator / denominator) * 1e6 # MPa
     return sigma_z
 
 
@@ -307,9 +307,9 @@ def calculate_basic_shear_flows(Vx: float, Vy: float, I_xx: float, I_yy: float, 
                        q_bi is the flow in the panel connecting boom i to boom (i+1)%N.
                        Returns empty list or list of NaNs if denominator is zero.
     """
-    I_xx *= 1e-6 # Convert to m^4 for consistency with Vx, Vy in N
-    I_yy *= 1e-6 # Convert to m^4 for consistency with Vx, Vy in N
-    I_xy *= 1e-6 # Convert to m^4 for consistency with Vx, Vy in N
+    # I_xx *= 1e-12 # Convert to m^4 for consistency with Vx, Vy in N
+    # I_yy *= 1e-12 # Convert to m^4 for consistency with Vx, Vy in N
+    # I_xy *= 1e-12 # Convert to m^4 for consistency with Vx, Vy in N
     num_booms = len(boom_areas)
     if not (num_booms == len(boom_x_coords) == len(boom_y_coords)):
         raise ValueError("Boom data lists must have the same length.")
@@ -321,16 +321,16 @@ def calculate_basic_shear_flows(Vx: float, Vy: float, I_xx: float, I_yy: float, 
         print("Warning: Denominator (I_xx*I_yy - I_xy^2) is zero. Basic shear flow calculation failed.")
         return [float('nan')] * num_booms
     
-    Ky_coeff = (Vx * I_yy - Vy * I_xy) / denom_I
-    Kx_coeff = (Vy * I_xx - Vx * I_xy) / denom_I
+    Ky_coeff = ((Vx * I_yy - Vy * I_xy) / denom_I) * 1e12
+    Kx_coeff = ((Vy * I_xx - Vx * I_xy) / denom_I) * 1e12
     
     q_b_panels = [0.0] * num_booms
     current_sum_Br_yr = 0.0
     current_sum_Br_xr = 0.0
 
     for i in range(num_booms):
-        current_sum_Br_yr += boom_areas[i] * boom_y_coords[i] * 1e-3
-        current_sum_Br_xr += boom_areas[i] * boom_x_coords[i] * 1e-3
+        current_sum_Br_yr += boom_areas[i] * boom_y_coords[i] * 1e-6
+        current_sum_Br_xr += boom_areas[i] * boom_x_coords[i] * 1e-6
         q_b_panels[i] = float(-Ky_coeff * current_sum_Br_yr - Kx_coeff * current_sum_Br_xr)
         
     return q_b_panels
