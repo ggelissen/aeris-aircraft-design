@@ -28,7 +28,8 @@ def calculate_CD0(S_ref: float, C_f_c: np.ndarray, FF_c: np.ndarray, IF_c: np.nd
     CD0 = 1 / S_ref * np.sum(C_f_c * FF_c * IF_c * S_wet_c) + np.sum(CD_misc)
     # if CD0 > 0.02:
     #     CD0 = 0.02  # Limit CD0 to a maximum of 0.02 as per design constraints
-    return CD0
+    CD0_tail = C_f_c[2] * FF_c[2] * IF_c[2] * S_wet_c[2] / S_ref
+    return CD0, CD0_tail
 
 
 def calculate_skin_friction_coefficient(flow_ratio: tuple, Re: float, Mach: float) -> float:
@@ -180,7 +181,7 @@ def run_improved_drag_estimations(params) -> dict:
 
     CD_misc = calculate_misc_drag_coefficient(params.cruise_mach + 0.03, params.cruise_mach)
 
-    CD0 = calculate_CD0(params.wing.S_ref, C_f_lst, FF_lst, IF_lst, S_wet_lst, CD_misc)
+    CD0, CD0_tail = calculate_CD0(params.wing.S_ref, C_f_lst, FF_lst, IF_lst, S_wet_lst, CD_misc)
     
     # Prepare C_f_lst for output TODO, not sure if this is the best way to do it, but it works for now.
     C_f_lst = {
@@ -188,8 +189,9 @@ def run_improved_drag_estimations(params) -> dict:
         'wing': C_f_lst[1],
         'tail': C_f_lst[2]
     }
-    
-    return {'CD0': CD0, 
+
+    return {'CD0': CD0,
+            'CD0_tail': CD0_tail,
             'C_f': C_f_lst}
 
 
@@ -200,4 +202,5 @@ if __name__ == "__main__":
 
     CD0 = run_improved_drag_estimations(params)
     print(f"Total zero-lift drag coefficient (CD0): {CD0['CD0']:.6f}")
+    print(f"Total zero-lift drag coefficient for tail (CD0_tail): {CD0['CD0_tail']:.6f}")
     print(f"Skin friction coefficients (C_f): {CD0['C_f']}")

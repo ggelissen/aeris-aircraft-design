@@ -439,6 +439,7 @@ def print_final_design_summary(params: DesignParameters) -> None:
     print(f"    L/D Cruise:                 {params.performance.L_D_cruise:.2f}")
     print(f"    L/D Loiter:                 {params.performance.L_D_loiter:.2f}")
     print(f"    Zero-Lift Drag (CD0):       {params.wing.C_D0:.6f}")
+    print(f"    Zero-Lift Drag Tail (CD0_tail): {params.empennage.CD0_tail:.6f}")
     print(f"    Fuel Fraction:              {params.weight.M_ff:.3f}")
     
     print(f"\n🎚️  EMPENNAGE:")

@@ -65,6 +65,7 @@ class DesignParameters:
 
         # Load top-level parameters
         self.range = config.get('range')
+        self.cruise_speed = config.get('cruise_speed')
         self.cruise_mach = config.get('cruise_mach')
         self.stall_speed_clean = config.get('stall_speed_clean')
         self.stall_speed_land = config.get('stall_speed_land')
@@ -628,7 +629,7 @@ class EmpennageParameters:
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
         self.z_v = 0.5*self.b_v #TODO this is a placeholder for distance between tail a/c and cg vertically
         self.tailid = None
-        self.cd0 = None          # cd0 of tail, can we even get this?
+        self.CD0_tail = None          # cd0 of tail, can we even get this?
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
