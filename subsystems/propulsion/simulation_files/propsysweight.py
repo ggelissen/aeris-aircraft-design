@@ -31,7 +31,7 @@ def calculate_propulsion_system_weight(params: DesignParameters):
     # W_ai_kg = W_ai * lbs_to_kg  # convert to kg
 
     Ksp = 6.47 #lbs/gal (density of Jet A-1)
-    W_fuel = params.weight.W_F/9.81  * kg_to_lbs # fuel weight in lbs
+    W_fuel = 8589/9.81  * kg_to_lbs # fuel weight in lbs
     W_fs = (0.4/Ksp) * W_fuel  # lbs, fuel system weight
     W_fs_kg = W_fs * lbs_to_kg  # convert to kg
     print(f"Fuel System Weight: {W_fs:.2f} lbs / {W_fs_kg:.2f} kg")
