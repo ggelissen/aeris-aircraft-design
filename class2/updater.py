@@ -181,6 +181,9 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
     if 'CD0' in class_ii_results:
         params.wing.C_D0 = class_ii_results['CD0']
         updates += 1
+    if 'CD0_tail' in class_ii_results:
+        params.empennage.CD0_tail = class_ii_results['CD0_tail']
+        updates += 1
     
     # Landing gear (simplified)
     if 'x_mlg' in class_ii_results:

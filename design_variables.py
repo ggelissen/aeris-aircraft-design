@@ -21,6 +21,7 @@ class DesignParameters:
         self.stall_speed_land = None
         self.cruise_altitude = None
         self.cruise_density = None
+        self.cruise_temperature = None
         self.take_off_distance = None
         self.landing_distance = None
         self.diversion_distance = None
@@ -71,6 +72,7 @@ class DesignParameters:
         self.max_eq_velocity = config.get('max_eq_velocity')
         self.cruise_altitude = config.get('cruise_altitude')
         self.cruise_density = config.get('cruise_density')
+        self.cruise_temperature = config.get('cruise_temperature')
         self.take_off_distance = config.get('takeoff_distance')
         self.landing_distance = config.get('landing_distance')
         self.diversion_distance = config.get('diversion_distance')
@@ -150,7 +152,7 @@ class WeightParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.W_TO = 1                       # Maximum Take-Off Weight (MTOW) in N
+        self.W_TO = 27000                       # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
         self.W_OE = 11277                         # Operational Empty Weight (OEW) in N
         self.W_F = 8589                 # Total Fuel weight in N
@@ -627,7 +629,7 @@ class EmpennageParameters:
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
         self.z_v = 0.5*self.b_v #TODO this is a placeholder for distance between tail a/c and cg vertically
         self.tailid = None
-        self.cd0 = None          # cd0 of tail, can we even get this?
+        self.CD0_tail = None          # cd0 of tail, can we even get this?
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():

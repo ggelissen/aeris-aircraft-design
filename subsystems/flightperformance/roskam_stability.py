@@ -49,7 +49,7 @@ def angle_of_sideslip_beta(params: DesignParameters):
     two_r_1 = 2*np.sqrt(fuselage_area_at_that_place/np.pi) #from lucas: fuselage depth in region of vertical tail (at x_ac_mac of tail)
     print(f"this is the x axis of k_v plot: {b_v / two_r_1}")
     k_v = float(input("what is the value of k_v? p.385/417"))
-    C_L_alpha_v = 0 #get eventually from tail sizing
+    C_L_alpha_v = params.empennage.Cl_alpha #get eventually from tail sizing
     parameter_in_C_Y_beta_v = 0.724 + 3.06*((params.empennage.S_v / params.wing.S_w)/(1+ math.cos(params.wing.Lambda_025c_w)))+0.4* z_w / z_f + 0.009 * params.wing.A_w_target
     C_Y_beta_v = -k_v*(C_L_alpha_v)* parameter_in_C_Y_beta_v * (params.empennage.S_v / params.wing.S_w)
 
@@ -265,5 +265,5 @@ if __name__ == '__main__':
     print(f"C_Y_beta: {C_Y_beta}, C_l_beta: {C_l_beta}, C_n_beta: {C_n_beta}, C_Y_beta_v: {C_Y_beta_v}")
     print(f"Cyp: {Cyp}, Clp: {Clp}, Cnp: {Cnp}, zv: {zv}, lv: {lv}")
     print(f"Cnr: {Cnr}, C_Y_r: {C_Y_r}, C_l_r: {C_l_r}")
-    
+
 

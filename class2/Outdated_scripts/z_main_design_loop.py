@@ -16,7 +16,7 @@ from class2.prelim_sizing_undercarriage import perform_undercarriage_positioning
 from class2.improved_drag import run_improved_drag_estimations
 
 # This is our advanced wing optimization script
-from class2.Wing_Planform_Adv_AC_Design_torenbeek_class_II import calculate_torenbeek_inputs_from_params, optimize_wing_planform
+from class2.Outdated_scripts.Wing_Planform_Adv_AC_Design_torenbeek_class_II import calculate_torenbeek_inputs_from_params, optimize_wing_planform
 
 g = 9.80665  # Standard gravity in m/s^2 # Might want to import this from a constants module instead, for consistency
 def run_full_design_iteration(params: DesignParameters) -> DesignParameters:

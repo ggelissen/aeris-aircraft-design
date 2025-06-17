@@ -303,7 +303,7 @@ def run_performance_diagram(params: DesignParameters) -> dict: # Alejandro, adde
     W_L_over_W_TO_uav_pd = 0.88             # [cite: 88]
 
     cruise_alt_m_pd = params.cruise_altitude                        
-    cruise_V_ms_pd = params.cruise_speed                               
+    cruise_V_ms_pd = params.cruise_speed                      
     cruise_W_frac_pd = 0.8                                     
     cruise_thrust_setting_pd = params.engine.cruise_thrust_setting          
 
