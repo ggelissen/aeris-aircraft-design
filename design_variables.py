@@ -432,7 +432,7 @@ class PerformanceParameters:
         self.L_D_cruise = 14.562                      # Lift-to-Drag Ratio at Cruise
         self.L_D_loiter = 16.815                      # Lift-to-Drag Ratio at Loiter
 
-        self.CL_cruise = None                  # Lift Coefficient at Cruise	
+        self.CL_cruise = 0.4                  # Lift Coefficient at Cruise	
         self.C_L_hat = 0.6                      # Design Lift Coefficient, to be updated by alejandro's code
 
         self.V_A = 136.7                       # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
@@ -795,10 +795,10 @@ class Control:
 
 class IntertiaParameters:
     def __init__(self, W_TO :float = None, g :float = None):
-        self.I_xx = None     # Moment of inertia about x-axis (kg*m^2)
-        self.I_yy = None     # Moment of inertia about y-axis (kg*m^2)
-        self.I_zz = None     # Moment of inertia about z-axis (kg*m^2)
-        self.I_xz = None     # Product of inertia xz-plane (kg*m^2)
+        self.I_xx = 1212.66     # Moment of inertia about x-axis (kg*m^2)
+        self.I_yy = 8466.62     # Moment of inertia about y-axis (kg*m^2)
+        self.I_zz = 9219.268     # Moment of inertia about z-axis (kg*m^2)
+        self.I_xz = 382.99     # Product of inertia xz-plane (kg*m^2)
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -991,3 +991,14 @@ class StructuresResults():
         self.should_increase_sparcap_thickness_by_10_percent_in_nextround = False
         self.should_increase_sparweb_thickness_by_10_percent_in_nextround = False
         self.should_increase_wingskin_thickness_by_10_percent_in_nextround = False
+
+class VSPparameters():
+    def __init (self):
+        self.x_cg_vsp = 5.567
+        self.y_cg_vsp = 0
+        self.z_cg_vsp = 0.111
+    
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
