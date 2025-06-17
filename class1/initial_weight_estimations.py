@@ -427,7 +427,7 @@ def run_initial_weight_estimations(params: DesignParameters) -> dict:
         "W_PL_N": params.weight.W_PL,
         "W_crew_N": params.weight.W_crew,
         "R_cruise1_m": params.range,
-        "V_cruise_ms": params.cruise_speed
+        "V_cruise_ms": params.cruise_mach * m.sqrt(1.4 * 287.15 * params.cruise_temperature)
     }
     uav_reserve_params = {
         "type": "mission_extension",

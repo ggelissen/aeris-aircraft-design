@@ -203,7 +203,8 @@ def print_convergence_status(iteration: int, relative_diffs: Dict[str, float],
     
     print("="*60)
 
-def master_design_process(config_file: str = 'design_config.yaml', 
+def master_design_process(params_in: DesignParameters = None,
+                         config_file: str = 'design_config.yaml', 
                          max_iterations: int = 10, 
                          tolerance: float = 0.015,
                          verbose: bool = True) -> Tuple[DesignParameters, List[Dict], bool]:
@@ -220,6 +221,7 @@ def master_design_process(config_file: str = 'design_config.yaml',
     3. Continue until converged or max iterations reached
     
     Parameters:
+        params_in (DesignParameters): Optional initial parameters to override config
         config_file (str): Path to YAML configuration file
         max_iterations (int): Maximum number of design iterations
         tolerance (float): Relative convergence tolerance (default 1.5%)
@@ -237,18 +239,21 @@ def master_design_process(config_file: str = 'design_config.yaml',
         print(f"Tolerance: {tolerance:.1%}")
         print(f"{'='*80}")
     
-    # Initialize design parameters
-    try:
-        params = DesignParameters()
-        params.load_from_yaml(config_file)
-        if verbose:
+    if params_in:
+        params = params_in
+        print("✅ Using pre-configured DesignParameters object.")
+    else:
+        try:
+            params = DesignParameters()
+            params.load_from_yaml(config_file)
             print(f"✅ Initialized design parameters from {config_file}")
-            print(f"📊 Initial W_TO = {params.weight.W_TO:.0f} N")
-            print(f"📊 Initial W_S = {params.weight.W_S:.0f} N/m²")
-            print(f"📊 Initial T_W = {params.weight.T_W:.3f}")
-    except Exception as e:
-        print(f"❌ Failed to initialize parameters: {e}")
-        raise
+        except Exception as e:
+            print(f"❌ Failed to initialize parameters from {config_file}: {e}")
+            raise
+
+    print(f"📊 Initial W_TO = {params.weight.W_TO:.0f} N")
+    print(f"📊 Initial W_S = {params.weight.W_S:.0f} N/m²")
+    print(f"📊 Initial T_W = {params.weight.T_W:.3f}")
     
     # Initialize iteration tracking
     iteration_history = []
@@ -452,6 +457,7 @@ if __name__ == "__main__":
     try:
         # Execute master design process
         final_params, history, converged = master_design_process(
+            params_in=None,  # Use default parameters from config file
             config_file='design_config.yaml',
             max_iterations=8, 
             tolerance=0.015,  # 1.5% convergence tolerance
