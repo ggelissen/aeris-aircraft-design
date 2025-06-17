@@ -1,14 +1,14 @@
-
-
 # _____ IMPORTS _____
 import sys
 import os
 import yaml
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
+import math as m
 
-
+# --- Setup Project Paths ---
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -17,408 +17,187 @@ from design_variables import *
 from class2.master_design_loop import master_design_process
 
 
-# ==== Flight Envelope for UAV ====
-#
-#
-# This code generates a V-n diagram (Flight Envelope) for a UAV based on the STANAG 4671 and EASA CS-23 standards.
-# Inputs:
-# - Weight configuration (e.g., MTOW, MZFW)
-# - Altitude level (e.g., sea level, cruise altitude)
-# - Aircraft configuration (e.g., clean, take-off, landing)
-# Outputs:
-# - V-n diagram showing velocity vs. load factor limits
-# - Gust loads and maneuver loads
-# - Gust velocity calculations based on altitude
-#
-# =================================================================
+# --- Plotting Style and Formatting ---
 
+def _set_report_style():
+    """Sets a professional plot style suitable for reports."""
+    try:
+        plt.rcParams['font.family'] = 'Arial'
+    except RuntimeError:
+        print("Arial font not found, falling back to default sans-serif.")
+        plt.rcParams['font.family'] = 'sans-serif'
+    
+    plt.rcParams['figure.dpi'] = 100
+    plt.rcParams['savefig.dpi'] = 300
+    plt.rcParams['axes.titlesize'] = 14
+    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['xtick.labelsize'] = 10
+    plt.rcParams['ytick.labelsize'] = 10
+    plt.rcParams['legend.fontsize'] = 10
+    plt.rcParams['lines.linewidth'] = 2
+    plt.rcParams['lines.markersize'] = 6
+
+COLOR_PALETTE = {
+    'blue': '#0d3b66',
+    'orange': '#ee964b',
+    'grey': '#4F4F4F',
+    'red': '#D7263D' # A distinct red for critical points
+}
+
+
+# ==== Flight Envelope for UAV ====
 
 class FlightEnvelope:
     def __init__(self, params: DesignParameters):
         self.params = params
         self.SetUp(params)
     
+    # ... (SetUp and other calculation methods remain the same) ...
     def SetUp(self, params: DesignParameters):
-        """
-        Set up the flight envelope parameters and configurations.
-        This method initializes the necessary parameters for the flight envelope calculations.
-        """
-
-        # 1 - UAV Paramenters
-
-        #   -> Aerodynamic Constants
-        self.CL_alpha =  params.performance.CL_alpha # Lift curve slope (1/rad)
-        self.CL_max_values = {
-            "CLEAN": params.performance.CL_max_cruise,  # Clean configuration
-            "TAKE-OFF":  params.performance.CL_max_TO,  # Take-off configuration
-            "LAND":  params.performance.CL_max_LAND  # Landing configuration
-        }
-
-        #   -> Atmospheric densities 
-        self.density_at_altitude = {
-            "sea_level": 1.225,
-            "cruise":  params.cruise_density # cruise (design) using ISA standard atmosphere values
-            } 
-        
-        #   -> Aircraft Geometry
-        self.S = params.wing.S_w  # wing area (m²)
-        self.chord = params.wing.mac # Mean Aerodynamic Chord (MAC) in m
-
-        #   -> Cruise Speed TAS 
-        VC_TAS = params.cruise_speed # TAS in m/s
-        self.VC = true_to_equivalent_air_speed(VC_TAS, self.density_at_altitude['cruise'], 
-                                               self.density_at_altitude['sea_level'])  # Convert TAS to EAS [m/s]
-        
-        #   -> Flight Altitude 
-        self.flight_altitude = {
-            "sea_level": 0, # m
-            "cruise":  params.cruise_altitude # m
-            }
-        
-        #   -> Weight Configuration Scenarios
-        self.weight_configuration = {
-            "OEW": params.weight.W_OE,  # Operational Empty Weight (OEW) [N] 
-            "MTOW": params.weight.W_TO,  # Maximum Take-Off Weight (MTOW) [N] 
-            "OEW_Payload_Fuselage_Fuel": params.weight.W_OE + params.weight.W_PL + 
-                                            params.weight.W_F * params.weight.Fuel_Fuselage_Fraction # OEW + Payload + Fuselage_Fuel [N] 
-
-        }
+        self.CL_alpha = params.performance.CL_alpha
+        self.CL_max_values = {"CLEAN": params.performance.CL_max_cruise, "TAKE-OFF": params.performance.CL_max_TO, "LAND": params.performance.CL_max_LAND}
+        self.density_at_altitude = {"sea_level": 1.225, "cruise": params.cruise_density}
+        self.S = params.wing.S_w
+        self.chord = params.wing.mac
+        VC_TAS = params.cruise_mach * m.sqrt(1.4 * 287.05 * params.cruise_temperature)
+        self.VC = true_to_equivalent_air_speed(VC_TAS, params.cruise_density, self.density_at_altitude['sea_level'])
+        self.flight_altitude = {"sea_level": 0, "cruise": params.cruise_altitude}
+        self.weight_configuration = {"OEW": params.weight.W_OE, "MTOW": params.weight.W_TO, "OEW_Payload_Fuselage_Fuel": params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction}
 
     def calc_load_factor_limits(self, MTOW_kg):
-        """
-        Calculate the positive and negative load factor limits based on MTOW.
-        The limits are based on the NATO SATNAG 4671.
-
-        :param MTOW_kg: Maximum Take-Off Weight in kg
-
-        :return: Tuple of positive and negative load factor limits
-        """
         n_pos_limit = min(2.1 + (10900 / (MTOW_kg + 4536)), 3.8)
         n_neg_limit = -0.4 * n_pos_limit
         return n_pos_limit, n_neg_limit
 
     def calc_diagram_speed(self, weight_N, density_altitude, CL_max, VC):
-        """
-        Calculate the stall speed (VS), dive speed (VD), and velocity axis for the V-n diagram.
-
-        :param weight_N: Weight in Newtons
-        :param density: Air density at the given altitude in kg/m³
-        :param CL_max: Maximum lift coefficient for the aircraft configuration
-        :param VC: Cruise speed in m/s
-
-        :return: Tuple of stall speed (VS), dive speed (VD), and velocity axis (velocity_aixs)
-        """
-        # Stall speed (VS)
-        VS_TAS = np.sqrt((2 * weight_N) / (density_altitude * self.S * CL_max)) # Stall speed in TAS [m/s]
-        print(f"Stall speed (TAS): {VS_TAS} m/s")
-        VS = true_to_equivalent_air_speed(VS_TAS, density_altitude, self.density_at_altitude['sea_level'])  # Convert TAS to EAS [m/s]
-        # Dive speed (VD)
-        VD = 1.25 * VC   # Dive speed (VD) EAS [m/s]
-        # Velocity axis for the V-n diagram (EAS) [m/s]
-        velocity_aixs = np.linspace(0, VD, 1000) 
-
-        return VS, VD, velocity_aixs
-
-    # def compute_gust_loads(self, V_range, Ude):
-    #     """
-    #     Compute gust load factors over a range of velocities.
-        
-    #     Args:
-    #         params: DesignParameters object containing aircraft specs.
-    #         V_range: Numpy array of velocities [m/s].
-    #         Ude: Design gust velocity [m/s].
-        
-    #     Returns:
-    #         Tuple of (n_gust_positive, n_gust_negative) arrays.
-    #     """
-    #     rho = self.density_at_altitude['cruise']
-    #     mac = self.chord
-    #     Cl_alpha = self.CL_alpha
-    #     W_S = self.weight_configuration['OEW_Payload_Fuselage_Fuel']/ self.S  # Wing loading in N/m²
-        
-
-    #     mu_g = W_S / (0.5 * rho * mac * Cl_alpha * 9.80665)
-    #     K_g = (0.88 * mu_g) / (5.3 + mu_g)
-        
-    #     n_gust_positive = 1 + (K_g * rho * V_range * Ude * Cl_alpha) / (2 * W_S) 
-    #     n_gust_negative = 1 - (K_g * rho * V_range * Ude * Cl_alpha) / (2 * W_S) 
-        
-        
-    #     return n_gust_positive, n_gust_negative
+        VS_TAS = np.sqrt((2 * weight_N) / (density_altitude * self.S * CL_max))
+        VS = true_to_equivalent_air_speed(VS_TAS, density_altitude, self.density_at_altitude['sea_level'])
+        VD = 1.25 * VC
+        velocity_axis = np.linspace(0, VD, 1000)
+        return VS, VD, velocity_axis
 
     def calc_gust(self):
-
         rho = 1.225
-        rho_cruise = self.density_at_altitude['cruise']  # Air density at cruise altitude in kg/m³
-        VB = 70  # EAS  in m/s 
-        VC = self.VC # Cruise speed EAS in m/s
-        VD = VD = 1.25 * VC   # Dive speed (VD) EAS [m/s]
-        
+        rho_cruise = self.density_at_altitude['cruise']
+        VB = 70
+        VC = self.VC
+        VD = 1.25 * VC
         mac = self.chord
         Cl_alpha = self.CL_alpha
-        W_S = self.weight_configuration['OEW_Payload_Fuselage_Fuel'] / self.S  # Wing loading in N/m²
-        print(f"W_S: {W_S} N/m²")
-
-        mu_g = (W_S) / (9.80665*0.5 * rho_cruise * mac * Cl_alpha)
+        W_S = self.weight_configuration['OEW_Payload_Fuselage_Fuel'] / self.S
+        mu_g = W_S / (9.80665 * 0.5 * rho_cruise * mac * Cl_alpha)
         K_g = (0.88 * mu_g) / (5.3 + mu_g)
-        
-
-        V_values_var = [VB, VC, VD]  # Airspeeds EAS in m/s
-        # Gust Velocities for at Cruise Altitude
-        u_values_var = [15.2, 10.21, 10.21/2]  # Gust intensities in m/s STANAG 4671
-        
-        
-        # Compute total load factor n
+        V_values_var = [VB, VC, VD]
+        u_values_var = [15.2, 10.21, 10.21 / 2]
         n_values_positive_revised = [1 + (rho * V * self.CL_alpha * K_g * u) / (2 * W_S) for V, u in zip(V_values_var, u_values_var)]
         n_values_negative_revised = [1 - (rho * V * Cl_alpha * K_g * u) / (2 * W_S) for V, u in zip(V_values_var, u_values_var)]
-        print(f"n_values_positive_revised: {n_values_positive_revised}")
-        V_values_extended = [0] + V_values_var
+        velocities_eas_gust = [0] + V_values_var
         n_values_positive_extended = [1] + n_values_positive_revised
         n_values_negative_extended = [1] + n_values_negative_revised
-        velocities_eas_gust = V_values_extended
-
-
-        # # Compute gust velocity as a function of V
-        # U_gust = np.piecewise(velocity_aixs,
-        #     [velocity_aixs <= VC, velocity_aixs > VC],
-        #     [U_VC,
-        #     lambda V: U_VC - ((U_VC - U_VD) / (VD - VC)) * (V - VC)]
-        # )  
-        # print(f"Gust velocity at altitude {altitude_m} m: U_VC = {U_VC} m/s, U_VD = {U_VD} m/s")
         return n_values_positive_extended, n_values_negative_extended, velocities_eas_gust
 
-    # def calc_gust_loads(self, velocity_aixs, U_gust, weight_N, density, chord):
-    #     a = 2*np.pi # to be confirmed
-    #     # wing loading
-    #     W_S = weight_N / self.S  # in N/m²
-    #     # aeroplane mass ratio
-    #     ug = 2 * W_S / (density * chord * a * self.S * 9.80665)
-    #     # gust alleviation factor
-    #     kg = 0.88 * ug / (5.3 + ug)
-
-    #     # EAS 
-    #     #velocity_aixs_EAS
-    #     n_gust_pos = 1 + kg * 1.225 * U_gust * velocity_aixs / (2 * W_S)
-    #     n_gust_neg = 1 - kg * 1.225 * U_gust * velocity_aixs / (2 * W_S)
-        
-
-    #     #n_gust_pos = 1 + (density * CL_alpha * S * velocity_aixs * U_gust) / (2 * weight_N)
-    #     #n_gust_neg = 1 - (density * CL_alpha * S * velocity_aixs * U_gust) / (2 * weight_N)
-
-    #     return n_gust_pos, n_gust_neg
-
     def calc_maneuver_loads(self, velocity_aixs, n_pos_limit, n_neg_limit, VS, VD):
-        """
-        Calculate the maneuver load factors for positive and negative loads.
-
-        :param velocity_aixs: Array of velocities for the V-n diagram
-        :param n_pos_limit: Positive load factor limit
-        :param n_neg_limit: Negative load factor limit
-        :param VS: Stall speed in m/s
-        :param VD: Dive speed in m/s
-
-        :return: Tuple of positive and negative maneuver load factors
-        """
-
-        # I. Compute positive maneuver load factor
-        n_parabola = (velocity_aixs / VS) ** 2              # CLmax limit (stall speed parabola)
-        n_flat = np.full_like(velocity_aixs, n_pos_limit)   # Maximum positive load factor (flat line)
-
-        n_maneuver_pos = np.minimum(n_parabola, n_flat)     # --> Postive maneuver load factor (minimum of parabola and flat line)
-
-        # II. Compute negative maneuver load factor
+        n_parabola = (velocity_aixs / VS) ** 2
+        n_flat = np.full_like(velocity_aixs, n_pos_limit)
+        n_maneuver_pos = np.minimum(n_parabola, n_flat)
         V_break = VS * np.sqrt(abs(n_neg_limit))
-
-        n_maneuver_neg = np.piecewise(          # --> Negative maneuver load factor
-            velocity_aixs,
-            [velocity_aixs <= V_break,
-            (velocity_aixs > V_break) & (velocity_aixs <= self.VC),
-            (velocity_aixs > self.VC)],
-            [
-                lambda V: -((V / VS) ** 2),                         # Parabola (until it hits n_neg_limit)
-                lambda V: n_neg_limit,                              # Flat line (from V_break to VC)
-                lambda V: n_neg_limit * (VD - V) / (VD - self.VC)        # Linearly back to 0
-            ]
-        )
-
+        n_maneuver_neg = np.piecewise(velocity_aixs,
+            [velocity_aixs <= V_break, (velocity_aixs > V_break) & (velocity_aixs <= self.VC), (velocity_aixs > self.VC)],
+            [lambda V: -((V / VS) ** 2), lambda V: n_neg_limit, lambda V: n_neg_limit * (VD - V) / (VD - self.VC)])
         return n_maneuver_pos, n_maneuver_neg
 
     def plot_vn_diagram(self, velocity_aixs, n_pos_limit, n_neg_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust):
+        _set_report_style()
+        fig, ax = plt.subplots(figsize=(10, 6))
 
-        plt.figure(figsize=(10, 6))
-
-        # Plot maneuver limits
-        plt.plot(velocity_aixs, n_maneuver_pos, color='blue')
-        plt.plot(velocity_aixs, n_maneuver_neg, color='blue')
-
-        # Plot gust loads
-        V_gust = np.array(velocities_eas_gust)
-        plt.plot(V_gust, n_gust_pos, linestyle='--', color='orange')
-        plt.plot(V_gust, n_gust_neg, linestyle='--', color='orange')
-
-        # Compute VA
-        VA_index = np.argmax(n_maneuver_pos >= n_pos_limit)
-        VA = velocity_aixs[VA_index]
-        print(f"VA (EAS): {VA} m/s")
-
-        # Compute VA′ (negative)
-        VA_prime_index = np.argmax(n_maneuver_neg <= n_neg_limit)
-        VA_prime = velocity_aixs[VA_prime_index]
-        print(f"VA′ (EAS): {VA_prime} m/s")
-
-        # Plot vertical lines for VS, VA, VC, VD, VA'
-        speeds = [VS, VA, VC, VD, VA_prime]
-        labels = [r'$V_{S}$', r'$V_{A}$', r'$V_{C}$', r'$V_{D}$', r'$V_{A}^{*}$']
-        colors = ['black'] * 5
-
-        for v, label, color in zip(speeds, labels, colors):
-            plt.axvline(x=v, color=color, linestyle=':')
-            plt.text(v + 2, 0.1, label, fontsize=13, ha='left', va='bottom', color=color)
-
-        # Overlay blue segment of VD
-        plt.vlines(x=VD, ymin=0, ymax=n_pos_limit, colors='blue', linestyles='-', linewidth=2.5)
-
-        # Highlight VA and VA′ points on the curve
-        plt.plot(VA, n_pos_limit, 'ko')
-        plt.text(VA + 2, n_pos_limit + 0.2, r'$n =$' + f'{n_pos_limit:.1f}', fontsize=13, color='black')
-
-        plt.plot(VA_prime, n_neg_limit, 'ko')
-        plt.text(VA_prime + 2, n_neg_limit - 0.4, r'n =' + f'{n_neg_limit:.1f}', fontsize=13, color='black')
-
-        # Draw horizontal axis at n = 0
-        plt.axhline(y=0, color='black', linewidth=1)
-
-        # Aesthetics
-        plt.xlabel(r'$V_{EAS}$ [m/s]', fontsize=14, labelpad=0, loc='right')
-        plt.ylabel(r'$n$ [-]', fontsize=14)
-        plt.xticks(fontsize=12)
-        plt.yticks(fontsize=12)
-        plt.grid(axis='y')
+        ax.fill_between(velocity_aixs, n_maneuver_pos, n_maneuver_neg, color=COLOR_PALETTE['blue'], alpha=0.1)
+        ax.plot(velocity_aixs, n_maneuver_pos, color=COLOR_PALETTE['blue'])
+        ax.plot(velocity_aixs, n_maneuver_neg, color=COLOR_PALETTE['blue'])
         
-        # plt.legend(
-        #     [n_maneuver_pos, n_gust_pos],
-        #     ['Maneuver Envelope', 'Gust Envelope'],
-        #     loc='upper right', fontsize=14
-        # )
+        V_gust = np.array(velocities_eas_gust)
+        ax.plot(V_gust, n_gust_pos, linestyle='--', color=COLOR_PALETTE['orange'])
+        ax.plot(V_gust, n_gust_neg, linestyle='--', color=COLOR_PALETTE['orange'])
+        
+        # --- Calculate and Annotate Key Speeds and Points ---
+        VA = VS * np.sqrt(n_pos_limit)
+        VA_prime = VS * np.sqrt(-n_neg_limit)
+        
+        # Add VA* back to the speeds dictionary
+        speeds = {'$V_S$': VS, '$V_A$': VA, '$V_A^*$': VA_prime, '$V_C$': VC, '$V_D$': VD}
+        
+        for label, v in speeds.items():
+            ax.axvline(x=v, color=COLOR_PALETTE['grey'], linestyle=':', linewidth=1)
+            ax.text(v + 4, ax.get_ylim()[0] * 0.9 - 0.3, label, fontsize=11, ha='center', va='bottom', color=COLOR_PALETTE['grey'])
 
-        # Move x-axis label to n = 0 line
-        ax = plt.gca()
-        ax.spines['bottom'].set_position(('data', 0))
+        # --- Add Critical Load Case points ---
+        critical_points_plot, = ax.plot([VA, VA_prime], [n_pos_limit, n_neg_limit], 
+                                        marker='*', color=COLOR_PALETTE['red'], 
+                                        linestyle='None', markersize=12, label='Critical Load Cases')
+        
+        # --- Aesthetics and Axis Configuration ---
+        ax.set_ylabel('$n$ [-]')
+        ax.grid(True, which='major', linestyle=':', linewidth=0.5, color='lightgrey')
+        
+        ax.spines['bottom'].set_position('zero')
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        ax.spines['left'].set_position(('outward', 0))
-
-        plt.legend(loc='upper right', fontsize=14)
-        plt.ylim(-4, 5)
-        plt.xlim(0, VD + 10)
-        plt.tight_layout()
-        plt.savefig(f"Figures/VN_diagram")
-
-
-    # def plot_vn_diagram(self, velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust):
-
-    #     plt.figure(figsize=(10, 6))
-
-    #     # Maneuver limits
-    #     plt.plot(velocity_aixs, n_maneuver_pos, label='Positive Maneuver Limit', color='blue')
-    #     plt.plot(velocity_aixs, n_maneuver_neg, label='Negative Maneuver Limit', color='blue')
-
-    #     # Gust loads
-    #     # plt.plot(velocity_aixs, n_gust_pos, '--', label='Positive Gust Load', color='orange')
-    #     # plt.plot(velocity_aixs, n_gust_neg, '--', label='Negative Gust Load', color='orange')
-    #     V_gust = np.array(velocities_eas_gust)
-    #     plt.plot(V_gust, n_gust_pos, label="Gust Load", linestyle='--', color='orange')
-    #     plt.plot(V_gust, n_gust_neg, label="Gust Load", linestyle='--', color='orange')
-
-    #     # Key speeds
-    #     # Compute VA as the speed at which the parabola hits the flat limit
-    #     VA_index = np.argmax(n_maneuver_pos >= n_pos_limit)
-    #     VA = velocity_aixs[VA_index] # VA Equivalent Airspeed (EAS) [m/s]
-    #     VA_TAS = equivalent_to_true_air_speed(VA, self.density_at_altitude[altitude_level], self.density_at_altitude['sea_level'])  # Convert EAS to TAS [m/s]
-    #     print(f"VA (EAS): {VA} m/s, VA (TAS): {VA_TAS} m/s")
         
+        # --- Position the X-label manually to align with annotations ---
+        ax.set_xlabel('') # Clear the default label
+        ax.text(ax.get_xlim()[1] - 3, ax.get_ylim()[0] * 0.9 + 1.75, '$V_{EAS}$ [m/s]', ha='left', va='center', color='black', fontsize=14)
+        
+        ax.axhline(y=n_pos_limit, color=COLOR_PALETTE['grey'], linestyle=':', linewidth=1)
+        ax.text(ax.get_xlim()[1], n_pos_limit, f' $n={n_pos_limit:.2f}$', ha='left', va='center', color=COLOR_PALETTE['grey'])
+        ax.axhline(y=n_neg_limit, color=COLOR_PALETTE['grey'], linestyle=':', linewidth=1)
+        ax.text(ax.get_xlim()[1], n_neg_limit, f' $n={n_neg_limit:.2f}$', ha='left', va='center', color=COLOR_PALETTE['grey'])
+        ax.vlines(x=VD, ymin=0, ymax=n_pos_limit, color=COLOR_PALETTE['grey'])
 
-    #     # Custom color map for specific speeds
-    #     speed_labels = ['VS', 'VA', 'VC', 'VD']
-    #     speed_values = [VS, VA, VC, VD]
-    #     color_map = {
-    #         'VS': 'blue',
-    #         'VA': 'gray',
-    #         'VC': 'orange',
-    #         'VD': 'red'
-    #     }
+        # --- Create and Style Legend ---
+        maneuver_patch = mpatches.Patch(color=COLOR_PALETTE['blue'], alpha=0.2, label='Maneuver Envelope')
+        gust_line = plt.Line2D([0], [0], color=COLOR_PALETTE['orange'], linestyle='--', label='Gust Envelope')
+        
+        # Add the new critical points handle to the legend
+        handles = [maneuver_patch, gust_line, critical_points_plot]
+        
+        legend = ax.legend(handles=handles, loc='upper left', frameon=True)
+        frame = legend.get_frame()
+        frame.set_boxstyle('round,pad=0.5,rounding_size=0.4')
+        frame.set_facecolor('white')
+        frame.set_edgecolor('black')
+        frame.set_alpha(0.8)
+        frame.set_linewidth(0.5)
+        legend.set_zorder(10)
 
-    #     for v, label in zip(speed_values, speed_labels):
-    #         plt.axvline(x=v, color=color_map[label], linestyle=':', label=label)
-
-    #     # Labels and aesthetics
-    #     plt.title(f'V-n Diagram (Flight Envelope)\nWeight: {weight_config}, Altitude: {altitude_level}, CL config: {ac_configuration}')
-    #     plt.xlabel('Equivalent Airspeed (m/s)')
-    #     plt.ylabel('Load Factor (n)')
-    #     plt.grid(True)
-    #     plt.legend(loc='upper right')
-    #     plt.ylim(-4, 5)
-    #     plt.xlim(0, VD + 10)
-    #     plt.tight_layout()
-    #     plt.show()
+        ax.set_ylim(n_neg_limit - 1.5, n_pos_limit + 1)
+        ax.set_xlim(0, VD * 1.05)
+        
+        plt.tight_layout()
+        plt.savefig(f"Figures/VN_diagram_{weight_config}_{altitude_level}.png", transparent=False, dpi=300)
+        print(f"Saved plot: Figures/VN_diagram_{weight_config}_{altitude_level}.png")
+        plt.close(fig)
 
     def generate_flight_envelope(self, weight_config: str, altitude_level: str, ac_configuration: str):
-        """
-        Generates a V-n diagram based on selected weight and altitude.
-
-        Parameters:
-            weight_config: str, e.g., 'MTOW', 'MLW', 'OEW'
-            altitude_level: str, e.g., 'sea_level', 'cruise'
-        """
         weight_N = self.weight_configuration[weight_config]
-        MTOW_kg = N_to_kg(self.weight_configuration['MTOW'])  # Convert weight from N to kg
-        density = self.density_at_altitude[altitude_level]  # Get density based on altitude level
+        MTOW_kg = N_to_kg(self.weight_configuration['MTOW'])
+        density = self.density_at_altitude[altitude_level]
         altitude = self.flight_altitude[altitude_level]
-        CL_max = self.CL_max_values[ac_configuration]  # Get CL_max based on aircraft configuration
-
-        # 1. Calculate load factor limits
+        CL_max = self.CL_max_values[ac_configuration]
         n_pos_limit, n_neg_limit = self.calc_load_factor_limits(MTOW_kg)
-        # 2. Calculate speeds
         VS, VD, velocity_aixs = self.calc_diagram_speed(weight_N, density, CL_max, self.VC)
-        # 3. Calculate gust velocity
-        #U_gust = self.calc_gust_velocity(altitude, velocity_aixs, self.VC, VD) 
-        # 4. Calculate gust loads
-        #n_gust_pos, n_gust_neg = self.calc_gust_loads(velocity_aixs, U_gust, weight_N, density, self.chord)
-        #n_gust_pos, n_gust_neg = self.compute_gust_loads(velocity_aixs, U_gust)
         n_gust_pos, n_gust_neg, velocities_eas_gust = self.calc_gust()
-        # 5. Calculate maneuver loads
         n_maneuver_pos, n_maneuver_neg = self.calc_maneuver_loads(velocity_aixs, n_pos_limit, n_neg_limit, VS, VD)
-        # 6. Plot the V-n diagram
         self.plot_vn_diagram(velocity_aixs, n_pos_limit, n_neg_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, self.VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust)
 
     def run_all_configurations(self):
-        """
-        Runs the flight envelope generation for all valid combinations of
-        weight configuration, altitude level, and aircraft configuration.
-        Skips incompatible configurations (e.g., landing config at cruise altitude).
-        """
         for weight_key in self.weight_configuration.keys():
             for altitude_key in self.density_at_altitude.keys():
                 for ac_config_key in self.CL_max_values.keys():
-
-                    # === Skip incompatible scenarios ===
-                    if altitude_key == 'cruise' and ac_config_key == 'LAND':
-                        continue  # Skip landing config at cruise altitude
-                    if altitude_key == 'cruise' and ac_config_key == 'TAKE-OFF':
-                        continue  # Clean config usually not relevant on ground
-
+                    if altitude_key == 'cruise' and ac_config_key in ['LAND', 'TAKE-OFF']:
+                        continue
                     print(f"\nRunning: Weight = {weight_key}, Altitude = {altitude_key}, Config = {ac_config_key}")
                     self.generate_flight_envelope(weight_key, altitude_key, ac_config_key)
 
-
-
-
 if __name__ == "__main__":
-
-    params, _, _ = master_design_process("design_config.yaml")
-
+    params, _, _ = master_design_process(config_file="design_config.yaml")
     fe = FlightEnvelope(params)
     fe.generate_flight_envelope("MTOW", "cruise", "CLEAN")
-    #fe.run_all_configurations()
-
-
