@@ -35,4 +35,4 @@ engine:
   engine_diameter: 0.53           # Engine Diameter in m
   nacelle_diameter: 0.71            # Nacelle Diameter in m
   nacelle_length: 2.2          # Nacelle Length in m
-  cruise_tsfc: 0.685              # Cruise TSFC in lb/h/lbf
+  cruise_tsfc: 0.6655              # Cruise TSFC in lb/h/lbf
