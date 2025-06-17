@@ -288,7 +288,7 @@ def master_design_process(config_file: str = 'design_config.yaml',
                 raise
             print(f"    🔄 Continuing with previous iteration parameters")
         
-        params_class_i_key = get_key_parameters(params)
+        #params_class_i_key = get_key_parameters(params)
         # ================================================================
         # PHASE 2: WING PLANFORM OPTIMIZATION
         # ================================================================  
@@ -312,6 +312,7 @@ def master_design_process(config_file: str = 'design_config.yaml',
         # ================================================================
         print(f"\n🟢 PHASE 3: CLASS II ANALYSIS")
         try:
+            print(f"    Initial W_TO guess for Class II: {params.weight.W_TO:.0f} N")
             class_ii_results = perform_class_II_analysis(params, initial_W_TO_guess=params.weight.W_TO)
             if class_ii_results:
                 update_parameters_from_class_ii(params, class_ii_results)
@@ -416,6 +417,7 @@ def print_final_design_summary(params: DesignParameters) -> None:
     print(f"    Aspect Ratio (A_w):         {params.wing.A_w_target:.2f}")
     print(f"    Wing Loading (W_S):         {params.weight.W_S:.0f} N/m²")
     print(f"    Sweep Angle (Λ_0.25c):      {np.rad2deg(params.wing.Lambda_025c_w):.1f}°")
+    print(f"    Sweep Angle Leading  Edge (Λ_LE): {np.rad2deg(params.wing.Lambda_0_w):.1f}°")
     print(f"    Design Lift Coefficient (C_L): {params.wing.CL:.3f}")
     print(f"    Taper Ratio (λ):            {params.wing.lambda_w:.3f}")
     print(f"    Thickness-to-Chord (t/c):   {params.wing.t_c_w_max:.3f}")
@@ -451,7 +453,7 @@ if __name__ == "__main__":
         # Execute master design process
         final_params, history, converged = master_design_process(
             config_file='design_config.yaml',
-            max_iterations=30, 
+            max_iterations=8, 
             tolerance=0.015,  # 1.5% convergence tolerance
             verbose=True
         )

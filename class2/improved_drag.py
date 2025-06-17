@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
-from design_variables import DesignParameters
+#from design_variables import DesignParameters
 from class1.preliminary_sizing.prelim_sizing_wing import calculate_sweep_angle_x_c, calculate_sweep_angle_LE
 
 # TODO add winglet CD0_winglet
@@ -24,7 +24,10 @@ def calculate_CD0(S_ref: float, C_f_c: np.ndarray, FF_c: np.ndarray, IF_c: np.nd
     Returns:
     float: The calculated zero-lift drag coefficient.
     """
+    #print(f"S_ref: {S_ref}, C_f_c: {C_f_c}, FF_c: {FF_c}, IF_c: {IF_c}, S_wet_c: {S_wet_c}, CD_misc: {CD_misc}")
     CD0 = 1 / S_ref * np.sum(C_f_c * FF_c * IF_c * S_wet_c) + np.sum(CD_misc)
+    # if CD0 > 0.02:
+    #     CD0 = 0.02  # Limit CD0 to a maximum of 0.02 as per design constraints
     return CD0
 
 
@@ -136,7 +139,7 @@ def calculate_misc_drag_coefficient(Mach_dd: float, Mach_cr: float) -> float:
         return 0.002 * (1 + 2.5 * (Mach_dd - Mach_cr) / 0.05) ** (-1)
     
 
-def run_improved_drag_estimations(params: DesignParameters) -> dict:
+def run_improved_drag_estimations(params) -> dict:
     """
     Run the improved drag estimations based on the design parameters.
     
@@ -146,7 +149,7 @@ def run_improved_drag_estimations(params: DesignParameters) -> dict:
     Returns:
     dict: The total zero-lift drag coefficient (CD0) for the aircraft configuration plus skin friction coefficients (C_f).
     """
-
+    #print(f"Surface Area of the wing: {params.wing.S_w:.2f} m^2 and the reference area: {params.wing.b_w}")
     Re = calculate_Reynolds_number(V=params.cruise_speed, rho=params.cruise_density, l=params.wing.root_chord, mu=1.4436e-5, k=0.152e-5, Mach=params.cruise_mach)
     
     C_f_lst = np.array([
@@ -191,6 +194,7 @@ def run_improved_drag_estimations(params: DesignParameters) -> dict:
 
 
 if __name__ == "__main__":
+    from design_variables import DesignParameters
     params = DesignParameters()
     params.load_from_yaml('design_config.yaml')
 

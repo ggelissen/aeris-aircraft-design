@@ -70,6 +70,7 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         updates += 1
     if 'S_w' in class_i_results:
         params.wing.S_w = class_i_results['S_w']
+        params.wing.S_ref = class_i_results['S_w']  # Assume S_ref is same as S_w for now
     if 'lambda_w' in class_i_results:
         params.wing.lambda_w = class_i_results['lambda_w']
         updates += 1
@@ -247,7 +248,9 @@ def update_parameters_from_wing_optimization(params: DesignParameters, wing_resu
         updates += 1
     if 'L_D_optimal' in wing_results:
         params.performance.L_D_cruise = wing_results['L_D_optimal']
-        #params.performance.L_D_loiter = wing_results['L_D_optimal']
+        updates += 1
+    if 'L_D_loit_optimal' in wing_results:
+        params.performance.L_D_loiter = wing_results['L_D_loit_optimal']
         updates += 1
     print(f"        ✅ Updated {updates} parameters from wing optimization")
     return params
