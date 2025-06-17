@@ -138,10 +138,10 @@ def run_mission_simulation_comparison():
     print("Starting Aircraft Mission Comparison Simulation with specific engine models...\n")
 
     # --- Thrust Parameters as specified ---
-    T_TO = 7535          # N for AERIS
+    T_TO = 8232         # N for AERIS
     T_TOHALO = 121478.211     # N for HALO (MTOW* 0.3)
     T_TOPH_LAB = 19423    # N for PH-LAB (MTOW * 0.3)
-    T_cruise = 1800  # N for AERIS cruise thrust
+    T_cruise = 1324  # N for AERIS cruise thrust
     # --- Aircraft Configurations with Specific Engine Params and Missions ---
     aircraft_configs = {
         "AERIS": {
@@ -152,7 +152,7 @@ def run_mission_simulation_comparison():
                 {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TO, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 900}},
                 {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TO, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1400}},
                 {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TO, "flight_conditions": {"mach_0": 0.55, "ts_0": 242.7, "ps_0": 46560}, "engine_params_override": {"tt_4": 1300}},
-                {"name": "Cruise", "duration_minutes": 120, "target_thrust_N": T_cruise, "flight_conditions": {"mach_0": 0.7, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1200}},
+                {"name": "Cruise", "duration_minutes": 400, "target_thrust_N": T_cruise, "flight_conditions": {"mach_0": 0.7, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1200}},
                 {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TO, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 900}},
                 {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TO, "flight_conditions": {"mach_0": 0.30, "ts_0": 282.65, "ps_0": 95970}, "engine_params_override": {"tt_4": 950}},
                 {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TO, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1000}},
@@ -163,30 +163,30 @@ def run_mission_simulation_comparison():
             "num_engines": 2,
             "baseline_engine_config": { "bpr": 4.2, "pr_fan": 1.5, "pr_lpc": 1.2, "pr_hpc": 24.0, "tt_4": 1500., "eta_fan": 0.92, "eta_lpc": 0.91, "eta_hpc": 0.90, "eta_hpt": 0.93, "eta_lpt": 0.94, "lhv": 43.e6, "cooling_h": 0.05, "cooling_l": 0.03 },
             "mission_segments": [
-                {"name": "Engine Start & Warm-Up", "duration_minutes": 10, "target_thrust_N": 0.07 * T_TOHALO, "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 900}},
-                {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TOHALO, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 950}},
+                {"name": "Engine Start & Warm-Up", "duration_minutes": 10, "target_thrust_N": 0.07 * T_TOHALO, "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1000}},
+                {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TOHALO, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1000}},
                 {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TOHALO, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1600}},
                 {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.90 * T_TOHALO, "flight_conditions": {"mach_0": 0.65, "ts_0": 235.2, "ps_0": 34567}, "engine_params_override": {"tt_4": 1500}},
                 {"name": "Cruise", "duration_minutes": 400, "target_thrust_N": 0.3*T_TOHALO, "flight_conditions": {"mach_0": 0.85, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1400}},
                 {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TOHALO, "flight_conditions": {"mach_0": 0.55, "ts_0": 242.7, "ps_0": 55720}, "engine_params_override": {"tt_4": 1000}},
-                {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TOHALO, "flight_conditions": {"mach_0": 0.35, "ts_0": 268.65, "ps_0": 75271}, "engine_params_override": {"tt_4": 980}},
-                {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TOHALO, "flight_conditions": {"mach_0": 0.28, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1100}},
-                {"name": "Taxi & Shutdown", "duration_minutes": 15, "target_thrust_N": 0.07 * T_TOHALO, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 900}},
+                {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TOHALO, "flight_conditions": {"mach_0": 0.35, "ts_0": 268.65, "ps_0": 75271}, "engine_params_override": {"tt_4": 1000}},
+                {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TOHALO, "flight_conditions": {"mach_0": 0.28, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1200}},
+                {"name": "Taxi & Shutdown", "duration_minutes": 15, "target_thrust_N": 0.07 * T_TOHALO, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1200}},
             ]
         },
         "PH-LAB (Citation II)": {
             "num_engines": 2,
             "baseline_engine_config": { "bpr": 2.6, "pr_fan": 1.5, "pr_lpc": 1.2, "pr_hpc": 7, "tt_4": 1200, "eta_fan": 0.915, "eta_lpc": 0.9, "eta_hpc": 0.9, "eta_hpt": 0.93, "eta_lpt": 0.93, "lhv": 43.e6 },
             "mission_segments": [
-                {"name": "Engine Start & Warm-Up", "duration_minutes": 10, "target_thrust_N": 0.07 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 800}},
-                {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 850}},
+                {"name": "Engine Start & Warm-Up", "duration_minutes": 10, "target_thrust_N": 0.07 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.0, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 950}},
+                {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1000}},
                 {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TOPH_LAB, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1300}},
                 {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.60, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 1200}},
                 {"name": "Cruise", "duration_minutes": 120, "target_thrust_N": 0.3*T_TOPH_LAB, "flight_conditions": {"mach_0": 0.7, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1100}},
-                {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 900}},
-                {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.28, "ts_0": 285.2, "ps_0": 95970}, "engine_params_override": {"tt_4": 880}},
+                {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 950}},
+                {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.28, "ts_0": 285.2, "ps_0": 95970}, "engine_params_override": {"tt_4": 950}},
                 {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.20, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 950}},
-                {"name": "Taxi & Shutdown", "duration_minutes": 15, "target_thrust_N": 0.07 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 800}},
+                {"name": "Taxi & Shutdown", "duration_minutes": 15, "target_thrust_N": 0.07 * T_TOPH_LAB, "flight_conditions": {"mach_0": 0.01, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 950}},
             ]
         }
     }
