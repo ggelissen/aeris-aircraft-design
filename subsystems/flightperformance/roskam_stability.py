@@ -98,7 +98,7 @@ def angle_of_sideslip_beta(params: DesignParameters):
     for geom in vsp.FindGeoms():
         vsp.SetSetFlag(geom, vsp.GetSetIndex("Shown"), True)
     h2 = 2 * np.sqrt(fuselage_area_at_that_place / np.pi) #get from lucas, diameter of fuselage at 3l_f/4
-    print(f"This is needed for K_N: {np.sqrt(h1/h2)}")
+    print(f"This is needed for K_N: {np.sqrt(h1/h2)}")  #TODO: we need more
     K_N = float(input("what is K_N? p.397/431"))
     Re_L_f = (params.cruise_speed * params.fuselage.l_f) / params.cruise_viscosity #find cruise viscosity
     print(f"This is needed for K_R_l, the reynolds number of fuselage: {Re_L_f}")
@@ -203,7 +203,7 @@ def roll_rate_derivates(params: DesignParameters, CyBv):
     
     Cnp = Cnpw + Cnpv
     
-    return Cyp, Clp, Cnp
+    return Cyp, Clp, Cnp, zv, lv
 
 def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv):
     CnrCL2 = input("Figure 10.44 pag. 433/465")
@@ -226,4 +226,14 @@ if __name__ == '__main__':
     AERIS = DesignParameters()
     AERIS.load_from_yaml("design_config.yaml")
     struct_main(AERIS, show_3d=False)
-    angle_of_sideslip_beta(AERIS)
+    C_Y_beta, C_l_beta, C_n_beta, C_Y_beta_v = angle_of_sideslip_beta(AERIS)
+    C_Y_r, C_l_r = yaw_rate_r(AERIS, C_Y_beta_v)
+    Cyp, Clp, Cnp, zv, lv = roll_rate_derivates(AERIS, C_Y_beta_v)  # CyBv needs to be calculated first
+    Cnr = yaw_moment_due_to_yaw_rate_CNR(AERIS, C_Y_beta_v, zv, lv)  # CyBv, zv, lv need to be calculated first
+    # pitch_rate_q(AERIS)  # This function is not fully implemented yet
+    # speed_derivatives(AERIS)  # This function is not fully implemented yet()
+    print(f"C_Y_beta: {C_Y_beta}, C_l_beta: {C_l_beta}, C_n_beta: {C_n_beta}, C_Y_beta_v: {C_Y_beta_v}")
+    print(f"Cyp: {Cyp}, Clp: {Clp}, Cnp: {Cnp}, zv: {zv}, lv: {lv}")
+    print(f"Cnr: {Cnr}, C_Y_r: {C_Y_r}, C_l_r: {C_l_r}")
+    
+

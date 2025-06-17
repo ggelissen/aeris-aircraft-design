@@ -1,0 +1,19 @@
+this is the x axis of the K_i plot: -0.4000000000000001
+what is the value of K_i? p.384/4161.2
+this is the x axis of k_v plot: 3.8830412922070714
+what is the value of k_v? p.385/4171
+what is the contribution of the wing sweep to the C_l_beta? p.393/425-0.003
+this is the x axis of the compressibility sweep plot: (0.6981584898493799, 10.95739736925695)
+what is the compressibility correction to sweep? p.394/4261.6
+this is the x axis of the K_F plot: (0.8192922586827549, 10.95739736925695)
+what is the fuselage correction to sweep? p.394/4260.8
+what is the contribution of the aspect ratio to the C_l_beta? p.394/4260
+what is the contribution of the wing dihedral to the C_l_beta? p.395/427-0.00025
+this is the x axis of the K__M_Gamma plot: (0.6981584898493799, 10.95739736925695)
+what is the compressibility correction to the wing dihedral? p.396/4281.2
+what is kappa_Gamma (dihedral factor for roll stability)?0.98
+what is kappa_l (planform factor for roll stability)? Phil                                                            ips paper fig. 170.98
+This is needed for K_N: 0.936493243531996
+what is K_N? p.397/4310.001
+This is needed for K_R_l, the reynolds number of fuselage: 62499999.99999999
+what is K_R_l? p.399/4321.8
