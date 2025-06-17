@@ -30,6 +30,8 @@ from class2.master_design_loop import master_design_process
 # - Gust loads and maneuver loads
 # - Gust velocity calculations based on altitude
 #
+
+# THE INTRUCTIONS FOR THIS CODE ARE IN THE BOTTOM OF THE FILE
 # =================================================================
 
 
@@ -119,32 +121,6 @@ class FlightEnvelope:
 
         return VS, VD, velocity_aixs
 
-    # def compute_gust_loads(self, V_range, Ude):
-    #     """
-    #     Compute gust load factors over a range of velocities.
-        
-    #     Args:
-    #         params: DesignParameters object containing aircraft specs.
-    #         V_range: Numpy array of velocities [m/s].
-    #         Ude: Design gust velocity [m/s].
-        
-    #     Returns:
-    #         Tuple of (n_gust_positive, n_gust_negative) arrays.
-    #     """
-    #     rho = self.density_at_altitude['cruise']
-    #     mac = self.chord
-    #     Cl_alpha = self.CL_alpha
-    #     W_S = self.weight_configuration['OEW_Payload_Fuselage_Fuel']/ self.S  # Wing loading in N/m²
-        
-
-    #     mu_g = W_S / (0.5 * rho * mac * Cl_alpha * 9.80665)
-    #     K_g = (0.88 * mu_g) / (5.3 + mu_g)
-        
-    #     n_gust_positive = 1 + (K_g * rho * V_range * Ude * Cl_alpha) / (2 * W_S) 
-    #     n_gust_negative = 1 - (K_g * rho * V_range * Ude * Cl_alpha) / (2 * W_S) 
-        
-        
-    #     return n_gust_positive, n_gust_negative
 
     def calc_gust(self):
 
@@ -187,25 +163,6 @@ class FlightEnvelope:
         # print(f"Gust velocity at altitude {altitude_m} m: U_VC = {U_VC} m/s, U_VD = {U_VD} m/s")
         return n_values_positive_extended, n_values_negative_extended, velocities_eas_gust
 
-    # def calc_gust_loads(self, velocity_aixs, U_gust, weight_N, density, chord):
-    #     a = 2*np.pi # to be confirmed
-    #     # wing loading
-    #     W_S = weight_N / self.S  # in N/m²
-    #     # aeroplane mass ratio
-    #     ug = 2 * W_S / (density * chord * a * self.S * 9.80665)
-    #     # gust alleviation factor
-    #     kg = 0.88 * ug / (5.3 + ug)
-
-    #     # EAS 
-    #     #velocity_aixs_EAS
-    #     n_gust_pos = 1 + kg * 1.225 * U_gust * velocity_aixs / (2 * W_S)
-    #     n_gust_neg = 1 - kg * 1.225 * U_gust * velocity_aixs / (2 * W_S)
-        
-
-    #     #n_gust_pos = 1 + (density * CL_alpha * S * velocity_aixs * U_gust) / (2 * weight_N)
-    #     #n_gust_neg = 1 - (density * CL_alpha * S * velocity_aixs * U_gust) / (2 * weight_N)
-
-    #     return n_gust_pos, n_gust_neg
 
     def calc_maneuver_loads(self, velocity_aixs, n_pos_limit, n_neg_limit, VS, VD):
         """
@@ -315,52 +272,32 @@ class FlightEnvelope:
         plt.savefig(f"Figures/VN_diagram")
 
 
-    # def plot_vn_diagram(self, velocity_aixs, n_pos_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust):
+    def lift_coeff(self, n_pos_limit, n_neg_limit, load_case):
+        """
+        Calculate the lift coefficient based on the load factor limits and load case.
+        :param n_pos_limit: Positive load factor limit
+        :param n_neg_limit: Negative load factor limit
+        :param load_case: Load case type, either "POSITIVE" or "NEGATIVE"
+        :return: Lift coefficient
+        """
 
-    #     plt.figure(figsize=(10, 6))
+        if load_case == "POSITIVE":
+            n_ult =  n_pos_limit
+            V = 162.348
+            lift = n_ult * self.weight_configuration['OEW_Payload_Fuselage_Fuel']
+        elif load_case == "NEGATIVE":
+            n_ult = n_neg_limit
+            V = 126.376
+            lift = n_ult * self.weight_configuration['MTOW']
 
-    #     # Maneuver limits
-    #     plt.plot(velocity_aixs, n_maneuver_pos, label='Positive Maneuver Limit', color='blue')
-    #     plt.plot(velocity_aixs, n_maneuver_neg, label='Negative Maneuver Limit', color='blue')
+        lift = self.weight_configuration['MTOW']
+        V = 209
+        lift_coefficient = lift / (0.5 * self.density_at_altitude['cruise'] * V**2 * self.S)  # Lift coefficient
 
-    #     # Gust loads
-    #     # plt.plot(velocity_aixs, n_gust_pos, '--', label='Positive Gust Load', color='orange')
-    #     # plt.plot(velocity_aixs, n_gust_neg, '--', label='Negative Gust Load', color='orange')
-    #     V_gust = np.array(velocities_eas_gust)
-    #     plt.plot(V_gust, n_gust_pos, label="Gust Load", linestyle='--', color='orange')
-    #     plt.plot(V_gust, n_gust_neg, label="Gust Load", linestyle='--', color='orange')
+        return lift_coefficient
 
-    #     # Key speeds
-    #     # Compute VA as the speed at which the parabola hits the flat limit
-    #     VA_index = np.argmax(n_maneuver_pos >= n_pos_limit)
-    #     VA = velocity_aixs[VA_index] # VA Equivalent Airspeed (EAS) [m/s]
-    #     VA_TAS = equivalent_to_true_air_speed(VA, self.density_at_altitude[altitude_level], self.density_at_altitude['sea_level'])  # Convert EAS to TAS [m/s]
-    #     print(f"VA (EAS): {VA} m/s, VA (TAS): {VA_TAS} m/s")
-        
 
-    #     # Custom color map for specific speeds
-    #     speed_labels = ['VS', 'VA', 'VC', 'VD']
-    #     speed_values = [VS, VA, VC, VD]
-    #     color_map = {
-    #         'VS': 'blue',
-    #         'VA': 'gray',
-    #         'VC': 'orange',
-    #         'VD': 'red'
-    #     }
 
-    #     for v, label in zip(speed_values, speed_labels):
-    #         plt.axvline(x=v, color=color_map[label], linestyle=':', label=label)
-
-    #     # Labels and aesthetics
-    #     plt.title(f'V-n Diagram (Flight Envelope)\nWeight: {weight_config}, Altitude: {altitude_level}, CL config: {ac_configuration}')
-    #     plt.xlabel('Equivalent Airspeed (m/s)')
-    #     plt.ylabel('Load Factor (n)')
-    #     plt.grid(True)
-    #     plt.legend(loc='upper right')
-    #     plt.ylim(-4, 5)
-    #     plt.xlim(0, VD + 10)
-    #     plt.tight_layout()
-    #     plt.show()
 
     def generate_flight_envelope(self, weight_config: str, altitude_level: str, ac_configuration: str):
         """
@@ -378,18 +315,25 @@ class FlightEnvelope:
 
         # 1. Calculate load factor limits
         n_pos_limit, n_neg_limit = self.calc_load_factor_limits(MTOW_kg)
-        # 2. Calculate speeds
+  
+        # 2. Calculate stall speed (VS), dive speed (VD), and velocity axis
         VS, VD, velocity_aixs = self.calc_diagram_speed(weight_N, density, CL_max, self.VC)
-        # 3. Calculate gust velocity
-        #U_gust = self.calc_gust_velocity(altitude, velocity_aixs, self.VC, VD) 
-        # 4. Calculate gust loads
-        #n_gust_pos, n_gust_neg = self.calc_gust_loads(velocity_aixs, U_gust, weight_N, density, self.chord)
-        #n_gust_pos, n_gust_neg = self.compute_gust_loads(velocity_aixs, U_gust)
+ 
+        # 3. Calculate Gust loads
         n_gust_pos, n_gust_neg, velocities_eas_gust = self.calc_gust()
-        # 5. Calculate maneuver loads
+
+        # 4. Calculate maneuver loads
         n_maneuver_pos, n_maneuver_neg = self.calc_maneuver_loads(velocity_aixs, n_pos_limit, n_neg_limit, VS, VD)
+
         # 6. Plot the V-n diagram
         self.plot_vn_diagram(velocity_aixs, n_pos_limit, n_neg_limit, n_gust_pos, n_gust_neg, n_maneuver_pos, n_maneuver_neg, VS, self.VC, VD, weight_config, altitude_level, ac_configuration, velocities_eas_gust)
+
+        # 7. Calculate and print the lift coefficient limits
+        load_case = "NEGATIVE" ########## CHANGE THIS TO "NEGATIVE" FOR NEGATIVE LOAD CASE
+        cl = self.lift_coeff(n_pos_limit, n_neg_limit, load_case)
+        print(f"Angle of attack limit for {weight_config} at {altitude_level} in {ac_configuration} configuration: {cl:.4f}")
+
+
 
     def run_all_configurations(self):
         """
@@ -420,5 +364,18 @@ if __name__ == "__main__":
     fe = FlightEnvelope(params)
     fe.generate_flight_envelope("MTOW", "cruise", "CLEAN")
     #fe.run_all_configurations()
+
+
+
+
+
+# TO RUN THE FILE:
+
+# 1. SELECT THE WEIGHT CONFIGURATION, ALTITUDE LEVEL,   
+#    AND AIRCRAFT CONFIGURATION when calling the function generate_flight_envelope
+
+# 2. FOR CL CALCULATION, SELECT THE LOAD CASE
+#    (POSITIVE OR NEGATIVE) (inside the class FlightEnvelope -> item 7 of generate_flight_envelope)
+
 
 
