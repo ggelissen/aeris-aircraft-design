@@ -174,3 +174,72 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
         updates += 1
     # TODO, add the rest of the landing gear parameters if needed
     print(f"        ✅ Updated {updates} parameters from Class II")
+
+
+def update_parameters_from_wing_optimization(params: DesignParameters, wing_results: Dict) -> None:
+    """Update parameters with wing optimization results (inline)."""
+    
+    if not wing_results:
+        print(f"    ⚠️  No wing optimization results to update")
+        return
+        
+    print(f"    📝 Updating parameters from wing optimization...")
+    updates = 0
+    
+    # Core wing parameters
+    if 'A_w_optimal' in wing_results:
+        params.wing.A_w_target = wing_results['A_w_optimal']
+        params.wing.A_w_actual = wing_results['A_w_optimal']
+        updates += 1
+    if 'S_w_optimal' in wing_results:
+        params.wing.S_w = wing_results['S_w_optimal']
+        updates += 1
+    if 'b_w_optimal' in wing_results:
+        params.wing.b_w = wing_results['b_w_optimal']
+        updates += 1
+    if 'Lambda_025c_optimal' in wing_results:
+        params.wing.Lambda_025c_w = wing_results['Lambda_025c_optimal']
+        updates += 1
+    if 'Lambda_LE_optimal' in wing_results:
+        params.wing.Lambda_0_w = wing_results['Lambda_LE_optimal']
+        updates += 1
+    if 'Lambda_05c_optimal' in wing_results:
+        params.wing.Lambda_05_w = wing_results['Lambda_05c_optimal']
+        updates += 1
+    if 'taper_ratio_optimal' in wing_results:
+        params.wing.lambda_w = wing_results['taper_ratio_optimal']
+        updates += 1
+    if 'root_chord_optimal' in wing_results:
+        params.wing.root_chord = wing_results['root_chord_optimal']
+        updates += 1
+    if 'tip_chord_optimal' in wing_results:
+        params.wing.tip_chord = wing_results['tip_chord_optimal']
+        updates += 1
+    if 'MAC_optimal' in wing_results:
+        params.wing.mac = wing_results['MAC_optimal']
+        updates += 1
+    if 'y_LEMAC_optimal' in wing_results:
+        params.wing.y_LEMAC = wing_results['y_LEMAC_optimal']
+        updates += 1
+    if 't_c_optimal' in wing_results:
+        params.wing.t_c_w_max = wing_results['t_c_optimal']
+        params.wing.t_c_w_r = wing_results['t_c_optimal']
+        updates += 1
+    if 'dihedral_optimal' in wing_results:
+        params.wing.Gamma_w = wing_results['dihedral_optimal']
+        updates += 1
+    if 'M_ff_optimal' in wing_results:
+        params.weight.M_ff = wing_results['M_ff_optimal']
+        updates += 1
+    if 'W_S_optimal' in wing_results:
+        params.weight.W_S = wing_results['W_S_optimal']
+        updates += 1
+    if 'C_L_design_optimal' in wing_results:
+        params.wing.CL = wing_results['C_L_design_optimal']
+        updates += 1
+    if 'L_D_optimal' in wing_results:
+        params.performance.L_D_cruise = wing_results['L_D_optimal']
+        #params.performance.L_D_loiter = wing_results['L_D_optimal']
+        updates += 1
+    print(f"        ✅ Updated {updates} parameters from wing optimization")
+
