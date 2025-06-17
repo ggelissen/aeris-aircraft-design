@@ -487,7 +487,7 @@ class FuselageParameters:
         }
 
 
-        self.D_f = 2.3
+        self.D_f = 1.7
         #self.D_f = np.max(np.array([self.crosssections[f"crosssection_{i+1}"]['Dimensions']['Width'] for i in range(len(self.crosssections)-2)]))    #  Maximum Fuselage Diameter in m
         if self.D_f is not None and self.l_f is not None:
             self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
@@ -519,7 +519,7 @@ class EngineParameters:
         # TODO: Add separate variables for the nacelle
         self.N_engines = 1                          # Number of Engines
         # self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
-        self.T_TO = 7535                    # Thrust at Take-Off in N
+        self.T_TO = 8135                     # Thrust at Take-Off in N
         self.cruise_thrust_setting = None           # Thrust setting for cruise
         self.engine_weight =   234.05                 # Engine Weight in N
         self.engine_max_thrust = 9340               # Engine Maximum Thrust in N
@@ -565,7 +565,7 @@ class EngineParameters:
         self.power_toh = 0.
         self.cooling_l = 0.
         self.cooling_h = 0.
-        self.cruise_thrust = 1800 #N
+        self.cruise_thrust = 1324 #N
 
 
     def load_from_dict(self, param_dict):

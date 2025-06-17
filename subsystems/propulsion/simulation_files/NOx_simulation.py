@@ -54,34 +54,34 @@ except (ImportError, ModuleNotFoundError):
     #     def r_gas(self, gas="air", far=0.): return 287.0
     # gpr = MockGPR()
 
-    class DesignParameters:
-        """A mock DesignParameters class."""
-        def __init__(self):
-            self.engine = type('engine', (object,), {})()
-            self.engine.Bpr = 3.3
-            self.engine.prfan = 1.9
-            self.engine.prlpc = 1.5
-            self.engine.prhpc = 5.65
-            self.engine.etafan = 0.915
-            self.engine.etalpc = 0.9
-            self.engine.etahpc = 0.9
-            self.engine.etahpt = 0.93
-            self.engine.etalpt = 0.93
-            self.engine.etacom = 0.99
-            self.engine.etamechl = 0.99
-            self.engine.etamechh = 0.99
-            self.engine.prcom = 0.99
-            self.engine.prinlet = 0.98
-            self.engine.bleedto = 0.0
-            self.engine.power_tol = 0.0
-            self.engine.power_toh = 0.0
-            self.engine.cooling_l = 0.0
-            self.engine.cooling_h = 0.0
-            self.engine.lhv = 43.e6
-            self.engine.T_TO = 7535. # N
-            self.engine.T_cruise = 1800. 
-        def load_from_yaml(self, filepath):
-             print(f"Mock loading parameters from {filepath}")
+    # class DesignParameters:
+    #     """A mock DesignParameters class."""
+    #     def __init__(self):
+    #         self.engine = type('engine', (object,), {})()
+    #         self.engine.Bpr = 3.3
+    #         self.engine.prfan = 1.9
+    #         self.engine.prlpc = 1.5
+    #         self.engine.prhpc = 5.65
+    #         self.engine.etafan = 0.915
+    #         self.engine.etalpc = 0.9
+    #         self.engine.etahpc = 0.9
+    #         self.engine.etahpt = 0.93
+    #         self.engine.etalpt = 0.93
+    #         self.engine.etacom = 0.99
+    #         self.engine.etamechl = 0.99
+    #         self.engine.etamechh = 0.99
+    #         self.engine.prcom = 0.99
+    #         self.engine.prinlet = 0.98
+    #         self.engine.bleedto = 0.0
+    #         self.engine.power_tol = 0.0
+    #         self.engine.power_toh = 0.0
+    #         self.engine.cooling_l = 0.0
+    #         self.engine.cooling_h = 0.0
+    #         self.engine.lhv = 43.e6
+    #         self.engine.T_TO = 7535. # N
+    #         self.engine.T_cruise = 1800. 
+    #     def load_from_yaml(self, filepath):
+    #          print(f"Mock loading parameters from {filepath}")
 
 
 
