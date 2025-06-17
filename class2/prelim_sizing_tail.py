@@ -128,8 +128,11 @@ def run_preliminary_sizing_tail(params: DesignParameters) -> dict:
         "y_LEMAC_t": y_LEMAC_t,
         "t_c_t": t_c_t,
     }
-    print(f"  - Tail Sizing Complete: S_t={S_t:.2f} m^2, b_t={b_t:.2f} m, taper={taper_ratio_t:.3f}")
+
+    print(f"  - Tail Sizing Complete: S_t={S_t:.2f} m^2, b_t={b_t:.2f} m, taper={taper_ratio_t:.3f}, dihedral={np.rad2deg(dihedral_rad):.2f}°, aspect_ratio={A_t:.2f}, t/c={t_c_t:.4f})")
+    print(f"results:{results}")
     return results
+
 
 if __name__ == '__main__':
     # This block allows for standalone testing of this module
@@ -153,3 +156,4 @@ if __name__ == '__main__':
             print(f"{key:<25}: {value:.4f}")
         else:
             print(f"{key:<25}: {value}")
+
