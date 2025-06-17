@@ -9,8 +9,7 @@ from class1.preliminary_sizing.prelim_sizing_wing import calculate_sweep_angle_L
 
 
 
-params = DesignParameters()
-params.load_from_yaml("design_config.yaml")
+
 
 
 def flaps_TE_sizing(params):
@@ -94,5 +93,10 @@ def flaps_TE_sizing(params):
     print(f"Stall speed (flapped): {V_stall_flapped:.2f} [m/s] (note: should be lower than 43.72 [knts] for landing)")
     return placement[0],placement[1],placement[2],placement[3], c_ave*CF_to_C
     
-
-flaps_TE_sizing(params)
+# python -m subsystems.flightperformance.high_lift_surfaces
+# Copy the command into the terminal to run the script
+if __name__ == "__main__":
+    print("Running Trailing Edge Flap Sizing...")
+    params = DesignParameters()
+    params.load_from_yaml("design_config.yaml")
+    flaps_TE_sizing(params)
