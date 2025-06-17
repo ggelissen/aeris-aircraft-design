@@ -26,7 +26,7 @@ from utils.unit_conversions import *
 
 def class_II_weight_estimation(params: DesignParameters,
                                initial_W_TO_N_guess: float,
-                               max_iterations: int = 100,
+                               max_iterations: int = 5,
                                tolerance: float = 0.005) -> Tuple[float, bool, int, float]:
     """
     Iterative Class II weight estimation using detailed component weight calculations.
@@ -44,7 +44,7 @@ def class_II_weight_estimation(params: DesignParameters,
     
     W_TO_N_current = initial_W_TO_N_guess
     params.weight.W_TO = W_TO_N_current 
-    print(f"    Starting Class II Weight Estimation with initial WTO: {W_TO_N_current:.2f} N")
+    print(f"    Staring Class II Weight Estimation with initial WTO: {W_TO_N_current:.2f} N")
 
     for i in range(max_iterations):
         
@@ -262,7 +262,7 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
         final_W_TO, converged, iterations, W_empty_final = class_II_weight_estimation(
             params=params,
             initial_W_TO_N_guess=initial_W_TO_guess,
-            max_iterations=100,
+            max_iterations=5,
             tolerance=0.005
         )
         # Store weight results
@@ -271,6 +271,7 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
             "W_E": W_empty_final,
             "W_OE": W_empty_final + params.weight.W_crew,
             "W_F": final_W_TO * (1 - params.weight.M_ff),
+            "W_F_used": final_W_TO * (1 - params.weight.M_ff_nominal),
             "converged": converged,
             "iterations": iterations
         }
@@ -312,9 +313,12 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
 if __name__ == "__main__":
     params = DesignParameters()
     params.load_from_yaml('design_config.yaml')
-    
+    from class1.main_class_I import perform_class_I_analysis
+    from class2.updater import update_parameters_from_class_i
     analysis_results = perform_class_II_analysis(params)
-    
+    class_I_results = perform_class_I_analysis(params)
+    update_parameters_from_class_i(params, class_I_results)
+    print(f" W_TO: {params.weight.W_TO:.2f} N")
     print("\n" + "="*40)
     print("       CLASS II RESULTS SUMMARY")
     print("="*40)

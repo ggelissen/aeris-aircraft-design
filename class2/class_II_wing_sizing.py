@@ -21,7 +21,7 @@ import os
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from design_variables import DesignParameters
+#from design_variables import DesignParameters
 import class1.preliminary_sizing.prelim_sizing_wing as psw
 from class2.improved_drag import run_improved_drag_estimations
 from class1.initial_weight_estimations import (
@@ -44,7 +44,7 @@ G = 9.80665  # Gravity constant in m/s^2
 
 
 def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: float, 
-                               params: DesignParameters, W_TO_baseline: float) -> float:
+                               params, W_TO_baseline: float) -> float:
     """
     Calculate fuel burn penalty for given wing parameters.
     
@@ -89,11 +89,14 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
             'W_TO': params.weight.W_TO
         }
         
+        #print(f"Original wing parameters: {original_values}") # Works correctly now
         # Calculate current wing weight (to subtract from baseline W_TO), before updating params with trial values
         from class2.component_weights import wing_weight_N
         #print("     Calculating current wing weight before trial parameters...")
+        #print(f"WTO_baseline: {params.weight.W_TO:.2f} N")
         W_wing_current = wing_weight_N(params)
-        # print(f"     Current wing weight: {W_wing_current:.2f} N")
+
+        #print(f"     Current wing weight: {W_wing_current:.2f} N")
         # Update params with trial wing parameters
         params.wing.A_w_actual = A_w
         params.wing.A_w_target = A_w  # Keep both consistent        
@@ -130,7 +133,6 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         # Step 1: Calculate CD0 using improved_drag with trial parameters
         drag_results = run_improved_drag_estimations(params)
         CD0 = drag_results.get('CD0')  # Default if calculation fails
-        #print(f"     Calculated CD0: {CD0:.6f} (from improved_drag)")
         # Step 2: Calculate L/D using existing function from initial_weight_estimations.py
         # Assume reasonable Oswald efficiency for modern wing
         e_oswald = 0.9 # Typical value for clean wing # for winglets TODO Torenbeek said that Induced drag 
@@ -163,6 +165,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         M_ff_total *= M_cruise_fuel_fraction  # Cruise segment
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M6_descent1")
         
+        M_ff_nominal = M_ff_total  # Store used fuel fraction for debugging
         # Reserve segments (if applicable)
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M7_climb2_reserve")
         # Reserve cruise - use same L/D but shorter range
@@ -171,7 +174,6 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
             reserve_range, V_cruise_ms, L_D_cruise, c_j_kg_Ns
         )
         M_ff_total *= M_reserve_cruise
-        
         # Reserve loiter - use loiter L/D
         from class1.initial_weight_estimations import calculate_L_D_loiter
         L_D_loiter = calculate_L_D_loiter(CD0, A_w_winglets, e_oswald)
@@ -184,12 +186,16 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M10_descent2_reserve")
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M11_land_taxi_shutdown")
         
+        M_ff_nominal *= get_statistical_fuel_fractions(aircraft_type, "M11_land_taxi_shutdown")
+
         #print(f"     Total fuel fraction M_ff_total: {M_ff_total:.6f} (includes all mission segments)")
         # Step 5: Calculate total fuel weight
         # From initial_weight_estimations.py: W_F_total = (1 - M_ff_total) * W_TO
         W_F_total_N = (1.0 - M_ff_total) * W_TO_adjusted
+        W_F_used_N = (1.0 - M_ff_nominal) * W_TO_adjusted
         params.weight.M_ff = M_ff_total  # Update params with total fuel weight
-
+        params.weight.M_ff_nominal = M_ff_nominal  # Store nominal fuel fraction for debugging
+        #print(f"     Total fuel weight W_F_total: {W_F_total_N:.2f} N (from W_TO_adjusted = {W_TO_adjusted:.2f} N)")
         # Updated W_TO after fuel burn calculation
         W_TO_adjusted2 = W_TO_adjusted_no_fuel + W_F_total_N
         #print(f"     Updated W_TO after fuel burn: {W_TO_adjusted2:.2f} N")
@@ -213,12 +219,15 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         
         if W_S_adjusted > params.weight.W_S_max:
             #print(f"    ⚠️  Warning: W/S exceeds maximum ({W_S_adjusted:.2f} N/m² > {params.weight.W_S_max:.2f} N/m²)")
+            print(f"    ⚠️  Warning: W/S exceeds maximum ({W_S_adjusted:.2f} N/m² > {params.weight.W_S_max:.2f} N/m²), returning high penalty")
             return 1e6
         
         testing_dict = {'W_TO_adjusted': W_TO_adjusted2, 'W_TO_baseline': W_TO_baseline,
                         'Wing Weight Current': W_wing_current,
                         'Wing Weight Trial': W_wing_trial, 'W_S_adjusted': W_S_adjusted,}
-        return W_F_total_N, L_D_cruise, M_ff_total, CD0, W_S_adjusted, testing_dict
+        #print(f"    ✅  Fuel burn calculation successful: W_F_total = {W_F_total_N:.2f} N, W_TO_adjusted = {W_TO_adjusted2:.2f} N, W/S = {W_S_adjusted:.2f} N/m²")
+
+        return W_F_total_N, L_D_cruise, L_D_loiter, M_ff_total, M_ff_nominal, CD0, W_S_adjusted, testing_dict
         
     except Exception as e:
         print(f"    ⚠️  Fuel burn calculation failed: {e}")
@@ -238,11 +247,11 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
                 params.weight.W_TO = original_values['W_TO']
         except:
             pass
-        
+        print("    ⚠️  Returning high penalty due to calculation failure.")
         return 1e6
 
 
-def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
+def optimize_wing_for_fuel_burn(params) -> dict:
     """
     Optimize wing planform by minimizing fuel burn.
     
@@ -261,10 +270,11 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
     
     # Use current W_TO as baseline for wing weight adjustment
     W_TO_baseline = params.weight.W_TO
-    
+    print(f"    📏 Baseline in Wing Opt W_TO = {W_TO_baseline:.0f} N")
     # Calculate baseline L/D for fuel fraction estimation
     baseline_drag = run_improved_drag_estimations(params)
     baseline_CD0 = baseline_drag.get('CD0')
+    print(f"    📊 Baseline CD0 = {baseline_CD0:.6f} (from improved_drag)")
     baseline_A_w = params.wing.A_w_target
     e_oswald = 0.9   # Typical Oswald efficiency for clean wing with winglets
     # Typical value for clean wing # for winglets TODO Torenbeek said that Induced drag 
@@ -297,9 +307,9 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
     print(f"    🎯 Objective: Minimize total mission fuel weight")
     
     # Define optimization ranges (reasonable for business jet UAV)
-    A_w_range = np.linspace(11, 12, 2)           # Aspect ratio
-    S_w_range = np.linspace(5,15 , 15)          # Wing area (m²)  
-    sweep_deg_range = np.linspace(5, 40, 35)    # Sweep angle (deg)
+    A_w_range = np.linspace(11, 12,10)           # Aspect ratio
+    S_w_range = np.linspace(5,15 , 10)          # Wing area (m²)  
+    sweep_deg_range = np.linspace(5, 40, 10)    # Sweep angle (deg)
     
     # Initialize best solution tracking
     best_fuel_weight = float('inf')
@@ -307,9 +317,9 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
     
     total_evaluations = 0
     successful_evaluations = 0
-    print(f"    🔍 Evaluating {len(A_w_range) * len(S_w_range) * len(sweep_deg_range)} design points...")
-    class_ii_results = perform_class_II_analysis(params, initial_W_TO_guess=params.weight.W_TO)  # Run Class II analysis to update params
-    update_parameters_from_class_ii(params, class_ii_results)  # Update params with Class II results
+    #print(f"    🔍 Evaluating {len(A_w_range) * len(S_w_range) * len(sweep_deg_range)} design points...")
+    #class_ii_results = perform_class_II_analysis(params, initial_W_TO_guess=params.weight.W_TO)  # Run Class II analysis to update params
+    #update_parameters_from_class_ii(params, class_ii_results)  # Update params with Class II results
     W_wing_baseline_start = wing_weight_N(params)
     # Grid search optimization
     for A_w in A_w_range:
@@ -349,8 +359,8 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                 W_S_start_cruise = W_start_cruise / S_w
                 W_S_end_cruise = W_end_cruise / S_w  
                 C_L_design = 1.1 * 0.5 * (W_S_start_cruise + W_S_end_cruise) / q_cruise # From ADSEE II, TODO, document safety factor.
-            
-
+                #print(f" CL_design = {C_L_design:.3f} (before delta method), ")
+                #C_L_design = max(C_L_design, 0.2)  # Ensure C_L_design is not too low
                 # print(f" C_L_design (before delta method) = {C_L_design:.3f} ")
                 # Correction for sweep, no longer doing it as the delta method takes in airfoil Cl directly, not section Cl, or aifoil Cl
                 #C_L_design_corrected = C_L_design / np.cos(np.deg2rad(sweep_deg))**2  
@@ -361,15 +371,15 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     sweep_deg=sweep_deg,
                     cl_des=C_L_design
                 )
-
+                #print(f" t/c from delta method = {t_c:.3f} (sweep={sweep_deg:.1f}°), ")
                 total_evaluations += 1
-                
+                #print(f"t/c from delta method = {t_c:.3f} (sweep={sweep_deg:.1f}°), C_L_design = {C_L_design:.3f}")
+
                 # Check t/c ratio
                 if t_c < 0.05 or t_c > 0.20:  # Reasonable bounds for UAV wing
                     #print(f"    Skipping configuration: A_w={A_w:.1f}, S_w={S_w:.1f} m², "
                     #      f"sweep={sweep_deg:.1f}°, t/c={t_c:.3f} (out of bounds), C_L_design={C_L_design_corrected:.3f}")
                     continue  # Skip this configuration, move on to next! 
-
                 # Calculate fuel burn penalty for this configuration
                 try:
                     # from class1.initial_weight_estimations import (
@@ -379,11 +389,12 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     #     calculate_loiter_fuel_fraction_jet
                     # )
                     # from class1.initial_weight_estimations import calculate_L_D_loiter
-                    fuel_weight, L_D_opt, M_ff_opt, CDO_opt, W_S_opt, test_dict= calculate_fuel_burn_penalty(
+                    #print(f"    Evaluating: A_w={A_w:.1f}, S_w={S_w:.1f} m², sweep={sweep_deg:.1f}°, t/c={t_c:.3f}")
+                    fuel_weight, L_D_opt, L_D_loit_opt, M_ff_opt, M_ff_nominal, CDO_opt, W_S_opt, test_dict= calculate_fuel_burn_penalty(
                         A_w, S_w, sweep_deg, t_c, params, W_TO_baseline
                     )
                     successful_evaluations += 1
-                    
+                    #print(f"   Successful evaluation: A_w={A_w:.1f}, S_w={S_w:.1f} m², ")
                     if fuel_weight < best_fuel_weight and W_S_opt < params.weight.W_S_max:
                         winner_dict = test_dict.copy()  # Copy the test dictionary for the winning configuration
                         #print(f"CD0_opt = {CDO_opt:.6f}, L/D_opt = {L_D_opt:.2f}, M_ff_opt = {M_ff_opt:.4f}")
@@ -423,16 +434,20 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                             'fuel_fraction_optimal': fuel_weight / W_TO_baseline,
                             'C_L_design_optimal': C_L_design,
                             'L_D_optimal': L_D_opt,
+                            'L_D_loit_optimal': L_D_loit_opt,
                             'M_ff_optimal': M_ff_opt,
+                            'M_ff_nominal': M_ff_nominal,
+                            
                         }
                         
                         #print(f"    New best: A_w={A_w:.1f}, S_w={S_w:.1f}m², sweep={sweep_deg:.1f}°")
                         #print(f"    Fuel weight: {fuel_weight:.0f} N ({fuel_weight/W_TO_baseline:.1%} of W_TO)")
                         
                 except Exception as e:
+                    print(f"    ⚠️  Evaluation failed for A_w={A_w:.2f}, S_w={S_w:.2f} m², sweep={sweep_deg:.1f}°: {e}")
                     # Skip failed evaluations
                     continue
-    print(winner_dict)
+    #print(winner_dict)
                 
     success_rate = successful_evaluations / total_evaluations if total_evaluations > 0 else 0
     print(f"    Optimization complete: {successful_evaluations}/{total_evaluations} evaluations successful ({success_rate:.1%}) Most likely due to Cl of airfoil being out of Delta method bounds.")
@@ -483,10 +498,15 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
 
 
 if __name__ == "__main__":
+    from design_variables import DesignParameters
+    from class1.main_class_I import perform_class_I_analysis
+    from class2.updater import update_parameters_from_class_i
     # Test the fuel burn optimization
     params = DesignParameters()
     params.load_from_yaml('design_config.yaml')
-    
+    class_i_results = perform_class_I_analysis(params)
+    update_parameters_from_class_i(params, class_i_results)  # Update params with Class I results
+    print(f" W_TO from Class I: {params.weight.W_TO:.0f} N")
     print("Testing Wing Optimization for Fuel Burn...")
     results = optimize_wing_for_fuel_burn(params)
     

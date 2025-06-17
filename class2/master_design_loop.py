@@ -36,7 +36,7 @@ from class2.main_class_II import perform_class_II_analysis
 from utils.unit_conversions import *
 
 from class1.thrust_wing_loading import run_performance_diagram
-from class2.updater import update_parameters_from_class_ii, update_parameters_from_class_i
+from class2.updater import update_parameters_from_class_ii, update_parameters_from_class_i, update_parameters_from_wing_optimization
 def get_key_parameters(params: DesignParameters) -> Dict[str, float]:
     """
     Extract key parameters for convergence monitoring.
@@ -203,74 +203,6 @@ def print_convergence_status(iteration: int, relative_diffs: Dict[str, float],
     
     print("="*60)
 
-def update_parameters_from_wing_optimization(params: DesignParameters, wing_results: Dict) -> None:
-    """Update parameters with wing optimization results (inline)."""
-    
-    if not wing_results:
-        print(f"    ⚠️  No wing optimization results to update")
-        return
-        
-    print(f"    📝 Updating parameters from wing optimization...")
-    updates = 0
-    
-    # Core wing parameters
-    if 'A_w_optimal' in wing_results:
-        params.wing.A_w_target = wing_results['A_w_optimal']
-        params.wing.A_w_actual = wing_results['A_w_optimal']
-        updates += 1
-    if 'S_w_optimal' in wing_results:
-        params.wing.S_w = wing_results['S_w_optimal']
-        updates += 1
-    if 'b_w_optimal' in wing_results:
-        params.wing.b_w = wing_results['b_w_optimal']
-        updates += 1
-    if 'Lambda_025c_optimal' in wing_results:
-        params.wing.Lambda_025c_w = wing_results['Lambda_025c_optimal']
-        updates += 1
-    if 'Lambda_LE_optimal' in wing_results:
-        params.wing.Lambda_0_w = wing_results['Lambda_LE_optimal']
-        updates += 1
-    if 'Lambda_05c_optimal' in wing_results:
-        params.wing.Lambda_05_w = wing_results['Lambda_05c_optimal']
-        updates += 1
-    if 'taper_ratio_optimal' in wing_results:
-        params.wing.lambda_w = wing_results['taper_ratio_optimal']
-        updates += 1
-    if 'root_chord_optimal' in wing_results:
-        params.wing.root_chord = wing_results['root_chord_optimal']
-        updates += 1
-    if 'tip_chord_optimal' in wing_results:
-        params.wing.tip_chord = wing_results['tip_chord_optimal']
-        updates += 1
-    if 'MAC_optimal' in wing_results:
-        params.wing.mac = wing_results['MAC_optimal']
-        updates += 1
-    if 'y_LEMAC_optimal' in wing_results:
-        params.wing.y_LEMAC = wing_results['y_LEMAC_optimal']
-        updates += 1
-    if 't_c_optimal' in wing_results:
-        params.wing.t_c_w_max = wing_results['t_c_optimal']
-        params.wing.t_c_w_r = wing_results['t_c_optimal']
-        updates += 1
-    if 'dihedral_optimal' in wing_results:
-        params.wing.Gamma_w = wing_results['dihedral_optimal']
-        updates += 1
-    if 'M_ff_optimal' in wing_results:
-        params.weight.M_ff = wing_results['M_ff_optimal']
-        updates += 1
-    if 'W_S_optimal' in wing_results:
-        params.weight.W_S = wing_results['W_S_optimal']
-        updates += 1
-    if 'C_L_design_optimal' in wing_results:
-        params.wing.CL = wing_results['C_L_design_optimal']
-        updates += 1
-    if 'L_D_optimal' in wing_results:
-        params.performance.L_D_cruise = wing_results['L_D_optimal']
-        #params.performance.L_D_loiter = wing_results['L_D_optimal']
-        updates += 1
-    print(f"        ✅ Updated {updates} parameters from wing optimization")
-
-
 def master_design_process(config_file: str = 'design_config.yaml', 
                          max_iterations: int = 10, 
                          tolerance: float = 0.015,
@@ -296,23 +228,24 @@ def master_design_process(config_file: str = 'design_config.yaml',
     Returns:
         (final_params, iteration_history, converged)
     """
-    
-    print(f"\n{'='*80}")
-    print(f"                 MASTER AIRCRAFT DESIGN PROCESS")
-    print(f"{'='*80}")
-    print(f"Configuration: {config_file}")
-    print(f"Max iterations: {max_iterations}")
-    print(f"Tolerance: {tolerance:.1%}")
-    print(f"{'='*80}")
+    if verbose:
+        print(f"\n{'='*80}")
+        print(f"                 MASTER AIRCRAFT DESIGN PROCESS")
+        print(f"{'='*80}")
+        print(f"Configuration: {config_file}")
+        print(f"Max iterations: {max_iterations}")
+        print(f"Tolerance: {tolerance:.1%}")
+        print(f"{'='*80}")
     
     # Initialize design parameters
     try:
         params = DesignParameters()
         params.load_from_yaml(config_file)
-        print(f"✅ Initialized design parameters from {config_file}")
-        print(f"📊 Initial W_TO = {params.weight.W_TO:.0f} N")
-        print(f"📊 Initial W_S = {params.weight.W_S:.0f} N/m²")
-        print(f"📊 Initial T_W = {params.weight.T_W:.3f}")
+        if verbose:
+            print(f"✅ Initialized design parameters from {config_file}")
+            print(f"📊 Initial W_TO = {params.weight.W_TO:.0f} N")
+            print(f"📊 Initial W_S = {params.weight.W_S:.0f} N/m²")
+            print(f"📊 Initial T_W = {params.weight.T_W:.3f}")
     except Exception as e:
         print(f"❌ Failed to initialize parameters: {e}")
         raise
@@ -325,11 +258,11 @@ def master_design_process(config_file: str = 'design_config.yaml',
     # Main design iteration loop
     for iteration in range(1, max_iterations + 1):
         iteration_start_time = time.time()
-        
-        print(f"\n{'='*80}")
-        print(f"                    DESIGN ITERATION {iteration}")
-        print(f"{'='*80}")
-        
+        if verbose:
+            print(f"\n{'='*80}")
+            print(f"                    DESIGN ITERATION {iteration}")
+            print(f"{'='*80}")
+            
         # Store parameters at start of iteration for convergence check
         params_start = get_key_parameters(params)
         if verbose:
@@ -355,7 +288,7 @@ def master_design_process(config_file: str = 'design_config.yaml',
                 raise
             print(f"    🔄 Continuing with previous iteration parameters")
         
-        params_class_i_key = get_key_parameters(params)
+        #params_class_i_key = get_key_parameters(params)
         # ================================================================
         # PHASE 2: WING PLANFORM OPTIMIZATION
         # ================================================================  
@@ -366,7 +299,8 @@ def master_design_process(config_file: str = 'design_config.yaml',
                 update_parameters_from_wing_optimization(params, wing_results)
                 print(f"    ✅ Wing optimization completed successfully")
                 if 'fuel_weight_N' in wing_results:
-                    print(f"    📊 Optimized fuel weight: {wing_results['fuel_weight_N']:.0f} N")
+                    if verbose:
+                        print(f"    📊 Optimized fuel weight: {wing_results['fuel_weight_N']:.0f} N")
             else:
                 print(f"    ⚠️  Wing optimization returned no results")
         except Exception as e:
@@ -378,12 +312,14 @@ def master_design_process(config_file: str = 'design_config.yaml',
         # ================================================================
         print(f"\n🟢 PHASE 3: CLASS II ANALYSIS")
         try:
+            print(f"    Initial W_TO guess for Class II: {params.weight.W_TO:.0f} N")
             class_ii_results = perform_class_II_analysis(params, initial_W_TO_guess=params.weight.W_TO)
             if class_ii_results:
                 update_parameters_from_class_ii(params, class_ii_results)
                 print(f"    ✅ Class II analysis completed successfully")
                 if 'W_TO' in class_ii_results:
-                    print(f"    📊 Converged W_TO: {class_ii_results['W_TO']:.0f} N")
+                    if verbose:
+                        print(f"    📊 Converged W_TO: {class_ii_results['W_TO']:.0f} N")
                 # Update wing loading consistency check
                 W_S_post_class_ii = params.weight.W_TO / params.wing.S_w
                 params.weight.W_S = W_S_post_class_ii
@@ -429,9 +365,10 @@ def master_design_process(config_file: str = 'design_config.yaml',
         iteration_history.append(iteration_results)
         
         # Print convergence status
-        print_convergence_status(iteration, relative_diffs, converged, tolerance)
-        print(f"⏱️  Iteration {iteration} completed in {iteration_time:.1f} seconds")
-        
+        if verbose:
+            print_convergence_status(iteration, relative_diffs, converged, tolerance)
+            print(f"⏱️  Iteration {iteration} completed in {iteration_time:.1f} seconds")
+            
         # Check if converged
         if converged:
             total_time = time.time() - start_time
@@ -441,13 +378,14 @@ def master_design_process(config_file: str = 'design_config.yaml',
     
     # Final summary
     total_time = time.time() - start_time
-    print(f"\n{'='*80}")
-    print(f"                    DESIGN PROCESS COMPLETE")
-    print(f"{'='*80}")
-    print(f"Status: {'CONVERGED' if converged else 'MAX ITERATIONS REACHED'}")
-    print(f"Iterations: {iteration}/{max_iterations}")
-    print(f"Total time: {total_time:.1f} seconds")
-    print(f"Average time per iteration: {total_time/iteration:.1f} seconds")
+    if verbose:
+        print(f"\n{'='*80}")
+        print(f"                    DESIGN PROCESS COMPLETE")
+        print(f"{'='*80}")
+        print(f"Status: {'CONVERGED' if converged else 'MAX ITERATIONS REACHED'}")
+        print(f"Iterations: {iteration}/{max_iterations}")
+        print(f"Total time: {total_time:.1f} seconds")
+        print(f"Average time per iteration: {total_time/iteration:.1f} seconds")
     
     # Final design summary
     final_params = get_key_parameters(params)
@@ -479,6 +417,7 @@ def print_final_design_summary(params: DesignParameters) -> None:
     print(f"    Aspect Ratio (A_w):         {params.wing.A_w_target:.2f}")
     print(f"    Wing Loading (W_S):         {params.weight.W_S:.0f} N/m²")
     print(f"    Sweep Angle (Λ_0.25c):      {np.rad2deg(params.wing.Lambda_025c_w):.1f}°")
+    print(f"    Sweep Angle Leading  Edge (Λ_LE): {np.rad2deg(params.wing.Lambda_0_w):.1f}°")
     print(f"    Design Lift Coefficient (C_L): {params.wing.CL:.3f}")
     print(f"    Taper Ratio (λ):            {params.wing.lambda_w:.3f}")
     print(f"    Thickness-to-Chord (t/c):   {params.wing.t_c_w_max:.3f}")
@@ -501,6 +440,7 @@ def print_final_design_summary(params: DesignParameters) -> None:
     print(f"    Total Tail Area (S_t):      {params.empennage.S_t:.2f} m²")
     print(f"    Horizontal Area (S_h):      {params.empennage.S_h:.2f} m²") 
     print(f"    Vertical Area (S_v):        {params.empennage.S_v:.2f} m²")
+    print(f"    V-Tailcal Span (b_v):       {params.empennage.b_v:.2f} m")
     
     print(f"{'='*80}")
 
@@ -513,7 +453,7 @@ if __name__ == "__main__":
         # Execute master design process
         final_params, history, converged = master_design_process(
             config_file='design_config.yaml',
-            max_iterations=30, 
+            max_iterations=8, 
             tolerance=0.015,  # 1.5% convergence tolerance
             verbose=True
         )

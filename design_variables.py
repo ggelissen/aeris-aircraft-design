@@ -47,7 +47,7 @@ class DesignParameters:
         self.stability_aero = StabilityAerodynamicParameters()
         self.inertia = IntertiaParameters()
         self.structure_results = StructuresResults(self)
-
+        self.VSP = VSPparameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -150,16 +150,17 @@ class WeightParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.W_TO = 37807.7                         # Maximum Take-Off Weight (MTOW) in N
+        self.W_TO = 1                       # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
-        self.W_OE = 16352.775                         # Operational Empty Weight (OEW) in N
-        self.W_F = 11483.09                 # Total Fuel weight in N
+        self.W_OE = 11277                         # Operational Empty Weight (OEW) in N
+        self.W_F = 8589                 # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 3218.59                             # Wing Loading in N/m^2, can be updated by class II 
         self.W_S_max = 3218.59                      # Maximum Wing Loading in N/m^2, set by class I analysis
         self.T_W = 0.305                           # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.588                         # Maximum Fuel Fraction 
+        self.M_ff_nominal = 0.500                # Nominal not accounting for reserves or contingency fuel
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # 0.001 on the initial sizing script!! Maximum Trapped Fuel and Oil Fraction TODO, why is this here? Does it need to be accounted? Though it is just part of OEW? This is not contingency fuel, value yes, but not the description
         self.W_tfo = 1890.384                           # Trapped Fuel and Oil Fraction
@@ -192,26 +193,28 @@ class WingParameters:
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
         self.S_ref = self.S_w
-        self.A_w_target =9.0                              # Aspect Ratio (INITIAL)
+        self.A_w_target =12.0                              # Aspect Ratio (INITIAL)
         self.A_w_actual = None                      # Because addition of yehudi and winglets change aspect ratio. During iteration, optimise such that target=actual
         if self.S_w is not None and self.A_w_target is not None:
             self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
-        self.mac = 1.2824                            # Mean Aerodynamic Chord in m
+        self.mac = 0.924                           # Mean Aerodynamic Chord in m
         self.y_LEMAC = None                       # y-position of Leading Edge of MAC in m, recalculated by the programme
         self.x_LEMAC = 5.0                            # Position of Leading Edge of MAC in m
         self.xpos = None                                # calculated in the code in m. relative to the root
         self.z_LEMAC = 0.0
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_025c_w = 26.6 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
         self.Lambda_05_w = 0.607                           # Wind half-chord sweep angle in rad
         self.Lambda_0_w =None                       # Wing leading edge sweep angle in rad
         self.t_c_w_max = None
-        self.de_da = None                         # Downwash effect on the lift coefficient.
+        self.de_da = 0.246616                         # Downwash effect on the lift coefficient.
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
         self.t_c_w = 0.12                     # Wing Thickness-to-Chord Ratio, average of root and tip
-        self.CL = None                          # Design CL of aircraft
+        self.CL = 0.304                          # Design CL of aircraft during cruise
+        self.eta = 0.95                  # wing efficiency
+        self.cm_025c =-0.6              # moment coeff at quarter chord
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
         self.list_of_airfoils = {
@@ -374,10 +377,12 @@ class WingParameters:
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
         self.yehudi_area = 4.0 # Yehudi area m2
-        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4) # First two span, second one chord
-        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
+        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.18, spanwise_pos_frac_outbound=0.3, flapwidth=0.2) # First two span, second one chord
+        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.75, flapwidth=0.04)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
         self.airfoil_clalpha = 1.5
+        self.CLA_A_h = 6.449844 # during cruise
+        self.CLA_A_h_M0 = 5.115368 # during cruise, M = 0 (M=0 during cruise doesn't make sense but Roskam wants it so fuck it)
         self.airfoil_cd0 = 0.06
         self.C_D0 = 0.017196 
         self.e = 0.9         #oswald efficiency factor
@@ -385,9 +390,10 @@ class WingParameters:
         self.Mach_cross = 0.935
         self.epsilon_t = 0         # Wing twist angle [degrees]
         self.weight_distribution = None
-        self.max_allowed_x_displacement = 0.10 # m
+        self.max_allowed_x_displacement = 1.0 # m
         self.max_allowed_z_displacement = 0.10
         self.max_allowed_twist_angle = np.pi / 20 # rad
+      
 
 
         # Aerodynamics Loads Distribution
@@ -425,17 +431,19 @@ class PerformanceParameters:
 
         self.CL_max_TO = 1.3                        # Maximum Lift Coefficient at Take-Off
         self.CL_max_LAND = 1.6                      # Maximum Lift Coefficient at Landing
-        self.CL_max_cruise = 1.8                    # Maximum Lift Coefficient at Cruise
+        self.CL_max_cruise = 1.6                    # Maximum Lift Coefficient at Cruise
 
         self.CL_alpha = 5.0                  # Lift Curve Slope in 1/rad
 
         self.L_D_cruise = 14.562                      # Lift-to-Drag Ratio at Cruise
         self.L_D_loiter = 16.815                      # Lift-to-Drag Ratio at Loiter
 
-        self.CL_cruise = 0.4                  # Lift Coefficient at Cruise	
+        self.stall_angle_cruise = 15 * np.pi/180    # stall angle from CL-alpha curve airfoil
+
+        self.CL_cruise = 0.4                  # Lift Coefficient at Cruise
         self.C_L_hat = 0.6                      # Design Lift Coefficient, to be updated by alejandro's code
 
-        self.V_A = 136.7                       # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
+        self.V_A = 162.35                       # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
 
 
     def load_from_dict(self, param_dict):
@@ -459,7 +467,7 @@ class FuselageParameters:
     def __init__(self):
         self.l_f = 10                           # Fuselage Length in m
         self.lh = None                          # Dist from wing to hor. stabilizer
-        self.C_m_ac = None                       # Moment coefficient at the aerodynamic center.
+        self.C_m_ac = -0.3584513                       # Moment coefficient at the aerodynamic center.
         self.x_ac = None                        # Aerodynamic center of the aircraft.
         self.x_payload = None                   # x-coordinate of Center of gravity of payload
         self.x_fuselage = None                  # x-coordinate of Center of gravity of fuselage
@@ -473,7 +481,7 @@ class FuselageParameters:
                                                  "RadiusSymmetryType": 1.0, "Radius": 0.35, "RadiusBR": 0.09}},
             "crosssection_2": {"Tan_Angles": {"top": 0, "right": 0, "bottom": 0, "left": 0},
                                  "Type": "vsp.XS_ROUNDED_RECTANGLE",
-                                    "Dimensions": {"Width": 1.6, "Height": 1.4, "Keystone": 0.58929,
+                                    "Dimensions": {"Width": 1.7, "Height": 1.4, "Keystone": 0.58929,
                                                      "RadiusSymmetryType": 3.0, "Radius": 0.38}},
             "crosssection_3": {"Tan_Angles": {"top": 0, "right": 0, "bottom": 0, "left": 0},
                                     "Type": "vsp.XS_ROUNDED_RECTANGLE",
@@ -483,6 +491,7 @@ class FuselageParameters:
         }
 
 
+        #self.D_f = 1.7
         self.D_f = np.max(np.array([self.crosssections[f"crosssection_{i+1}"]['Dimensions']['Width'] for i in range(len(self.crosssections)-2)]))    #  Maximum Fuselage Diameter in m
         if self.D_f is not None and self.l_f is not None:
             self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
@@ -514,14 +523,14 @@ class EngineParameters:
         # TODO: Add separate variables for the nacelle
         self.N_engines = 1                          # Number of Engines
         # self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
-        self.T_TO = 7535                    # Thrust at Take-Off in N
+        self.T_TO = 8135                     # Thrust at Take-Off in N
         self.cruise_thrust_setting = None           # Thrust setting for cruise
         self.engine_weight =   234.05                 # Engine Weight in N
         self.engine_max_thrust = 9340               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
-        self.nacelle_diameter = None
-        self.nacelle_length = None
+        self.nacelle_diameter = 0.918
+        self.nacelle_length = 1.9
         self.fuel_density = None                    # Fuel density depending on fuel type (A1, SAF, etc)
         self.cruise_tsfc = 68                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h # TODO, it is now in lb/hr, all code did this
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
@@ -560,7 +569,7 @@ class EngineParameters:
         self.power_toh = 0.
         self.cooling_l = 0.
         self.cooling_h = 0.
-        self.cruise_thrust = 1800 #N
+        self.cruise_thrust = 1324 #N
 
 
     def load_from_dict(self, param_dict):
@@ -584,28 +593,31 @@ class EmpennageParameters:
     def __init__(self, l_f: float = None):
         # TODO: Change to V-Tail, remove horizontal and vertical stabilizer parameters, which are still used in some part of the code
         # ^^ no right? V-tail is combination of hor. tail and vert. tail size?
-        self.S_h =    1.39                          # Horizontal Stabilizer Area in m^2
-        self.S_v =   2.16                          # Vertical Stabilizer Area in m^2
+        self.S_h =    1.23                          # Horizontal Stabilizer Area in m^2
+        self.S_v =   0.97                         # Vertical Stabilizer Area in m^2
         self.V_h = 0.64 #estimation                             # V-Tail Volume Coefficient
         self.V_v = 0.07 #estimation                             # Horizontal Stabilizer Volume Coefficient
-        self.Cl_alpha = None                          # Hor. Stabilizer cl alpha curve
-        self.CL_h = None                              # Design CL of hor. stabilizer.
-        self.S_t = 2                             # Total Stabilizer Area in m^2
+        self.Cl_alpha = 6.341572                          # Hor. Stabilizer cl alpha curve during cruise
+        self.Cl_alpha_M0 = 4.6402468 # during cruise, M = 0 (M=0 during cruise doesn't make sense but Roskam wants it so fuck it)
+        self.CL_h = -1.06717                              # Design CL of hor. stabilizer. during cruise
+        self.S_t = 1.57                           # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
         self.type = 'fixed'
-        self.Vh_v = None                             # Ratio of (hor.) tail speed to free stream speed.
+        self.Vh_v = 0.95                             # Ratio of (hor.) tail speed to free stream speed.
 
         # V_Tail:
-        self.b_v = 3.0                            # V_Tail Span in m TODO, computed in preliminary_sizing_tail.py, shouldnt be a magic number
+        self.b_v = 3.76                            # V_Tail Span in m TODO, computed in preliminary_sizing_tail.py, shouldnt be a magic number
+        self.b_v_h = self.b_v * np.cos(self.Gamma_h) * 2 # hor tail span
         self.c_t = 1.0                             # V-Tail Tip Chord in m
         self.c_r = 1.5                             # V-Tail Root Chord in m
         self.wetted_area = None                         # V-Tail Wetted Area in m^2, to be calculated by the OpenVSP CompGeom function, taking into account part of stabilizer inside fuselage
         self.x_t = 8.0                             # V-Tail Position in m
-        self.z_t = -0.2                        # V-Tail position in m
+        self.z_t = -0.2                             # V-Tail position in m
         self.V_t = None                             # V-Tail Volume Coefficient
         self.i_t = None                             # V-Tail Incidence Angle in degrees
-        self.A_t = 9                             # V-Tail Aspect Ratio
+        self.A_t = self.b_v**2/self.S_v             # V-Tail Aspect Ratio
+        self.A_t_h = self.b_v_h**2/self.S_h             # hor tail Aspect Ratio
         self.Lambda_t_025c = None                   # V-Tail Quarter-Chord Sweep Angle in degrees
         self.lambda_t = 0.25                        # V-Tail Taper Ratio
         self.t_c_t = 0.14                           # V-Tail Thickness-to-Chord Ratio
@@ -615,6 +627,7 @@ class EmpennageParameters:
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
         self.z_v = 0.5*self.b_v #TODO this is a placeholder for distance between tail a/c and cg vertically
         self.tailid = None
+        self.cd0 = None          # cd0 of tail, can we even get this?
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -673,9 +686,9 @@ class ControlSurfaceParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.x_a_inboard = 4.1                             # Control Surface Position in m
-        self.x_a_outboard = 5.2
-        self.aileron_width = 0.17                        # Aileron Width in m
+        self.x_a_inboard = 3.7                             # Control Surface Position in m
+        self.x_a_outboard = 4.7
+        self.aileron_width = 0.14                        # Aileron Width in m
         self.S_a = (self.x_a_outboard-self.x_a_inboard)*self.aileron_width                          # Control Surface Area in m^2
         self.delta_a = None                         # Control Surface Deflection Angle in degrees
         self.C_m_a = None                           # Control Surface Moment Coefficient
@@ -701,7 +714,7 @@ class CGParameters:
     calculate CG from the 3D model, but for this more precise weights and geometries of the aircraft need to be known.
     """
     def __init__(self):
-        self.x_cg_wing = 5                       # CG Position of the Wing in m
+        self.x_cg_wing = 3.78                       # CG Position of the Wing in m
         self.x_cg_fuselage = 4                   # CG Position of the Fuselage in m
         self.x_cg_landing_gear = 4.7               # CG Position of the Landing Gear in m
         self.x_cg_empennage = 9                  # CG Position of the Empennage in m
@@ -709,10 +722,12 @@ class CGParameters:
         self.x_cg_propulsion = 7                 # CG Position of the Propulsion System in m
         self.x_cg_payload = 3                    # CG Position of the Payload in m
         self.x_cg_fuel = 5                       # CG Position of the Fuel in m
+        self.x_ac_w = 3.781                      # wing aerodynamic center
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.z_cg = 1.5                          # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.z_cg_propulsion = None              # Z CG pos of the propulsion system in m
+        
         
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -730,25 +745,25 @@ class CGParameters:
 class WingSectionParameters:
     def __init__(self, parent):
         self.spars = {
-            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3*1.3*1.3, "t_flange_2_mm": 3*1.3*1.3, "t_web_mm": 2*1.1*1.1, "flange_width_mm": 50, 'material_density_kgm3': parent.materials.material_density},
-            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 3*1.3*1.3, "t_flange_2_mm": 3*1.3*1.3, "t_web_mm": 2*1.1*1.1, "flange_width_mm": 50, 'material_density_kgm3': parent.materials.material_density},
+            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 10, "t_flange_2_mm": 10, "t_web_mm": 30, "flange_width_mm": 75, 'material_density_kgm3': parent.materials.material_density},
+            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 10, "t_flange_2_mm": 10, "t_web_mm": 30, "flange_width_mm": 75, 'material_density_kgm3': parent.materials.material_density},
         }
         self.num_spars = len(self.spars)
         self.stringers = {
-            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200*1.3*1.3 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
-            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200*1.3*1.3 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
-            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200*1.3*1.3, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
-            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200*1.3*1.3, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
-            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200*1.1*1.1, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.1*1.1, 'K': 1.0},
-            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200*1.3*1.3, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
-            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200*1.1*1.1, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.1*1.1, 'K': 1.0},
-            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200*1.1*1.1, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.1*1.1, 'K': 1.0},
-            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 1350 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 1350 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 1350 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 1350 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
         }
         self.num_stringers = len(self.stringers)
         self.wingskin = {
@@ -909,7 +924,7 @@ class MaterialsParameters():
         materials_data = data["materials"]
 
         # Set the material name to DESIRED material
-        self.material_name = "Aluminium_2024_T3_wrought"
+        self.material_name = "Aluminium_7075_T6_wrought"
 
         for mat_id, mat in materials_data.items():
             if mat["name"].lower() == self.material_name.lower():

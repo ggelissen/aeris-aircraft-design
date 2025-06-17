@@ -9,7 +9,12 @@ import sys
 # In a real scenario, you would save your original code as 'mission_simulation.py'
 # and this test file as 'test_mission_simulation.py' in the same directory.
 # For this example, we assume the code from the artifact can be imported.
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+from utils.unit_conversions import *
+from design_variables import DesignParameters
 from simulation_files.Mission_Simulation import (
     atmosphere as atmosphere_old,
     ei_nox_dallara as ei_nox_dallara_old,
@@ -19,6 +24,7 @@ from simulation_files.Mission_Simulation import (
     run_mission_simulation as run_mission_simulation_old,
     DesignParameters as DesignParameters_old,
 )
+from design_variables import DesignParameters
 
 # Imports for the new test targeting temp.py
 from simulation_files.NOx_simulation import (
@@ -248,11 +254,11 @@ def test_calculate_propulsion_system_weight_nominal(mock_design_params):
     m_to_ft = 3.28084
 
     We = 516
-    T_to = 7450 * n_to_lbf
+    T_to = 8135  * n_to_lbf
     L_d = 7.28
     A_inl = 9.5
     W_ai = 11.45 * (L_d * 1 * A_inl**0.5)**0.7331
-    W_fuel = 1429.18 * kg_to_lbs
+    W_fuel = 8589/9.81 * kg_to_lbs
     W_fs = (0.4 / 6.47) * W_fuel
     L_fus = 10 * m_to_ft
     W_ec = 0.686 * (L_fus**0.792)
@@ -399,10 +405,10 @@ def test_NOx_simulation_mission_simulation_logic(mock_tf_analysis, mock_design_p
         (T_to * 5 * 60) +           # Take-off
         (0.85 * T_to * 20 * 60) +   # Climb
         (T_cruise * 400 * 60) +     # Cruise
-        (T_cruise * 34 * 60) +      # Diversion Cruise
-        (800 * 120 * 60) +          # Loiter (This one is hardcoded in the mission profile)
+        (T_cruise * 30 * 60) +      # Diversion Cruise
+        (0.15*T_to * 120 * 60) +          # Loiter (This one is hardcoded in the mission profile)
         (0.08 * T_to * 15 * 60) +   # Descent
-        (0.18 * T_to * 5 * 60) +    # Landing
+        (0.30 * T_to * 5 * 60) +    # Landing
         (0.07 * T_to * 15 * 60)     # Taxi & Shutdown
     )
     expected_total_fuel = total_thrust_newton_seconds * mock_tsfc

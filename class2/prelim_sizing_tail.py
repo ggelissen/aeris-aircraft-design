@@ -105,7 +105,7 @@ def run_preliminary_sizing_tail(params: DesignParameters) -> dict:
     Lambda_LE_t = psw.calculate_sweep_angle_LE(Lambda_025c_t, c_root_t, b_t, taper_ratio_t)
     Lambda_05c_t = psw.calculate_sweep_angle_x_c(Lambda_LE_t, c_root_t, b_t, 0.5, taper_ratio_t)
     
-    t_c_t = psw.calculate_thickness_ratio(params.cruise_altitude, Mach_cruise_tail, params.weight.W_TO, S_t, Lambda_05c_t, Mach_cross)
+    t_c_t = psw.calculate_thickness_ratio(params.cruise_altitude, Mach_cruise_tail, 37000, S_t, Lambda_05c_t, Mach_cross)
 
     if t_c_t < 0.05: # TODO, this needs to be properly addressed.
         print(f"Warning: Calculated t/c ratio for tail ({t_c_t:.4f}) is less than 0.05. Adjusting to 0.05.")

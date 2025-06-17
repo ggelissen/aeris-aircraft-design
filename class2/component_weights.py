@@ -5,12 +5,12 @@ import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
-from design_variables import DesignParameters
+#from design_variables import DesignParameters
 
 # --- Constants ---
 G = 9.80665  # Acceleration due to gravity (m/s^2)
 
-def calculate_cruise_dynamic_pressure_lbf_ft2(params: DesignParameters) -> float:
+def calculate_cruise_dynamic_pressure_lbf_ft2(params) -> float:
     """
     Calculate cruise dynamic pressure in lbf/ft² using cruise conditions.
     
@@ -28,13 +28,14 @@ def calculate_cruise_dynamic_pressure_lbf_ft2(params: DesignParameters) -> float
     
     return q_cruise_lbf_ft2
 
-def wing_weight_N(params: DesignParameters): # Torenbeek light transport aircraft method
+def wing_weight_N(params): # Torenbeek light transport aircraft method
     """
     Calculates wing weight based on the Torenbeek method for light transport aircraft.
     Source: Torenbeek, "Advanced Aircraft Design", Appendix C.
     NOTE: This formula is empirical and requires imperial units (lbf, ft).
     """
     #print("  - Calculating Wing Weight (Torenbeek)...") # Removed so that it doesnt print in iterations.
+    #print(f"W_TO: {params.weight.W_TO}, b_w_ft: {params.wing.b_w}, Lambda_05_w: {np.rad2deg(params.wing.Lambda_05_w)}, ")
     W_TO_lb = N_to_lbf(params.weight.W_TO)
     b_w_ft = m_to_ft(params.wing.b_w)
     S_w_ft2 = m2_to_ft2(params.wing.S_w)
@@ -62,7 +63,7 @@ def wing_weight_N(params: DesignParameters): # Torenbeek light transport aircraf
     
     return lbf_to_N(W_wing_lb)
 
-def wing_weight_N_z(params: DesignParameters): # Torenbeek not so light transport aircraft method
+def wing_weight_N_z(params): # Torenbeek not so light transport aircraft method
     """
     Calculates wing weight based on the Torenbeek method for light transport aircraft.
     Source: Torenbeek, "Advanced Aircraft Design", Appendix C. NO!?
@@ -93,7 +94,7 @@ def wing_weight_N_z(params: DesignParameters): # Torenbeek not so light transpor
     
     return lbf_to_N(W_wing_lb)
 
-def wing_weight_N_z(params: DesignParameters): # Raymer Cargo Aircraft Method, Page 402, Eq 15.25
+def wing_weight_N_z(params): # Raymer Cargo Aircraft Method, Page 402, Eq 15.25
     """
     Calculates wing weight based on the updated empirical formula.
     Formula: W_wing = 0.0051(W_dg*N_z)^0.557 * S_w^0.649 * A^0.5 * (t/c)_root^-0.4 * (1 + λ)^0.1 * (cosΛ)^-1.0 * S_csw^0.1
@@ -137,7 +138,7 @@ def wing_weight_N_z(params: DesignParameters): # Raymer Cargo Aircraft Method, P
 
     return lbf_to_N(W_wing_lb)
 
-def wing_weight_N_z(params: DesignParameters): # General Aviation weights
+def wing_weight_N_z(params): # General Aviation weights
     """
     Calculates wing weight based on the updated empirical formula (Equation 15.46), Page 402 Raymer.
     Formula: W_wing = 0.036 * S_w^0.758 * W_fw^0.0415 * (A/cos²Λ)^0.6 * q^0.006 * λ^0.04 * (100*t/c/cosΛ)^-0.3 * (N_z*W_dg)^0.49
@@ -191,7 +192,7 @@ def wing_weight_N_z(params: DesignParameters): # General Aviation weights
     # Convert back to Newtons
     return lbf_to_N(W_wing_lb)
     
-def fuselage_weight_N(params: DesignParameters):
+def fuselage_weight_N(params):
     """
     Calculates fuselage weight using the Gundlach statistical method.
     Source: Gundlach, "Designing Unmanned Aircraft Systems", Eq. 6.40.
@@ -220,7 +221,7 @@ def fuselage_weight_N(params: DesignParameters):
     #print(f"V_dive_Eq_kts: {V_dive_Eq_kts}, V_EqMax_kts: {V_EqMax_kts}, V_dive_kts: {V_dive_kts}")
     return lbf_to_N(W_fus_lb)
 
-def landing_gear_weight_N(params: DesignParameters):
+def landing_gear_weight_N(params):
     """
     Calculates landing gear weight as a statistical fraction of MTOW.
     Source: Gundlach, p. 222. 4% is a standard starting point for conventional gear.
@@ -230,7 +231,7 @@ def landing_gear_weight_N(params: DesignParameters):
     W_lg_lb = F_lg * N_to_lbf(params.weight.W_TO)
     return lbf_to_N(W_lg_lb)
 
-def empennage_weight_N(params: DesignParameters):
+def empennage_weight_N(params):
     """
     Calculates V-tail empennage weight based on your teammate's original script.
     Source: Gundlach, Eq. 6.37-6.39 provide weight-per-area factors.
@@ -246,7 +247,7 @@ def empennage_weight_N(params: DesignParameters):
                
     return lbf_to_N(W_emp_lb)
 
-def propulsion_weight_N(params: DesignParameters):
+def propulsion_weight_N(params):
     """
     Calculates propulsion system weight including engine, nacelle, and fuel system.
     """
@@ -266,7 +267,7 @@ def propulsion_weight_N(params: DesignParameters):
     
     return lbf_to_N(W_propulsion_lb)
 
-def fixed_equipment_weight_N(params: DesignParameters):
+def fixed_equipment_weight_N(params):
     """
     Calculates fixed equipment weight based on your teammate's original script.
     Source: Gundlach 6.3.3
@@ -288,7 +289,7 @@ def fixed_equipment_weight_N(params: DesignParameters):
     W_fixed_equipment_lb = W_avionics_lb + W_FCS_lb
     return lbf_to_N(W_fixed_equipment_lb)
 
-def get_final_weight_breakdown(params: DesignParameters) -> dict:
+def get_final_weight_breakdown(params) -> dict:
     """
     Calculates the final weight of each component based on the converged design
     and returns a dictionary with the breakdown.
