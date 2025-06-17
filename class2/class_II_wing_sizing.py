@@ -165,6 +165,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         M_ff_total *= M_cruise_fuel_fraction  # Cruise segment
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M6_descent1")
         
+        M_ff_nominal = M_ff_total  # Store used fuel fraction for debugging
         # Reserve segments (if applicable)
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M7_climb2_reserve")
         # Reserve cruise - use same L/D but shorter range
@@ -185,11 +186,15 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M10_descent2_reserve")
         M_ff_total *= get_statistical_fuel_fractions(aircraft_type, "M11_land_taxi_shutdown")
         
+        M_ff_nominal *= get_statistical_fuel_fractions(aircraft_type, "M11_land_taxi_shutdown")
+
         #print(f"     Total fuel fraction M_ff_total: {M_ff_total:.6f} (includes all mission segments)")
         # Step 5: Calculate total fuel weight
         # From initial_weight_estimations.py: W_F_total = (1 - M_ff_total) * W_TO
         W_F_total_N = (1.0 - M_ff_total) * W_TO_adjusted
+        W_F_used_N = (1.0 - M_ff_nominal) * W_TO_adjusted
         params.weight.M_ff = M_ff_total  # Update params with total fuel weight
+        params.weight.M_ff_nominal = M_ff_nominal  # Store nominal fuel fraction for debugging
         #print(f"     Total fuel weight W_F_total: {W_F_total_N:.2f} N (from W_TO_adjusted = {W_TO_adjusted:.2f} N)")
         # Updated W_TO after fuel burn calculation
         W_TO_adjusted2 = W_TO_adjusted_no_fuel + W_F_total_N
@@ -222,7 +227,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
                         'Wing Weight Trial': W_wing_trial, 'W_S_adjusted': W_S_adjusted,}
         #print(f"    ✅  Fuel burn calculation successful: W_F_total = {W_F_total_N:.2f} N, W_TO_adjusted = {W_TO_adjusted2:.2f} N, W/S = {W_S_adjusted:.2f} N/m²")
 
-        return W_F_total_N, L_D_cruise, L_D_loiter, M_ff_total, CD0, W_S_adjusted, testing_dict
+        return W_F_total_N, L_D_cruise, L_D_loiter, M_ff_total, M_ff_nominal, CD0, W_S_adjusted, testing_dict
         
     except Exception as e:
         print(f"    ⚠️  Fuel burn calculation failed: {e}")
@@ -385,7 +390,7 @@ def optimize_wing_for_fuel_burn(params) -> dict:
                     # )
                     # from class1.initial_weight_estimations import calculate_L_D_loiter
                     #print(f"    Evaluating: A_w={A_w:.1f}, S_w={S_w:.1f} m², sweep={sweep_deg:.1f}°, t/c={t_c:.3f}")
-                    fuel_weight, L_D_opt, L_D_loit_opt, M_ff_opt, CDO_opt, W_S_opt, test_dict= calculate_fuel_burn_penalty(
+                    fuel_weight, L_D_opt, L_D_loit_opt, M_ff_opt, M_ff_nominal, CDO_opt, W_S_opt, test_dict= calculate_fuel_burn_penalty(
                         A_w, S_w, sweep_deg, t_c, params, W_TO_baseline
                     )
                     successful_evaluations += 1
@@ -431,6 +436,8 @@ def optimize_wing_for_fuel_burn(params) -> dict:
                             'L_D_optimal': L_D_opt,
                             'L_D_loit_optimal': L_D_loit_opt,
                             'M_ff_optimal': M_ff_opt,
+                            'M_ff_nominal': M_ff_nominal,
+                            
                         }
                         
                         #print(f"    New best: A_w={A_w:.1f}, S_w={S_w:.1f}m², sweep={sweep_deg:.1f}°")

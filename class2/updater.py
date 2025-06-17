@@ -36,9 +36,11 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         updates += 1
     if 'W_F_used' in class_i_results:
         params.weight.W_F_used = class_i_results['W_F_used']
+        print(f"        ⚠️  W_F_used updated to {params.weight.W_F_used} (from Class I results)")
         updates += 1
     if 'W_F_res' in class_i_results:
         params.weight.W_F_res = class_i_results['W_F_res']
+        print(f"        ⚠️  W_F_res updated to {params.weight.W_F_res} (from Class I results)")
         updates += 1
     if 'M_ff' in class_i_results:
         params.weight.M_ff = class_i_results['M_ff']
@@ -46,6 +48,7 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         updates += 1
     if 'W_F' in class_i_results:
         params.weight.W_F = class_i_results['W_F']
+        print(f"        ⚠️  W_F updated to {params.weight.W_F} (from Class I results)")
         updates += 1
     if 'W_tfo' in class_i_results:
         params.weight.W_tfo = class_i_results['W_tfo']
@@ -128,18 +131,20 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
     if 'W_F' in class_ii_results:
         params.weight.W_F = class_ii_results['W_F']
         updates += 1
+        print(f"        ⚠️  W_F updated to {params.weight.W_F} (from Class II results)")
     if 'W_F_used' in class_ii_results:
         params.weight.W_F_used = class_ii_results['W_F_used']
         updates += 1
+        print(f"        ⚠️  W_F_used updated to {params.weight.W_F_used} (from Class II results)")
     # Empennage parameters
     # Update ALL relevant tail parameters directly (inline, simple approach)
     if 'S_h' in class_ii_results:
         params.empennage.S_h = class_ii_results['S_h']
-        print(f"        ⚠️  S_h updated to {params.empennage.S_h} (from Class II results)")
+        #print(f"        ⚠️  S_h updated to {params.empennage.S_h} (from Class II results)")
         updates += 1
     if 'S_v' in class_ii_results:
         params.empennage.S_v = class_ii_results['S_v']
-        print(f"        ⚠️  S_v updated to {params.empennage.S_v} (from Class II results)")
+        #print(f"        ⚠️  S_v updated to {params.empennage.S_v} (from Class II results)")
         updates += 1
     if 'S_t' in class_ii_results:
         params.empennage.S_t = class_ii_results['S_t']
@@ -239,6 +244,9 @@ def update_parameters_from_wing_optimization(params: DesignParameters, wing_resu
         updates += 1
     if 'M_ff_optimal' in wing_results:
         params.weight.M_ff = wing_results['M_ff_optimal']
+        updates += 1
+    if 'M_ff_nominal' in wing_results:
+        params.weight.M_ff_nominal = wing_results['M_ff_nominal']
         updates += 1
     if 'W_S_optimal' in wing_results:
         params.weight.W_S = wing_results['W_S_optimal']

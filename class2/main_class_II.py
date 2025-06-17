@@ -271,6 +271,7 @@ def perform_class_II_analysis(params: DesignParameters, initial_W_TO_guess: floa
             "W_E": W_empty_final,
             "W_OE": W_empty_final + params.weight.W_crew,
             "W_F": final_W_TO * (1 - params.weight.M_ff),
+            "W_F_used": final_W_TO * (1 - params.weight.M_ff_nominal),
             "converged": converged,
             "iterations": iterations
         }

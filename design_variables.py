@@ -160,6 +160,7 @@ class WeightParameters:
         self.W_S_max = 3218.59                      # Maximum Wing Loading in N/m^2, set by class I analysis
         self.T_W = 0.305                           # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.588                         # Maximum Fuel Fraction 
+        self.M_ff_nominal = 0.500                # Nominal not accounting for reserves or contingency fuel
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # 0.001 on the initial sizing script!! Maximum Trapped Fuel and Oil Fraction TODO, why is this here? Does it need to be accounted? Though it is just part of OEW? This is not contingency fuel, value yes, but not the description
         self.W_tfo = 1890.384                           # Trapped Fuel and Oil Fraction
@@ -480,7 +481,7 @@ class FuselageParameters:
                                                  "RadiusSymmetryType": 1.0, "Radius": 0.35, "RadiusBR": 0.09}},
             "crosssection_2": {"Tan_Angles": {"top": 0, "right": 0, "bottom": 0, "left": 0},
                                  "Type": "vsp.XS_ROUNDED_RECTANGLE",
-                                    "Dimensions": {"Width": 1.6, "Height": 1.4, "Keystone": 0.58929,
+                                    "Dimensions": {"Width": 1.7, "Height": 1.4, "Keystone": 0.58929,
                                                      "RadiusSymmetryType": 3.0, "Radius": 0.38}},
             "crosssection_3": {"Tan_Angles": {"top": 0, "right": 0, "bottom": 0, "left": 0},
                                     "Type": "vsp.XS_ROUNDED_RECTANGLE",
@@ -490,8 +491,8 @@ class FuselageParameters:
         }
 
 
-        self.D_f = 1.7
-        #self.D_f = np.max(np.array([self.crosssections[f"crosssection_{i+1}"]['Dimensions']['Width'] for i in range(len(self.crosssections)-2)]))    #  Maximum Fuselage Diameter in m
+        #self.D_f = 1.7
+        self.D_f = np.max(np.array([self.crosssections[f"crosssection_{i+1}"]['Dimensions']['Width'] for i in range(len(self.crosssections)-2)]))    #  Maximum Fuselage Diameter in m
         if self.D_f is not None and self.l_f is not None:
             self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
         self.l_n = 2.0                              # Nose Length in m
