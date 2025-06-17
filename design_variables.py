@@ -47,7 +47,7 @@ class DesignParameters:
         self.stability_aero = StabilityAerodynamicParameters()
         self.inertia = IntertiaParameters()
         self.structure_results = StructuresResults(self)
-
+        self.VSP = VSPparameters()
 
         # Loads Initial Configuration from YAML File (design_config.yaml)
         self.initial_config_path = initial_config_path
@@ -381,6 +381,7 @@ class WingParameters:
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
         self.airfoil_clalpha = 1.5
         self.CLA_A_h = 6.449844 # during cruise
+        self.CLA_A_h_M0 = 5.115368 # during cruise, M = 0 (M=0 during cruise doesn't make sense but Roskam wants it so fuck it)
         self.airfoil_cd0 = 0.06
         self.C_D0 = 0.017196 
         self.e = 0.9         #oswald efficiency factor
@@ -391,6 +392,7 @@ class WingParameters:
         self.max_allowed_x_displacement = 0.10 # m
         self.max_allowed_z_displacement = 0.10
         self.max_allowed_twist_angle = np.pi / 20 # rad
+      
 
 
         # Aerodynamics Loads Distribution
@@ -595,6 +597,7 @@ class EmpennageParameters:
         self.V_h = 0.64 #estimation                             # V-Tail Volume Coefficient
         self.V_v = 0.07 #estimation                             # Horizontal Stabilizer Volume Coefficient
         self.Cl_alpha = 6.341572                          # Hor. Stabilizer cl alpha curve during cruise
+        self.Cl_alpha_M0 = 4.6402468 # during cruise, M = 0 (M=0 during cruise doesn't make sense but Roskam wants it so fuck it)
         self.CL_h = -1.06717                              # Design CL of hor. stabilizer. during cruise
         self.S_t = 1.57                           # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
@@ -623,6 +626,7 @@ class EmpennageParameters:
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
         self.z_v = 0.5*self.b_v #TODO this is a placeholder for distance between tail a/c and cg vertically
         self.tailid = None
+        self.cd0 = None          # cd0 of tail, can we even get this?
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -722,6 +726,7 @@ class CGParameters:
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.z_cg = 1.5                          # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.z_cg_propulsion = None              # Z CG pos of the propulsion system in m
+        
         
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
