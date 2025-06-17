@@ -200,9 +200,9 @@ def calculate_bending_stress(Mx: float, My: float, I_xx: float, I_yy: float, I_x
         float: Bending stress (sigma_z).
                Returns float('nan') if denominator is zero.
     """
-    I_xx *= 1e-6 # Convert to m^4 for consistency with Mx, My in Nm
-    I_yy *= 1e-6 # Convert to m^4 for consistency with Mx, My in Nm
-    I_xy *= 1e-6 # Convert to m^4 for consistency with Mx, My in Nm
+    I_xx *= 1e-12 # Convert to m^4 for consistency with Mx, My in Nm
+    I_yy *= 1e-12 # Convert to m^4 for consistency with Mx, My in Nm
+    I_xy *= 1e-12 # Convert to m^4 for consistency with Mx, My in Nm
     numerator = (Mx * I_yy - My * I_xy) * y_coord + (My * I_xx - Mx * I_xy) * x_coord
     denominator = I_xx * I_yy - I_xy**2
 
