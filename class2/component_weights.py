@@ -238,13 +238,25 @@ def empennage_weight_N(params):
     The formula resolves projected area weights back to the true panel weight.
     """
     #print("  - Calculating Empennage Weight (Original Method)...")
-    WA_emp = 0.8
+    WA_emp = 8  # Weight per area factor for empennage (lb/ft²)
     W_HT_proj_lb = WA_emp * m2_to_ft2(params.empennage.S_h)
     W_VT_proj_lb = WA_emp * m2_to_ft2(params.empennage.S_v)
     
     W_emp_lb = W_HT_proj_lb * math.cos(params.empennage.vtail_dihedral)**2 + \
                W_VT_proj_lb * math.sin(params.empennage.vtail_dihedral)**2
                
+    return lbf_to_N(W_emp_lb)
+
+def empennage_weight_N_z(params):
+    # Use minimum gauge method for UAV
+    F_Emp = 1.3
+    F_Cont = 1.2
+    S_Emp_ft2 = m2_to_ft2(params.empennage.S_t)  # Total tail area
+    t_Min_in = 0.04  # Minimum gauge thickness (inches) for UAV
+    rho_Matl_lb_ft3 = 169  # Aluminum density (lb/ft³)
+    
+    W_emp_lb = (1/6) * F_Emp * F_Cont * S_Emp_ft2 * t_Min_in * rho_Matl_lb_ft3
+    
     return lbf_to_N(W_emp_lb)
 
 def propulsion_weight_N(params):
