@@ -382,8 +382,6 @@ if __name__ == "__main__":
  -0.421828, -0.474521, -0.527851, -0.582518, -0.638535, -0.695066, -0.750358,
  -0.800418, -0.839733, -0.8605, -0.85492, -0.819707, -0.750884, -0.624756]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
 
-    wingloading = WingLoadingDiagrams(designvars)
-    wingloading = wingloading.run_analysis(False)
 
     print(designvars.weight.W_wing)
 

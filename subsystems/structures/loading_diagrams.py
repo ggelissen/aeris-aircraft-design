@@ -58,13 +58,13 @@ class WingLoadingDiagrams:
         self.drag = []
         self.moment_aero = []
         inputspace = np.linspace(0, self.span / 2, 1000)
-        for i, cl, sparwise_poss in enumerate(zip(self.params.wing.CL_distribution, inputspace)):
+        for i, (cl, sparwise_poss) in enumerate(zip(self.params.wing.CL_distribution, inputspace)):
             chord = cross_section(self.params, sparwise_poss, False)[1]
             self.lift.append(self.params.wing.CL_distribution[i] * 0.5 * self.params.cruise_density * (self.V_critical ** 2) * chord)
-        for i, cd, sparwise_poss in enumerate(zip(self.params.wing.CD_distribution, inputspace)):
+        for i, (cd, sparwise_poss) in enumerate(zip(self.params.wing.CD_distribution, inputspace)):
             chord = cross_section(self.params, sparwise_poss, False)[1]
             self.drag.append(self.params.wing.CD_distribution[i] * 0.5 * self.params.cruise_density * (self.V_critical ** 2) * chord)
-        for i, cm, sparwise_poss in enumerate(zip(self.params.wing.CM_distribution, inputspace)):
+        for i, (cm, sparwise_poss) in enumerate(zip(self.params.wing.CM_distribution, inputspace)):
             chord = cross_section(self.params, sparwise_poss, False)[1]
             self.moment_aero.append(self.params.wing.CM_distribution[i] * 0.5 * self.params.cruise_density * (self.V_critical ** 2) * chord ** 2)
         # TODO: fix weight distribution
