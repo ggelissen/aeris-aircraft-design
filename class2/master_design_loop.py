@@ -228,23 +228,24 @@ def master_design_process(config_file: str = 'design_config.yaml',
     Returns:
         (final_params, iteration_history, converged)
     """
-    
-    print(f"\n{'='*80}")
-    print(f"                 MASTER AIRCRAFT DESIGN PROCESS")
-    print(f"{'='*80}")
-    print(f"Configuration: {config_file}")
-    print(f"Max iterations: {max_iterations}")
-    print(f"Tolerance: {tolerance:.1%}")
-    print(f"{'='*80}")
+    if verbose:
+        print(f"\n{'='*80}")
+        print(f"                 MASTER AIRCRAFT DESIGN PROCESS")
+        print(f"{'='*80}")
+        print(f"Configuration: {config_file}")
+        print(f"Max iterations: {max_iterations}")
+        print(f"Tolerance: {tolerance:.1%}")
+        print(f"{'='*80}")
     
     # Initialize design parameters
     try:
         params = DesignParameters()
         params.load_from_yaml(config_file)
-        print(f"✅ Initialized design parameters from {config_file}")
-        print(f"📊 Initial W_TO = {params.weight.W_TO:.0f} N")
-        print(f"📊 Initial W_S = {params.weight.W_S:.0f} N/m²")
-        print(f"📊 Initial T_W = {params.weight.T_W:.3f}")
+        if verbose:
+            print(f"✅ Initialized design parameters from {config_file}")
+            print(f"📊 Initial W_TO = {params.weight.W_TO:.0f} N")
+            print(f"📊 Initial W_S = {params.weight.W_S:.0f} N/m²")
+            print(f"📊 Initial T_W = {params.weight.T_W:.3f}")
     except Exception as e:
         print(f"❌ Failed to initialize parameters: {e}")
         raise
@@ -257,11 +258,11 @@ def master_design_process(config_file: str = 'design_config.yaml',
     # Main design iteration loop
     for iteration in range(1, max_iterations + 1):
         iteration_start_time = time.time()
-        
-        print(f"\n{'='*80}")
-        print(f"                    DESIGN ITERATION {iteration}")
-        print(f"{'='*80}")
-        
+        if verbose:
+            print(f"\n{'='*80}")
+            print(f"                    DESIGN ITERATION {iteration}")
+            print(f"{'='*80}")
+            
         # Store parameters at start of iteration for convergence check
         params_start = get_key_parameters(params)
         if verbose:
@@ -298,7 +299,8 @@ def master_design_process(config_file: str = 'design_config.yaml',
                 update_parameters_from_wing_optimization(params, wing_results)
                 print(f"    ✅ Wing optimization completed successfully")
                 if 'fuel_weight_N' in wing_results:
-                    print(f"    📊 Optimized fuel weight: {wing_results['fuel_weight_N']:.0f} N")
+                    if verbose:
+                        print(f"    📊 Optimized fuel weight: {wing_results['fuel_weight_N']:.0f} N")
             else:
                 print(f"    ⚠️  Wing optimization returned no results")
         except Exception as e:
@@ -315,7 +317,8 @@ def master_design_process(config_file: str = 'design_config.yaml',
                 update_parameters_from_class_ii(params, class_ii_results)
                 print(f"    ✅ Class II analysis completed successfully")
                 if 'W_TO' in class_ii_results:
-                    print(f"    📊 Converged W_TO: {class_ii_results['W_TO']:.0f} N")
+                    if verbose:
+                        print(f"    📊 Converged W_TO: {class_ii_results['W_TO']:.0f} N")
                 # Update wing loading consistency check
                 W_S_post_class_ii = params.weight.W_TO / params.wing.S_w
                 params.weight.W_S = W_S_post_class_ii
@@ -361,9 +364,10 @@ def master_design_process(config_file: str = 'design_config.yaml',
         iteration_history.append(iteration_results)
         
         # Print convergence status
-        print_convergence_status(iteration, relative_diffs, converged, tolerance)
-        print(f"⏱️  Iteration {iteration} completed in {iteration_time:.1f} seconds")
-        
+        if verbose:
+            print_convergence_status(iteration, relative_diffs, converged, tolerance)
+            print(f"⏱️  Iteration {iteration} completed in {iteration_time:.1f} seconds")
+            
         # Check if converged
         if converged:
             total_time = time.time() - start_time
@@ -373,13 +377,14 @@ def master_design_process(config_file: str = 'design_config.yaml',
     
     # Final summary
     total_time = time.time() - start_time
-    print(f"\n{'='*80}")
-    print(f"                    DESIGN PROCESS COMPLETE")
-    print(f"{'='*80}")
-    print(f"Status: {'CONVERGED' if converged else 'MAX ITERATIONS REACHED'}")
-    print(f"Iterations: {iteration}/{max_iterations}")
-    print(f"Total time: {total_time:.1f} seconds")
-    print(f"Average time per iteration: {total_time/iteration:.1f} seconds")
+    if verbose:
+        print(f"\n{'='*80}")
+        print(f"                    DESIGN PROCESS COMPLETE")
+        print(f"{'='*80}")
+        print(f"Status: {'CONVERGED' if converged else 'MAX ITERATIONS REACHED'}")
+        print(f"Iterations: {iteration}/{max_iterations}")
+        print(f"Total time: {total_time:.1f} seconds")
+        print(f"Average time per iteration: {total_time/iteration:.1f} seconds")
     
     # Final design summary
     final_params = get_key_parameters(params)
