@@ -150,7 +150,7 @@ class WeightParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.W_TO = 1                       # Maximum Take-Off Weight (MTOW) in N
+        self.W_TO = 27000                       # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
         self.W_OE = 11277                         # Operational Empty Weight (OEW) in N
         self.W_F = 8589                 # Total Fuel weight in N

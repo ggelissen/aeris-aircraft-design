@@ -17,5 +17,17 @@
                 "PYTHONPATH": "/root/DSEproject"
             },
         }
+       {
+            "name": "STAB STATIC Runner",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/root/DSEproject/subsystems/flightperformance/ControlStability.py",
+            "console": "integratedTerminal",
+            "python": "/root/miniconda3/envs/vsppytools/bin/python",
+            "cwd": "/root/DSEproject",
+            "env": {
+                "PYTHONPATH": "/root/DSEproject"
+            },
+        } 
     ]
 }

@@ -441,7 +441,17 @@ def print_final_design_summary(params: DesignParameters) -> None:
     print(f"    Horizontal Area (S_h):      {params.empennage.S_h:.2f} m²") 
     print(f"    Vertical Area (S_v):        {params.empennage.S_v:.2f} m²")
     print(f"    V-Tailcal Span (b_v):       {params.empennage.b_v:.2f} m")
-    
+    print(f"    Dihedral V-tail (Gamma):    {np.rad2deg(params.empennage.vtail_dihedral):.2f} deg")
+    print(f"    Root Chord (c_r):           {params.empennage.c_r :.2f} m")
+    print(f"    Tip Chord (c_t):            {params.empennage.c_t:.2f} m")
+    print(f"    Taper Ratio (λ_t):          {params.empennage.lambda_t:.3f}")
+    print(f"    Aspect Ratio (A_t):         {params.empennage.A_t:.2f}")
+    print(f"    Sweep Angle (Λ_0.25c_t):    {np.rad2deg(params.empennage.Lambda_t_025c ):.1f}°")
+    print(f"    Thickness-to-Chord (t/c_t): {params.empennage.t_c_t:.3f}")
+
+
+
+
     print(f"{'='*80}")
 
 
