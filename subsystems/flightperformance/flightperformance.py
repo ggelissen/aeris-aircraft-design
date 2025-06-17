@@ -39,14 +39,19 @@ class FlightPerformance:
         '''
         weight in N!
         '''
-        C_L = (0.3333333 * math.pi * A * oswald * cd0)**0.5
-        C_D = 1.33333333333* cd0
-        W = ((W_ini+W_fin)/2)/9.81
-        Vopt = ( (2/rho) * (W/S) * (1/C_L) )**0.5
+        C_L = (1/3 * math.pi * A * oswald * cd0)**0.5
+        C_D = 4/3* cd0
+
+        print('1',(2/(rho*S))**0.5)
+        print('2',1/(cT * 9.81))
+        print('3',(C_L**0.5)/C_D )
+        print('4',(W_ini**0.5 - W_fin**0.5))
         
-        R = Vopt/(9.81*cT)*C_L/C_D*math.log(W_ini/W_fin)
+        R = 2 * (2/(rho*S))**0.5 * 1/(cT * 9.81) * (C_L**0.5)/C_D * (W_ini**0.5 - W_fin**0.5)
+
+        #R = Vopt/(9.81*cT)*C_L/C_D*math.log(W_ini/W_fin)
         
-        return R/1000, Vopt
+        return R/1000
 
     def payload_range(self, cT, A, oswald, cd0, Wtotal, Wfuel, OEW, rho, S, plot=False):
         
@@ -63,7 +68,7 @@ class FlightPerformance:
         Wpayload = np.arange(0, Wtotal-Wfuel-OEW,  1*9.81)
         range = []
         for payload in Wpayload:
-            range1 = self.__range__(cT, OEW + Wfuel + payload , OEW- Wfuel + payload ,A, oswald, cd0, rho, S)[0]
+            range1 = self.__range__(cT, OEW + Wfuel + payload , OEW + payload ,A, oswald, cd0, rho, S)
             range.append(range1)
         
         
@@ -132,17 +137,11 @@ class FlightPerformance:
         output is endurance in seconds
         Weights in N
         '''
-        k2 = (1/(math.pi*AR*oswald))
-        CLopt = ((12*k2*Cd0)**0.5) / (2*k2)
-        # Vopt = ((W/S)*(2/rho)*(1/CLopt))**0.5
-        CD = Cd0 + ((CLopt)**2)*k2
+        CD = 2 * Cd0
+        CL = (Cd0 * math.pi * oswald * AR)**0.5
         
-        D = (CD/CLopt) * Wtotal
-        
-        FF = cT * D # kg/s
-        
-        
-        endurance = Wfuel/9.81 / FF
+        endurance = 1/(cT*9.81) * CL/CD * math.log(Wtotal/(Wtotal-Wfuel))
+        print(endurance)
         
         return endurance
     
@@ -274,10 +273,11 @@ def run_flight_performance(params: DesignParameters): # pragma: no cover
         
         
 if __name__ == "__main__": # pragma: no cover
+    pass
     
     #FlightPerformance().drag_plot(0.017, 0.3, np.arange(1,300, 1), 12, 4000*9.81, 12, 0.85)
     
-    #print(FlightPerformance().__range__(200, 0.00020, 4000*9.81, 3000*9.81, 12, 0.85, 0.017))
+    print('range',FlightPerformance().__range__(14*(10**-6), 35000, 25000, 12, 0.88, 0.017, 0.3108, 15))
     
     FlightPerformance().payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
     #endurance = FlightPerformance().endurance(12000, 35000, 0.017, 10, 0.88, 14*(10**-6))

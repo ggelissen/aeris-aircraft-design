@@ -372,7 +372,7 @@ def run_performance_diagram(params: DesignParameters) -> dict: # Alejandro, adde
     tw_grad_oei = constraint_climb_gradient_uav_pd(W_S_range_Npm2_pd, climb_grad_OEI_req_pd, climb_grad_OEI_alt_m_pd, C_D0_grad_OEI, e_grad_OEI, uav_A_perf, is_OEI=True, num_engines=num_engines_uav_perf, delta_CD0_OEI=delta_CD0_OEI_val_pd)
     constraints_list_pd.append({'label': f'Climb Gradient c/V (OEI)', 'T_W_values': tw_grad_oei, 'style': '--'})
 
-    plot_TW_WS_diagram_pd(W_S_range_Npm2_pd, constraints_list_pd, title=f"T/W vs W/S Diagram - Business uav (A={uav_A_perf})", design_point=design_point_example)
+    #plot_TW_WS_diagram_pd(W_S_range_Npm2_pd, constraints_list_pd, title=f"T/W vs W/S Diagram - Business uav (A={uav_A_perf})", design_point=design_point_example)
 
     return {"T_W": float(tw_intersect), "W_S": float(ws_intersect)}
 

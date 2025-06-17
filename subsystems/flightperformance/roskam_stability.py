@@ -56,7 +56,7 @@ def angle_of_sideslip_beta(params: DesignParameters):
     C_Y_beta = C_Y_beta_w + C_Y_beta_f + C_Y_beta_v
     
     
-    C_L_wf = 0 #cruise lift coefficient of aircraft
+    C_L_wf = params.performance.CL_cruise
     wing_sweep_contribution = float(input("what is the contribution of the wing sweep to the C_l_beta? p.393/425"))
     M_cos_Lambda_half = params.cruise_mach*math.cos(params.wing.Lambda_05_w)
     A_Sweep = params.wing.A_w_target / math.cos(params.wing.Lambda_05_w)
@@ -116,38 +116,38 @@ def angle_of_sideslip_beta(params: DesignParameters):
 
     return C_Y_beta, C_l_beta, C_n_beta, C_Y_beta_v
 
-def pitch_rate_q(params: DesignParameters):
-    C_D_q = 0 
+# def pitch_rate_q(params: DesignParameters):
+#     C_D_q = 0 
 
-    B = None#from luuks code when merged
-    x_w =None #position of wing 0.25 c - x_cg of aircraft
-    C_L_alpha_w =None #wing lift curve slope from mrugank
-    C_L_q_w_M0 = (0.5 + 2*x_w / params.wing.mac)*C_L_alpha_w
-    C_L_q_w = ((params.wing.A_w_target + 2*math.cos(params.wing.Lambda_025c_w))/(params.wing.A_w_target*B+2*math.cos(params.wing.Lambda_025c_w)))*C_L_q_w_M0
-    C_L_alpha_h =None #lift curve slope of tail
-    C_L_q_h = 2*C_L_alpha_h*params.empennage.Vh_v*params.empennage.V_h #check that V_h is volume coefficient
-    C_L_q = C_L_q_w + C_L_q_h 
+#     B = None #from luuks code when merged
+#     x_w = params. #position of wing 0.25 c - x_cg of aircraft @lucas
+#     C_L_alpha_w = params. #wing lift curve slope from mrugank
+#     C_L_q_w_M0 = (0.5 + 2*x_w / params.wing.mac)*C_L_alpha_w
+#     C_L_q_w = ((params.wing.A_w_target + 2*math.cos(params.wing.Lambda_025c_w))/(params.wing.A_w_target*B+2*math.cos(params.wing.Lambda_025c_w)))*C_L_q_w_M0
+#     C_L_alpha_h =None #lift curve slope of tail
+#     C_L_q_h = 2*C_L_alpha_h*params.empennage.Vh_v*params.empennage.V_h 
+#     C_L_q = C_L_q_w + C_L_q_h 
 
-    K_w = 0.9 #assuming aspect ratio is higher than 10 so change if not, see p.426/459 roskam
-    C_m_q_w_M0 = -K_w*C_L_alpha_w * math.cos(params.wing.Lambda_025c_w)*((params.wing.A_w_target*(2*(x_w/params.wing.mac)**2 + 0.5*(x_w / params.wing.mac)))/(params.wing.A_w_target + 2*math.cos(params.wing.Lambda_025c_w)) + (params.wing.A_w_target**3 * math.tan(params.wing.Lambda_025c_w)**2)/(24*(params.wing.A_w_target + 6*math.cos(params.wing.Lambda_025c_w))) + 1/8)
-    C_m_q_w = C_m_q_w_M0*((params.wing.A_w_target**3 * math.tan(params.wing.Lambda_025c_w)**2)/(params.wing.A_w_target * B + 6 * math.cos(params.wing.Lambda_025c_w))+3/B)/((params.wing.A_w_target**3 * math.tan(params.wing.Lambda_025c_w)**2)/(params.wing.A_w_target + 6*math.cos(params.wing.Lambda_025c_w)+3))
+#     K_w = 0.9 #assuming aspect ratio is higher than 10 so change if not, see p.426/459 roskam
+#     C_m_q_w_M0 = -K_w*C_L_alpha_w * math.cos(params.wing.Lambda_025c_w)*((params.wing.A_w_target*(2*(x_w/params.wing.mac)**2 + 0.5*(x_w / params.wing.mac)))/(params.wing.A_w_target + 2*math.cos(params.wing.Lambda_025c_w)) + (params.wing.A_w_target**3 * math.tan(params.wing.Lambda_025c_w)**2)/(24*(params.wing.A_w_target + 6*math.cos(params.wing.Lambda_025c_w))) + 1/8)
+#     C_m_q_w = C_m_q_w_M0*((params.wing.A_w_target**3 * math.tan(params.wing.Lambda_025c_w)**2)/(params.wing.A_w_target * B + 6 * math.cos(params.wing.Lambda_025c_w))+3/B)/((params.wing.A_w_target**3 * math.tan(params.wing.Lambda_025c_w)**2)/(params.wing.A_w_target + 6*math.cos(params.wing.Lambda_025c_w)+3))
     
-    x_ac_h = None#distance between LEMAC to quarter chord of tail
-    C_m_q_h = -2*C_L_alpha_h*params.empennage.Vh_v*params.empennage.V_h*(x_ac_h - params.cg.x_cg) #TODO check that this cg works
+#     x_ac_h = None#distance between LEMAC to quarter chord of tail, @lucas
+#     C_m_q_h = -2*C_L_alpha_h*params.empennage.Vh_v*params.empennage.V_h*(x_ac_h - params.cg.x_cg) #TODO check that this cg works
 
-    C_m_q = C_m_q_w + C_m_q_h
+#     C_m_q = C_m_q_w + C_m_q_h
 
-    return C_L_q, C_m_q, C_D_q
+#     return C_L_q, C_m_q, C_D_q
 
 def yaw_rate_r(params: DesignParameters, C_Y_beta_v):
     C_Y_r = -2* C_Y_beta_v * (params.empennage.L_h * math.cos(params.cruise_aoa) + params.empennage.z_v * math.sin(params.cruise_aoa)) / params.wing.b_w
 
-    C_L_w = None#wing lift coefficient at cruise
+    C_L_w = params.performance.CL_cruise
     parameter_for_C_l_r_w = None
     parameter2_for_C_l_r_w = input("what is the parameter from fig 10.41 p.428/462 roskam?")
     C_l_r_w = C_L_w * parameter_for_C_l_r_w + parameter2_for_C_l_r_w * params.wing.Gamma_w
     
-    C_l_r_v = -(2/params.wing.b_w**2)*(params.empennage.L_h*math.cos(params.cruise_aoa)+params.empennage.z_v*math.sin(cruise_aoa))*(params.empennage.z_v*math.cos(params.cruise_aoa - params.empennage.L_v*math.sin(params.cruise_aoa))*C_Y_beta_v)
+    C_l_r_v = -(2/params.wing.b_w**2)*(params.empennage.L_h*math.cos(params.cruise_aoa)+params.empennage.z_v*math.sin(params.cruise_aoa))*(params.empennage.z_v*math.cos(params.cruise_aoa - params.empennage.L_v*math.sin(params.cruise_aoa))*C_Y_beta_v)
     
     C_l_r = C_l_r_w + C_l_r_v
 
@@ -173,11 +173,11 @@ def roll_rate_derivates(params: DesignParameters, CyBv):
     zw = input("zw defined in figure 10.9")
     paramater1 = (1 - (4*zw / params.wing.b_w)*math.sin(gamma) + 12 * (zw / params.wing.b_w)**2 * math.sin(gamma)**2)
     ClpCdlCl2 = input("The drag-due-to-lift roll damping parameter as found from figure 10.36")
-    C_L = input("wing C_L")
+    C_L = params.performance.CL_cruise
     paramater2 = ClpCdlCl2 * C_L**2 - 0.125*params.wing.C_D0
     Clpw = BClp_K_CL_0*(kappa/beta) * (ClaCL / ClaCl_0) * paramater1 + paramater2
     Clp_h = input("the roll-damping derivative of the horizontal tail based on its own reference geometry. It is obtained from Eq 10.52 with appropiate substitution of horizontal tail parameters for wing parameters")
-    b_h = input("span of horizontal tail (b_h)")
+    b_h = params.empennage.b_v
     Clph = 0.5*Clp_h * (params.empennage.S_h/params.wing.S_w)*(b_h/params.wing.b_w)**2
     Clpv = 2/(params.wing.b_w**2)*abs((zv*math.cos(alpha)-lv*math.sin(alpha))*(zv*math.cos(alpha)-lv*math.sin(alpha)-zv))*CyBv
     
@@ -194,8 +194,8 @@ def roll_rate_derivates(params: DesignParameters, CyBv):
     deltaCnpadfdf = input("contribution due to symmetrical flap deflection as found from Figure 10.38 (pag. 423/455)")
     deltacl = input("deltacl determined from 8.1.2.1 for the type of flap used")
     cla = input("cla is the airfoil (flaps-up) lift-curve-slope as found from 8.1.1.2")
-    df = input("flap deflection employed")
-    
+    df = 0 #cruise
+
     adf = deltacl/(cla * df)
     Cnpw = CnpClCl_0 * C_L + Cnpet * params.wing.epsilon_t + (deltaCnpadfdf)*adf*df
     
@@ -218,9 +218,9 @@ def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv):
     Cnr = Cnrw + Cnrv
     return Cnr
 
-def speed_derivatives(params: DesignParameters):
-    C_L_u = (params.cruise_mach**2*(math.cos(params.wing.Lambda_025c_w))**2 * params.performance.CL_cruise)/(1-params.cruise_mach**2*(math.cos(params.wing.Lambda_025c_w))**2)
-    C_m_u = None
+# def speed_derivatives(params: DesignParameters):
+#     C_L_u = (params.cruise_mach**2*(math.cos(params.wing.Lambda_025c_w))**2 * params.performance.CL_cruise)/(1-params.cruise_mach**2*(math.cos(params.wing.Lambda_025c_w))**2)
+#     C_m_u = None
 
 if __name__ == '__main__':
     AERIS = DesignParameters()

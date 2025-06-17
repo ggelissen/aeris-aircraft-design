@@ -167,7 +167,7 @@ class WeightParameters:
         self.W_F_res = 1379.7765        # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
         self.W_fus = None                           # Fuselage weight in N
-        self.W_wing = 3000                          # Wing weight in N
+        self.W_wing = 1665.24                         # Wing weight in N
 
 
     def load_from_dict(self, param_dict):
@@ -373,7 +373,7 @@ class WingParameters:
         self.wingribs = Wingribs(parent)  # Wing ribs parameters, such as thickness, are stored here
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
-        self.yehudi_area = 7.0 # Yehudi area m2
+        self.yehudi_area = 4.0 # Yehudi area m2
         self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4) # First two span, second one chord
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
@@ -432,7 +432,7 @@ class PerformanceParameters:
         self.L_D_cruise = 14.562                      # Lift-to-Drag Ratio at Cruise
         self.L_D_loiter = 16.815                      # Lift-to-Drag Ratio at Loiter
 
-        self.CL_cruise = None                  # Lift Coefficient at Cruise	
+        self.CL_cruise = 0.4                  # Lift Coefficient at Cruise	
         self.C_L_hat = 0.6                      # Design Lift Coefficient, to be updated by alejandro's code
 
         self.V_A = 136.7                       # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
@@ -730,24 +730,24 @@ class CGParameters:
 class WingSectionParameters:
     def __init__(self, parent):
         self.spars = {
-            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50, 'material_density_kgm3': parent.materials.material_density},
-            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 3, "t_flange_2_mm": 3, "t_web_mm": 2, "flange_width_mm": 50, 'material_density_kgm3': parent.materials.material_density},
+            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 3*1.3*1.3, "t_flange_2_mm": 3*1.3*1.3, "t_web_mm": 2*1.1*1.1, "flange_width_mm": 50, 'material_density_kgm3': parent.materials.material_density},
+            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 3*1.3*1.3, "t_flange_2_mm": 3*1.3*1.3, "t_web_mm": 2*1.1*1.1, "flange_width_mm": 50, 'material_density_kgm3': parent.materials.material_density},
         }
         self.num_spars = len(self.spars)
         self.stringers = {
             "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
             "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200*1.3*1.3 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
+            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200*1.3*1.3 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
+            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200*1.3*1.3, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
+            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200*1.3*1.3, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
             "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
             "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
             "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
-            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
+            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 200*1.1*1.1, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.1*1.1, 'K': 1.0},
+            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 200*1.3*1.3, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.3*1.3, 'K': 1.0},
+            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 200*1.1*1.1, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.1*1.1, 'K': 1.0},
+            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 200*1.1*1.1, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*1.1*1.1, 'K': 1.0},
             "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 200, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9, 'K': 1.0},
         }
         self.num_stringers = len(self.stringers)
@@ -795,10 +795,10 @@ class Control:
 
 class IntertiaParameters:
     def __init__(self, W_TO :float = None, g :float = None):
-        self.I_xx = None     # Moment of inertia about x-axis (kg*m^2)
-        self.I_yy = None     # Moment of inertia about y-axis (kg*m^2)
-        self.I_zz = None     # Moment of inertia about z-axis (kg*m^2)
-        self.I_xz = None     # Product of inertia xz-plane (kg*m^2)
+        self.I_xx = 1212.66     # Moment of inertia about x-axis (kg*m^2)
+        self.I_yy = 8466.62     # Moment of inertia about y-axis (kg*m^2)
+        self.I_zz = 9219.268     # Moment of inertia about z-axis (kg*m^2)
+        self.I_xz = 382.99     # Product of inertia xz-plane (kg*m^2)
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -918,8 +918,8 @@ class MaterialsParameters():
         # Get material properties
         self.material_code = self.material["code"]                                  # Material code
         self.material_density = self.material["density"]                            # Density in kg/m^3
-        self.material_E = self.material["E"]                                        # Young's Modulus in Pa
-        self.material_G = self.material["G"]                                        # Shear Modulus in Pa
+        self.material_E = self.material["E"]                                        # Young's Modulus in GPa
+        self.material_G = self.material["G"]                                        # Shear Modulus in GPa
         self.material_price_kg = self.material["price_per_kg"]                      # Price per kg in EUR 
         self.material_sigma_yield = self.material["sigma_yield"]                    # Yield Strenght MPa
         self.material_sigma_ult = self.material["sigma_ult"]                        # Ultimate Strenght MPa
@@ -991,3 +991,14 @@ class StructuresResults():
         self.should_increase_sparcap_thickness_by_10_percent_in_nextround = False
         self.should_increase_sparweb_thickness_by_10_percent_in_nextround = False
         self.should_increase_wingskin_thickness_by_10_percent_in_nextround = False
+
+class VSPparameters():
+    def __init (self):
+        self.x_cg_vsp = 5.567
+        self.y_cg_vsp = 0
+        self.z_cg_vsp = 0.111
+    
+    def load_from_dict(self, param_dict):
+        for key, value in param_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)

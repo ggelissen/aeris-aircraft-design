@@ -12,7 +12,7 @@ fpcon_source_dir = os.path.join(os.path.dirname(__file__), "vpwin_fpv20")
 vfp_source_dir = os.path.join(os.path.dirname(__file__), "vpwin_vfphv20")
 
 # Directory where your airfoil .DAT files are stored
-airfoil_source_dir = os.path.join(os.path.dirname(__file__), "airfoils")
+#airfoil_source_dir = os.path.join(os.path.dirname(__file__), "airfoils")
 
 # --- Angle of Attack Sweep ---
 # List of angles of attack (in degrees) to simulate
@@ -92,7 +92,7 @@ def generate_case_name(wing, mach, alpha, re):
 
 def setup_case_directory(base_dir, wing_name, run_name):
     """Creates a clean, self-contained directory for a single simulation case."""
-    wing_results_dir = os.path.join(base_dir, "results", wing_name)
+    wing_results_dir = os.path.join("/root/DSEproject/subsystems/aerodynamics/vfp_analysis/results", wing_name)
     os.makedirs(wing_results_dir, exist_ok=True)
     
     case_run_dir = os.path.join(wing_results_dir, run_name)
@@ -116,7 +116,7 @@ def run_fpcon_once(base_dir, wing_name, airfoil_src_dir, mach_for_fpcon):
     This is run only once for the entire simulation sweep.
     """
     print("\n--- Step 1: Running FPCON to generate master geometry files ---")
-    wing_results_dir = os.path.join(base_dir, "results", wing_name)
+    wing_results_dir = os.path.join("/root/DSEproject/subsystems/aerodynamics/vfp_analysis/results", wing_name)
     os.makedirs(wing_results_dir, exist_ok=True)
     
     fpcon_run_dir = os.path.join(wing_results_dir, "geometry_master")
@@ -167,7 +167,7 @@ def run_fpcon_once(base_dir, wing_name, airfoil_src_dir, mach_for_fpcon):
     nsect = len(section_data)
     local_nsect1 = nsect if not is_cranked else NSECT1
 
-    input_file = "fpcon_input.txt"
+    input_file = f"{fpcon_run_dir}/fpcon_input.txt"
     with open(os.path.join(fpcon_run_dir, input_file), "w") as f:
         f.write("y\n" if is_cranked else "n\n")
         f.write(f"{A_g} {tip_c0_taper_ratio} {crank_c0_taper_ratio} {eta_sc}\n")
@@ -193,7 +193,25 @@ def run_fpcon_once(base_dir, wing_name, airfoil_src_dir, mach_for_fpcon):
         f.write(f"{mach_for_fpcon} {alpha_sweep[0]}\n")
     
     try:
-        subprocess.run(f'"fpcon.exe" < {input_file}', shell=True, check=True, cwd=fpcon_run_dir)
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/0412vgk.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/nac0012.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/rae2822.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/sc20412.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/sc20612.dat', '/root/DSEproject')
+        shutil.copy('/root/DSEproject/subsystems/aerodynamics/vfp_analysis/airfoils/sc20712.dat', '/root/DSEproject')
+        subprocess.run(f'wine "{fpcon_run_dir}/fpcon.exe" < {input_file}', shell=True, check=True)
+        os.remove('/root/DSEproject/0412vgk.dat')
+        os.remove('/root/DSEproject/nac0012.dat')
+        os.remove('/root/DSEproject/rae2822.dat')
+        os.remove('/root/DSEproject/sc20412.dat')
+        os.remove('/root/DSEproject/sc20612.dat')
+        os.remove('/root/DSEproject/sc20712.dat')
+        shutil.move('/root/DSEproject/FLOW.DAT', f'{fpcon_run_dir}/FLOW.DAT')
+        shutil.copy('/root/DSEproject/GEO.DAT', '/root/DSEproject/subsystems/aerodynamics/vfp_analysis/vpwin_vfphv20')
+        shutil.move('/root/DSEproject/GEO.DAT', f'{fpcon_run_dir}/GEO.DAT')
+        shutil.move('/root/DSEproject/GEOSUP.DAT', f'{fpcon_run_dir}/GEOSUP.DAT')
+        shutil.move('/root/DSEproject/MAP.DAT', f'{fpcon_run_dir}/MAP.DAT')
+        shutil.move('/root/DSEproject/RESPIN.DAT', f'{fpcon_run_dir}/RESPIN.DAT')
         print("FPCON executed successfully.")
         return fpcon_run_dir
     except subprocess.CalledProcessError as e:
@@ -219,7 +237,7 @@ def run_vfp_case(case_run_dir, master_fpcon_dir, current_run_name, current_mach,
                 f.write(f"{current_mach}\n") # Use current Mach for fusegen
                 f.write(f"{fuselage_length} {fore_body_length} {aft_body_length}\n")
                 f.write(f"{wing_root_le_pos}\n")
-            subprocess.run(f'"vfpfusegenv2.exe" < {input_file_fuse}', shell=True, check=True, cwd=case_run_dir)
+            subprocess.run(f'wine "vfpfusegenv2.exe" < {input_file_fuse}', shell=True, check=True, cwd=case_run_dir)
 
             input_file_body = "body_input.txt"
             with open(os.path.join(case_run_dir, input_file_body), "w") as f:
@@ -234,8 +252,8 @@ def run_vfp_case(case_run_dir, master_fpcon_dir, current_run_name, current_mach,
                     f.write(f"{data[0]} {data[1]} {data[2]} {data[3]}\n")
                 for data in lower_transition_data:
                     f.write(f"{data[0]} {data[1]} {data[2]} {data[3]}\n")
-            subprocess.run(f'"vfptvkbodyv8.exe" < {input_file_body}', shell=True, check=True, cwd=case_run_dir)
-            shutil.copy(os.path.join(case_run_dir, "FLOWdmmean.dat"), os.path.join(case_run_dir, "fort.15"))
+            subprocess.run(f'wine "vfptvkbodyv8.exe" < {input_file_body}', shell=True, check=True, cwd=case_run_dir)
+            shutil.copy(f"{case_run_dir}/FLOWdmmean.DAT", os.path.join(case_run_dir, "fort.15"))
         else:
             print("ERROR: Wing-only flow file generation not implemented.")
             return False
@@ -267,7 +285,7 @@ def run_vfp_case(case_run_dir, master_fpcon_dir, current_run_name, current_mach,
         # Here you would typically generate the FLOWVIS.DAT file based on current_mach and current_alpha
         # For simplicity, this example assumes vfphe.exe can take these as command line arguments or reads a pre-made file.
         # A more robust implementation would write a FLOWVIS.DAT file here.
-        subprocess.run('"vfphe.exe"', shell=True, check=True, cwd=case_run_dir)
+        subprocess.run('wine "vfphe.exe"', shell=True, check=True, cwd=case_run_dir)
         print("VFP core solver finished successfully.")
 
         # --- Post-Process and archive results with standard names ---
@@ -282,7 +300,7 @@ def run_vfp_case(case_run_dir, master_fpcon_dir, current_run_name, current_mach,
         if os.path.exists(os.path.join(case_run_dir, "fort.70")):
             shutil.copy(os.path.join(case_run_dir, "fort.70"), os.path.join(case_run_dir, "flow70.dat"))
             shutil.copy(os.path.join(case_run_dir, "fort.71"), os.path.join(case_run_dir, "flow71.dat"))
-            subprocess.run('"f137b1.exe"', shell=True, check=True, cwd=case_run_dir)
+            subprocess.run('wine "f137b1.exe"', shell=True, check=True, cwd=case_run_dir)
             if os.path.exists(os.path.join(case_run_dir, "wavedrg73.dat")):
                 shutil.copy(os.path.join(case_run_dir, "wavedrg73.dat"), os.path.join(case_run_dir, f"{current_run_name}wavedrg73.dat"))
             print("Wave drag calculation complete.")
@@ -300,7 +318,7 @@ def run_vfp_case(case_run_dir, master_fpcon_dir, current_run_name, current_mach,
         return False
 
 def run_simulation():
-    script_root = os.path.dirname(os.path.abspath(__file__))
+    script_root = '/root/DSEproject'
     
     mach_list = []
     if enable_mach_sweep:
@@ -316,6 +334,7 @@ def run_simulation():
         mach_for_fpcon = round(Mach_freestream, 2)
 
     # Run FPCON once to generate the master geometry files
+    airfoil_source_dir = os.path.join(script_root, 'subsystems/aerodynamics/vfp_analysis/airfoils')
     master_fpcon_dir = run_fpcon_once(script_root, wing_name, airfoil_source_dir, mach_for_fpcon)
     
     if not master_fpcon_dir:
