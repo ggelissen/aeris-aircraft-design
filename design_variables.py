@@ -150,10 +150,10 @@ class WeightParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.W_TO = 37807.7                         # Maximum Take-Off Weight (MTOW) in N
+        self.W_TO = 25750                       # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
-        self.W_OE = 16352.775                         # Operational Empty Weight (OEW) in N
-        self.W_F = 11483.09                 # Total Fuel weight in N
+        self.W_OE = 11277                         # Operational Empty Weight (OEW) in N
+        self.W_F = 8589                 # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
         self.W_S = 3218.59                             # Wing Loading in N/m^2, can be updated by class II 
@@ -192,26 +192,28 @@ class WingParameters:
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
         self.S_w = W_TO / W_S                       # Wing Area in m^2
         self.S_ref = self.S_w
-        self.A_w_target =9.0                              # Aspect Ratio (INITIAL)
+        self.A_w_target =12.0                              # Aspect Ratio (INITIAL)
         self.A_w_actual = None                      # Because addition of yehudi and winglets change aspect ratio. During iteration, optimise such that target=actual
         if self.S_w is not None and self.A_w_target is not None:
             self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
-        self.mac = 1.2824                            # Mean Aerodynamic Chord in m
+        self.mac = 0.924                           # Mean Aerodynamic Chord in m
         self.y_LEMAC = None                       # y-position of Leading Edge of MAC in m, recalculated by the programme
         self.x_LEMAC = 5.0                            # Position of Leading Edge of MAC in m
         self.xpos = None                                # calculated in the code in m. relative to the root
         self.z_LEMAC = 0.0
         self.lambda_w = 0.2703                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.Lambda_025c_w = 32 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_025c_w = 26.6 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
         self.Lambda_05_w = 0.607                           # Wind half-chord sweep angle in rad
         self.Lambda_0_w =None                       # Wing leading edge sweep angle in rad
         self.t_c_w_max = None
-        self.de_da = None                         # Downwash effect on the lift coefficient.
+        self.de_da = 0.246616                         # Downwash effect on the lift coefficient.
         self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
         self.t_c_w = 0.12                     # Wing Thickness-to-Chord Ratio, average of root and tip
-        self.CL = None                          # Design CL of aircraft
+        self.CL = 0.304                          # Design CL of aircraft during cruise
+        self.eta = 0.95                  # wing efficiency
+        self.cm_025c =-0.6              # moment coeff at quarter chord
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"
         # Airfoil parameters for CST-parametrised supercritical airfoil. For now, root and tip airfoil are the same.
         self.list_of_airfoils = {
@@ -374,8 +376,8 @@ class WingParameters:
         self.yehudi = True
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
         self.yehudi_area = 4.0 # Yehudi area m2
-        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.18, spanwise_pos_frac_outbound=0.3, flapwidth=0.2) # First two span, second one chord
-        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.75, flapwidth=0.1)
+        self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.12, spanwise_pos_frac_outbound=0.3, flapwidth=0.4) # First two span, second one chord
+        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.4)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
         self.airfoil_clalpha = 1.5
         self.airfoil_cd0 = 0.06
@@ -425,14 +427,16 @@ class PerformanceParameters:
 
         self.CL_max_TO = 1.3                        # Maximum Lift Coefficient at Take-Off
         self.CL_max_LAND = 1.6                      # Maximum Lift Coefficient at Landing
-        self.CL_max_cruise = 1.8                    # Maximum Lift Coefficient at Cruise
+        self.CL_max_cruise = 1.6                    # Maximum Lift Coefficient at Cruise
 
         self.CL_alpha = 5.0                  # Lift Curve Slope in 1/rad
 
         self.L_D_cruise = 14.562                      # Lift-to-Drag Ratio at Cruise
         self.L_D_loiter = 16.815                      # Lift-to-Drag Ratio at Loiter
 
-        self.CL_cruise = 0.4                  # Lift Coefficient at Cruise	
+        self.stall_angle_cruise = 15 * np.pi/180    # stall angle from CL-alpha curve airfoil
+
+        self.CL_cruise = 0.4                  # Lift Coefficient at Cruise
         self.C_L_hat = 0.6                      # Design Lift Coefficient, to be updated by alejandro's code
 
         self.V_A = 136.7                       # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
@@ -459,7 +463,7 @@ class FuselageParameters:
     def __init__(self):
         self.l_f = 10                           # Fuselage Length in m
         self.lh = None                          # Dist from wing to hor. stabilizer
-        self.C_m_ac = None                       # Moment coefficient at the aerodynamic center.
+        self.C_m_ac = -0.3584513                       # Moment coefficient at the aerodynamic center.
         self.x_ac = None                        # Aerodynamic center of the aircraft.
         self.x_payload = None                   # x-coordinate of Center of gravity of payload
         self.x_fuselage = None                  # x-coordinate of Center of gravity of fuselage
@@ -483,7 +487,8 @@ class FuselageParameters:
         }
 
 
-        self.D_f = np.max(np.array([self.crosssections[f"crosssection_{i+1}"]['Dimensions']['Width'] for i in range(len(self.crosssections)-2)]))    #  Maximum Fuselage Diameter in m
+        self.D_f = 2.3
+        #self.D_f = np.max(np.array([self.crosssections[f"crosssection_{i+1}"]['Dimensions']['Width'] for i in range(len(self.crosssections)-2)]))    #  Maximum Fuselage Diameter in m
         if self.D_f is not None and self.l_f is not None:
             self.lf_df = self.l_f / self.D_f        # Fuselage Length-to-Diameter Ratio
         self.l_n = 2.0                              # Nose Length in m
@@ -520,8 +525,8 @@ class EngineParameters:
         self.engine_max_thrust = 9340               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
-        self.nacelle_diameter = None
-        self.nacelle_length = None
+        self.nacelle_diameter = 0.918
+        self.nacelle_length = 1.9
         self.fuel_density = None                    # Fuel density depending on fuel type (A1, SAF, etc)
         self.cruise_tsfc = 68                     # Thrust Specific Fuel Consumption at Cruise in kg/N/h # TODO, it is now in lb/hr, all code did this
         self.take_off_tsfc = None                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
@@ -584,28 +589,30 @@ class EmpennageParameters:
     def __init__(self, l_f: float = None):
         # TODO: Change to V-Tail, remove horizontal and vertical stabilizer parameters, which are still used in some part of the code
         # ^^ no right? V-tail is combination of hor. tail and vert. tail size?
-        self.S_h =    1.39                          # Horizontal Stabilizer Area in m^2
-        self.S_v =   2.16                          # Vertical Stabilizer Area in m^2
-        self.V_h = 0.9 # 0.64 #estimation                             # V-Tail Volume Coefficient
-        self.V_v = 0.08 # 0.07 #estimation                             # Horizontal Stabilizer Volume Coefficient
-        self.Cl_alpha = None                          # Hor. Stabilizer cl alpha curve
-        self.CL_h = None                              # Design CL of hor. stabilizer.
-        self.S_t = 2                             # Total Stabilizer Area in m^2
+        self.S_h =    1.23                          # Horizontal Stabilizer Area in m^2
+        self.S_v =   0.97                         # Vertical Stabilizer Area in m^2
+        self.V_h = 0.64 #estimation                             # V-Tail Volume Coefficient
+        self.V_v = 0.07 #estimation                             # Horizontal Stabilizer Volume Coefficient
+        self.Cl_alpha = 6.341572                          # Hor. Stabilizer cl alpha curve during cruise
+        self.CL_h = -1.06717                              # Design CL of hor. stabilizer. during cruise
+        self.S_t = 1.57                           # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
         self.type = 'fixed'
-        self.Vh_v = None                             # Ratio of (hor.) tail speed to free stream speed.
+        self.Vh_v = 0.95                             # Ratio of (hor.) tail speed to free stream speed.
 
         # V_Tail:
-        self.b_v = 3.0                            # V_Tail Span in m TODO, computed in preliminary_sizing_tail.py, shouldnt be a magic number
+        self.b_v = 3.76                            # V_Tail Span in m TODO, computed in preliminary_sizing_tail.py, shouldnt be a magic number
+        self.b_v_h = self.b_v * np.cos(self.Gamma_h) * 2 # hor tail span
         self.c_t = 1.0                             # V-Tail Tip Chord in m
         self.c_r = 1.5                             # V-Tail Root Chord in m
         self.wetted_area = None                         # V-Tail Wetted Area in m^2, to be calculated by the OpenVSP CompGeom function, taking into account part of stabilizer inside fuselage
         self.x_t = 8.0                             # V-Tail Position in m
-        self.z_t = -0.2                        # V-Tail position in m
+        self.z_t = -0.2                             # V-Tail position in m
         self.V_t = None                             # V-Tail Volume Coefficient
         self.i_t = None                             # V-Tail Incidence Angle in degrees
-        self.A_t = 9                             # V-Tail Aspect Ratio
+        self.A_t = self.b_v**2/self.S_v             # V-Tail Aspect Ratio
+        self.A_t_h = self.b_v_h**2/self.S_h             # hor tail Aspect Ratio
         self.Lambda_t_025c = None                   # V-Tail Quarter-Chord Sweep Angle in degrees
         self.lambda_t = 0.25                        # V-Tail Taper Ratio
         self.t_c_t = 0.14                           # V-Tail Thickness-to-Chord Ratio
@@ -701,7 +708,7 @@ class CGParameters:
     calculate CG from the 3D model, but for this more precise weights and geometries of the aircraft need to be known.
     """
     def __init__(self):
-        self.x_cg_wing = 5                       # CG Position of the Wing in m
+        self.x_cg_wing = 3.78                       # CG Position of the Wing in m
         self.x_cg_fuselage = 4                   # CG Position of the Fuselage in m
         self.x_cg_landing_gear = 4.7               # CG Position of the Landing Gear in m
         self.x_cg_empennage = 9                  # CG Position of the Empennage in m
@@ -709,6 +716,7 @@ class CGParameters:
         self.x_cg_propulsion = 7                 # CG Position of the Propulsion System in m
         self.x_cg_payload = 3                    # CG Position of the Payload in m
         self.x_cg_fuel = 5                       # CG Position of the Fuel in m
+        self.x_ac_w = 3.781                      # wing aerodynamic center
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.total_mass_from_3Dmodel = None      # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
         self.z_cg = 1.5                          # CG Height in m, can be calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
