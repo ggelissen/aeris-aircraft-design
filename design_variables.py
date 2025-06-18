@@ -519,7 +519,7 @@ class EngineParameters:
         # TODO: Add separate variables for the nacelle
         self.N_engines = 1                          # Number of Engines
         # self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
-        self.T_TO = 8135                     # Thrust at Take-Off in N
+        self.T_TO = 9294                     # Thrust at Take-Off in N
         self.cruise_thrust_setting = None           # Thrust setting for cruise
         self.engine_weight =   234.05                 # Engine Weight in N
         self.engine_max_thrust = 9340               # Engine Maximum Thrust in N
@@ -565,7 +565,7 @@ class EngineParameters:
         self.power_toh = 0.
         self.cooling_l = 0.
         self.cooling_h = 0.
-        self.cruise_thrust = 1324 #N
+        self.cruise_thrust = 1801.46968769137 #N
 
 
     def load_from_dict(self, param_dict):
