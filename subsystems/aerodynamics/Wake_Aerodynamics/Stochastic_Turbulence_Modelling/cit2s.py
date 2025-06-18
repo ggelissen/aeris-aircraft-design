@@ -37,8 +37,8 @@ lh    = 5.5
 # TURBULENCE PARAMETERS
 print(' ');
 if __name__ == "__main__":
-    # sigma = float(input('   Enter turbulence intensity sigma [m/s]     (  1) : '))
-    # Lg    = float(input('   Enter turbulence scale length Lg [m]       (150) : '))
+    sigma = float(input('   Enter turbulence intensity sigma [m/s]     (  1) : '))
+    Lg    = float(input('   Enter turbulence scale length Lg [m]       (150) : '))
     
     sigmaug_V = sigma/V
     sigmaag   = sigma/V
