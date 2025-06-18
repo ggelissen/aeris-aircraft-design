@@ -27,19 +27,21 @@ mub = 79.6
 KX2 = 0.012
 KZ2 = 0.037
 KXZ = 0.002
-I_xx = 1212.66     # Moment of inertia about x-axis (kg*m^2)
-I_yy = 8466.62     # Moment of inertia about y-axis (kg*m^2)
-I_zz = 9219.268     # Moment of inertia about z-axis (kg*m^2)
-I_xz = 382.99     # Product of inertia xz-plane (kg*m^2)
-CL  = 0.281
 
-KX2 = I_xx/(3000 * 10.65**2)
-KZ2 = I_zz/(3000 * 10.65**2)
-KXZ = I_xz/(3000 * 10.65**2)
+CL  = 0.281
+I_xx = 1212.66      # kg*m²
+I_yy = 8466.62      # kg*m²  
+I_zz = 9219.268     # kg*m²
+I_xz = 382.99       # kg*m²
+mass = 3000         # kg
+
+KX2 = I_xx / (mass * b * b)    # = 0.003564
+KZ2 = I_zz / (mass * b * b)    # = 0.027094
+KXZ = I_xz / (mass * b * b)    # = 0.001126
 # TURBULENCE PARAMETERS APPROXIMATED POWER SPECTRAL DENSITIES
-Lg        = 150   # Turbulence length scale [m]
+Lg        = 1   # Turbulence length scale [m]
 B         = b/(2*Lg)
-sigma     = 1     # Turbulence intensity [m/s]
+sigma     = 5     # Turbulence intensity [m/s]
 sigmaug_V = sigma/V
 sigmavg   = sigma
 sigmabg   = sigmavg/V
@@ -52,12 +54,12 @@ tau1 = 0.0991;      tau2 = 0.5545;      tau3 = 0.4159
 tau4 = 0.0600;      tau5 = 0.3294;      tau6 = 0.2243
 
 # AIRCRAFT ASYMMETRIC AERODYNAMIC DERIVATIVES 
-CYb  =-1.0204;      Clb  =-0.2497;      Cnb  = 0.140
-CYp  =-0.0131;      Clp  =-0.2561;      Cnp  =-0.5163
+CYb  =-1.0204;      Clb  =-0.07097;      Cnb  = 0.0140#Reduced Dihedral, Clb =-0.2497 to Clb =-0.1597, Cnb = 0.0140 is corrected
+CYp  =-0.0131;      Clp  =-0.2561;      Cnp  =-0.148 # Cnp =-0.5163 to Cnp =-0.0508, more realistic
 CYr  = 0.6475;      Clr  = 0.2868;      Cnr  =-0.3867
 CYda = 0.0000;      Clda =-0.2349;      Cnda = 0.0286
 CYdr = 0.3037;      Cldr = 0.0286;      Cndr =-0.1261
- 
+
 # Wing contribution corrections
 Clpw = 0.8*Clp;    Cnpw = 0.9*Cnp
 Clrw = 0.7*Clr;    Cnrw = 0.2*Cnr
@@ -194,9 +196,15 @@ def cit2a_fun():
     I_xz = 382.99     # Product of inertia xz-plane (kg*m^2)
     CL  = 0.281
 
-    KX2 = I_xx/(3000 * 10.65**2)
-    KZ2 = I_zz/(3000 * 10.65**2)
-    KXZ = I_xz/(3000 * 10.65**2)
+    I_xx = 1212.66      # kg*m²
+    I_yy = 8466.62      # kg*m²  
+    I_zz = 9219.268     # kg*m²
+    I_xz = 382.99       # kg*m²
+    mass = 3000         # kg
+
+    KX2 = I_xx / (mass * b * b)    # = 0.003564
+    KZ2 = I_zz / (mass * b * b)    # = 0.027094
+    KXZ = I_xz / (mass * b * b)    # = 0.001126
     Lg        = 150
     B         = b/(2*Lg)
     sigma     = 1
@@ -211,8 +219,8 @@ def cit2a_fun():
     tau1 = 0.0991;      tau2 = 0.5545;      tau3 = 0.4159
     tau4 = 0.0600;      tau5 = 0.3294;      tau6 = 0.2243
 
-    CYb  =-1.0204;      Clb  =-0.2497;      Cnb  = 0.140
-    CYp  =-0.0131;      Clp  =-0.2561;      Cnp  =-0.5163
+    CYb  =-1.0204;      Clb  =-0.1597;      Cnb  = 0.140#Reduced Dihedral, Clb =-0.2497 to Clb =-0.1597
+    CYp  =-0.0131;      Clp  =-0.2561;      Cnp  =-0.05163 # Cnp =-0.5163 to Cnp =-0.0508, more realistic
     CYr  = 0.6475;      Clr  = 0.2868;      Cnr  =-0.3867
     CYda = 0.0000;      Clda =-0.2349;      Cnda = 0.0286
     CYdr = 0.3037;      Cldr = 0.0286;      Cndr =-0.1261
