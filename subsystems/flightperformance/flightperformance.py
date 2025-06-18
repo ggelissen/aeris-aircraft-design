@@ -313,6 +313,13 @@ class FlightPerformance:
 
 if __name__ == "__main__":
     fp = FlightPerformance()
+
+    # Initialize design parameters
+    params = DesignParameters()
+    params.load_from_yaml('design_config.yaml')
+
+    # Set up parameters for flight performance calculations
+    # ...
     
     # Generate styled plots by calling the main methods with plot=True
     fp.drag_plot(0.017, 0.3, np.arange(1,300, 1), 12, 4000*9.81, 12, 0.85, 60)
