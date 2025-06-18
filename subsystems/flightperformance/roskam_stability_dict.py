@@ -171,10 +171,10 @@ def yaw_rate_r(params: DesignParameters, C_Y_beta_v, input_data: dict):
 
     return C_Y_r, C_l_r
 
-def roll_rate_derivates(params: DesignParameters, CyBv):
-    zv = 0.5 #???
+def roll_rate_derivates(params: DesignParameters, CyBv, input_data: dict):
+    zv = float(input_data['zv'])  # input("vertical distance of empennage from fuselage c.g. (smaller than 0 for high empennage) (ask Julie/Lucas)")
     lv = params.empennage.L_v
-    z = 0.5 #???
+    z = float(input_data['z'])  # input("vertical distance of wing from fuselage c.g. (smaller than 0 for high wing) (ask Julie/Lucas)")
     M = 0.7
     beta = (1-M**2)**0.5
     #cla = params.wing.CLA_A_h
@@ -254,7 +254,7 @@ def roll_rate_derivates(params: DesignParameters, CyBv):
     
     return Cyp, Clp, Cnp, zv, lv
 
-def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv):
+def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv, input_data: dict):
     c = params.wing.mac
     x_lemac = params.cg.x_ac_w - c/4
     x = ((params.VSP.x_cg_vsp - x_lemac)/c - (params.cg.x_ac_w-x_lemac)/c)
@@ -373,23 +373,24 @@ if __name__ == '__main__':
         'K_N': 0.001,  # From Roskam p.397/431
         'K_R_l': 1.8,  # From Roskam p.399/432
         'parameter_for_C_l_r_w': 0.1, # Parameter from fig 10.41 p.428/462 roskam
-        'parameter2_for_C_l_r_w': 0.05, # Parameter from fig 10.41 p.428/462 roskam
+        # 'parameter2_for_C_l_r_w': 0.05, # Parameter from fig 10.41 p.428/462 roskam
         'zv': 1.5,  # Read from figure 10.27
-        'lv': 10.0,  # Read from figure 10.27
+        # 'lv': 10.0,  # Read from figure 10.27
         'z': 0.5,   # Vertical distance between airplane cg and wing root quarter chord point
-        'ClaM': 6.0,  # cl-alpha curve due to M
-        'beta_Clp': -0.4, # (beta*Clp)/kappa from figure 10.35 pag. 418/450
+        # 'ClaM': 6.0,  # cl-alpha curve due to M
+        # 'beta_Clp': -0.4, # (beta*Clp)/kappa from figure 10.35 pag. 418/450
         'BClp_K_CL_0': -0.35, # Roll damping parameter at zero lift, figure 10.35 pag. 418/450
-        'ClaCL': 6.2,  # Wing lift-curve slope at any lift coefficient
-        'ClaCl_0': 6.1,  # Wing lift-curve slope at zero lift from eq (8.22)
-        'gamma': 2.0,  # Gamma(?) defined in figure 10.7
-        'zw': -0.2,  # zw defined in figure 10.9
+        # 'ClaCL': 6.2,  # Wing lift-curve slope at any lift coefficient
+        # 'ClaCl_0': 6.1,  # Wing lift-curve slope at zero lift from eq (8.22)
+        # 'gamma': 2.0,  # Gamma(?) defined in figure 10.7
+        # 'zw': -0.2,  # zw defined in figure 10.9
         'ClpCdlCl2': -0.05, # Drag-due-to-lift roll damping parameter from figure 10.36
-        'Clp_h': -0.3, # Roll-damping derivative of the horizontal tail
-        'Cnpet': 0.01, # Wing twist contribution from Figures 10.37 (pag. 420/452)
-        'deltaCnpadfdf': -0.02, # Contribution due to symmetrical flap deflection, Figure 10.38
-        'deltacl': 0.0,  # Determined from 8.1.2.1 for the type of flap used (0 in cruise)
-        'cla': 6.0,    # Airfoil (flaps-up) lift-curve-slope from 8.1.1.2
+        'ClpCdlCl2_h': -0.05, # Drag-due-to-lift roll damping parameter from figure 10.36
+        # 'Clp_h': -0.3, # Roll-damping derivative of the horizontal tail
+        # 'Cnpet': 0.01, # Wing twist contribution from Figures 10.37 (pag. 420/452)
+        # 'deltaCnpadfdf': -0.02, # Contribution due to symmetrical flap deflection, Figure 10.38
+        # 'deltacl': 0.0,  # Determined from 8.1.2.1 for the type of flap used (0 in cruise)
+        # 'cla': 6.0,    # Airfoil (flaps-up) lift-curve-slope from 8.1.1.2
         'CnrCL2': -0.1, # From Figure 10.44 pag. 433/465
         'CnrCdo': -0.05  # Found from Figure 10.45
     }
