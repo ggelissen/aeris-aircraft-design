@@ -268,8 +268,10 @@ class Control:
             Y1.append(self.__normalise_coordinate__(result[0], i*self.l_fus))
             Y2.append(self.__normalise_coordinate__(result[1], i*self.l_fus))
         
-        plt.plot(Y1, self.x_lemac_lfus_list, label="min")
-        plt.plot(Y2, self.x_lemac_lfus_list, label="max")
+        plt.plot(Y1, self.x_lemac_lfus_list, label="min c.g.")
+        plt.plot(Y2, self.x_lemac_lfus_list, label="max c.g.")
+        plt.ylabel("x_lemac/l_fus")
+        plt.xlabel("x_cg/mac")
         plt.legend()
         plt.show()
         
@@ -365,7 +367,7 @@ class Control:
         while True:
             old_xlemac_fus = self.x_lemac_lfus
             #print(self.lh)
-            result = self.calculate_range(OEW, Wpayload, Xpayload, Wfuel, Wwing, Wfuselage, Xfuselage, False)
+            result = self.calculate_range(OEW, Wpayload, Xpayload, Wfuel, Wwing, Wfuselage, Xfuselage, True)
             
             #print('min range',result['cg_range'])
             

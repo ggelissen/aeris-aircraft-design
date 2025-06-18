@@ -322,7 +322,17 @@ if __name__ == "__main__":
     # ...
     
     # Generate styled plots by calling the main methods with plot=True
-    fp.drag_plot(0.017, 0.3, np.arange(1,300, 1), 12, 4000*9.81, 12, 0.85, 60)
-    fp.payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
-    fp.ROC(0.017, 1.225, np.arange(1,300,1), 15, 35000, 10, 0.85, 7000, 60, plot=True)
-    fp.performance_limit(35000, 15, 1.6, 7000, 0.017, 12, 0.88, True)
+    #fp.drag_plot(0.017, 0.3, np.arange(1,300, 1), 12, 4000*9.81, 12, 0.85, 60)
+    #fp.drag_plot(params.wing.C_D0, )
+    #fp.payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
+    result1 = fp.payload_range(params.engine.cruise_tsfc, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_TO, params.weight.W_F, params.weight.W_OE, 0.3108, params.wing.S_w, True)
+    print('pl-range', result1)
+    #fp.ROC(0.017, 1.225, np.arange(1,300,1), 15, 35000, 10, 0.85, 7000, 60, plot=True)
+    result2 = fp.ROC(params.wing.C_D0, 1.225, np.arange(1,300,1), params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.engine.engine_max_thrust, fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO), plot=True)
+    print('ROC',result2)
+    #fp.performance_limit(35000, 15, 1.6, 7000, 0.017, 12, 0.88, True)
+    result3 = fp.performance_limit(params.weight.W_TO, params.wing.S_w, params.performance.CL_max_TO, params.engine.engine_max_thrust, params.wing.C_D0, params.wing.A_w_target, params.wing.e, True)
+    print('perf-limit', result3)
+    
+    result4= FlightSim().ground_run2(params.engine.engine_max_thrust, params.weight.W_TO/9.81, params.wing.S_w, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.take_off_tsfc, params.performance.CL_max_TO, 1800)
+    print('ground run', result4)
