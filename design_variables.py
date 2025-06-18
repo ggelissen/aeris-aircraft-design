@@ -848,15 +848,15 @@ class StabilityAerodynamicParameters:
         self.Cmde = None      # Pitch control effectiveness (elevator)
 
         # Lateral-Directional Derivatives
-        self.CYb = None       # Side force due to sideslip
-        self.Clb = None       # Rolling moment due to sideslip (dihedral effect)
-        self.Cnb = None       # Yawing moment due to sideslip (weathercock stability)
-        self.CYp = None
-        self.Clp = None       # Rolling moment due to roll rate (roll damping)
-        self.Cnp = None       # Yawing moment due to roll rate
-        self.CYr = None
-        self.Clr = None       # Rolling moment due to yaw rate
-        self.Cnr = None       # Yawing moment due to yaw rate (yaw damping)
+        self.CYb =  -1.0204      # Side force due to sideslip
+        self.Clb =   -0.2497      # Side force due to sideslip
+        self.Cnb = 0.0140       # Rolling moment due to sideslip (dihedral effect)
+        self.CYp = -0.0131
+        self.Clp = -0.2561       # Rolling moment due to roll rate (roll damping)
+        self.Cnp = -0.5163       # Yawing moment due to roll rate
+        self.CYr =  0.6475
+        self.Clr = 0.2868       # Rolling moment due to yaw rate
+        self.Cnr = -0.3867       # Yawing moment due to yaw rate (yaw damping)
         
         # # Lateral-Directional Control Derivatives (optional for basic stability, needed for control response)
         # self.CYda = None

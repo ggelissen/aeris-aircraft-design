@@ -74,7 +74,7 @@ def aperiodic_roll_eigenvalues(params: DesignParameters):
 
     eigenvalues = params.stability_aero.Clp / (4 * mub * KX2)
     half_period = - np.log(0.5) / np.real(eigenvalues) * params.wing.b_w / params.cruise_speed
-    period = np.NaN
+    period = np.nan
     time_constant = - 1 / np.real(eigenvalues) * params.wing.b_w / params.cruise_speed
     dimensioned_eigenvalues = eigenvalues * params.cruise_speed / params.wing.b_w
 
@@ -91,7 +91,7 @@ def spiral_eigenvalues(params: DesignParameters):
     dimensioned_eigenvalues = eigenvalues * params.cruise_speed/ params.wing.b_w #is this mac correct or should it be b_w?
 
     half_period = - np.log(0.5) / np.real(eigenvalues) * params.wing.b_w / params.cruise_speed
-    period = np.NaN
+    period = np.nan
     time_constant = - 1 / np.real(eigenvalues) * params.wing.b_w / params.cruise_speed
 
     dict = {"eigenvalues": eigenvalues, "half_period": half_period, "period": period, "time_constant": time_constant, "dimensioned_eigenvalues": dimensioned_eigenvalues}
@@ -165,7 +165,7 @@ def asymmetric_eigenvalues(params: DesignParameters):
 
     # Half-period
     half_period =  np.log(0.5) / np.real(eigenvalues) * params.wing.b_w / params.cruise_speed
-    period = np.NaN
+    period = np.nan
     time_constant = - 1 / np.real(eigenvalues) * params.wing.b_w / params.cruise_speed
 
     dict = {"eigenvalues": eigenvalues, "half_period": half_period, "period": period, "time_constant": time_constant, "dimensioned_eigenvalues": dimensioned_eigenvalues}
@@ -193,7 +193,7 @@ def asymmetric_eigenvalues(params: DesignParameters):
 
 #     # Half-period
 #     half_period =  np.log(0.5) / np.real(eigenvalues) * params.wing.mac / params.cruise_speed
-#     period = np.NaN
+#     period = np.nan
 #     time_constant = - 1 / np.real(eigenvalues) * params.wing.mac / params.cruise_speed
 
 #     dict = {"eigenvalues": eigenvalues, "half_period": half_period, "period": period, "time_constant": time_constant, "dimensioned_eigenvalues": dimensioned_eigenvalues}
