@@ -203,7 +203,8 @@ def print_convergence_status(iteration: int, relative_diffs: Dict[str, float],
     
     print("="*60)
 
-def master_design_process(config_file: str = 'design_config.yaml', 
+def master_design_process(params_in: DesignParameters = None,
+                         config_file: str = 'design_config.yaml', 
                          max_iterations: int = 10, 
                          tolerance: float = 0.015,
                          verbose: bool = True) -> Tuple[DesignParameters, List[Dict], bool]:
@@ -220,6 +221,7 @@ def master_design_process(config_file: str = 'design_config.yaml',
     3. Continue until converged or max iterations reached
     
     Parameters:
+        params_in (DesignParameters): Optional initial parameters to override config
         config_file (str): Path to YAML configuration file
         max_iterations (int): Maximum number of design iterations
         tolerance (float): Relative convergence tolerance (default 1.5%)
@@ -237,18 +239,21 @@ def master_design_process(config_file: str = 'design_config.yaml',
         print(f"Tolerance: {tolerance:.1%}")
         print(f"{'='*80}")
     
-    # Initialize design parameters
-    try:
-        params = DesignParameters()
-        params.load_from_yaml(config_file)
-        if verbose:
+    if params_in:
+        params = params_in
+        print("✅ Using pre-configured DesignParameters object.")
+    else:
+        try:
+            params = DesignParameters()
+            params.load_from_yaml(config_file)
             print(f"✅ Initialized design parameters from {config_file}")
-            print(f"📊 Initial W_TO = {params.weight.W_TO:.0f} N")
-            print(f"📊 Initial W_S = {params.weight.W_S:.0f} N/m²")
-            print(f"📊 Initial T_W = {params.weight.T_W:.3f}")
-    except Exception as e:
-        print(f"❌ Failed to initialize parameters: {e}")
-        raise
+        except Exception as e:
+            print(f"❌ Failed to initialize parameters from {config_file}: {e}")
+            raise
+
+    print(f"📊 Initial W_TO = {params.weight.W_TO:.0f} N")
+    print(f"📊 Initial W_S = {params.weight.W_S:.0f} N/m²")
+    print(f"📊 Initial T_W = {params.weight.T_W:.3f}")
     
     # Initialize iteration tracking
     iteration_history = []
@@ -288,7 +293,7 @@ def master_design_process(config_file: str = 'design_config.yaml',
                 raise
             print(f"    🔄 Continuing with previous iteration parameters")
         
-        params_class_i_key = get_key_parameters(params)
+        #params_class_i_key = get_key_parameters(params)
         # ================================================================
         # PHASE 2: WING PLANFORM OPTIMIZATION
         # ================================================================  
@@ -312,6 +317,7 @@ def master_design_process(config_file: str = 'design_config.yaml',
         # ================================================================
         print(f"\n🟢 PHASE 3: CLASS II ANALYSIS")
         try:
+            print(f"    Initial W_TO guess for Class II: {params.weight.W_TO:.0f} N")
             class_ii_results = perform_class_II_analysis(params, initial_W_TO_guess=params.weight.W_TO)
             if class_ii_results:
                 update_parameters_from_class_ii(params, class_ii_results)
@@ -416,6 +422,7 @@ def print_final_design_summary(params: DesignParameters) -> None:
     print(f"    Aspect Ratio (A_w):         {params.wing.A_w_target:.2f}")
     print(f"    Wing Loading (W_S):         {params.weight.W_S:.0f} N/m²")
     print(f"    Sweep Angle (Λ_0.25c):      {np.rad2deg(params.wing.Lambda_025c_w):.1f}°")
+    print(f"    Sweep Angle Leading  Edge (Λ_LE): {np.rad2deg(params.wing.Lambda_0_w):.1f}°")
     print(f"    Design Lift Coefficient (C_L): {params.wing.CL:.3f}")
     print(f"    Taper Ratio (λ):            {params.wing.lambda_w:.3f}")
     print(f"    Thickness-to-Chord (t/c):   {params.wing.t_c_w_max:.3f}")
@@ -432,6 +439,7 @@ def print_final_design_summary(params: DesignParameters) -> None:
     print(f"    L/D Cruise:                 {params.performance.L_D_cruise:.2f}")
     print(f"    L/D Loiter:                 {params.performance.L_D_loiter:.2f}")
     print(f"    Zero-Lift Drag (CD0):       {params.wing.C_D0:.6f}")
+    print(f"    Zero-Lift Drag Tail (CD0_tail): {params.empennage.CD0_tail:.6f}")
     print(f"    Fuel Fraction:              {params.weight.M_ff:.3f}")
     
     print(f"\n🎚️  EMPENNAGE:")
@@ -439,7 +447,17 @@ def print_final_design_summary(params: DesignParameters) -> None:
     print(f"    Horizontal Area (S_h):      {params.empennage.S_h:.2f} m²") 
     print(f"    Vertical Area (S_v):        {params.empennage.S_v:.2f} m²")
     print(f"    V-Tailcal Span (b_v):       {params.empennage.b_v:.2f} m")
-    
+    print(f"    Dihedral V-tail (Gamma):    {np.rad2deg(params.empennage.vtail_dihedral):.2f} deg")
+    print(f"    Root Chord (c_r):           {params.empennage.c_r :.2f} m")
+    print(f"    Tip Chord (c_t):            {params.empennage.c_t:.2f} m")
+    print(f"    Taper Ratio (λ_t):          {params.empennage.lambda_t:.3f}")
+    print(f"    Aspect Ratio (A_t):         {params.empennage.A_t:.2f}")
+    print(f"    Sweep Angle (Λ_0.25c_t):    {np.rad2deg(params.empennage.Lambda_t_025c ):.1f}°")
+    print(f"    Thickness-to-Chord (t/c_t): {params.empennage.t_c_t:.3f}")
+
+
+
+
     print(f"{'='*80}")
 
 
@@ -450,8 +468,9 @@ if __name__ == "__main__":
     try:
         # Execute master design process
         final_params, history, converged = master_design_process(
+            params_in=None,  # Use default parameters from config file
             config_file='design_config.yaml',
-            max_iterations=30, 
+            max_iterations=8, 
             tolerance=0.015,  # 1.5% convergence tolerance
             verbose=True
         )

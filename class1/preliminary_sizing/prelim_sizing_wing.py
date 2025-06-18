@@ -180,8 +180,11 @@ def run_preliminary_sizing_wing(params: DesignParameters) -> dict: # pragma: no 
     #print(f"Calculated sweep angle at 0.25c (Lambda_025c): {(Lambda_025c)} degrees")
     taper_ratio = calculate_taper_ratio(Lambda_025c)
     
-    S = params.wing.S_w 
-    b = params.wing.b_w   
+    S = params.weight.W_TO/params.weight.W_S  
+    #params.wing.S_w = S  # Update the wing area in the design parameters
+    b = np.sqrt(S * params.wing.A_w_target)  # Calculate the wing span using the aspect ratio  
+    # print(f"Calculated wing area (S): {S} m²")
+    # print(f"Calculated wing span (b): {b} m")
     
     c_root, c_tip = calculate_chord_lengths(S, b, taper_ratio)
     MAC, y_LEMAC = calculate_MAC_and_y_LEMAC(c_root, c_tip, b)
@@ -196,6 +199,8 @@ def run_preliminary_sizing_wing(params: DesignParameters) -> dict: # pragma: no 
     dihedral_angle_rad = calculate_dihedral_angle_rad(Lambda_025c)
 
     results = {
+        'S_w': S,
+        'b_w': b,
         'Lambda_025c_w': Lambda_025c,
         'Lambda_05c_w': Lambda_05c,
         'Lambda_LE_w': Lambda_LE,

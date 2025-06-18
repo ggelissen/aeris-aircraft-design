@@ -36,9 +36,11 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         updates += 1
     if 'W_F_used' in class_i_results:
         params.weight.W_F_used = class_i_results['W_F_used']
+        print(f"        ⚠️  W_F_used updated to {params.weight.W_F_used} (from Class I results)")
         updates += 1
     if 'W_F_res' in class_i_results:
         params.weight.W_F_res = class_i_results['W_F_res']
+        print(f"        ⚠️  W_F_res updated to {params.weight.W_F_res} (from Class I results)")
         updates += 1
     if 'M_ff' in class_i_results:
         params.weight.M_ff = class_i_results['M_ff']
@@ -46,6 +48,7 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         updates += 1
     if 'W_F' in class_i_results:
         params.weight.W_F = class_i_results['W_F']
+        print(f"        ⚠️  W_F updated to {params.weight.W_F} (from Class I results)")
         updates += 1
     if 'W_tfo' in class_i_results:
         params.weight.W_tfo = class_i_results['W_tfo']
@@ -65,6 +68,12 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
     if 'Lambda_025c_w' in class_i_results:
         params.wing.Lambda_025c_w = class_i_results['Lambda_025c_w']
         updates += 1
+    if 'b_w' in class_i_results:
+        params.wing.b_w = class_i_results['b_w']
+        updates += 1
+    if 'S_w' in class_i_results:
+        params.wing.S_w = class_i_results['S_w']
+        params.wing.S_ref = class_i_results['S_w']  # Assume S_ref is same as S_w for now
     if 'lambda_w' in class_i_results:
         params.wing.lambda_w = class_i_results['lambda_w']
         updates += 1
@@ -100,6 +109,7 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
     #     not_updated = [key for key in class_i_results.keys() if key not in params.__dict__]
     #     if not_updated:
     #         print(f"        ⚠️  The following Class I results were not used to update parameters: {', '.join(not_updated)}")
+    return params
 
 
 def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: Dict) -> None:
@@ -121,16 +131,20 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
     if 'W_F' in class_ii_results:
         params.weight.W_F = class_ii_results['W_F']
         updates += 1
+        print(f"        ⚠️  W_F updated to {params.weight.W_F} (from Class II results)")
     if 'W_F_used' in class_ii_results:
         params.weight.W_F_used = class_ii_results['W_F_used']
         updates += 1
+        print(f"        ⚠️  W_F_used updated to {params.weight.W_F_used} (from Class II results)")
     # Empennage parameters
     # Update ALL relevant tail parameters directly (inline, simple approach)
     if 'S_h' in class_ii_results:
         params.empennage.S_h = class_ii_results['S_h']
+        #print(f"        ⚠️  S_h updated to {params.empennage.S_h} (from Class II results)")
         updates += 1
     if 'S_v' in class_ii_results:
         params.empennage.S_v = class_ii_results['S_v']
+        #print(f"        ⚠️  S_v updated to {params.empennage.S_v} (from Class II results)")
         updates += 1
     if 'S_t' in class_ii_results:
         params.empennage.S_t = class_ii_results['S_t']
@@ -167,6 +181,9 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
     if 'CD0' in class_ii_results:
         params.wing.C_D0 = class_ii_results['CD0']
         updates += 1
+    if 'CD0_tail' in class_ii_results:
+        params.empennage.CD0_tail = class_ii_results['CD0_tail']
+        updates += 1
     
     # Landing gear (simplified)
     if 'x_mlg' in class_ii_results:
@@ -174,7 +191,7 @@ def update_parameters_from_class_ii(params: DesignParameters, class_ii_results: 
         updates += 1
     # TODO, add the rest of the landing gear parameters if needed
     #print(f"        ✅ Updated {updates} parameters from Class II")
-
+    return params
 
 def update_parameters_from_wing_optimization(params: DesignParameters, wing_results: Dict) -> None:
     """Update parameters with wing optimization results (inline)."""
@@ -231,6 +248,9 @@ def update_parameters_from_wing_optimization(params: DesignParameters, wing_resu
     if 'M_ff_optimal' in wing_results:
         params.weight.M_ff = wing_results['M_ff_optimal']
         updates += 1
+    if 'M_ff_nominal' in wing_results:
+        params.weight.M_ff_nominal = wing_results['M_ff_nominal']
+        updates += 1
     if 'W_S_optimal' in wing_results:
         params.weight.W_S = wing_results['W_S_optimal']
         updates += 1
@@ -239,7 +259,9 @@ def update_parameters_from_wing_optimization(params: DesignParameters, wing_resu
         updates += 1
     if 'L_D_optimal' in wing_results:
         params.performance.L_D_cruise = wing_results['L_D_optimal']
-        #params.performance.L_D_loiter = wing_results['L_D_optimal']
+        updates += 1
+    if 'L_D_loit_optimal' in wing_results:
+        params.performance.L_D_loiter = wing_results['L_D_loit_optimal']
         updates += 1
     print(f"        ✅ Updated {updates} parameters from wing optimization")
-
+    return params

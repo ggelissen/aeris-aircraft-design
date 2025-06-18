@@ -1,17 +1,18 @@
 # Top-Level Parameters
 range: 6500000                  # Range in meters
-cruise_speed: 250               # Cruise speed in m/s # TODO, update as a function of mach, for consistency and ease of changes
 cruise_mach: 0.85               # Cruise Mach Number
+cruise_speed: 250              # Cruise Speed in m/s # TODO: has to be removed and as function of cruise mach
 stall_speed_clean: 110          # Stall speed clean configuration in kts
 stall_speed_land: 85            # Stall speed landing configuration in kts
 cruise_altitude: 12100         # Cruise altitude in meters
 cruise_density: 0.3059685       # Cruise density in kg/m^3
+cruise_temperature: 216.65      # Cruise temperature in Kelvin
 takeoff_distance: 1500 # 1500          # Takeoff distance in meters
 landing_distance: 1350 # 1200          # Landing distance in meters
 diversion_distance: 460000      # Diversion distance in meters
 loiter_time: 7200               # Loiter time in seconds
 max_eq_velocity: 207.549        # Maximum Equivalent Velocity in kts
-max_load_factor: 3.3            # Maximum Load Factor
+max_load_factor: 3.6            # Maximum Load Factor
 crit_mach: 0.75                 # Critical Mach Number TODO why is this a top level parameter? What? Alejandro
 cruise_viscosity: 0.00004 #TODO: what unit, this is wrong
 cruise_aoa: 0.03 #placeholder value for cruise aoa in rad

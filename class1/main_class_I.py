@@ -7,7 +7,7 @@ from class1.initial_weight_estimations import run_initial_weight_estimations
 from class1.thrust_wing_loading import run_performance_diagram
 from class1.preliminary_sizing.prelim_sizing_wing import run_preliminary_sizing_wing
 from class1.preliminary_sizing.prelim_sizing_fus import run_preliminary_sizing_fuselage
-
+from class2.updater import update_parameters_from_class_i
 def perform_class_I_analysis(params: DesignParameters) -> dict:
     """
     Perform Class I analysis on the design parameters.
@@ -31,16 +31,20 @@ def perform_class_I_analysis(params: DesignParameters) -> dict:
     # Run individual Class I modules
     print("\n1. Initial Weight Estimations...")
     results_weights = run_initial_weight_estimations(params)
-    
+    params = update_parameters_from_class_i(params, results_weights)
+
     print("\n2. Performance Constraint Analysis (T/W vs W/S)...")
     results_thrust_area = run_performance_diagram(params)
-    
+    params = update_parameters_from_class_i(params, results_thrust_area)
+
     print("\n3. Wing Preliminary Sizing...")
     results_wing_sizing = run_preliminary_sizing_wing(params)
-    
+    params = update_parameters_from_class_i(params, results_wing_sizing)
+
     print("\n4. Fuselage Preliminary Sizing...") # Empty function, and will remain empty, done in class II
     results_fuselage_sizing = run_preliminary_sizing_fuselage(params)
-
+    params = update_parameters_from_class_i(params, results_fuselage_sizing)
+    
     # Combine all results
     combined_results = {**results_weights, **results_thrust_area, 
                        **results_wing_sizing, **results_fuselage_sizing}

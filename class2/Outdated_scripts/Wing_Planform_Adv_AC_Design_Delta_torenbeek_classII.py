@@ -89,8 +89,9 @@ def calculate_torenbeek_inputs_from_params(params: DesignParameters) -> dict:
                     cw.fixed_equipment_weight_N(params))
 
     # --- Propulsion ---
-    eta_o = calculate_eta_o_from_tsfc(params.engine.cruise_tsfc, params.cruise_speed) # Default was 0.31
-    print(f"Overall efficiency (eta_o): {eta_o:.4f}")	
+    cruise_speed = params.cruise_mach * math.sqrt(1.4 * 287.15 * params.cruise_temperature)  # Speed at cruise altitude
+    eta_o = calculate_eta_o_from_tsfc(params.engine.cruise_tsfc, cruise_speed) # Default was 0.31
+    print(f"Overall efficiency (eta_o): {eta_o:.4f}")
     # Power plant weight per unit take-off thrust
     mu_T = params.engine.engine_weight / params.engine.T_TO if params.engine.T_TO > 0 else 0.172
     print(f"Propulsion weight fraction (mu_T): {mu_T:.4f}")
@@ -124,7 +125,7 @@ def calculate_torenbeek_inputs_from_params(params: DesignParameters) -> dict:
     e_hat = 0.90 * 1.15 # Oswald's efficiency factor, typical for modern aircraft, check with others for consistency TODO add winglet correction of 1.15
     C_Dc = 0.0005 # Eq. 10.42 context TODO, ARBITRARY DESIGN TARGET VALUE, NOT DERIVED FROM ANYTHING
     # C_f is the skin friction coefficient, typically around 0.00225 for clean aircraft, torenbeek
-    Re_cruise = id.calculate_Reynolds_number(V=params.cruise_speed, rho=params.cruise_density, l=params.wing.root_chord, mu=1.4436e-5, k=0.152e-5, Mach=params.cruise_mach)
+    Re_cruise = id.calculate_Reynolds_number(V=cruise_speed, rho=params.cruise_density, l=params.wing.root_chord, mu=1.4436e-5, k=0.152e-5, Mach=params.cruise_mach)
     C_f = id.calculate_skin_friction_coefficient(flow_ratio=(0.35, 0.65), Re=Re_cruise, Mach=params.cruise_mach) # For the wing, using a typical flow ratio for a transonic wing
     # TODO, check that fuselage and empennage skin friction coefficients are not needed here, as they are not included in the WPF?
     print(f"Skin friction coefficient (C_f): {C_f:.4f}")
