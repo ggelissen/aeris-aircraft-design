@@ -171,6 +171,7 @@ def run_structures(designvars):
     wing_loading = wing_loading.run_analysis(PLOT=False)
 
     cross_sectional_results = []
+    highest_stress = 0.0
     for i, spanwise_position in enumerate(spanwise_position_lst):
         results = perform_cross_section_analysis(designvars, wing_loading[i], spanwise_position)
         cross_sectional_results.append(results)
@@ -206,6 +207,8 @@ def run_structures(designvars):
         nameslist = (['Spar1'] + [f'Stringer{index+1}' for index in bottom_stringer_indices.tolist()] + ['Spar2', 'Spar2'] + [f'Stringer{index+1}' for index in top_stringer_indices.tolist()] + ['Spar1'])
         nameslist.reverse()
         for inddd, (boom_stress, boom_number, boom_x, boom_y, boom_area, boom_shearflow) in enumerate(zip(results['bending_stresses'][:-1], nameslist, results['boom_x_coords_sorted'][:-1], results['boom_y_coords_sorted'][:-1], results['boom_areas_sorted'][:-1], results["final_shear_flows"][:-1])):
+            if boom_stress > highest_stress:
+                highest_stress = boom_stress
             if spanwise_position > 0.21:
                 if np.abs(boom_stress) > designvars.materials.material_sigma_yield:
                     print(f"Warning: Boom {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield strength with {100*(boom_stress-designvars.materials.material_sigma_yield)/boom_stress} % ")
@@ -310,7 +313,6 @@ def run_structures(designvars):
     ax3.set_ylabel('Torsion around y axis (Nm)')
     ax3.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]), color='green', label='Torsion around y axis')
     ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
-    plt.title("Internal Moment Distribution")
     lines, labels = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
     lines3, labels3 = ax3.get_legend_handles_labels()
@@ -331,7 +333,6 @@ def run_structures(designvars):
              np.array([wing_loading[i]["shear_z"] for i in range(len(spanwise_position_lst))]), color='orange',
              label='Shear along z axis')
     ax2.tick_params(axis='y')
-    plt.title("Internal Shear Distribution")
     lines, labels = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
     ax1.legend(lines + lines2, labels + labels2, loc=0)
@@ -342,20 +343,19 @@ def run_structures(designvars):
     ax1.set_xlabel('spanwise position (%)')
     ax1.set_ylabel('Displacement x axis (m)')
     ax1.plot(np.linspace(0, 1, 1000),
-             np.array([wing_loading[i]['shear_x'] for i in range(len(spanwise_position_lst))]),
+             x_bending_distribution,
              label='Displacement along x axis')
     ax1.tick_params(axis='x')
     ax2 = ax1.twinx()
     ax2.set_ylabel('Displacement along z axis (m)')
     ax2.plot(np.linspace(0, 1, 1000),
-             np.array([wing_loading[i]["shear_z"] for i in range(len(spanwise_position_lst))]), color='orange',
-             label='Displacement along z axis')
+             z_bending_distribution, color='orange',
+             label='Displacement along z axis', linestyle='--')
     ax2.tick_params(axis='y')
     ax3 = ax1.twinx()
     ax3.set_ylabel('Twist angle (rad)')
-    ax3.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]), color='green', label='Twist angle')
+    ax3.plot(np.linspace(0, 1, 1000), y_twist_distribution, color='green', label='Twist angle')
     ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
-    plt.title("Displacement of the wing")
     lines, labels = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
     lines3, labels3 = ax3.get_legend_handles_labels()
@@ -397,7 +397,6 @@ if __name__ == "__main__":
     ax3.set_ylabel('Cm (-)')
     ax3.plot(np.linspace(0,1,1000), designvars.wing.CM_distribution, color='green', label='CM distribution')
     ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
-    plt.title("Wing Aerodynamic Distributions")
     lines, labels = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
     lines3, labels3 = ax3.get_legend_handles_labels()
