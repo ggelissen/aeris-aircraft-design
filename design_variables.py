@@ -152,25 +152,25 @@ class WeightParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.W_TO = 27000                       # Maximum Take-Off Weight (MTOW) in N
+        self.W_TO = 28868.5264                       # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
-        self.W_OE = 11277                         # Operational Empty Weight (OEW) in N
-        self.W_F = 8589                 # Total Fuel weight in N
+        self.W_OE = 12344.7188                         # Operational Empty Weight (OEW) in N
+        self.W_F = 10640                 # Total Fuel weight in N
         self.W_PL = 5884                            # Maximum Payload weight in N
         self.W_crew = 0.0                           # Crew Weight in N
-        self.W_S = 3218.59                             # Wing Loading in N/m^2, can be updated by class II 
-        self.W_S_max = 3218.59                      # Maximum Wing Loading in N/m^2, set by class I analysis
-        self.T_W = 0.305                           # Thrust-to-Weight ratio in N/N
+        self.W_S = 3218.593                            # Wing Loading in N/m^2, can be updated by class II 
+        self.W_S_max = 3219                      # Maximum Wing Loading in N/m^2, set by class I analysis
+        self.T_W = 0.3159                           # Thrust-to-Weight ratio in N/N
         self.M_ff = 0.588                         # Maximum Fuel Fraction 
         self.M_ff_nominal = 0.500                # Nominal not accounting for reserves or contingency fuel
         self.Fuel_Fuselage_Fraction = 0             # Fraction of fuel in fuselage
         self.M_tfo = 0.05                           # 0.001 on the initial sizing script!! Maximum Trapped Fuel and Oil Fraction TODO, why is this here? Does it need to be accounted? Though it is just part of OEW? This is not contingency fuel, value yes, but not the description
         self.W_tfo = 1890.384                           # Trapped Fuel and Oil Fraction
-        self.W_F_used = 10103.319            # Used Fuel Weight in N
-        self.W_F_res = 1379.7765        # Reserve Fuel Weight in N
+        self.W_F_used = 8545           # Used Fuel Weight in N
+        self.W_F_res = 2095        # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
-        self.W_fus = 4219.19                           # Fuselage weight in N
-        self.W_wing = 1665.24                         # Wing weight in N
+        self.W_fus = 4056.62                           # Fuselage weight in N
+        self.W_wing = 2067.25                         # Wing weight in N
 
 
     def load_from_dict(self, param_dict):
@@ -193,28 +193,28 @@ class WingParameters:
     """
     def __init__(self, parent, W_TO: float = None, W_S: float = None):
         self.wetted_area = None                         # Wing Wetted Area in m^2, to be calculated by subsystems.structures.vspfunctions.calculate_wet_areas(), taking into account part of wing inside fuselage
-        self.S_w = W_TO / W_S                       # Wing Area in m^2
+        self.S_w = 9.44 #  W_TO / W_S                       # Wing Area in m^2
         self.S_ref = self.S_w
         self.A_w_target =12.0                              # Aspect Ratio (INITIAL)
         self.A_w_actual = None                      # Because addition of yehudi and winglets change aspect ratio. During iteration, optimise such that target=actual
         if self.S_w is not None and self.A_w_target is not None:
-            self.b_w = m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
-        self.mac = 0.924                           # Mean Aerodynamic Chord in m
+            self.b_w = 10.65#m.sqrt(self.A_w_target * self.S_w)  # Wing Span in m
+        self.mac = 0.972                           # Mean Aerodynamic Chord in m
         self.y_LEMAC = None                       # y-position of Leading Edge of MAC in m, recalculated by the programme
         self.x_LEMAC = 5.0                            # Position of Leading Edge of MAC in m
         self.xpos = None                                # calculated in the code in m. relative to the root
         self.z_LEMAC = 0.0
-        self.lambda_w = 0.2703                        # Wing Taper Ratio
+        self.lambda_w = 0.301                        # Wing Taper Ratio
         self.Lambda_w = None                        # Wing Sweep Angle in degrees
-        self.Lambda_025c_w = 26.6 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
+        self.Lambda_025c_w = 28.3 * np.pi / 180               # Wing quarter-Chord Sweep Angle in radians
         self.Lambda_05_w = 0.607                           # Wind half-chord sweep angle in rad
-        self.Lambda_0_w =None                       # Wing leading edge sweep angle in rad
+        self.Lambda_0_w =30.3 *np.pi/180                       # Wing leading edge sweep angle in rad
         self.t_c_w_max = None
         self.de_da = 0.246616                         # Downwash effect on the lift coefficient.
-        self.t_c_w_r = 0.12                    # Wing Thickness-to-Chord Ratio at Root
-        self.t_c_w_t = 0.12                     # Wing Thickness-to-Chord Ratio at Tip
-        self.t_c_w = 0.12                     # Wing Thickness-to-Chord Ratio, average of root and tip
-        self.CL = 0.304                          # Design CL of aircraft during cruise
+        self.t_c_w_r = 0.121                    # Wing Thickness-to-Chord Ratio at Root
+        self.t_c_w_t = 0.121                     # Wing Thickness-to-Chord Ratio at Tip
+        self.t_c_w = 0.121                     # Wing Thickness-to-Chord Ratio, average of root and tip
+        self.CL = 0.282                          # Design CL of aircraft during cruise
         self.eta = 0.95                  # wing efficiency
         self.cm_025c =-0.6              # moment coeff at quarter chord
         self.airfoil_w = "Supercritical airfoil, based on Class-Shape Transformation parametrisation for airfoils"
@@ -364,8 +364,8 @@ class WingParameters:
         self.i_w = 0.0                             # Wing Incidence Angle in degrees
         self.epsilon_t_quarter_chord = 0.0                       # Wing Twist Angle in radians
         self.Gamma_w = 0.0175                         # Wing Dihedral Angle in radians
-        self.root_chord = 1.819  # Wing Root Chord in m
-        self.tip_chord = 0.4916  # Wing Tip Chord in m
+        self.root_chord = 1.364  # Wing Root Chord in m
+        self.tip_chord = 0.411  # Wing Tip Chord in m
         self.C_m_ac = None       # Wing moment coefficient at aerodynamic center
         self.t_r = self.t_c_w_r * self.root_chord   # Wing Root Thickness in m
         self.planform_points = None  # 2D Numpy array with points forming the planform, is calculated by create_wing()
@@ -385,7 +385,7 @@ class WingParameters:
         self.airfoil_clalpha = 1.5
         self.CLA_A_h = 6.449844 # during cruise
         self.CLA_A_h_M0 = 5.115368 # during cruise, M = 0 (M=0 during cruise doesn't make sense but Roskam wants it so fuck it)
-        self.airfoil_cd0 = 0.06
+        self.airfoil_cd0 = 0.025826
         self.C_D0 = 0.017196 
         self.e = 0.9         #oswald efficiency factor
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
@@ -525,10 +525,10 @@ class EngineParameters:
         # TODO: Add separate variables for the nacelle
         self.N_engines = 1                          # Number of Engines
         # self.T_TO = T_W * W_TO                      # Thrust at Take-Off in N
-        self.T_TO = 9294                     # Thrust at Take-Off in N
+        self.T_TO = 9121                     # Thrust at Take-Off in N
         self.cruise_thrust_setting = None           # Thrust setting for cruise
         self.engine_weight =   234.05                 # Engine Weight in N
-        self.engine_max_thrust = 9340               # Engine Maximum Thrust in N
+        self.engine_max_thrust = 9121               # Engine Maximum Thrust in N
         self.engine_length = None                   # Engine Length in m
         self.engine_diameter = None                 # Engine Diameter in m
         self.nacelle_diameter = 0.918
@@ -595,41 +595,41 @@ class EmpennageParameters:
     def __init__(self, l_f: float = None):
         # TODO: Change to V-Tail, remove horizontal and vertical stabilizer parameters, which are still used in some part of the code
         # ^^ no right? V-tail is combination of hor. tail and vert. tail size?
-        self.S_h =    1.23                          # Horizontal Stabilizer Area in m^2
-        self.S_v =   0.97                         # Vertical Stabilizer Area in m^2
+        self.S_h =    1.45                          # Horizontal Stabilizer Area in m^2
+        self.S_v =   1.74                         # Vertical Stabilizer Area in m^2
         self.V_h = 0.64 #estimation                             # V-Tail Volume Coefficient
         self.V_v = 0.07 #estimation                             # Horizontal Stabilizer Volume Coefficient
         self.Cl_alpha = 6.341572                          # Hor. Stabilizer cl alpha curve during cruise
         self.Cl_alpha_M0 = 4.6402468 # during cruise, M = 0 (M=0 during cruise doesn't make sense but Roskam wants it so fuck it)
         self.CL_h = -1.06717                              # Design CL of hor. stabilizer. during cruise
-        self.S_t = 1.57                           # Total Stabilizer Area in m^2
+        self.S_t = 2.26                           # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
-            self.Gamma_h = np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
+            self.Gamma_h = 50.13 *np.pi /180#np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
         self.type = 'fixed'
         self.Vh_v = 0.95                             # Ratio of (hor.) tail speed to free stream speed.
 
         # V_Tail:
-        self.b_v = 3.76                            # V_Tail Span in m TODO, computed in preliminary_sizing_tail.py, shouldnt be a magic number
+        self.b_v = 5.74                            # V_Tail Span in m TODO, computed in preliminary_sizing_tail.py, shouldnt be a magic number
         self.b_v_h = self.b_v * np.cos(self.Gamma_h) * 2 # hor tail span
-        self.c_t = 1.0                             # V-Tail Tip Chord in m
-        self.c_r = 1.5                             # V-Tail Root Chord in m
+        self.c_t = 0.17                            # V-Tail Tip Chord in m
+        self.c_r = 0.62                             # V-Tail Root Chord in m
         self.wetted_area = None                         # V-Tail Wetted Area in m^2, to be calculated by the OpenVSP CompGeom function, taking into account part of stabilizer inside fuselage
         self.x_t = 8.0                             # V-Tail Position in m
         self.z_t = -0.2                             # V-Tail position in m
         self.V_t = None                             # V-Tail Volume Coefficient
         self.i_t = None                             # V-Tail Incidence Angle in degrees
-        self.A_t = self.b_v**2/self.S_v             # V-Tail Aspect Ratio
+        self.A_t = 14.57 #self.b_v**2/self.S_v             # V-Tail Aspect Ratio
         self.A_t_h = self.b_v_h**2/self.S_h             # hor tail Aspect Ratio
         self.Lambda_t_025c =    34.9 *np.pi / 180                # V-Tail Quarter-Chord Sweep Angle in degrees
-        self.lambda_t = 0.25                        # V-Tail Taper Ratio
-        self.t_c_t = 0.14                           # V-Tail Thickness-to-Chord Ratio
+        self.lambda_t = 0.278                        # V-Tail Taper Ratio
+        self.t_c_t = 0.05                           # V-Tail Thickness-to-Chord Ratio
         self.airfoil_t = None                       # V-Tail Airfoil Type
         self.vtail_dihedral = np.deg2rad((110 - 180)/-2) #placeholder                  # V-Tail Dihedral Angle in radians
         self.L_v = 0.45* l_f                         #Moment arm vertical stabilizer
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
         self.z_v = 0.5*self.b_v #TODO this is a placeholder for distance between tail a/c and cg vertically
         self.tailid = None
-        self.CD0_tail = 0.0016          # cd0 of tail, can we even get this?
+        self.CD0_tail = 0.001771          # cd0 of tail, can we even get this?
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
