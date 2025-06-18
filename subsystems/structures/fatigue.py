@@ -60,7 +60,7 @@ if __name__ == "__main__":
     K_col = 1.0
 
     # Fatigue
-    sigma_D = 140  # MPa
+    sigma_D = 172  # MPa
     ND = 1e6       # cycles
     m = 5          # S-N slope
     Rm = 400       # MPa (ultimate)

@@ -18,10 +18,10 @@
             },
         }
        {
-            "name": "STAB STATIC Runner",
+            "name": "STAB  Runner",
             "type": "debugpy",
             "request": "launch",
-            "program": "/root/DSEproject/subsystems/flightperformance/ControlStability.py",
+            "program": "/root/DSEproject/subsystems/flightperformance/roskam_stability_dict.py",
             "console": "integratedTerminal",
             "python": "/root/miniconda3/envs/vsppytools/bin/python",
             "cwd": "/root/DSEproject",
