@@ -210,7 +210,7 @@ class WingParameters:
         self.Lambda_05_w = 0.607                           # Wind half-chord sweep angle in rad
         self.Lambda_0_w =30.3 *np.pi/180                       # Wing leading edge sweep angle in rad
         self.t_c_w_max = None
-        self.de_da = 0.246616                         # Downwash effect on the lift coefficient.
+        self.de_da = 0.25480010542035314                         # Downwash effect on the lift coefficient.
         self.t_c_w_r = 0.121                    # Wing Thickness-to-Chord Ratio at Root
         self.t_c_w_t = 0.121                     # Wing Thickness-to-Chord Ratio at Tip
         self.t_c_w = 0.121                     # Wing Thickness-to-Chord Ratio, average of root and tip
@@ -383,7 +383,7 @@ class WingParameters:
         self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.75, flapwidth=0.04)
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
         self.airfoil_clalpha = 1.5
-        self.CLA_A_h = 6.449844 # during cruise
+        self.CLA_A_h = 6.2727563022846 # during cruise
         self.CLA_A_h_M0 = 5.115368 # during cruise, M = 0 (M=0 during cruise doesn't make sense but Roskam wants it so fuck it)
         self.airfoil_cd0 = 0.025826
         self.C_D0 = 0.017196 
@@ -469,7 +469,7 @@ class FuselageParameters:
     def __init__(self):
         self.l_f = 9                          # Fuselage Length in m
         self.lh = None                          # Dist from wing to hor. stabilizer
-        self.C_m_ac = -0.3584513                       # Moment coefficient at the aerodynamic center.
+        self.C_m_ac = -0.3913907761248668                       # Moment coefficient at the aerodynamic center.
         self.x_ac = None                        # Aerodynamic center of the aircraft.
         self.x_payload = None                   # x-coordinate of Center of gravity of payload
         self.x_fuselage = None                  # x-coordinate of Center of gravity of fuselage
@@ -600,9 +600,9 @@ class EmpennageParameters:
         self.S_v =   1.74                         # Vertical Stabilizer Area in m^2
         self.V_h = 0.64 #estimation                             # V-Tail Volume Coefficient
         self.V_v = 0.07 #estimation                             # Horizontal Stabilizer Volume Coefficient
-        self.Cl_alpha = 6.341572                          # Hor. Stabilizer cl alpha curve during cruise
+        self.Cl_alpha = 6.459948059476199                          # Hor. Stabilizer cl alpha curve during cruise
         self.Cl_alpha_M0 = 4.6402468 # during cruise, M = 0 (M=0 during cruise doesn't make sense but Roskam wants it so fuck it)
-        self.CL_h = -1.06717                              # Design CL of hor. stabilizer. during cruise
+        self.CL_h = -1.169949                              # Design CL of hor. stabilizer. during cruise
         self.S_t = 2.26                           # Total Stabilizer Area in m^2
         if self.S_h is not None and self.S_v is not None:
             self.Gamma_h = 50.13 *np.pi /180#np.arctan2(self.S_v, self.S_h)  # Butterfly Angle in radians
