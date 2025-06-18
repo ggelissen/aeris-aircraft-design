@@ -19,6 +19,7 @@ from design_variables import DesignParameters
 SENSITIVITY_CONFIG = {
     # Parameter Path: [List of values to test]
     'cruise_mach': np.linspace(0.75, 0.90, 20), # Vary cruise Mach number from 0.75 to 0.90
+    'cruise_speed': np.linspace(200, 300, 20),  # Vary cruise speed from 200 m/s to 300 m/s
     'range': np.linspace(6000e3, 10000e3, 20),  # Vary range from 6,000 km to 10,000 km
     'weight.W_PL': np.linspace(300 * 9.81, 1100 * 9.81, 20), # Vary payload from 300kg to 1100kg (in N)
     'engine.cruise_tsfc': np.linspace(0.55, 0.80, 20), # Vary TSFC (lb/hr/lbf)
@@ -29,7 +30,7 @@ OUTPUT_METRICS = {
     'W_TO': 'weight.W_TO',
     'W_F': 'weight.W_F',
     'W_OE': 'weight.W_OE',
-    'S_w': 'wing.S_w',
+    #'S_w': 'wing.S_w',
     'L/D_cruise': 'performance.L_D_cruise'
 }
 
@@ -196,7 +197,7 @@ def plot_aspect_ratio_trade_study(data: dict):
     legend.set_zorder(10)
     
     plt.tight_layout()
-    filename = "report_sensitivity_aspect_ratio.png"
+    filename = "report_sensitivity_aspect_ratio.pdf"
     save_path = os.path.join(plot_dir, filename)
     plt.savefig(save_path, transparent=False)
     print(f"Saved plot: {save_path}")
@@ -262,7 +263,7 @@ def plot_general_sensitivity_results(param_path: str, data: dict, baseline_outpu
     legend.set_zorder(10)
 
     plt.tight_layout()
-    filename = f"report_sensitivity_{param_path.replace('.', '_')}.png"
+    filename = f"report_sensitivity_{param_path.replace('.', '_')}.pdf"
     save_path = os.path.join(plot_dir, filename)
     plt.savefig(save_path, transparent=False)
     print(f"Saved plot: {save_path}")
