@@ -54,7 +54,7 @@ def angle_of_sideslip_beta(params: DesignParameters, input_data: dict):
         fuselage_area_at_that_place / np.pi)  # from lucas: fuselage depth in region of vertical tail (at x_ac_mac of tail)
     print(f"this is the x axis of k_v plot: {b_v / two_r_1}")
     k_v = float(input_data['k_v'])
-    C_L_alpha_v = 0  # get eventually from tail sizing
+    C_L_alpha_v = params.empennage.Cl_alpha  # get eventually from tail sizing
     parameter_in_C_Y_beta_v = 0.724 + 3.06 * ((params.empennage.S_v / params.wing.S_w) / (
                 1 + math.cos(params.wing.Lambda_025c_w))) + 0.4 * z_w / z_f + 0.009 * params.wing.A_w_target
     C_Y_beta_v = -k_v * (C_L_alpha_v) * parameter_in_C_Y_beta_v * (params.empennage.S_v / params.wing.S_w)
@@ -171,84 +171,184 @@ def yaw_rate_r(params: DesignParameters, C_Y_beta_v, input_data: dict):
 
     return C_Y_r, C_l_r
 
-
-def roll_rate_derivates(params: DesignParameters, CyBv, input_data: dict):
-    zv = params.empennage.z_v
+def roll_rate_derivates(params: DesignParameters, CyBv):
+    zv = 0.5 #???
     lv = params.empennage.L_v
-    z = 
-    M = params.cruise_mach
-    beta = (1 - M ** 2) ** 0.5
-    ClaM = float(input_data['ClaM'])
-    kappa = ClaM * beta / (2 * math.pi)
-    Clp_gamma_0_cl_0 = (kappa / beta) * (float(input_data['beta_Clp']) / kappa)  # at C_L = 0
-    alpha = params.cruise_aoa / 180 * math.pi
-
-    Cyp = 2 * CyBv * (zv * math.cos(alpha) - lv * math.sin(alpha) - zv) / params.wing.b_w + 3 * math.sin(
-        params.wing.Gamma_w) * (1 - (4 * z / params.wing.b_w) * math.sin(params.wing.Gamma_w)) * Clp_gamma_0_cl_0
-
-    BClp_K_CL_0 = float(input_data['BClp_K_CL_0'])
-    ClaCL = float(input_data['ClaCL'])
-    ClaCl_0 = float(input_data['ClaCl_0'])
-    gamma = float(input_data['gamma'])
-    zw = float(input_data['zw'])
-    paramater1 = (1 - (4 * zw / params.wing.b_w) * math.sin(gamma) + 12 * (zw / params.wing.b_w) ** 2 * math.sin(
-        gamma) ** 2)
-    ClpCdlCl2 = float(input_data['ClpCdlCl2'])
-    C_L = params.performance.CL_cruise
-    paramater2 = ClpCdlCl2 * C_L ** 2 - 0.125 * params.wing.C_D0
-    Clpw = BClp_K_CL_0 * (kappa / beta) * (ClaCL / ClaCl_0) * paramater1 + paramater2
-    Clp_h = float(input_data['Clp_h'])
-    b_h = params.empennage.b_v
-    Clph = 0.5 * Clp_h * (params.empennage.S_h / params.wing.S_w) * (b_h / params.wing.b_w) ** 2
-    Clpv = 2 / (params.wing.b_w ** 2) * abs(
-        (zv * math.cos(alpha) - lv * math.sin(alpha)) * (zv * math.cos(alpha) - lv * math.sin(alpha) - zv)) * CyBv
-
-    Clp = Clpw + Clph + Clpv
-
-    qcsweep = params.wing.Lambda_025c_w
-    B = (1 - M ** 2 * math.cos(qcsweep) ** 2) ** 0.5
+    z = 0.5 #???
+    M = 0.7
+    beta = (1-M**2)**0.5
+    #cla = params.wing.CLA_A_h
+    cla0 = params.wing.CLA_A_h_M0
+    clam = cla0 /beta
+    cla0_t = params.empennage.Cl_alpha_M0
+    clam_t = cla0_t/beta
+    kappa_w = clam*beta*2*np.pi
+    kappa_t = clam_t*beta*2*np.pi
+    alpha = params.cruise_aoa /180 *math.pi
+    
+    deltaB = np.arctan(np.tan(params.wing.Lambda_025c_w/beta))
+    BA_K = beta/kappa_w * params.wing.A_w_target
     A = params.wing.A_w_target
-    CnpClCl_0_M_0 = -1 / 6 * ((A + 6 * (math.cos(qcsweep)) * (
-                0.25 * (math.tan(qcsweep) / A) + (math.tan(qcsweep)) ** 2 / 12)) / (
-                                          A + 4 * math.cos(qcsweep)))  # x/c was assumed to be quarter chord = 0.25
-    CnpClCl_0 = (A + 4 * math.cos(qcsweep) / (A * B + 4 * math.cos(qcsweep))) * ((A * B + 0.5 * (
-                A * B + math.cos(qcsweep)) * (math.tan(qcsweep) ** 2)) / (
-                                                                                             A + 0.5 * (
-                                                                                                         A + math.cos(
-                                                                                                     qcsweep)) * (
-                                                                                                         math.tan(
-                                                                                                             qcsweep) ** 2))) * CnpClCl_0_M_0
+    BClp_K_CL_0 = float(input_data['BClp_K_CL_0'])  # input("roll damping parameter at zero lift which is obtained from figure 10.35 pag. 418/450 using sweep_b = {deltaB} and BA/K = {BA_K} and lamba = {params.wing.lambda_w}")
+    print(f"roll damping parameter at zero lift which is obtained from figure 10.35 pag. 418/450 using sweep_b = {deltaB} and BA/K = {BA_K} and lamba = {params.wing.lambda_w}")
+    ClaCL = params.wing.CLA_A_h # input("the wing lift-curve slope at any lift coefficient. It is obtained as the local slope of the wing CL versus alpha curve as obtained from 8.1.3.5 or from 8.1.4.4")
+    ClaCl_0 = 2*np.pi*A / (2+(((A**2)*(beta**2)*(kappa_w**2))*(1+(np.tan(params.wing.Lambda_025c_w)/beta)**2)+4)**0.5)  #input("the wing lift-curve slope at zero lift as obtained from eq (8.22)")
+    gamma = params.wing.Gamma_w
+    zw = float(input_data['zw'])  # input("vertical distance of wing from fuselage c.g. (smaller than 0 for high wing) (ask Julie/Lucas)")
+    print("vertical distance of wing from fuselage c.g. (smaller than 0 for high wing) (ask Julie/Lucas)")
+    paramater1 = (1 - (4*zw / params.wing.b_w)*math.sin(gamma) + 12 * (zw / params.wing.b_w)**2 * math.sin(gamma)**2)
+    
+    ClpCdlCl2 = float(input_data['ClpCdlCl2'])  # input(f"The drag-due-to-lift roll damping parameter as found from figure 10.36 at lamba_c/4 = {params.wing.Lambda_025c_w} and A = {params.wing.A_w_target}")
+    print(f"The drag-due-to-lift roll damping parameter as found from figure 10.36 at lamba_c/4 = {params.wing.Lambda_025c_w} and A = {params.wing.A_w_target}")
+    C_L = params.performance.CL_cruise
+    paramater2 = ClpCdlCl2 * C_L**2 - 0.125*params.wing.C_D0
+    Clpw = BClp_K_CL_0*(kappa_w/beta) * (ClaCL / ClaCl_0) * paramater1 + paramater2
+    
+    # for h:
+    # -----------
+    deltaB = np.arctan(np.tan(params.empennage.Lambda_t_025c/beta))
+    BA_K = beta/kappa_t * params.empennage.A_t_h
+    A = params.empennage.A_t_h
+    BClp_K_CL_0 = input(f"roll damping parameter at zero lift which is obtained from figure 10.35 pag. 418/450 using sweep_b = {deltaB} and BA/K = {BA_K} and lamba = {0}")
+    ClaCL = params.empennage.Cl_alpha #  input("the wing lift-curve slope at any lift coefficient. It is obtained as the local slope of the wing CL versus alpha curve as obtained from 8.1.3.5 or from 8.1.4.4")
+    ClaCl_0 = 2*np.pi*A / (2+(((A**2)*(beta**2)*(kappa_t**2))*(1+(np.tan(params.wing.Lambda_025c_w)/beta)**2)+4)**0.5) #  input("the wing lift-curve slope at zero lift as obtained from eq (8.22)")
+    #gamma = params.wing.Gamma_w
+    #zw = input("vertical distance of wing from fuselage c.g. (smaller than 0 for high wing)")
+    paramater1 = 1 # gamma = 0 
+    
+    ClpCdlCl2_h = float(input_data['ClpCdlCl2_h'])  # input(f"The drag-due-to-lift roll damping parameter as found from figure 10.36 at lamba_c/4 = {params.empennage.Lambda_t_025c} and A = {params.empennage.A_t_h}")
+    print(f"The drag-due-to-lift roll damping parameter as found from figure 10.36 at lamba_c/4 = {params.empennage.Lambda_t_025c} and A = {params.empennage.A_t_h}")
+    C_Lh = params.empennage.CL_h
+    paramater2 = ClpCdlCl2_h * C_Lh**2 - 0.125*params.empennage.cd0
+    Clp_h = BClp_K_CL_0*(kappa_t/beta) * (ClaCL / ClaCl_0) * paramater1 + paramater2
+    # ----------
+    
+    b_h = params.empennage.b_v
+    Clph = 0.5*Clp_h * (params.empennage.S_h/params.wing.S_w)*(b_h/params.wing.b_w)**2
+    Clpv = 2/(params.wing.b_w**2)*abs((zv*math.cos(alpha)-lv*math.sin(alpha))*(zv*math.cos(alpha)-lv*math.sin(alpha)-zv))*CyBv
+    
+    Clp = Clpw + Clph + Clpv
+    
+    Clp_gamma_0_cl_0 = (kappa_w/beta)*((beta*Clp)/kappa_w) # at C_L = 0
+    Cyp = 2*CyBv(zv*math.cos(alpha)-lv*math.sin(alpha)-zv)/params.wing.b_w + 3*math.sin(params.wing.Gamma_w) * (1- (4*z/params.wing.b_w)*math.sin(params.wing.Gamma_w))*Clp_gamma_0_cl_0
+    
+    
+    qcsweep = params.wing.Lambda_025c_w
+    B = (1-M**2*math.cos(qcsweep)**2)**0.5
+    A = params.wing.A_w_target
+    CnpClCl_0_M_0 = -1/6 * ((A+6*(math.cos(qcsweep))*(0.25 * (math.tan(qcsweep)/A)+(math.tan(qcsweep))**2/12))/(A+4*math.cos(qcsweep))) # x/c was assumed to be quarter chord = 0.25
+    CnpClCl_0 = (A+4*math.cos(qcsweep)/(A*B+4*math.cos(qcsweep))) * ((A*B + 0.5*(A*B+math.cos(qcsweep))*(math.tan(qcsweep)**2))/(A + 0.5*(A+math.cos(qcsweep))*(math.tan(qcsweep)**2))) * CnpClCl_0_M_0
+    
+    # #Cnpet = input("wing twist contribution as given by Figures 10.37 (pag. 420/452)") # twist = 0
+    # bf = input("span of the flaps [m]")
+    # deltaCnpadfdf = input(f"contribution due to symmetrical flap deflection as found from Figure 10.38 (pag. 423/455) with A = {params.wing.A_w_target}, bf/b = {bf/params.wing.b_w}")
+    # deltacl = input(f"deltacl determined from 8.1.2.1 for the type of flap used ")
+    # cla = input("cla is the airfoil (flaps-up) lift-curve-slope as found from 8.1.1.2")
 
-    Cnpet = float(input_data['Cnpet'])
-
-    deltaCnpadfdf = float(input_data['deltaCnpadfdf'])
-    deltacl = float(input_data['deltacl'])
-    cla = float(input_data['cla'])
-    df = 0  # cruise
-
-    adf = deltacl / (cla * df) if cla * df != 0 else 0 # Avoid division by zero
-    Cnpw = CnpClCl_0 * C_L + Cnpet * params.wing.epsilon_t + (deltaCnpadfdf) * adf * df
-
-    Cnpv = -(2 / params.wing.b_w ** 2) * (lv * math.cos(alpha) + zv * math.sin(alpha)) * (
-                zv * math.cos(alpha) - lv * math.sin(alpha) - zv) * CyBv
-
+    # adf = deltacl/(cla)
+    Cnpw = CnpClCl_0 * C_L # + (deltaCnpadfdf)*adf
+    
+    Cnpv = -(2/params.wing.b_w**2)*(lv*math.cos(alpha)+zv*math.sin(alpha))*(zv*math.cos(alpha)-lv*math.sin(alpha)-zv)*CyBv
+    
     Cnp = Cnpw + Cnpv
-
+    
     return Cyp, Clp, Cnp, zv, lv
 
-
-def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv, input_data: dict):
-    CnrCL2 = float(input_data['CnrCL2'])
+def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv):
+    c = params.wing.mac
+    x_lemac = params.cg.x_ac_w - c/4
+    x = ((params.VSP.x_cg_vsp - x_lemac)/c - (params.cg.x_ac_w-x_lemac)/c)
+    CnrCL2 = float(input_data['CnrCL2'])  # input("found from Figure 10.44 pag. 433/465 with A={params.wing.A_w_target}, Lamba_c/4={params.wing.Lambda_025c_w}, x/c = {x/c}")
+    print(f"Figure 10.44 pag. 433/465 with A={params.wing.A_w_target}, Lamba_c/4={params.wing.Lambda_025c_w}, x/c = {x/c}")
     CLw = params.performance.CL_cruise
-    CnrCdo = float(input_data['CnrCdo'])
+    CnrCdo = float(input_data['CnrCdo'])  # input("found from Figure 10.45 pag. 434/466 with A={params.wing.A_w_target}, Lamba_c/4={params.wing.Lambda_025c_w}, x/c = {x/c}")
+    print(f"found from Figure 10.45 pag. 434/466 with A={params.wing.A_w_target}, Lamba_c/4={params.wing.Lambda_025c_w}, x/c = {x/c}")
     Cd0 = params.wing.C_D0
-    Cnrw = CnrCL2 * CLw ** 2 + CnrCdo * Cd0
-
-    alpha = params.cruise_aoa / 180 * math.pi
-    Cnrv = (2 / (params.wing.S_w ** 2)) * ((lv * math.cos(alpha) + zv * math.sin(alpha)) ** 2) * CyBv
-
+    Cnrw = CnrCL2 *CLw**2 + CnrCdo * Cd0
+    
+    alpha = params.cruise_aoa /180 * math.pi
+    Cnrv = (2/(params.wing.S_w**2))*((lv*math.cos(alpha)+zv*math.sin(alpha))**2)*CyBv
+    
     Cnr = Cnrw + Cnrv
     return Cnr
+
+# def roll_rate_derivates(params: DesignParameters, CyBv, input_data: dict):
+#     zv = params.empennage.z_v
+#     lv = params.empennage.L_v
+#     z = 
+#     M = params.cruise_mach
+#     beta = (1 - M ** 2) ** 0.5
+#     ClaM = float(input_data['ClaM'])
+#     kappa = ClaM * beta / (2 * math.pi)
+#     Clp_gamma_0_cl_0 = (kappa / beta) * (float(input_data['beta_Clp']) / kappa)  # at C_L = 0
+#     alpha = params.cruise_aoa / 180 * math.pi
+
+#     Cyp = 2 * CyBv * (zv * math.cos(alpha) - lv * math.sin(alpha) - zv) / params.wing.b_w + 3 * math.sin(
+#         params.wing.Gamma_w) * (1 - (4 * z / params.wing.b_w) * math.sin(params.wing.Gamma_w)) * Clp_gamma_0_cl_0
+
+#     BClp_K_CL_0 = float(input_data['BClp_K_CL_0'])
+#     ClaCL = float(input_data['ClaCL'])
+#     ClaCl_0 = float(input_data['ClaCl_0'])
+#     gamma = float(input_data['gamma'])
+#     zw = float(input_data['zw'])
+#     paramater1 = (1 - (4 * zw / params.wing.b_w) * math.sin(gamma) + 12 * (zw / params.wing.b_w) ** 2 * math.sin(
+#         gamma) ** 2)
+#     ClpCdlCl2 = float(input_data['ClpCdlCl2'])
+#     C_L = params.performance.CL_cruise
+#     paramater2 = ClpCdlCl2 * C_L ** 2 - 0.125 * params.wing.C_D0
+#     Clpw = BClp_K_CL_0 * (kappa / beta) * (ClaCL / ClaCl_0) * paramater1 + paramater2
+#     Clp_h = float(input_data['Clp_h'])
+#     b_h = params.empennage.b_v
+#     Clph = 0.5 * Clp_h * (params.empennage.S_h / params.wing.S_w) * (b_h / params.wing.b_w) ** 2
+#     Clpv = 2 / (params.wing.b_w ** 2) * abs(
+#         (zv * math.cos(alpha) - lv * math.sin(alpha)) * (zv * math.cos(alpha) - lv * math.sin(alpha) - zv)) * CyBv
+
+#     Clp = Clpw + Clph + Clpv
+
+#     qcsweep = params.wing.Lambda_025c_w
+#     B = (1 - M ** 2 * math.cos(qcsweep) ** 2) ** 0.5
+#     A = params.wing.A_w_target
+#     CnpClCl_0_M_0 = -1 / 6 * ((A + 6 * (math.cos(qcsweep)) * (
+#                 0.25 * (math.tan(qcsweep) / A) + (math.tan(qcsweep)) ** 2 / 12)) / (
+#                                           A + 4 * math.cos(qcsweep)))  # x/c was assumed to be quarter chord = 0.25
+#     CnpClCl_0 = (A + 4 * math.cos(qcsweep) / (A * B + 4 * math.cos(qcsweep))) * ((A * B + 0.5 * (
+#                 A * B + math.cos(qcsweep)) * (math.tan(qcsweep) ** 2)) / (
+#                                                                                              A + 0.5 * (
+#                                                                                                          A + math.cos(
+#                                                                                                      qcsweep)) * (
+#                                                                                                          math.tan(
+#                                                                                                              qcsweep) ** 2))) * CnpClCl_0_M_0
+
+#     Cnpet = float(input_data['Cnpet'])
+
+#     deltaCnpadfdf = float(input_data['deltaCnpadfdf'])
+#     deltacl = float(input_data['deltacl'])
+#     cla = float(input_data['cla'])
+#     df = 0  # cruise
+
+#     adf = deltacl / (cla * df) if cla * df != 0 else 0 # Avoid division by zero
+#     Cnpw = CnpClCl_0 * C_L + Cnpet * params.wing.epsilon_t + (deltaCnpadfdf) * adf * df
+
+#     Cnpv = -(2 / params.wing.b_w ** 2) * (lv * math.cos(alpha) + zv * math.sin(alpha)) * (
+#                 zv * math.cos(alpha) - lv * math.sin(alpha) - zv) * CyBv
+
+#     Cnp = Cnpw + Cnpv
+
+#     return Cyp, Clp, Cnp, zv, lv
+
+
+# def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv, input_data: dict):
+#     CnrCL2 = float(input_data['CnrCL2'])
+#     CLw = params.performance.CL_cruise
+#     CnrCdo = float(input_data['CnrCdo'])
+#     Cd0 = params.wing.C_D0
+#     Cnrw = CnrCL2 * CLw ** 2 + CnrCdo * Cd0
+
+#     alpha = params.cruise_aoa / 180 * math.pi
+#     Cnrv = (2 / (params.wing.S_w ** 2)) * ((lv * math.cos(alpha) + zv * math.sin(alpha)) ** 2) * CyBv
+
+#     Cnr = Cnrw + Cnrv
+#     return Cnr
 
 
 # def speed_derivatives(params: DesignParameters):
