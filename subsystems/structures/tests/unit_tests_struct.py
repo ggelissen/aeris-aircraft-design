@@ -369,3 +369,326 @@ class TestWingStressAnalysis(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
+
+
+
+    import pytest
+import numpy as np
+from unittest.mock import MagicMock
+from flight_envelope import FlightEnvelope, _set_report_style
+
+class DummyPerformance:
+    CL_alpha = 5.7
+    CL_max_cruise = 1.4
+    CL_max_TO = 1.6
+    CL_max_LAND = 2.0
+
+class DummyWing:
+    S_w = 30.0
+    mac = 2.0
+
+class DummyWeight:
+    W_OE = 8000
+    W_TO = 15000
+    W_PL = 2000
+    W_F = 5000
+    Fuel_Fuselage_Fraction = 0.5
+
+class DummyParams:
+    performance = DummyPerformance()
+    wing = DummyWing()
+    weight = DummyWeight()
+    cruise_mach = 0.7
+    cruise_density = 0.4
+    cruise_temperature = 220
+    cruise_altitude = 10000
+
+class TestFlightEnvelope:
+
+    @pytest.fixture
+    def env(self):
+        return FlightEnvelope(DummyParams())
+
+    def test_set_report_style(self):
+        # Just call the function to ensure no exceptions
+        _set_report_style()
+
+    def test_calc_load_factor_limits(self, env):
+        n_pos, n_neg = env.calc_load_factor_limits(15000)
+        assert np.isclose(n_pos, min(2.1 + (10900 / (15000 + 4536)), 3.8))
+        assert np.isclose(n_neg, -0.4 * n_pos)
+
+    def test_calc_diagram_speed(self, env):
+        weight_N = 15000 * 9.81
+        rho = 1.225
+        CL_max = 1.5
+        VC = 100
+        V = env.calc_diagram_speed(weight_N, rho, CL_max, VC)
+        expected_VS_TAS = np.sqrt((2 * weight_N) / (rho * env.S * CL_max))
+        from utils.unit_conversions import true_to_equivalent_air_speed
+        expected_VS = true_to_equivalent_air_speed(expected_VS_TAS, rho, 1.225)
+        assert np.isclose(V, expected_VS)
+
+
+
+import pytest
+import numpy as np
+from unittest.mock import patch, MagicMock
+from loading_diagrams import WingLoadingDiagrams
+
+# Dummy parameters for testing
+class DummyPerformance:
+    V_A = 70
+
+class DummyWing:
+    b_w = 20  # 20 m span
+    CL_distribution = np.ones(1000) * 1.0
+    CD_distribution = np.ones(1000) * 0.05
+    CM_distribution = np.ones(1000) * 0.01
+
+class DummyParams:
+    performance = DummyPerformance()
+    wing = DummyWing()
+    cruise_density = 1.225
+
+class TestWingLoadingDiagrams:
+
+    @pytest.fixture
+    def mock_cross_section(self):
+        with patch('loading_diagrams.cross_section', return_value=(0, 2.0)):
+            yield
+
+    @pytest.fixture
+    def diagram(self, mock_cross_section):
+        return WingLoadingDiagrams(DummyParams())
+
+    def test_y_span(self, diagram):
+        assert len(diagram.y) == 1000
+        assert np.isclose(diagram.y[0], 0)
+        assert np.isclose(diagram.y[-1], DummyParams().wing.b_w / 2)
+
+    def test_lift_distribution(self, diagram):
+        # Each lift value should be computed as CL * 0.5 * rho * V^2 * chord
+        expected_value = 1.0 * 0.5 * 1.225 * (70 ** 2) * 2.0
+        assert np.allclose(diagram.lift, expected_value)
+
+    def test_drag_distribution(self, diagram):
+        expected_value = 0.05 * 0.5 * 1.225 * (70 ** 2) * 2.0
+        assert np.allclose(diagram.drag, expected_value)
+
+    def test_moment_distribution(self, diagram):
+        expected_value = 0.01 * 0.5 * 1.225 * (70 ** 2) * 2.0
+        assert np.allclose(diagram.moment_aero, expected_value)
+
+
+
+import pytest
+import numpy as np
+from unittest.mock import patch, MagicMock
+from wing_stress_analysis import perform_cross_section_analysis, calculate_bending_distribution
+
+class DummyDesignVars:
+    class Wing:
+        class WingSection:
+            wingskin = {'thicness': 0.005}
+        wingsection = WingSection()
+    wing = Wing()
+
+class TestWingStressAnalysis:
+
+    @pytest.fixture
+    def dummy_loading(self):
+        return {
+            "moment_x": 1000,
+            "moment_z": 2000,
+            "torsion_y": 150,
+            "shear_x": 300,
+            "shear_z": 400,
+        }
+
+    def test_perform_cross_section_analysis(self, dummy_loading):
+        with patch("wing_stress_analysis.cross_sectional_structure_along_span", return_value=(["spar"], ["stringer"], None, None, None, None)), \
+             patch("wing_stress_analysis.run_cross_section_analysis", return_value={"stress": 42}) as mock_run:
+            result = perform_cross_section_analysis(DummyDesignVars(), dummy_loading)
+            assert "stress" in result
+            assert result["stress"] == 42
+            mock_run.assert_called_once()
+
+    def test_calculate_bending_distribution(self):
+        M = np.linspace(0, 1000, 100)
+        I = np.ones_like(M) * 0.01
+        E = 70e9  # Young's modulus (Pa)
+        half_span = 10.0  # meters
+        deflection = calculate_bending_distribution(M, I, E, half_span)
+        assert isinstance(deflection, np.ndarray)
+        assert deflection.shape == M.shape
+        assert np.all(np.isfinite(deflection))
+
+
+
+import pytest
+from unittest.mock import patch, MagicMock
+from vspfunctions import print_all_params, plotSTL, create_fuselage
+import numpy as np
+
+class DummyFuselage:
+    l_f = 10.0
+    crosssections = {
+        "fuselagetip1": {
+            "Tan_Angles": {"top": 10, "right": 10, "bottom": 10, "left": 10}
+        }
+    }
+
+class DummyDesignVars:
+    fuselage = DummyFuselage()
+
+class TestVSPFunctions:
+
+    def test_print_all_params(self, capsys):
+        with patch("vspfunctions.vsp.GetGeomParmIDs", return_value=["id1", "id2"]), \
+             patch("vspfunctions.vsp.GetParmName", side_effect=["P1", "P2"]), \
+             patch("vspfunctions.vsp.GetParmGroupName", side_effect=["G1", "G2"]), \
+             patch("vspfunctions.vsp.GetParmVal", side_effect=[1.0, 2.0]):
+            print_all_params("dummy")
+            captured = capsys.readouterr()
+            assert "Group: G1 / Parameter Name: P1 / Value: 1.0" in captured.out
+            assert "Group: G2 / Parameter Name: P2 / Value: 2.0" in captured.out
+
+    def test_plotSTL(self):
+        with patch("vspfunctions.mesh.Mesh.from_file") as mock_mesh, \
+             patch("vspfunctions.pv.PolyData") as mock_polydata, \
+             patch("vspfunctions.pv.Plotter") as mock_plotter, \
+             patch("vspfunctions.is_headless", return_value=True):
+            mock_mesh.return_value.vectors = np.zeros((10, 3, 3))
+            plotSTL("dummy_file.stl")
+            assert mock_plotter.call_count >= 1
+
+    def test_create_fuselage(self):
+        with patch("vspfunctions.vsp.AddGeom", return_value="fuse_id"), \
+             patch("vspfunctions.vsp.GetXSecSurf", return_value="surf"), \
+             patch("vspfunctions.vsp.GetNumXSec", return_value=3), \
+             patch("vspfunctions.vsp.InsertXSec"), \
+             patch("vspfunctions.vsp.SetParmVal"), \
+             patch("vspfunctions.vsp.GetXSecParm", return_value="xsecparm"), \
+             patch("vspfunctions.vsp.GetXSec", return_value="xsec"), \
+             patch("vspfunctions.vsp.SetXSecTanAngles"):
+            create_fuselage(DummyDesignVars())
+
+
+
+import pytest
+import numpy as np
+from fatigue import (
+    calculate_critical_buckling_stress,
+    sn_curve,
+    miners_rule,
+    corrected_stress,
+    plot_sn_curve
+)
+
+class TestFatigue:
+
+    def test_calculate_critical_buckling_stress(self):
+        E, I, A, L = 70e9, 8e-6, 0.004, 2.0
+        sigma_cr = calculate_critical_buckling_stress(E, I, A, L)
+        expected = (np.pi ** 2 * E * I) / (L ** 2 * A)
+        assert np.isclose(sigma_cr, expected)
+
+    def test_calculate_critical_buckling_stress_zero_inputs(self):
+        assert calculate_critical_buckling_stress(0, 1, 1, 1) == 0
+        assert calculate_critical_buckling_stress(1, 0, 1, 1) == 0
+        assert calculate_critical_buckling_stress(1, 1, 0, 1) == 0
+        assert calculate_critical_buckling_stress(1, 1, 1, 0) == 0
+
+    def test_sn_curve(self):
+        assert np.isclose(sn_curve(100, A=1e12, m=3), (1e12 / 100) ** (1/3))
+
+    def test_miners_rule(self):
+        stress = [100, 150]
+        cycles = [1e4, 2e4]
+        damage = miners_rule(stress, cycles, A=1e12, m=3)
+        expected = sum(n / sn_curve(s, A=1e12, m=3) for s, n in zip(stress, cycles))
+        assert np.isclose(damage, expected)
+
+    @pytest.mark.parametrize("method,expected", [
+        ("none", 100),
+        ("goodman", 100 / (1 - 40/400)),
+        ("gerber", 100 / (1 - (40/400)**2)),
+    ])
+    def test_corrected_stress(self, method, expected):
+        assert np.isclose(corrected_stress(100, 40, 400, method), expected)
+
+    def test_plot_sn_curve(self, monkeypatch):
+        monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
+        plot_sn_curve(sigma_D=172, ND=1e6, m=5, Rm=400, sigma_m=40, method='goodman')
+
+
+
+import pytest
+import numpy as np
+from unittest.mock import patch, MagicMock
+from gust_diagram import equivalent_to_true_air_speed
+
+class DummyPerformance:
+    CL_alpha = 5.7
+
+class DummyWing:
+    mac = 2.0
+    S_w = 25.0
+
+class DummyWeight:
+    W_OE = 9000
+    W_PL = 1500
+    W_F = 4000
+    Fuel_Fuselage_Fraction = 0.6
+
+class DummyParams:
+    performance = DummyPerformance()
+    wing = DummyWing()
+    weight = DummyWeight()
+    cruise_density = 0.4
+    cruise_speed = 120
+
+class TestGustDiagram:
+
+    @pytest.fixture
+    def params(self):
+        return DummyParams()
+
+    def test_mu_g_and_Kg(self, params):
+        rho_cruise = params.cruise_density
+        mac = params.wing.mac
+        Cl_alpha = params.performance.CL_alpha
+        W_S = (params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction) / params.wing.S_w
+        mu_g = W_S / (9.80665 * 0.5 * rho_cruise * mac * Cl_alpha)
+        K_g = (0.88 * mu_g) / (5.3 + mu_g)
+        assert 0 < mu_g < 10
+        assert 0 < K_g < 1
+
+    def test_equivalent_to_true_air_speed_conversion(self):
+        TAS = equivalent_to_true_air_speed(70, 0.4, 1.225)
+        assert isinstance(TAS, float)
+        assert TAS > 0
+
+    def test_gust_load_factor_computation(self, params):
+        rho = 1.225
+        rho_cruise = params.cruise_density
+        Cl_alpha = params.performance.CL_alpha
+        mac = params.wing.mac
+        W_S = (params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction) / params.wing.S_w
+        mu_g = W_S / (9.80665 * 0.5 * rho_cruise * mac * Cl_alpha)
+        K_g = (0.88 * mu_g) / (5.3 + mu_g)
+
+        VB = equivalent_to_true_air_speed(70, rho_cruise, rho)
+        VC = params.cruise_speed
+        VD = 1.25 * VC
+        gusts = [15.2, 10.21, 10.21 / 2]
+
+        V_eas = [v * (rho_cruise / rho)**0.5 for v in [VB, VC, VD]]
+        n_pos = [1 + (rho * V * Cl_alpha * K_g * u) / (2 * W_S) for V, u in zip(V_eas, gusts)]
+        n_neg = [1 - (rho * V * Cl_alpha * K_g * u) / (2 * W_S) for V, u in zip(V_eas, gusts)]
+
+        for n in n_pos + n_neg:
+            assert n > -10 and n < 10  # sanity check
+
+
