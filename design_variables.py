@@ -21,6 +21,7 @@ class DesignParameters:
         self.stall_speed_land = None
         self.cruise_altitude = None
         self.cruise_density = None
+        self.cruise_temperature = None
         self.take_off_distance = None
         self.landing_distance = None
         self.diversion_distance = None
@@ -71,6 +72,7 @@ class DesignParameters:
         self.max_eq_velocity = config.get('max_eq_velocity')
         self.cruise_altitude = config.get('cruise_altitude')
         self.cruise_density = config.get('cruise_density')
+        self.cruise_temperature = config.get('cruise_temperature')
         self.take_off_distance = config.get('takeoff_distance')
         self.landing_distance = config.get('landing_distance')
         self.diversion_distance = config.get('diversion_distance')
@@ -150,7 +152,7 @@ class WeightParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.W_TO = 1                       # Maximum Take-Off Weight (MTOW) in N
+        self.W_TO = 27000                       # Maximum Take-Off Weight (MTOW) in N
         self.W_E = None                             # Empty Weight in N
         self.W_OE = 11277                         # Operational Empty Weight (OEW) in N
         self.W_F = 8589                 # Total Fuel weight in N
@@ -618,7 +620,7 @@ class EmpennageParameters:
         self.i_t = None                             # V-Tail Incidence Angle in degrees
         self.A_t = self.b_v**2/self.S_v             # V-Tail Aspect Ratio
         self.A_t_h = self.b_v_h**2/self.S_h             # hor tail Aspect Ratio
-        self.Lambda_t_025c = None                   # V-Tail Quarter-Chord Sweep Angle in degrees
+        self.Lambda_t_025c =    34.9 *np.pi / 180                # V-Tail Quarter-Chord Sweep Angle in degrees
         self.lambda_t = 0.25                        # V-Tail Taper Ratio
         self.t_c_t = 0.14                           # V-Tail Thickness-to-Chord Ratio
         self.airfoil_t = None                       # V-Tail Airfoil Type
@@ -627,7 +629,7 @@ class EmpennageParameters:
         self.L_h = 0.45* l_f                        #Moment arm horizontal stabilizer
         self.z_v = 0.5*self.b_v #TODO this is a placeholder for distance between tail a/c and cg vertically
         self.tailid = None
-        self.cd0 = None          # cd0 of tail, can we even get this?
+        self.CD0_tail = 0.0016          # cd0 of tail, can we even get this?
 
     def load_from_dict(self, param_dict):
         for key, value in param_dict.items():
@@ -846,15 +848,15 @@ class StabilityAerodynamicParameters:
         self.Cmde = None      # Pitch control effectiveness (elevator)
 
         # Lateral-Directional Derivatives
-        self.CYb = None       # Side force due to sideslip
-        self.Clb = None       # Rolling moment due to sideslip (dihedral effect)
-        self.Cnb = None       # Yawing moment due to sideslip (weathercock stability)
-        self.CYp = None
-        self.Clp = None       # Rolling moment due to roll rate (roll damping)
-        self.Cnp = None       # Yawing moment due to roll rate
-        self.CYr = None
-        self.Clr = None       # Rolling moment due to yaw rate
-        self.Cnr = None       # Yawing moment due to yaw rate (yaw damping)
+        self.CYb =  -1.0204      # Side force due to sideslip
+        self.Clb =   -0.2497      # Side force due to sideslip
+        self.Cnb = 0.0140       # Rolling moment due to sideslip (dihedral effect)
+        self.CYp = -0.0131
+        self.Clp = -0.2561       # Rolling moment due to roll rate (roll damping)
+        self.Cnp = -0.5163       # Yawing moment due to roll rate
+        self.CYr =  0.6475
+        self.Clr = 0.2868       # Rolling moment due to yaw rate
+        self.Cnr = -0.3867       # Yawing moment due to yaw rate (yaw damping)
         
         # # Lateral-Directional Control Derivatives (optional for basic stability, needed for control response)
         # self.CYda = None

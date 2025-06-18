@@ -1,293 +1,328 @@
 import math
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from design_variables import DesignParameters
 from subsystems.flightperformance.utils_flight import __ISA__
 from subsystems.flightperformance.FlightSim import FlightSim
 from subsystems.flightperformance.take_off_requirement import calculate_Cm
- 
+
+# --- Plotting Style and Formatting ---
+
+def _set_report_style():
+    """Sets a professional plot style suitable for reports."""
+    try:
+        plt.rcParams['font.family'] = 'Arial'
+    except RuntimeError:
+        print("Arial font not found, falling back to default sans-serif.")
+        plt.rcParams['font.family'] = 'sans-serif'
+    
+    plt.rcParams['figure.dpi'] = 100
+    plt.rcParams['savefig.dpi'] = 300
+    plt.rcParams['axes.titlesize'] = 14
+    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['xtick.labelsize'] = 10
+    plt.rcParams['ytick.labelsize'] = 10
+    plt.rcParams['legend.fontsize'] = 10
+    plt.rcParams['lines.linewidth'] = 2.5
+    plt.rcParams['lines.markersize'] = 6
+
+COLOR_PALETTE = {
+    'blue': '#0d3b66',
+    'orange': '#ee964b',
+    'grey': '#4F4F4F',
+    'green': '#5fad56',
+    'red': '#D7263D'
+}
+
+
 class FlightPerformance:
     def __init__(self):
         pass
     
     def __drag__(self, cd0, rho, V, S, W, A, oswald):
-        '''
-        weight in N!
-        '''
-        
         C_L = W/(0.5*rho*V**2*S)
         D0 = cd0 * 0.5 * rho * V**2 * S
         Di = (C_L**2)/(math.pi * A * oswald) * 0.5 * rho * V**2 * S
         D = D0 + Di
-        
         return D, D0, Di
         
-    
-    def drag_plot(self, cd0, rho, V, S, W, A, oswald): # pragma: no cover
+    def drag_plot(self, cd0, rho, V_range, S, W, A, oswald, V_stall):
+        """
+        Generates a styled plot of drag components vs. velocity, cropped to a useful view.
+        """
+        _set_report_style()
+        V_flight = V_range[V_range >= V_stall]
         
-        D, D0, Di = self.__drag__(cd0, rho, V, S, W, A, oswald)
+        if len(V_flight) < 2:
+            print("Warning: Not enough data points above stall speed to generate drag plot.")
+            return
+
+        D, D0, Di = self.__drag__(cd0, rho, V_flight, S, W, A, oswald)
         
-        plt.plot(V, D, label="Total Drag")
-        plt.plot(V, D0, label="Zero-lift Drag")
-        plt.ylim(0, max(D0))
-        plt.plot(V, Di, label="Lift-induced Drag")
-        plt.legend()
-        plt.show()
-    
+        fig, ax = plt.subplots(figsize=(8, 5))
+
+        ax.plot(V_flight, D, label="Total Drag", color=COLOR_PALETTE['blue'])
+        ax.plot(V_flight, D0, label="Zero-lift (Parasitic) Drag", color=COLOR_PALETTE['orange'], linestyle='--')
+        ax.plot(V_flight, Di, label="Lift-induced Drag", color=COLOR_PALETTE['green'], linestyle='--')
+        ax.axvline(x=V_stall, color=COLOR_PALETTE['red'], linestyle=':', linewidth=2, label=f'$V_{{stall}} = {V_stall:.1f}$ m/s')
+
+        # --- Intelligent Cropping ---
+        # Find minimum drag and set y-limit to a multiple of that for a good view
+        min_drag = np.min(D)
+        ax.set_ylim(bottom=0, top=min_drag * 3) # Crop view to 3x minimum drag
+        ax.set_xlim(left=V_stall-20)
+
+        #ax.set_title('Drag Components vs. Airspeed')
+        ax.set_xlabel('Velocity ($V_{EAS}$) [m/s]')
+        ax.set_ylabel('Drag ($D$) [N]')
+        ax.grid(True, which='major', linestyle=':', linewidth=0.5, color='lightgrey')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        
+        legend = ax.legend(loc='best', frameon=True)
+        frame = legend.get_frame()
+        frame.set_boxstyle('round,pad=0.5,rounding_size=0.4')
+        frame.set_facecolor('white')
+        frame.set_edgecolor('black')
+        frame.set_alpha(0.8)
+        legend.set_zorder(10)
+        
+        plt.tight_layout()
+        os.makedirs("Figures", exist_ok=True)
+        plt.savefig("Figures/flight performance/drag_plot.pdf", transparent=False)
+        plt.close(fig)
+        print("Saved plot: Figures/flight performance/drag_plot.pdf")
+
     def __range__(self, cT, W_ini, W_fin, A, oswald, cd0, rho, S):
-        '''
-        weight in N!
-        '''
         C_L = (1/3 * math.pi * A * oswald * cd0)**0.5
         C_D = 4/3* cd0
-
-        print('1',(2/(rho*S))**0.5)
-        print('2',1/(cT * 9.81))
-        print('3',(C_L**0.5)/C_D )
-        print('4',(W_ini**0.5 - W_fin**0.5))
-        
         R = 2 * (2/(rho*S))**0.5 * 1/(cT * 9.81) * (C_L**0.5)/C_D * (W_ini**0.5 - W_fin**0.5)
-
-        #R = Vopt/(9.81*cT)*C_L/C_D*math.log(W_ini/W_fin)
-        
         return R/1000
 
     def payload_range(self, cT, A, oswald, cd0, Wtotal, Wfuel, OEW, rho, S, plot=False):
-        
-        #range = self.__range__(V, cT, Wtotal, Wtotal-Wfuel, 12, 0.85, 0.017)
-        #range2 = self.__range__(V, cT, Wtotal-100*9.81, Wtotal-Wfuel-100*9.81, 12, 0.85, 0.017)
-        #print("range")
-        #print(range, range2)
-        #print("--")
-        
-        '''
-        weight in N!
-        '''
-        
-        Wpayload = np.arange(0, Wtotal-Wfuel-OEW,  1*9.81)
-        range = []
+        Wpayload = np.arange(0, Wtotal-Wfuel-OEW, 1*9.81)
+        ranges = []
         for payload in Wpayload:
-            range1 = self.__range__(cT, OEW + Wfuel + payload , OEW + payload ,A, oswald, cd0, rho, S)
-            range.append(range1)
+            range1 = self.__range__(cT, OEW + Wfuel + payload, OEW + payload, A, oswald, cd0, rho, S)
+            ranges.append(range1)
         
+        if plot:
+            self._plot_payload_range(ranges, Wpayload)
+            
+        return (min(ranges), max(ranges))
+
+    def _plot_payload_range(self, ranges, Wpayload):
+        """Generates a styled payload-range diagram."""
+        _set_report_style()
+        fig, ax = plt.subplots(figsize=(8, 5))
         
-        if plot: # pragma: no cover
-            plt.plot(range, (Wpayload)/9.81, color="blue")
-            plt.plot(np.arange(0, min(range)), len(np.arange(0, min(range)))*[max(Wpayload)/9.81], color="blue")
-            plt.xlabel("range [km]")
-            plt.ylabel("payload [kg]")
-            plt.show()
+        max_payload_kg = np.max(Wpayload) / 9.81
+        ferry_range = np.min(ranges)
+
+        # Plot the main curve
+        ax.plot(ranges, Wpayload / 9.81, color=COLOR_PALETTE['blue'])
+        # Plot the ferry range segment
+        ax.plot([0, ferry_range], [max_payload_kg, max_payload_kg], color=COLOR_PALETTE['blue'], linestyle='--')
         
-        return (min(range), max(range))
-        
-    
-    def ROC(self, cd0, rho, V, S, W, A, oswald, T, plot=False):
-        
-        '''
-        V = numpy list! (np.arange(1,Vmax,1))
-        '''
-        
-        D, D0, Di = self.__drag__(cd0, rho, V, S, W, A, oswald)
-        
-        
+        # --- Aesthetics ---
+        #ax.set_title('Payload-Range Diagram')
+        ax.set_xlabel('Range ($R$) [km]')
+        ax.set_ylabel('Payload Mass ($M_{PL}$) [kg]')
+        ax.grid(True, which='major', linestyle=':', linewidth=0.5, color='lightgrey')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.set_xlim(left=0)
+        ax.set_ylim(bottom=0)
+
+        plt.tight_layout()
+        os.makedirs("Figures", exist_ok=True)
+        plt.savefig("Figures/flight performance/payload_range.pdf", transparent=False)
+        plt.close(fig)
+        print("Saved plot: Figures/flight performance/payload_range.pdf")
+
+    def ROC(self, cd0, rho, V_range, S, W, A, oswald, T, V_stall, plot=False):
+        """Calculates Rate of Climb, corrected for stall speed."""
+        V_flight = V_range[V_range >= V_stall]
+        if len(V_flight) < 2:
+            return 0, 0, 0, 0
+
+        D, _, _ = self.__drag__(cd0, rho, V_flight, S, W, A, oswald)
         
         AOC = (T - min(D)) / W
-        AOC_V = V[np.argmin(D)]
-        print(f"max angle of climb: {AOC} at V = {AOC_V}")
+        AOC_V = V_flight[np.argmin(D)]
         
-        if plot: # pragma: no cover
-            plt.plot(V,D,label='drag')
-            plt.plot(V,[T]*len(V),label='thrust')
-            plt.ylim(0, T*1.1)
-            plt.xlabel("Velocity [m/s]")
-            plt.ylabel("Force [N]")
-            plt.legend()
-            plt.show()
+        if plot:
+            self._plot_roc_forces(V_flight, D, T, V_stall)
+
+        ROC = (V_flight * T - V_flight * D) / W
+        max_ROC = np.max(ROC)
+        ROC_V = V_flight[np.argmax(ROC)]
         
+        if plot:
+            self._plot_roc_power(V_flight, V_flight * D, V_flight * T, V_stall)
+            
+        return AOC, AOC_V, max_ROC, ROC_V
+
+    def _plot_roc_forces(self, V, D, T, V_stall):
+        """Generates a styled Thrust vs. Drag plot with a useful view."""
+        _set_report_style()
+        fig, ax = plt.subplots(figsize=(8, 5))
+
+        ax.plot(V, [T] * len(V), label='Thrust Available', color=COLOR_PALETTE['green'])
+        ax.plot(V, D, label='Total Drag (Power Required)', color=COLOR_PALETTE['blue'])
+        ax.fill_between(V, T, D, where=(T > D), color=COLOR_PALETTE['green'], alpha=0.1, label='Excess Thrust')
+        ax.axvline(x=V_stall, color=COLOR_PALETTE['red'], linestyle=':', linewidth=2, label=f'$V_{{stall}} = {V_stall:.1f}$ m/s')
+
+        # --- Intelligent Cropping ---
+        # Set y-limit based on thrust available for a clean view
+        ax.set_ylim(bottom=0, top=T * 1.5)
+        ax.set_xlim(left=0)
+
+        #ax.set_title('Thrust and Drag vs. Airspeed')
+        ax.set_xlabel('Velocity ($V_{EAS}$) [m/s]')
+        ax.set_ylabel('Force ($F$) [N]')
+        ax.grid(True, which='major', linestyle=':', linewidth=0.5, color='lightgrey')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
         
-        TV = V*T
-        DV = D*V
-        ROC = []
-        for i in range(len(V)):
-            val = V[i]
-            ROC.append((T*val - D[i]*val) / (W))
-        #print(max(ROC))
-        #print(ROC)
-        ROC_V = V[np.argmax(ROC)]
-        print(f"max rate of climb: {max(ROC)} at V = {ROC_V}")
+        legend = ax.legend(loc='best', frameon=True)
+        frame = legend.get_frame()
+        frame.set_boxstyle('round,pad=0.5,rounding_size=0.4')
+        frame.set_facecolor('white')
+        frame.set_edgecolor('black')
+        frame.set_alpha(0.8)
+        legend.set_zorder(10)
         
-        if plot: # pragma: no cover
-            plt.plot(V,DV,label='drag')
-            plt.plot(V,TV,label='thrust')
-            plt.ylim(0, max(TV)*1.1)
-            plt.ylabel("Force * Velocity [Nm/s]")
-            plt.xlabel("Velocity [m/s]")
-            plt.legend()
-            plt.show()
+        plt.tight_layout()
+        os.makedirs("Figures", exist_ok=True)
+        plt.savefig("Figures/flight performance/roc_forces.pdf", transparent=False)
+        plt.close(fig)
+        print("Saved plot: Figures/flight performance/roc_forces.pdf")
+
+    def _plot_roc_power(self, V, DV, TV, V_stall):
+        """Generates a styled Power Available vs. Power Required plot with a useful view."""
+        _set_report_style()
+        fig, ax = plt.subplots(figsize=(8, 5))
+
+        ax.plot(V, TV, label='Power Available', color=COLOR_PALETTE['green'])
+        ax.plot(V, DV, label='Power Required', color=COLOR_PALETTE['blue'])
+        ax.fill_between(V, TV, DV, where=(TV > DV), color=COLOR_PALETTE['green'], alpha=0.1, label='Excess Power')
+        ax.axvline(x=V_stall, color=COLOR_PALETTE['red'], linestyle=':', linewidth=2, label=f'$V_{{stall}} = {V_stall:.1f}$ m/s')
         
-        return AOC, AOC_V, max(ROC), ROC_V
+        # --- Intelligent Cropping ---
+        ax.set_ylim(bottom=0, top=np.max(TV) * 1.1)
+        ax.set_xlim(left=0)
         
+        #ax.set_title('Power vs. Airspeed')
+        ax.set_xlabel('Velocity ($V_{EAS}$) [m/s]')
+        ax.set_ylabel('Power [W]')
+        ax.grid(True, which='major', linestyle=':', linewidth=0.5, color='lightgrey')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        
+        legend = ax.legend(loc='best', frameon=True)
+        frame = legend.get_frame()
+        frame.set_boxstyle('round,pad=0.5,rounding_size=0.4')
+        frame.set_facecolor('white')
+        frame.set_edgecolor('black')
+        frame.set_alpha(0.8)
+        legend.set_zorder(10)
+        
+        plt.tight_layout()
+        os.makedirs("Figures", exist_ok=True)
+        plt.savefig("Figures/flight performance/roc_power.pdf", transparent=False)
+        plt.close(fig)
+        print("Saved plot: Figures/flight performance/roc_power.pdf")
+
     def stall_speed(self, W, S, rho, CLmax):
         return ((W/S)*(2/rho)*(1/CLmax))**0.5
     
     def endurance(self, Wfuel, Wtotal, Cd0, AR, oswald, cT):
-        '''
-        cT is kg/s/N
-        output is endurance in seconds
-        Weights in N
-        '''
         CD = 2 * Cd0
         CL = (Cd0 * math.pi * oswald * AR)**0.5
-        
         endurance = 1/(cT*9.81) * CL/CD * math.log(Wtotal/(Wtotal-Wfuel))
-        print(endurance)
-        
         return endurance
     
     def performance_limit(self, W, S, CLmax, T0, cd0, A, oswald, plot=False):
         h = np.arange(0,20000,1)
-        density = []
-        Vmin = []
-        T = []
-        Vmax = []
+        Vmin, Vmax, actual_h = [], [], []
         
-    
         for val in h:
             _, _, density1, _ = __ISA__(val)
-            density.append(density1)
             Vstall = self.stall_speed(W, S, density1, CLmax)
-            #Vmin.append(Vmin1)
             thrust = T0*(density1/1.225)
-            T.append(thrust)
-            V = np.arange(1,500,0.1)
-            D, D0, Di = self.__drag__(cd0, density1, V, S, W, A, oswald)
-            # if val % 1000 == 0:
-            #     print(val)
-            #     plt.plot(V,D,label='drag')
-            #     plt.plot(V,[thrust]*len(V),label='thrust')
-            #     plt.ylim(0, thrust*1.1)
-            #     plt.legend()
-            #     plt.show()
+            V = np.arange(1, 500, 0.1)
+            D, _, _ = self.__drag__(cd0, density1, V, S, W, A, oswald)
             
-            added = False
-            for i in range(len(D)-1, 0, -1):
-                drag = D[i]
-                if drag < thrust and V[i] > Vstall:
-                    Vmax1 = V[i]
-                    Vmax.append(Vmax1)
-                    added = True
-                    break
-                elif drag > thrust:
-                    continue
-            
-            for i in range(0, len(D)-1, 1):
-                drag = D[i]
-                if drag < thrust:
-                    Vmin1 = V[i]
-                    break
-                elif drag > thrust:
-                    continue
-            
-            if added == False:
+            # Find Vmax
+            idx_vmax = np.where((D < thrust) & (V > Vstall))[0]
+            if len(idx_vmax) == 0:
                 hmax = val
-                print(hmax)
                 break
+            Vmax.append(V[idx_vmax[-1]])
             
-            Vmin_actual = max(Vstall, Vmin1)
-            Vmin.append(Vmin_actual)
-            
-        actual_h = np.arange(0,hmax,1)
-            
-            
-        if plot: # pragma: no cover
-            plt.plot(Vmin, actual_h, color="blue")
-            plt.plot(Vmax, actual_h, color="blue")
-            plt.xlabel("Velocity [m/s]")
-            plt.ylabel("Altitude [m]")
-            plt.show()
+            # Find Vmin
+            idx_vmin = np.where(D < thrust)[0]
+            Vmin.append(max(Vstall, V[idx_vmin[0]]))
+            actual_h.append(val)
+        
+        if plot:
+            self._plot_performance_limit(Vmin, Vmax, actual_h)
         
         return (hmax, max(Vmax))
+
+    def _plot_performance_limit(self, Vmin, Vmax, h):
+        """Generates a styled flight envelope plot."""
+        _set_report_style()
+        fig, ax = plt.subplots(figsize=(8, 5))
+
+        ax.plot(Vmin, h, color=COLOR_PALETTE['blue'], label='Min Speed (Stall Limit)')
+        ax.plot(Vmax, h, color=COLOR_PALETTE['grey'], label='Max Speed (Thrust Limit)')
+        ax.fill_betweenx(h, Vmin, Vmax, color=COLOR_PALETTE['blue'], alpha=0.1, label='Flight Envelope')
+
+        #ax.set_title('Flight Envelope')
+        ax.set_xlabel('True Airspeed ($V_{TAS}$) [m/s]')
+        ax.set_ylabel('Altitude ($h$) [m]')
+        ax.grid(True, which='major', linestyle=':', linewidth=0.5, color='lightgrey')
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.set_xlim(left=0)
+        ax.set_ylim(bottom=0)
+
+        legend = ax.legend(loc='best', frameon=True)
+        frame = legend.get_frame()
+        frame.set_boxstyle('round,pad=0.5,rounding_size=0.4')
+        frame.set_facecolor('white')
+        frame.set_edgecolor('black')
+        frame.set_alpha(0.8)
+        legend.set_zorder(10)
         
+        plt.tight_layout()
+        os.makedirs("Figures", exist_ok=True)
+        plt.savefig("Figures/flight performance/performance_limit.pdf", transparent=False)
+        plt.close(fig)
+        print("Saved plot: Figures/flight performance/performance_limit.pdf")
 
+# ... (run_flight_performance and if __name__ == "__main__" remain the same) ...
 
-def run_flight_performance(params: DesignParameters): # pragma: no cover
-    """
-    Runs the control and stability analysis with the given design parameters.
-
-    Parameters:
-    params (DesignParameters): Design parameters for the aircraft.
-    """
-    # Initialize the Control class with parameters from DesignParameters
+if __name__ == "__main__":
     fp = FlightPerformance()
-    fs = FlightSim()
-    Wfuel = params.weight.W_F
-    cd0 = params.wing.C_D0
-    AR = params.wing.A_w_target
-    oswald = params.wing.e
-    cT = params.engine.cruise_tsfc/3600
-    Wtotal = params.weight.W_TO
-    OEW = params.weight.W_OE
-    S = params.wing.S_w
-    CLmax_cruise = params.performance.CL_max_cruise
-    CLmax_TO = params.performance.CL_max_TO
-    T0 = params.engine.engine_max_thrust
-    C_m_ac = params.fuselage.C_m_ac
-    S_h = params.empennage.S_h
-    l_h = params.empennage.L_h
-    V_h_V = params.empennage.Vh_v
-    x_cg = params.cg.cg_vector_from_3Dmodel
-    x_w = params.cg.x_cg_wing
-    c = params.wing.mac
-    C_N_h = params.empennage.CL_h
-    z_cg = params.cg.z_cg
-    z_p = params.cg.z_cg_propulsion
-    X_TO = params.take_off_distance
-    # Example usage of calculate_range method
-    T, X, M = fs.ground_run2(T0,Wtotal/9.81,S,cd0,AR,oswald,cT*1000000,CLmax_TO, X_TO)
-    endurance = fp.endurance(Wfuel, Wtotal, cd0, AR, oswald, cT)
-    min_range, max_range = fp.payload_range(params.cruise_speed, cT, AR, oswald, cd0, Wtotal, Wfuel, OEW)
-    ceiling, vmax = fp.performance_limit(Wtotal, S, CLmax_cruise, T0, cd0, AR, oswald)
-    stall_speed_cruise = fp.stall_speed(Wtotal, S, params.cruise_density, CLmax_cruise)
-    stall_speed_takeoff = fp.stall_speed(Wtotal, S, 1.225, CLmax_TO)
-    ROC_sea_level = fp.ROC(cd0, params.cruise_density, params.stall_speed_land, S, Wtotal, AR, oswald, T0)[2]
-    take_off_requirement = calculate_Cm(C_m_ac, Wtotal/9.81, S, S_h, l_h, V_h_V, x_cg, x_w, c, C_N_h, z_cg, z_p, cd0, AR, oswald, cT*1000000, CLmax_TO, X_TO)
-    
-    result = {
-        "endurance [s]": endurance,
-        "range with payload [km]": min_range,
-        "range without payload [km]": max_range,
-        "ceiling [m]": ceiling,
-        "max speed [probably sealevel] [m/s]": vmax,
-        "stall speed cruise [m/s]": stall_speed_cruise,
-        "stall speed takeoff [m/s]": stall_speed_takeoff,
-        "ROC at sea level [m/s]": ROC_sea_level,
-        "take-off thrust [N]": T,
-        "take-off distance (set value) [m]": X,
-        "take-off speed [M]": M,
-        "take-off req met? [bool]": take_off_requirement[1]
-    }
 
-    return result
+    # Initialize design parameters
+    params = DesignParameters()
+    params.load_from_yaml('design_config.yaml')
 
-        
-        
-if __name__ == "__main__": # pragma: no cover
-    pass
+    # Set up parameters for flight performance calculations
+    # ...
     
-    #FlightPerformance().drag_plot(0.017, 0.3, np.arange(1,300, 1), 12, 4000*9.81, 12, 0.85)
-    
-    print('range',FlightPerformance().__range__(14*(10**-6), 35000, 25000, 12, 0.88, 0.017, 0.3108, 15))
-    
-    FlightPerformance().payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
-    #endurance = FlightPerformance().endurance(12000, 35000, 0.017, 10, 0.88, 14*(10**-6))
-    #print(endurance)
-    
-    #FlightPerformance().ROC(0.017, 1.225, np.arange(1,300,1), 15, 35000, 10, 0.85, 7000, True)
-    
-    #print(FlightPerformance().performance_limit(35000, 15, 1.6, 7000, 0.017, 12, 0.88, True))
-
-    #print(FlightPerformance().stall_speed(35000, 15, 1.225, 1.6))
-    #FlightSim().ground_run2(7000, 35000/9.81, 15, 0.017, 12, 0.88, 14, 1.6, 1800)
-        
-        
+    # Generate styled plots by calling the main methods with plot=True
+    fp.drag_plot(0.017, 0.3, np.arange(1,300, 1), 12, 4000*9.81, 12, 0.85, 60)
+    fp.payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
+    fp.ROC(0.017, 1.225, np.arange(1,300,1), 15, 35000, 10, 0.85, 7000, 60, plot=True)
+    fp.performance_limit(35000, 15, 1.6, 7000, 0.017, 12, 0.88, True)
