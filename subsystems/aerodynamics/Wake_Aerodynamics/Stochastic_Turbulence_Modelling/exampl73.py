@@ -46,7 +46,7 @@ Cn = A[2, :] - A[1, :]
 Dn = B[2, iu] - B[1, iu]
 Hn = cm.ss(A, B[:,iu], V/g*Cn, Dn)
 # COMPUTE FREQUENCY RESPONSE FUNCTION
-mag = cm.bode(Hn,omega, Plot = False)[0]
+mag = cm.bode(Hn,omega)[0]
 
 Snn = mag*mag
 
@@ -59,7 +59,7 @@ Dn = B[2, iu] - B[1, iu]
 Hn = cm.ss(A, B[:,iu], V/g*Cn, Dn)
 
 # COMPUTE FREQUENCY RESPONSE FUNCTION
-mag = cm.bode(Hn,omega, Plot = False)[0]
+mag = cm.bode(Hn,omega)[0]
 Snn1 = mag*mag
 
 # VERTICAL TURBULENCE AIRCRAFT WITH PITCH ATTITUDE HOLD SYSTEM
@@ -72,7 +72,7 @@ Hn = cm.ss(At, B[:,iu], V/g*Cn, Dn)
 
 
 # COMPUTE FREQUENCY RESPONSE FUNCTION
-mag = cm.bode(Hn,omega, Plot = False)[0]
+mag = cm.bode(Hn,omega)[0]
 Snnt1 = mag*mag
 
 # PLOT POWER SPECTRAL DENSITIES
