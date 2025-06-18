@@ -37,10 +37,10 @@ w = numpy.random.randn(N)/sqrt(dt);  # note: divide by sqrt(dt), with dt the sam
 # Forming filter characteristics equation (6.41)
 rat = V/Lg1
 
-A = numpy.mat([[0, 1], [-rat**2, -2*rat]])
-B = sigma*numpy.mat([[sqrt(3*rat)], [(1-2*sqrt(3))*sqrt((rat**3))]])
-C = numpy.mat([[1, 0]])
-D = numpy.mat([[0]])
+A = numpy.asmatrix([[0, 1], [-rat**2, -2*rat]])
+B = sigma*numpy.asmatrix([[sqrt(3*rat)], [(1-2*sqrt(3))*sqrt((rat**3))]])
+C = numpy.asmatrix([[1, 0]])
+D = numpy.asmatrix([[0]])
 sys = cm.ss(A, B, C, D)
 
 # Output turbulence velocity
@@ -49,10 +49,10 @@ wg = cm.lsim(sys,w,t)[0]
 # Forming filter characteristics equation (6.41)
 rat = V/Lg2
 
-A = numpy.mat([[0, 1], [-rat**2, -2*rat]])
-B = sigma*numpy.mat([[sqrt(3*rat)], [(1-2*sqrt(3))*sqrt((rat**3))]])
-C = numpy.mat([[1, 0]])
-D = numpy.mat([[0]])
+A = numpy.asmatrix([[0, 1], [-rat**2, -2*rat]])
+B = sigma*numpy.asmatrix([[sqrt(3*rat)], [(1-2*sqrt(3))*sqrt((rat**3))]])
+C = numpy.asmatrix([[1, 0]])
+D = numpy.asmatrix([[0]])
 sys = cm.ss(A, B, C, D)
 
 # Output turbulence velocity

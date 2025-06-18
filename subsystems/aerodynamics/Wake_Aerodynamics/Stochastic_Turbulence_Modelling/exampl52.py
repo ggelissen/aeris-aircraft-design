@@ -41,10 +41,10 @@ zeta    = float(input('   Give damping ratio                          : '))
 m = 1; k = w0**2
 c = zeta*2*m*w0
 
-A= numpy.mat([[0, 1], [-k/m, -c/m]])  # state-space representation of second
-B= numpy.mat([[0], [1/m]])              # order system
-C= numpy.mat([[1, 0]])
-D= numpy.mat([[0]])
+A= numpy.asmatrix([[0, 1], [-k/m, -c/m]])  # state-space representation of second
+B= numpy.asmatrix([[0], [1/m]])              # order system
+C= numpy.asmatrix([[1, 0]])
+D= numpy.asmatrix([[0]])
 sys = cm.ss(A, B, C, D)
 
 # DEFINE TIME AXIS
@@ -88,7 +88,7 @@ Cx2x2 = numpy.zeros(N)
 Cx1x1[0]= float(input('   Give initial value of Cyy(1,1)              : '))
 Cx1x2[0]= float(input('   Give initial value of Cyy(1,2)=C(2,1)       : '))
 Cx2x2[0]= float(input('   Give initial value of Cyy(2,2)              : '))
-Cxx= numpy.mat([[Cx1x1[0], Cx1x2[0]], [Cx1x2[0], Cx2x2[0]]])
+Cxx= numpy.asmatrix([[Cx1x1[0], Cx1x2[0]], [Cx1x2[0], Cx2x2[0]]])
 
 # DISCRETE SOLUTION Cxx(k+1)=Phi*Cxx(k)*Phi' + Gamma*W*Gamma';
 for i in range(0, N-1):

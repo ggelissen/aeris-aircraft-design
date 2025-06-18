@@ -85,7 +85,7 @@ if __name__ == "__main__":
     mfag = (V/c)*(Cmfag+CZfag*Cmfa/(twmuc-CZfa))/(twmuc*KY2)
     
     # STATE- AND INPUT MATRICES
-    A= numpy.mat([[xu, xa, xt, 0,    xug,                  xag,       0],
+    A= numpy.asmatrix([[xu, xa, xt, 0,    xug,                  xag,       0],
                   [zu, za, zt, zq,   zug-zfug*V/Lg*(c/V),  zag,       zfag*(c/V)],
                   [0,  0,  0,  V/c,  0,                    0,         0],
                   [mu, ma, mt, mq,   mug-mfug*V/Lg*(c/V),  mag,       mfag*(c/V)],
@@ -93,7 +93,7 @@ if __name__ == "__main__":
                   [0,  0,  0,  0,    0,                    0,         1],
                   [0,  0,  0,  0,    0,                   -(V/Lg)**2, -2*V/Lg]])
     
-    B= numpy.mat([[xd, 0,                                 0],
+    B= numpy.asmatrix([[xd, 0,                                 0],
                   [zd, zfug*(c/V)*sigmaug_V*sqrt(2*V/Lg), zfag*(c/V)*sigmaag*sqrt(3*V/Lg)],
                   [0,  0,                                 0],
                   [md, mfug*(c/V)*sigmaug_V*sqrt(2*V/Lg), mfag*(c/V)*sigmaag*sqrt(3*V/Lg)],
@@ -182,7 +182,7 @@ def cit2s_fun():
     mfag = (V/c)*(Cmfag+CZfag*Cmfa/(twmuc-CZfa))/(twmuc*KY2)
     
     # STATE- AND INPUT MATRICES
-    A= numpy.mat([[xu, xa, xt, 0,    xug,                  xag,       0],
+    A= numpy.asmatrix([[xu, xa, xt, 0,    xug,                  xag,       0],
                   [zu, za, zt, zq,   zug-zfug*V/Lg*(c/V),  zag,       zfag*(c/V)],
                   [0,  0,  0,  V/c,  0,                    0,         0],
                   [mu, ma, mt, mq,   mug-mfug*V/Lg*(c/V),  mag,       mfag*(c/V)],
@@ -190,7 +190,7 @@ def cit2s_fun():
                   [0,  0,  0,  0,    0,                    0,         1],
                   [0,  0,  0,  0,    0,                   -(V/Lg)**2, -2*V/Lg]])
     
-    B= numpy.mat([[xd, 0,                                 0],
+    B= numpy.asmatrix([[xd, 0,                                 0],
                   [zd, zfug*(c/V)*sigmaug_V*sqrt(2*V/Lg), zfag*(c/V)*sigmaag*sqrt(3*V/Lg)],
                   [0,  0,                                 0],
                   [md, mfug*(c/V)*sigmaug_V*sqrt(2*V/Lg), mfag*(c/V)*sigmaag*sqrt(3*V/Lg)],

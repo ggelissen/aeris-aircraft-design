@@ -55,7 +55,7 @@ else:
 inpsig  = numpy.array([delta, w1, w3]).T
 
 # DEFINE C and D MATRICES
-C = numpy.mat([[1, 0, 0, 0, 0, 0, 0],   # u/V
+C = numpy.asmatrix([[1, 0, 0, 0, 0, 0, 0],   # u/V
      [0, 1, 0, 0, 0, 0, 0],    # alpha
      [0, 0, 1, 0, 0, 0, 0],    # theta
      [0, 0, 0, 1, 0, 0, 0],    # qc/V

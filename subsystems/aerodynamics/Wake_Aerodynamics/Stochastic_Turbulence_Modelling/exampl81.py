@@ -55,7 +55,7 @@ u1 = numpy.stack((nn, nn, u_g, nn, nn), axis = 1); u1 = u1[0].T
 u2 = numpy.stack((nn, nn, nn, w_g, nn), axis = 1); u2 = u2[0].T
 u3 = numpy.stack((nn, nn, nn, nn, v_g), axis = 1); u3 = u3[0].T
 # DEFINE OUTPUT MATRICES
-C = numpy.mat([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0],  
+C = numpy.asmatrix([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0],  
      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],    
      [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],    
      [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]])  

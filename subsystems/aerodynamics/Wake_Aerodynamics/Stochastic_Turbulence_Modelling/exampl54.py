@@ -40,10 +40,10 @@ m = 1                          # mass
 k = w0**2                       # spring constant
 c = zeta*2*m*w0                # damping constan
 
-A= numpy.mat([[0, 1], [-k/m, -c/m]])  # state-space representation of second
-B= numpy.mat([[0], [1/m]])              # order system
-C= numpy.mat([[1, 0]])
-D= numpy.mat([[0]])
+A= numpy.asmatrix([[0, 1], [-k/m, -c/m]])  # state-space representation of second
+B= numpy.asmatrix([[0], [1/m]])              # order system
+C= numpy.asmatrix([[1, 0]])
+D= numpy.asmatrix([[0]])
 sys = cm.ss(A, B, C, D)
 
 # SET TIME AXIS

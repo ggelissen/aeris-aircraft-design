@@ -104,7 +104,7 @@ bbg2 = (1-2*sqrt(3))*sigmabg*sqrt((V/Lg)**3)
 
 
 
-A = numpy.mat([[yb, yphi, yp,    yr, 0,    0,    0,    0,    ybg,  0],
+A = numpy.asmatrix([[yb, yphi, yp,    yr, 0,    0,    0,    0,    ybg,  0],
                [0,  0,    2*V/b, 0,  0,    0,    0,    0,    0,    0], 
                [lb, 0,    lp,    lr, lug,  0,    lag,  0,    lbg,  0],
                [nb, 0,    np,    nr, nug,  0,    nag,  0,    nbg,  0],
@@ -115,7 +115,7 @@ A = numpy.mat([[yb, yphi, yp,    yr, 0,    0,    0,    0,    ybg,  0],
                [0,  0,    0,     0,  0,    0,    0,    0,    0,    1],
                [0,  0,    0,     0,  0,    0,    0,    0,    abg1, abg2]])
 
-B = numpy.mat([[0,   ydr, 0,    0,    0],
+B = numpy.asmatrix([[0,   ydr, 0,    0,    0],
                [0,   0,   0,    0,    0],
                [lda, ldr, 0,    0,    0],
                [nda, ndr, 0,    0,    0],
@@ -251,7 +251,7 @@ def cit2a_fun():
 
 
 
-    A = numpy.mat([[yb, yphi, yp,    yr, 0,    0,    0,    0,    ybg,  0],
+    A = numpy.asmatrix([[yb, yphi, yp,    yr, 0,    0,    0,    0,    ybg,  0],
                 [0,  0,    2*V/b, 0,  0,    0,    0,    0,    0,    0], 
                 [lb, 0,    lp,    lr, lug,  0,    lag,  0,    lbg,  0],
                 [nb, 0,    np,    nr, nug,  0,    nag,  0,    nbg,  0],
@@ -262,7 +262,7 @@ def cit2a_fun():
                 [0,  0,    0,     0,  0,    0,    0,    0,    0,    1],
                 [0,  0,    0,     0,  0,    0,    0,    0,    abg1, abg2]])
 
-    B = numpy.mat([[0,   ydr, 0,    0,    0],
+    B = numpy.asmatrix([[0,   ydr, 0,    0,    0],
                 [0,   0,   0,    0,    0],
                 [lda, ldr, 0,    0,    0],
                 [nda, ndr, 0,    0,    0],
