@@ -1,3 +1,4 @@
+from design_variables import DesignParameters
 from subsystems.flightperformance.FlightSim import FlightSim
 
 def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_h,z_cg,z_p, Cd0, AR, oswald, TSFC, C_L, X_TO):
@@ -30,7 +31,7 @@ def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_h,z_cg,z_p, Cd0, AR
     rho = 1.225
     
     #print('Tc',T_c*(z_p - z_cg)/c)
-    
+    print("engine",2*T/(rho*(V**2)*S)*((z_cg - z_p)/c))
     C_m = C_m_ac + C_L*(x_cg-x_w)/c - C_N_h*(V_h_V**2)*S_h*l_h/(S*c) + 2*T/(rho*(V**2)*S)*((z_cg - z_p)/c)
     
     if C_m > 0:
@@ -39,5 +40,7 @@ def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_h,z_cg,z_p, Cd0, AR
         return C_m, False
     
 if __name__ == "__main__": # pragma: no cover
-    Cm, _ = calculate_Cm(-1, 35000/9.81, 15, 4, 4, 1, 6, 6, 1, 1, 1, 2, 0.017, 10, 0.88, 14, 1.6, 1800)
+    params = DesignParameters()
+    params.load_from_yaml('design_config.yaml')
+    Cm, _ = calculate_Cm(params.fuselage.C_m_ac, params.weight.W_TO/9.81, params.wing.S_w, params.empennage.S_h, 3.7439, 0.95, 5.4176, 5.256, params.wing.mac, params.empennage.CL_h, 0, 1.442, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.cruise_tsfc_SI, params.performance.CL_max_TO, 1500)
     print('Cm',Cm)

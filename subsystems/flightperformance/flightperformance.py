@@ -124,6 +124,7 @@ class FlightPerformance:
         
         max_payload_kg = np.max(Wpayload) / 9.81
         ferry_range = np.min(ranges)
+        print('ferry_Range',ferry_range)
 
         # Plot the main curve
         ax.plot(ranges, Wpayload / 9.81, color=COLOR_PALETTE['blue'])
@@ -327,10 +328,10 @@ if __name__ == "__main__":
     #fp.drag_plot(params.wing.C_D0, )
     #fp.payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
     print("T1", params.engine.engine_max_thrust)
-    result1 = fp.payload_range(params.engine.cruise_tsfc_SI, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_TO, params.weight.W_F, params.weight.W_OE, 0.3108, params.wing.S_w, True)
+    result1 = fp.payload_range(params.engine.cruise_tsfc_SI, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_TO, params.weight.W_F - params.weight.W_F_res , params.weight.W_OE, 0.3108, params.wing.S_w, True)
     print('pl-range', result1)
     #fp.ROC(0.017, 1.225, np.arange(1,300,1), 15, 35000, 10, 0.85, 7000, 60, plot=True)
-    result2 = fp.ROC(params.wing.C_D0, 1.225, np.arange(1,300,1), params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.engine.engine_max_thrust, fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO), plot=True)
+    result2 = fp.ROC(params.wing.C_D0, 1.225, np.arange(1,400,1), params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.engine.engine_max_thrust, fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO), plot=True)
     print('ROC',result2)
     #fp.performance_limit(35000, 15, 1.6, 7000, 0.017, 12, 0.88, True)
     result3 = fp.performance_limit(params.weight.W_TO, params.wing.S_w, params.performance.CL_max_TO, params.engine.engine_max_thrust, params.wing.C_D0, params.wing.A_w_target, params.wing.e, True)
@@ -338,6 +339,7 @@ if __name__ == "__main__":
     
     result4= FlightSim().ground_run2(params.engine.engine_max_thrust, params.weight.W_TO/9.81, params.wing.S_w, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.take_off_tsfc, params.performance.CL_max_TO, 1500)
     print('ground run', result4)
-    
-    result5=fp.endurance(params.weight.W_F, params.weight.W_TO, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.cruise_tsfc_SI)
+    result6=fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO)
+    print('stall', result6)
+    result5=fp.endurance(params.weight.W_F - params.weight.W_F_res, params.weight.W_TO, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.cruise_tsfc_SI)
     print('endurance',result5)
