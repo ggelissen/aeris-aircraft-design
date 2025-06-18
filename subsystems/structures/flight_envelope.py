@@ -62,7 +62,9 @@ class FlightEnvelope:
         VC_TAS = params.cruise_mach * m.sqrt(1.4 * 287.05 * params.cruise_temperature)
         self.VC = true_to_equivalent_air_speed(VC_TAS, params.cruise_density, self.density_at_altitude['sea_level'])
         self.flight_altitude = {"sea_level": 0, "cruise": params.cruise_altitude}
-        self.weight_configuration = {"OEW": params.weight.W_OE, "MTOW": params.weight.W_TO, "OEW_Payload_Fuselage_Fuel": params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction}
+        self.weight_configuration = {"OEW": params.weight.W_OE, 
+                                     "MTOW": params.weight.W_TO, 
+                                     "OEW_Payload_Fuselage_Fuel": params.weight.W_OE + params.weight.W_PL + params.weight.W_F * params.weight.Fuel_Fuselage_Fraction}
 
     def calc_load_factor_limits(self, MTOW_kg):
         n_pos_limit = min(2.1 + (10900 / (MTOW_kg + 4536)), 3.8)
@@ -172,8 +174,8 @@ class FlightEnvelope:
         ax.set_xlim(0, VD * 1.05)
         
         plt.tight_layout()
-        plt.savefig(f"Figures/VN_diagram_{weight_config}_{altitude_level}.png", transparent=False, dpi=300)
-        print(f"Saved plot: Figures/VN_diagram_{weight_config}_{altitude_level}.png")
+        plt.savefig(f"Figures/VN_diagram_{weight_config}_{altitude_level}.pdf", transparent=False, dpi=300)
+        print(f"Saved plot: Figures/VN_diagram_{weight_config}_{altitude_level}.pdf")
         plt.close(fig)
 
     def generate_flight_envelope(self, weight_config: str, altitude_level: str, ac_configuration: str):
