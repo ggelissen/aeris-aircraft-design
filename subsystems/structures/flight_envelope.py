@@ -29,11 +29,11 @@ def _set_report_style():
     
     plt.rcParams['figure.dpi'] = 100
     plt.rcParams['savefig.dpi'] = 300
-    plt.rcParams['axes.titlesize'] = 14
-    plt.rcParams['axes.labelsize'] = 12
-    plt.rcParams['xtick.labelsize'] = 10
-    plt.rcParams['ytick.labelsize'] = 10
-    plt.rcParams['legend.fontsize'] = 10
+    plt.rcParams['axes.titlesize'] = 16
+    plt.rcParams['axes.labelsize'] = 16
+    plt.rcParams['xtick.labelsize'] = 16
+    plt.rcParams['ytick.labelsize'] = 16
+    plt.rcParams['legend.fontsize'] = 16
     plt.rcParams['lines.linewidth'] = 2
     plt.rcParams['lines.markersize'] = 6
 
@@ -129,7 +129,7 @@ class FlightEnvelope:
         
         for label, v in speeds.items():
             ax.axvline(x=v, color=COLOR_PALETTE['grey'], linestyle=':', linewidth=1)
-            ax.text(v + 4, ax.get_ylim()[0] * 0.9 - 0.3, label, fontsize=11, ha='center', va='bottom', color=COLOR_PALETTE['grey'])
+            ax.text(v + 5, ax.get_ylim()[0] * 0.9 - 0.4, label, fontsize=16, ha='center', va='bottom', color=COLOR_PALETTE['grey'])
 
         # --- Add Critical Load Case points ---
         critical_points_plot, = ax.plot([VA, VA_prime], [n_pos_limit, n_neg_limit], 
@@ -146,12 +146,12 @@ class FlightEnvelope:
         
         # --- Position the X-label manually to align with annotations ---
         ax.set_xlabel('') # Clear the default label
-        ax.text(ax.get_xlim()[1] - 3, ax.get_ylim()[0] * 0.9 + 1.75, '$V_{EAS}$ [m/s]', ha='left', va='center', color='black', fontsize=14)
+        ax.text(ax.get_xlim()[1] - 3, ax.get_ylim()[0] * 0.9 + 1.75, '$V_{EAS}$ [m/s]', ha='left', va='center', color='black', fontsize=16)
         
         ax.axhline(y=n_pos_limit, color=COLOR_PALETTE['grey'], linestyle=':', linewidth=1)
-        ax.text(ax.get_xlim()[1], n_pos_limit, f' $n={n_pos_limit:.2f}$', ha='left', va='center', color=COLOR_PALETTE['grey'])
+        ax.text(ax.get_xlim()[1], n_pos_limit, f' $n={n_pos_limit:.2f}$', ha='left', va='center', color=COLOR_PALETTE['grey'], fontsize=14)
         ax.axhline(y=n_neg_limit, color=COLOR_PALETTE['grey'], linestyle=':', linewidth=1)
-        ax.text(ax.get_xlim()[1], n_neg_limit, f' $n={n_neg_limit:.2f}$', ha='left', va='center', color=COLOR_PALETTE['grey'])
+        ax.text(ax.get_xlim()[1], n_neg_limit, f' $n={n_neg_limit:.2f}$', ha='left', va='center', color=COLOR_PALETTE['grey'], fontsize=14)
         ax.vlines(x=VD, ymin=0, ymax=n_pos_limit, color=COLOR_PALETTE['grey'])
 
         # --- Create and Style Legend ---
@@ -174,8 +174,8 @@ class FlightEnvelope:
         ax.set_xlim(0, VD * 1.05)
         
         plt.tight_layout()
-        plt.savefig(f"Figures/VN_diagram_{weight_config}_{altitude_level}.pdf", transparent=False, dpi=300)
-        print(f"Saved plot: Figures/VN_diagram_{weight_config}_{altitude_level}.pdf")
+        plt.savefig(f"Figures/Structures/VN_diagram_{weight_config}_{altitude_level}.pdf", transparent=False, dpi=300)
+        print(f"Saved plot: Figures/Structures/VN_diagram_{weight_config}_{altitude_level}.pdf")
         plt.close(fig)
 
     def generate_flight_envelope(self, weight_config: str, altitude_level: str, ac_configuration: str):
