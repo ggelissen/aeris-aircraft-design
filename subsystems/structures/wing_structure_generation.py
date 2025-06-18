@@ -183,13 +183,15 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
 
 
     if plot:
-        plt.plot(outline[:, 0], outline[:, 1])
+        fig, ax = plt.subplots()
+        ax.plot(outline[:, 0], outline[:, 1])
         for stringer in stringer_array:
-            plt.scatter(stringer[0], stringer[1], marker='o', color='r')
+            ax.scatter(stringer[0], stringer[1], marker='o', color='r')
         for spar in spar_points_array:
-            plt.plot(spar[:, 0], spar[:, 1])
+            ax.plot(spar[:, 0], spar[:, 1])
+        ax.set_aspect('equal', adjustable='box')
         plt.show()
-        plt.savefig('data/wing_structure.png', dpi=300, bbox_inches='tight')
+        plt.savefig('data/wing_structure.pdf', dpi=300, bbox_inches='tight', format='pdf')
     return spar_points_array, stringer_array, outline, chord_length, lower_airfoil, upper_airfoil
 
 def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise_points: int = 1001, plot=True):
@@ -338,7 +340,7 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     fuselage_mesh = pv.read('data/fuselage.stl')
     fuselage_mesh.translate([0, 0, 0], inplace=True)
     fuselage_mesh.rotate_x(-90, inplace=True)
-    plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
+    #plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
 
 
     if plot:

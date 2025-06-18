@@ -439,7 +439,7 @@ class PerformanceParameters:
         self.CL_cruise = 0.4                  # Lift Coefficient at Cruise
         self.C_L_hat = 0.6                      # Design Lift Coefficient, to be updated by alejandro's code
 
-        self.V_A = 162.35                       # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
+        self.V_A = 124.757                     # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
 
 
     def load_from_dict(self, param_dict):

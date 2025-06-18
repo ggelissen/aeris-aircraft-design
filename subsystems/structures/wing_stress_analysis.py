@@ -168,7 +168,8 @@ def run_structures(designvars):
 
     wing_loading = WingLoadingDiagrams(designvars)
 
-    wing_loading = wing_loading.run_analysis(PLOT=False)
+    wing_loading = wing_loading.run_analysis(PLOT=True)
+    cross_sectional_structure_along_span(designvars, 0.5, plot=True)
 
     cross_sectional_results = []
     highest_stress = 0.0
@@ -251,7 +252,7 @@ def run_structures(designvars):
                     thickness = designvars.wing.wingsection.spars[boom_number]["t_web_mm"] / 1000
 
                     spar_web_buckling_crit = skin_shear_buckling(young, slenderness_ratio, thickness, base_height)
-                    if np.abs(boom_shearflow + results['torsional_shear_flow']) > spar_web_buckling_crit:
+                    if np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.spars['Spar1']["t_web_mm"]) >  spar_web_buckling_crit:
                         print(f"Warning: Spar web {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(np.abs(boom_shearflow + results['torsional_shear_flow'])/spar_web_buckling_crit-1)} %")
 
 
@@ -303,11 +304,12 @@ def run_structures(designvars):
     fig, ax1 = plt.subplots()
     ax1.set_xlabel('spanwise position (%)')
     ax1.set_ylabel('Moment around x axis (Nm)')
-    ax1.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]), label='oment around x axis')
+    ax1.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]), label='Moment around x axis')
     ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
     ax2 = ax1.twinx()
     ax2.set_ylabel('Moment around z axis (Nm)')
-    ax2.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]["moment_z"] for i in range(len(spanwise_position_lst))]), color='orange', label='oment around z axis')
+    ax2.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]["moment_z"] for i in range(len(spanwise_position_lst))]), color='orange', label='Moment around z axis')
     ax2.tick_params(axis='y')
     ax3 = ax1.twinx()
     ax3.set_ylabel('Torsion around y axis (Nm)')
@@ -327,6 +329,7 @@ def run_structures(designvars):
              np.array([wing_loading[i]['shear_x'] for i in range(len(spanwise_position_lst))]),
              label='Shear along x axis')
     ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
     ax2 = ax1.twinx()
     ax2.set_ylabel('Shear along z axis (N)')
     ax2.plot(np.linspace(0, 1, 1000),
@@ -343,18 +346,19 @@ def run_structures(designvars):
     ax1.set_xlabel('spanwise position (%)')
     ax1.set_ylabel('Displacement x axis (m)')
     ax1.plot(np.linspace(0, 1, 1000),
-             x_bending_distribution,
+             x_bending_distribution-x_bending_distribution[200],
              label='Displacement along x axis')
     ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
     ax2 = ax1.twinx()
     ax2.set_ylabel('Displacement along z axis (m)')
     ax2.plot(np.linspace(0, 1, 1000),
-             z_bending_distribution, color='orange',
+             z_bending_distribution-z_bending_distribution[200], color='orange',
              label='Displacement along z axis', linestyle='--')
     ax2.tick_params(axis='y')
     ax3 = ax1.twinx()
     ax3.set_ylabel('Twist angle (rad)')
-    ax3.plot(np.linspace(0, 1, 1000), y_twist_distribution, color='green', label='Twist angle')
+    ax3.plot(np.linspace(0, 1, 1000), y_twist_distribution - y_twist_distribution[200], color='green', label='Twist angle')
     ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
     lines, labels = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
@@ -389,20 +393,32 @@ if __name__ == "__main__":
     ax1.set_ylabel('Cl (-)')
     ax1.plot(np.linspace(0,1,1000), designvars.wing.CL_distribution, label='CL distribution')
     ax1.tick_params(axis='x')
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Cd (-)')
-    ax2.plot(np.linspace(0,1,1000), designvars.wing.CD_distribution, color='orange', label='CD distribution')
-    ax2.tick_params(axis='y')
-    ax3 = ax1.twinx()
-    ax3.set_ylabel('Cm (-)')
-    ax3.plot(np.linspace(0,1,1000), designvars.wing.CM_distribution, color='green', label='CM distribution')
-    ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
-    lines, labels = ax1.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    lines3, labels3 = ax3.get_legend_handles_labels()
-    ax1.legend(lines + lines2+lines3, labels + labels2+labels3, loc=0)
+    ax1.set_xlim([0.2, 1.0])
+    ax1.legend()
     fig.tight_layout()
-    plt.savefig('Figures/Structures/wingaerodistributions.pdf', format='pdf')
+    plt.savefig('Figures/Structures/wingaerodistributionsa.pdf', format='pdf')
+
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Cd (-)')
+    ax1.plot(np.linspace(0, 1, 1000), designvars.wing.CD_distribution, color='orange', label='CD distribution')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax1.legend()
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/wingaerodistributionsb.pdf', format='pdf')
+
+
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Cm (-)')
+    ax1.plot(np.linspace(0, 1, 1000), designvars.wing.CM_distribution, color='green', label='CM distribution')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax1.legend()
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/wingaerodistributionsc.pdf', format='pdf')
+
 
 
     print(designvars.weight.W_wing)
@@ -412,3 +428,12 @@ if __name__ == "__main__":
 
     print(designvars.structure_results)
     generate_wing_structure_3D(designvars)
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Weight (N/m)')
+    ax1.plot(np.linspace(0, 1, 1000), designvars.wing.weight_distribution, color='green', label='Weight distribution')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax1.legend()
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/wingaerodistributionsd.pdf', format='pdf')
