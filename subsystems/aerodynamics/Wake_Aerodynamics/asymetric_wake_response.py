@@ -18,7 +18,7 @@
 from math import*
 import numpy
 import pickle
-
+#from design_variables import DesignParameters
 # AIRCRAFT- AND FLIGHT CONDITION 'CRUISE FL400'.
 V   = 240.0
 S   = 9.44
@@ -27,8 +27,15 @@ mub = 79.6
 KX2 = 0.012
 KZ2 = 0.037
 KXZ = 0.002
+I_xx = 1212.66     # Moment of inertia about x-axis (kg*m^2)
+I_yy = 8466.62     # Moment of inertia about y-axis (kg*m^2)
+I_zz = 9219.268     # Moment of inertia about z-axis (kg*m^2)
+I_xz = 382.99     # Product of inertia xz-plane (kg*m^2)
 CL  = 0.281
 
+KX2 = I_xx/(3000 * 10.65**2)
+KZ2 = I_zz/(3000 * 10.65**2)
+KXZ = I_xz/(3000 * 10.65**2)
 # TURBULENCE PARAMETERS APPROXIMATED POWER SPECTRAL DENSITIES
 Lg        = 150   # Turbulence length scale [m]
 B         = b/(2*Lg)
@@ -181,6 +188,15 @@ def cit2a_fun():
     KXZ = 0.002
     CL  = 0.281
 
+    I_xx = 1212.66     # Moment of inertia about x-axis (kg*m^2)
+    I_yy = 8466.62     # Moment of inertia about y-axis (kg*m^2)
+    I_zz = 9219.268     # Moment of inertia about z-axis (kg*m^2)
+    I_xz = 382.99     # Product of inertia xz-plane (kg*m^2)
+    CL  = 0.281
+
+    KX2 = I_xx/(3000 * 10.65**2)
+    KZ2 = I_zz/(3000 * 10.65**2)
+    KXZ = I_xz/(3000 * 10.65**2)
     Lg        = 150
     B         = b/(2*Lg)
     sigma     = 1
