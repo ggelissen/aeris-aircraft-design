@@ -136,20 +136,20 @@ def cit2s_fun(sigma=1.0, Lg=150.0):
     # sigma = float(input('   Enter turbulence intensity sigma [m/s]     (  1) : '))
     # Lg    = float(input('   Enter turbulence scale length Lg [m]       (150) : '))
 
-    V   = 240.0
-    S   = 9.44
-    b   = 10.65
-    mub = 79.6
-    KX2 = 0.012
-    KZ2 = 0.037
-    KXZ = 0.002
+    # V   = 240.0
+    # S   = 9.44
+    # b   = 10.65
+    # mub = 79.6
+    # KX2 = 0.012
+    # KZ2 = 0.037
+    # KXZ = 0.002
 
-    CL  = 0.281
-    I_xx = 1212.66      # kg*m²
-    I_yy = 8466.62      # kg*m²  
-    I_zz = 9219.268     # kg*m²
-    I_xz = 382.99       # kg*m²
-    mass = 3000         # kg
+    # CL  = 0.281
+    # I_xx = 1212.66      # kg*m²
+    # I_yy = 8466.62      # kg*m²  
+    # I_zz = 9219.268     # kg*m²
+    # I_xz = 382.99       # kg*m²
+    # mass = 3000         # kg
 
 
     sigmaug_V = sigma/V
