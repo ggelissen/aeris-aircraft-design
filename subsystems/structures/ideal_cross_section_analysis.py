@@ -544,7 +544,7 @@ def plot_bending_stresses(bending_stresses: np.ndarray, boom_x: np.ndarray, boom
     
     # Optionally, add text labels for exact stress values
     for i, txt in enumerate(bending_stresses):
-        plt.annotate(f'{txt:.2e}', (boom_x[i], boom_y[i]), 
+        plt.annotate(f'{txt:.0f}', (boom_x[i], boom_y[i]),
                      textcoords="offset points", xytext=(0,10), ha='center',
                      fontsize=8, color='darkblue')
 
@@ -552,10 +552,9 @@ def plot_bending_stresses(bending_stresses: np.ndarray, boom_x: np.ndarray, boom
     plt.ylabel('Y Coordinate (m)')
     plt.grid(True)
     plt.axis('equal')
-    plt.title('Bending Stresses on Boom Elements')
     output_dir = "Figures/Structures"
     os.makedirs(output_dir, exist_ok=True)
-    plt.savefig(f"{output_dir}/bending_stresses.png")
+    plt.savefig(f"{output_dir}/bending_stresses.pdf", format='pdf')
     plt.close() # Close the plot to free memory
 
 

@@ -13,7 +13,7 @@ try:
     from subsystems.structures.vspfunctions import *
     from design_variables import DesignParameters
     from subsystems.structures.wing_structure_generation import cross_sectional_structure_along_span
-    from subsystems.structures.ideal_cross_section_analysis import run_cross_section_analysis
+    from subsystems.structures.ideal_cross_section_analysis import run_cross_section_analysis, plot_bending_stresses
     from subsystems.structures.loading_diagrams import WingLoadingDiagrams
     from subsystems.structures.utils_struct import *
     from subsystems.structures.buckling2 import  *
@@ -23,7 +23,7 @@ except:
     from vspfunctions import *
     from design_variables import DesignParameters
     from wing_structure_generation import cross_sectional_structure_along_span
-    from ideal_cross_section_analysis import run_cross_section_analysis
+    from ideal_cross_section_analysis import run_cross_section_analysis, plot_bending_stresses
     from loading_diagrams import WingLoadingDiagrams
     from utils_struct import *
     from buckling2 import *
@@ -173,6 +173,7 @@ def run_structures(designvars):
 
     cross_sectional_results = []
     highest_stress = 0.0
+    highest_stress2 = 0.0
     for i, spanwise_position in enumerate(spanwise_position_lst):
         results = perform_cross_section_analysis(designvars, wing_loading[i], spanwise_position)
         cross_sectional_results.append(results)
@@ -207,9 +208,13 @@ def run_structures(designvars):
             designvars.wing.Gamma_w)
         nameslist = (['Spar1'] + [f'Stringer{index+1}' for index in bottom_stringer_indices.tolist()] + ['Spar2', 'Spar2'] + [f'Stringer{index+1}' for index in top_stringer_indices.tolist()] + ['Spar1'])
         nameslist.reverse()
+        if spanwise_position == 0.0:
+            plot_bending_stresses(results['bending_stresses'], results['boom_x_coords_sorted'], results['boom_y_coords_sorted'])
         for inddd, (boom_stress, boom_number, boom_x, boom_y, boom_area, boom_shearflow) in enumerate(zip(results['bending_stresses'][:-1], nameslist, results['boom_x_coords_sorted'][:-1], results['boom_y_coords_sorted'][:-1], results['boom_areas_sorted'][:-1], results["final_shear_flows"][:-1])):
-            if boom_stress > highest_stress:
+            if np.abs(boom_stress) > np.abs(highest_stress):
                 highest_stress = boom_stress
+            if np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.wingskin['thicness']) > np.abs(highest_stress2):
+                highest_stress2 = np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.wingskin['thicness'])
             if spanwise_position > 0.21:
                 if np.abs(boom_stress) > designvars.materials.material_sigma_yield:
                     print(f"Warning: Boom {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield strength with {100*(boom_stress-designvars.materials.material_sigma_yield)/boom_stress} % ")
