@@ -27,7 +27,7 @@ print('   This program produces Figures 7-12 and 7-13 of the lecture   ')
 print('   notes: Aircraft Responses to Atmospheric Turbulence.         ')
 
 # GET A/C DYNAMICS
-A, At, B, sigmaug_V, sigmaag, Lg, V, c = cit2s_fun(sigma=1.0, Lg=150.0)
+A, At, B, sigmaug_V, sigmaag, Lg, V, c = cit2s_fun(sigma=5.0, Lg=0.5)
     
     
 # DEFINE FREQUENCY AXES
