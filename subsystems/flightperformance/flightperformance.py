@@ -246,7 +246,7 @@ class FlightPerformance:
     def endurance(self, Wfuel, Wtotal, Cd0, AR, oswald, cT):
         CD = 2 * Cd0
         CL = (Cd0 * math.pi * oswald * AR)**0.5
-        endurance = 1/(cT*9.81) * CL/CD * math.log(Wtotal/(Wtotal-Wfuel))
+        endurance = 1/(cT*0.000001*9.81) * CL/CD * math.log(Wtotal/(Wtotal-Wfuel))
         return endurance
     
     def performance_limit(self, W, S, CLmax, T0, cd0, A, oswald, plot=False):
@@ -320,13 +320,14 @@ if __name__ == "__main__":
 
     # Set up parameters for flight performance calculations
     # ...
-    
+    print('tsfc1',params.engine.cruise_tsfc_SI)
+    print('tsfc2',params.engine.take_off_tsfc)
     # Generate styled plots by calling the main methods with plot=True
     #fp.drag_plot(0.017, 0.3, np.arange(1,300, 1), 12, 4000*9.81, 12, 0.85, 60)
     #fp.drag_plot(params.wing.C_D0, )
     #fp.payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
     print("T1", params.engine.engine_max_thrust)
-    result1 = fp.payload_range(params.engine.cruise_tsfc, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_TO, params.weight.W_F, params.weight.W_OE, 0.3108, params.wing.S_w, True)
+    result1 = fp.payload_range(params.engine.cruise_tsfc_SI, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_TO, params.weight.W_F, params.weight.W_OE, 0.3108, params.wing.S_w, True)
     print('pl-range', result1)
     #fp.ROC(0.017, 1.225, np.arange(1,300,1), 15, 35000, 10, 0.85, 7000, 60, plot=True)
     result2 = fp.ROC(params.wing.C_D0, 1.225, np.arange(1,300,1), params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.engine.engine_max_thrust, fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO), plot=True)
@@ -335,5 +336,8 @@ if __name__ == "__main__":
     result3 = fp.performance_limit(params.weight.W_TO, params.wing.S_w, params.performance.CL_max_TO, params.engine.engine_max_thrust, params.wing.C_D0, params.wing.A_w_target, params.wing.e, True)
     print('perf-limit', result3)
     
-    result4= FlightSim().ground_run2(params.engine.engine_max_thrust, params.weight.W_TO/9.81, params.wing.S_w, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.take_off_tsfc, params.performance.CL_max_TO, 1800)
+    result4= FlightSim().ground_run2(params.engine.engine_max_thrust, params.weight.W_TO/9.81, params.wing.S_w, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.take_off_tsfc, params.performance.CL_max_TO, 1500)
     print('ground run', result4)
+    
+    result5=fp.endurance(params.weight.W_F, params.weight.W_TO, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.cruise_tsfc_SI)
+    print('endurance',result5)

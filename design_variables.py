@@ -534,6 +534,7 @@ class EngineParameters:
         self.nacelle_diameter = 0.918
         self.nacelle_length = 1.9
         self.fuel_density = None                    # Fuel density depending on fuel type (A1, SAF, etc)
+        self.cruise_tsfc_SI = 18.86 # mg/Ns   
         self.cruise_tsfc = 18.86 # mg/Ns                  # Thrust Specific Fuel Consumption at Cruise in kg/N/h # TODO, it is now in lb/hr, all code did this
         self.take_off_tsfc = 14.48 #mg/Ns                   # Thrust Specific Fuel Consumption at Take-Off in kg/N/h
         self.nacelle_blend_par = -0.4               # Parameter specifying the blend of the nacelle with the fuselage
