@@ -620,7 +620,7 @@ class EmpennageParameters:
         self.i_t = None                             # V-Tail Incidence Angle in degrees
         self.A_t = self.b_v**2/self.S_v             # V-Tail Aspect Ratio
         self.A_t_h = self.b_v_h**2/self.S_h             # hor tail Aspect Ratio
-        self.Lambda_t_025c = None                   # V-Tail Quarter-Chord Sweep Angle in degrees
+        self.Lambda_t_025c =    34.9 *np.pi / 180                # V-Tail Quarter-Chord Sweep Angle in degrees
         self.lambda_t = 0.25                        # V-Tail Taper Ratio
         self.t_c_t = 0.14                           # V-Tail Thickness-to-Chord Ratio
         self.airfoil_t = None                       # V-Tail Airfoil Type

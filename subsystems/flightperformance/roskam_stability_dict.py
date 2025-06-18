@@ -117,11 +117,11 @@ def angle_of_sideslip_beta(params: DesignParameters, input_data: dict):
     S_B_S = vsp.GetDoubleResults(resultsid, 'Area')[0]  # from lucas body side area
     C_n_beta_f = -57.3 * K_N * K_R_l * ((S_B_S * params.fuselage.l_f) / (params.wing.S_w * params.wing.b_w))
 
-    C_n_beta_v = -C_Y_beta_v * (
+    C_n_beta_v = - C_Y_beta_v * (
                 params.empennage.L_h * math.cos(params.cruise_aoa) + params.empennage.z_v * math.sin(
             params.cruise_aoa)) / params.wing.b_w
 
-    C_n_beta = C_n_beta_w + C_n_beta_f + C_n_beta_v
+    C_n_beta = (C_n_beta_w + C_n_beta_f + C_n_beta_v)
 
     return C_Y_beta, C_l_beta, C_n_beta, C_Y_beta_v
 
@@ -151,7 +151,7 @@ def angle_of_sideslip_beta(params: DesignParameters, input_data: dict):
 
 def yaw_rate_r(params: DesignParameters, C_Y_beta_v, input_data: dict):
     C_Y_r = -2 * C_Y_beta_v * (
-                params.empennage.L_h * math.cos(params.cruise_aoa) + params.empennage.z_v * math.sin(
+                params.empennage.L_h * math.cos((params.cruise_aoa)) + params.empennage.z_v * math.sin(
             params.cruise_aoa)) / params.wing.b_w
 
     C_L_w = params.performance.CL_cruise
@@ -194,7 +194,7 @@ def roll_rate_derivates(params: DesignParameters, CyBv, input_data: dict):
     ClaCL = params.wing.CLA_A_h # input("the wing lift-curve slope at any lift coefficient. It is obtained as the local slope of the wing CL versus alpha curve as obtained from 8.1.3.5 or from 8.1.4.4")
     ClaCl_0 = 2*np.pi*A / (2+(((A**2)*(beta**2)*(kappa_w**2))*(1+(np.tan(params.wing.Lambda_025c_w)/beta)**2)+4)**0.5)  #input("the wing lift-curve slope at zero lift as obtained from eq (8.22)")
     gamma = params.wing.Gamma_w
-    zw = float(input_data['zw'])  # input("vertical distance of wing from fuselage c.g. (smaller than 0 for high wing) (ask Julie/Lucas)")
+    zw = -0.4 * params.fuselage.D_f # input("vertical distance of wing from fuselage c.g. (smaller than 0 for high wing) (ask Julie/Lucas)")
     print("vertical distance of wing from fuselage c.g. (smaller than 0 for high wing) (ask Julie/Lucas)")
     paramater1 = (1 - (4*zw / params.wing.b_w)*math.sin(gamma) + 12 * (zw / params.wing.b_w)**2 * math.sin(gamma)**2)
     
@@ -209,9 +209,10 @@ def roll_rate_derivates(params: DesignParameters, CyBv, input_data: dict):
     deltaB = np.arctan(np.tan(params.empennage.Lambda_t_025c/beta))
     BA_K = beta/kappa_t * params.empennage.A_t_h
     A = params.empennage.A_t_h
-    BClp_K_CL_0 = input(f"roll damping parameter at zero lift which is obtained from figure 10.35 pag. 418/450 using sweep_b = {deltaB} and BA/K = {BA_K} and lamba = {0}")
+    BClp_K_CL_0_h = float(input_data['BClp_K_CL_0_h'])  #
+    print(f"roll damping parameter at zero lift which is obtained from figure 10.35 pag. 418/450 using sweep_b = {deltaB} and BA/K = {BA_K} and lamba = {0}")
     ClaCL = params.empennage.Cl_alpha #  input("the wing lift-curve slope at any lift coefficient. It is obtained as the local slope of the wing CL versus alpha curve as obtained from 8.1.3.5 or from 8.1.4.4")
-    ClaCl_0 = 2*np.pi*A / (2+(((A**2)*(beta**2)*(kappa_t**2))*(1+(np.tan(params.wing.Lambda_025c_w)/beta)**2)+4)**0.5) #  input("the wing lift-curve slope at zero lift as obtained from eq (8.22)")
+    ClaCl_0_h = 2*np.pi*A / (2+(((A**2)*(beta**2)*(kappa_t**2))*(1+(np.tan(params.wing.Lambda_025c_w)/beta)**2)+4)**0.5) #  input("the wing lift-curve slope at zero lift as obtained from eq (8.22)")
     #gamma = params.wing.Gamma_w
     #zw = input("vertical distance of wing from fuselage c.g. (smaller than 0 for high wing)")
     paramater1 = 1 # gamma = 0 
@@ -219,7 +220,7 @@ def roll_rate_derivates(params: DesignParameters, CyBv, input_data: dict):
     ClpCdlCl2_h = float(input_data['ClpCdlCl2_h'])  # input(f"The drag-due-to-lift roll damping parameter as found from figure 10.36 at lamba_c/4 = {params.empennage.Lambda_t_025c} and A = {params.empennage.A_t_h}")
     print(f"The drag-due-to-lift roll damping parameter as found from figure 10.36 at lamba_c/4 = {params.empennage.Lambda_t_025c} and A = {params.empennage.A_t_h}")
     C_Lh = params.empennage.CL_h
-    paramater2 = ClpCdlCl2_h * C_Lh**2 - 0.125*params.empennage.cd0
+    paramater2 = ClpCdlCl2_h * C_Lh**2 - 0.125*params.empennage.CD0_tail
     Clp_h = BClp_K_CL_0*(kappa_t/beta) * (ClaCL / ClaCl_0) * paramater1 + paramater2
     # ----------
     
@@ -227,10 +228,13 @@ def roll_rate_derivates(params: DesignParameters, CyBv, input_data: dict):
     Clph = 0.5*Clp_h * (params.empennage.S_h/params.wing.S_w)*(b_h/params.wing.b_w)**2
     Clpv = 2/(params.wing.b_w**2)*abs((zv*math.cos(alpha)-lv*math.sin(alpha))*(zv*math.cos(alpha)-lv*math.sin(alpha)-zv))*CyBv
     
-    Clp = Clpw + Clph + Clpv
+    # Clp = Clpw + Clph + Clpv
+    
+
+    Clp = -0.2560661380764772 # from aileron syzing
     
     Clp_gamma_0_cl_0 = (kappa_w/beta)*((beta*Clp)/kappa_w) # at C_L = 0
-    Cyp = 2*CyBv(zv*math.cos(alpha)-lv*math.sin(alpha)-zv)/params.wing.b_w + 3*math.sin(params.wing.Gamma_w) * (1- (4*z/params.wing.b_w)*math.sin(params.wing.Gamma_w))*Clp_gamma_0_cl_0
+    Cyp = 2*CyBv*(zv*math.cos(alpha)-lv*math.sin(alpha)-zv)/params.wing.b_w + 3*math.sin(params.wing.Gamma_w) * (1- (4*z/params.wing.b_w)*math.sin(params.wing.Gamma_w))*Clp_gamma_0_cl_0
     
     
     qcsweep = params.wing.Lambda_025c_w
@@ -257,7 +261,7 @@ def roll_rate_derivates(params: DesignParameters, CyBv, input_data: dict):
 def yaw_moment_due_to_yaw_rate_CNR(params: DesignParameters, CyBv, zv, lv, input_data: dict):
     c = params.wing.mac
     x_lemac = params.cg.x_ac_w - c/4
-    x = ((params.VSP.x_cg_vsp - x_lemac)/c - (params.cg.x_ac_w-x_lemac)/c)
+    x = ((5.2 - x_lemac)/c - (params.cg.x_ac_w-x_lemac)/c)
     CnrCL2 = float(input_data['CnrCL2'])  # input("found from Figure 10.44 pag. 433/465 with A={params.wing.A_w_target}, Lamba_c/4={params.wing.Lambda_025c_w}, x/c = {x/c}")
     print(f"Figure 10.44 pag. 433/465 with A={params.wing.A_w_target}, Lamba_c/4={params.wing.Lambda_025c_w}, x/c = {x/c}")
     CLw = params.performance.CL_cruise
@@ -362,37 +366,39 @@ if __name__ == '__main__':
     input_data = {
         'K_i': 1.2,  # Value from plot on page 384/416
         'k_v': 1,  # Value from plot on page 385/417
-        'wing_sweep_contribution': -0.003,  # Contribution of wing sweep to C_l_beta, p.393/425
-        'K_M_Lambda': 1.6,  # Compressibility correction to sweep, p.394/426
-        'K_f': 0.8,  # Fuselage correction to sweep, p.394/426
+        'wing_sweep_contribution': -0.0025,  # Contribution of wing sweep to C_l_beta, p.393/425
+        'K_M_Lambda': 1.3,  # Compressibility correction to sweep, p.394/426
+        'K_f': 0.85,  # Fuselage correction to sweep, p.394/426
         'aspect_ratio_contribution': 0.0,  # Contribution of aspect ratio to C_l_beta, p.394/426
-        'wing_dihedral_effect': -0.00025,  # Contribution of wing dihedral to C_l_beta, p.395/427
+        'wing_dihedral_effect': -0.00022,  # Contribution of wing dihedral to C_l_beta, p.395/427
         'K_M_Gamma': 1.2,  # Compressibility correction to wing dihedral, p.396/428
         'kappa_Gamma': 0.95,  # Dihedral factor for roll stability, Philips paper fig. 17
         'kappa_l': 0.98,  # Planform factor for roll stability, Philips paper fig. 17
-        'K_N': 0.001,  # From Roskam p.397/431
-        'K_R_l': 1.8,  # From Roskam p.399/432
-        'parameter_for_C_l_r_w': 0.1, # Parameter from fig 10.41 p.428/462 roskam
+        'K_N': 0.0015,  # From Roskam p.397/431
+        'K_R_l': 2.05,  # From Roskam p.399/432
+        'parameter_for_C_l_r_w': 0.27, # Parameter from fig 10.41 p.428/462 roskam
         # 'parameter2_for_C_l_r_w': 0.05, # Parameter from fig 10.41 p.428/462 roskam
-        'zv': 1.5,  # Read from figure 10.27
+        'zv': 0.7,  # Read from figure 10.27
         # 'lv': 10.0,  # Read from figure 10.27
-        'z': 0.5,   # Vertical distance between airplane cg and wing root quarter chord point
+        'z': 0.35,   # Vertical distance between airplane cg and wing root quarter chord point
         # 'ClaM': 6.0,  # cl-alpha curve due to M
         # 'beta_Clp': -0.4, # (beta*Clp)/kappa from figure 10.35 pag. 418/450
-        'BClp_K_CL_0': -0.35, # Roll damping parameter at zero lift, figure 10.35 pag. 418/450
+        'BClp_K_CL_0': -1.5, # Roll damping parameter at zero lift, figure 10.35 pag. 418/450
+        'zw': -0.2,  # Vertical distance of wing from fuselage c.g. (smaller than 0 for high wing)
         # 'ClaCL': 6.2,  # Wing lift-curve slope at any lift coefficient
         # 'ClaCl_0': 6.1,  # Wing lift-curve slope at zero lift from eq (8.22)
         # 'gamma': 2.0,  # Gamma(?) defined in figure 10.7
         # 'zw': -0.2,  # zw defined in figure 10.9
-        'ClpCdlCl2': -0.05, # Drag-due-to-lift roll damping parameter from figure 10.36
-        'ClpCdlCl2_h': -0.05, # Drag-due-to-lift roll damping parameter from figure 10.36
+        'BClp_K_CL_0_h': -1.5, # Roll damping parameter at zero lift for horizontal tail, figure 10.35 pag. 418/450
+        'ClpCdlCl2': -0.02, # Drag-due-to-lift roll damping parameter from figure 10.36
+        'ClpCdlCl2_h': -0.02, # Drag-due-to-lift roll damping parameter from figure 10.36
         # 'Clp_h': -0.3, # Roll-damping derivative of the horizontal tail
         # 'Cnpet': 0.01, # Wing twist contribution from Figures 10.37 (pag. 420/452)
         # 'deltaCnpadfdf': -0.02, # Contribution due to symmetrical flap deflection, Figure 10.38
         # 'deltacl': 0.0,  # Determined from 8.1.2.1 for the type of flap used (0 in cruise)
         # 'cla': 6.0,    # Airfoil (flaps-up) lift-curve-slope from 8.1.1.2
         'CnrCL2': -0.1, # From Figure 10.44 pag. 433/465
-        'CnrCdo': -0.05  # Found from Figure 10.45
+        'CnrCdo': -0.4  # Found from Figure 10.45
     }
 
     AERIS = DesignParameters()
