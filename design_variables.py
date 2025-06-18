@@ -167,7 +167,7 @@ class WeightParameters:
         self.W_F_used = 10103.319            # Used Fuel Weight in N
         self.W_F_res = 1379.7765        # Reserve Fuel Weight in N
         self.M_TO = self.W_TO / 9.80665             # Maximum Take-Off Mass in kg
-        self.W_fus = None                           # Fuselage weight in N
+        self.W_fus = 4219.19                           # Fuselage weight in N
         self.W_wing = 1665.24                         # Wing weight in N
 
 
@@ -465,7 +465,7 @@ class FuselageParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.l_f = 10                           # Fuselage Length in m
+        self.l_f = 9                          # Fuselage Length in m
         self.lh = None                          # Dist from wing to hor. stabilizer
         self.C_m_ac = -0.3584513                       # Moment coefficient at the aerodynamic center.
         self.x_ac = None                        # Aerodynamic center of the aircraft.
@@ -714,13 +714,13 @@ class CGParameters:
     calculate CG from the 3D model, but for this more precise weights and geometries of the aircraft need to be known.
     """
     def __init__(self):
-        self.x_cg_wing = 3.78                       # CG Position of the Wing in m
-        self.x_cg_fuselage = 4                   # CG Position of the Fuselage in m
+        self.x_cg_wing = 6                      # CG Position of the Wing in m
+        self.x_cg_fuselage = 5.50                    # CG Position of the Fuselage in m
         self.x_cg_landing_gear = 4.7               # CG Position of the Landing Gear in m
         self.x_cg_empennage = 9                  # CG Position of the Empennage in m
         self.x_cg_fixed_equipment = 3            # CG Position of the Fixed Equipment in m
         self.x_cg_propulsion = 7                 # CG Position of the Propulsion System in m
-        self.x_cg_payload = 3                    # CG Position of the Payload in m
+        self.x_cg_payload = 5                    # CG Position of the Payload in m
         self.x_cg_fuel = 5                       # CG Position of the Fuel in m
         self.x_ac_w = 3.781                      # wing aerodynamic center
         self.cg_vector_from_3Dmodel = None       # calculated by subsystems.structures.vspfunctions.calculate_cg() from the 3D model, if 3D model has enough fidelity
