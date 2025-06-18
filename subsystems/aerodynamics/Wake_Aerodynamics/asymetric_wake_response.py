@@ -1,4 +1,4 @@
-# Filename: cit2a.py
+# Filename: cit2a_updated.py
 
 # Calculation of state matrix and input matrix for calculation
 # of asymmetric aircraft response to atmospheric turbulence.
@@ -12,29 +12,27 @@
 # effective one-dimensional power spectral densities for u_g, alpha_g and
 # beta_g.
 
-# Data for Cessna Citation Ce-500, landing (1)%
-# Checked Matlab MM June 2021 -  Python version by B. Englebert (July 2021)
-
-
+# Data for cruise flight condition at FL400
+# Minimal changes from Cessna Citation Ce-500 template
 
 from math import*
 import numpy
 import pickle
 
-# AIRCRAFT- AND FLIGHT CONDITION 'LANDING'.
-V   = 59.9
-S   = 24.2
-b   = 13.36
-mub = 15.5
+# AIRCRAFT- AND FLIGHT CONDITION 'CRUISE FL400'.
+V   = 240.0
+S   = 9.44
+b   = 10.65
+mub = 79.6
 KX2 = 0.012
 KZ2 = 0.037
 KXZ = 0.002
-CL  = 1.1360
+CL  = 0.281
 
 # TURBULENCE PARAMETERS APPROXIMATED POWER SPECTRAL DENSITIES
-Lg        = 150
+Lg        = 150   # Turbulence length scale [m]
 B         = b/(2*Lg)
-sigma     = 1
+sigma     = 1     # Turbulence intensity [m/s]
 sigmaug_V = sigma/V
 sigmavg   = sigma
 sigmabg   = sigmavg/V
@@ -46,24 +44,20 @@ Iag0 = 0.0182*sigmaag**2
 tau1 = 0.0991;      tau2 = 0.5545;      tau3 = 0.4159
 tau4 = 0.0600;      tau5 = 0.3294;      tau6 = 0.2243
 
-
 # AIRCRAFT ASYMMETRIC AERODYNAMIC DERIVATIVES 
-CYb  =-0.9896;      Clb  =-0.0772;      Cnb  = 0.1638
-CYp  =-0.0870;      Clp  =-0.3444;      Cnp  =-0.0108
-CYr  = 0.4300;      Clr  = 0.2800;      Cnr  =-0.1930
+CYb  =-1.0204;      Clb  =-0.2497;      Cnb  = 0.140
+CYp  =-0.0131;      Clp  =-0.2561;      Cnp  =-0.5163
+CYr  = 0.6475;      Clr  = 0.2868;      Cnr  =-0.3867
 CYda = 0.0000;      Clda =-0.2349;      Cnda = 0.0286
 CYdr = 0.3037;      Cldr = 0.0286;      Cndr =-0.1261
  
+# Wing contribution corrections
 Clpw = 0.8*Clp;    Cnpw = 0.9*Cnp
 Clrw = 0.7*Clr;    Cnrw = 0.2*Cnr
 
 CYfb = 0
 Clfb = 0
 Cnfb = 0
-
-# CYfbg = CYfb+0.5*CYr
-# Clfbg = Clfb+0.5*Clr
-# Cnfbg = Cnfb+0.5*Cnr
 
 # CALCULATION OF AIRCRAFT ASYMMETRIC STABILITY DERIVATIVES
 yb   = (V/b)*CYb/(2*mub)
@@ -102,8 +96,7 @@ bag2 = (1-tau6*(tau4+tau5)/(tau4*tau5))*sqrt(Iag0*(V/Lg)**3)/(tau4*tau5)
 bbg1 = sigmabg*sqrt(3*V/Lg) 
 bbg2 = (1-2*sqrt(3))*sigmabg*sqrt((V/Lg)**3) 
 
-
-
+# STATE MATRIX A
 A = numpy.asmatrix([[yb, yphi, yp,    yr, 0,    0,    0,    0,    ybg,  0],
                [0,  0,    2*V/b, 0,  0,    0,    0,    0,    0,    0], 
                [lb, 0,    lp,    lr, lug,  0,    lag,  0,    lbg,  0],
@@ -115,6 +108,7 @@ A = numpy.asmatrix([[yb, yphi, yp,    yr, 0,    0,    0,    0,    ybg,  0],
                [0,  0,    0,     0,  0,    0,    0,    0,    0,    1],
                [0,  0,    0,     0,  0,    0,    0,    0,    abg1, abg2]])
 
+# INPUT MATRIX B
 B = numpy.asmatrix([[0,   ydr, 0,    0,    0],
                [0,   0,   0,    0,    0],
                [lda, ldr, 0,    0,    0],
@@ -128,6 +122,7 @@ B = numpy.asmatrix([[0,   ydr, 0,    0,    0],
 
 
 # SHOW EIGENVALUES OF THE UNCONTROLLED SYSTEM
+print("Eigenvalues of uncontrolled system:")
 print(numpy.linalg.eig(A)[0])
 
 
@@ -177,14 +172,14 @@ with open('dumpfile.txt', 'rb') as f:
 
 # Define the asymmetric aircraft dynamics function
 def cit2a_fun():
-    V   = 59.9
-    S   = 24.2
-    b   = 13.36
-    mub = 15.5
+    V   = 240.0
+    S   = 9.44
+    b   = 10.65
+    mub = 79.6
     KX2 = 0.012
     KZ2 = 0.037
     KXZ = 0.002
-    CL  = 1.1360
+    CL  = 0.281
 
     Lg        = 150
     B         = b/(2*Lg)
@@ -200,12 +195,20 @@ def cit2a_fun():
     tau1 = 0.0991;      tau2 = 0.5545;      tau3 = 0.4159
     tau4 = 0.0600;      tau5 = 0.3294;      tau6 = 0.2243
 
-    CYb  =-0.9896;      Clb  =-0.0772;      Cnb  = 0.1638
-    CYp  =-0.0870;      Clp  =-0.3444;      Cnp  =-0.0108
-    CYr  = 0.4300;      Clr  = 0.2800;      Cnr  =-0.1930
+    CYb  =-1.0204;      Clb  =-0.2497;      Cnb  = 0.140
+    CYp  =-0.0131;      Clp  =-0.2561;      Cnp  =-0.5163
+    CYr  = 0.6475;      Clr  = 0.2868;      Cnr  =-0.3867
     CYda = 0.0000;      Clda =-0.2349;      Cnda = 0.0286
     CYdr = 0.3037;      Cldr = 0.0286;      Cndr =-0.1261
     
+    Clpw = 0.8*Clp;    Cnpw = 0.9*Cnp
+    Clrw = 0.7*Clr;    Cnrw = 0.2*Cnr
+
+    CYfb = 0
+    Clfb = 0
+    Cnfb = 0
+
+        
     Clpw = 0.8*Clp;    Cnpw = 0.9*Cnp
     Clrw = 0.7*Clr;    Cnrw = 0.2*Cnr
 
@@ -249,8 +252,6 @@ def cit2a_fun():
     bbg1 = sigmabg*sqrt(3*V/Lg) 
     bbg2 = (1-2*sqrt(3))*sigmabg*sqrt((V/Lg)**3) 
 
-
-
     A = numpy.asmatrix([[yb, yphi, yp,    yr, 0,    0,    0,    0,    ybg,  0],
                 [0,  0,    2*V/b, 0,  0,    0,    0,    0,    0,    0], 
                 [lb, 0,    lp,    lr, lug,  0,    lag,  0,    lbg,  0],
@@ -282,4 +283,3 @@ def cit2a_fun():
     A2   = A-B[:,0]*K
 
     return A, A1, A2, B, sigmaug_V, sigmabg, sigmaag, Lg, V, b
-        
