@@ -37,9 +37,9 @@ lh    = 5.5
 # TURBULENCE PARAMETERS
 print(' ');
 if __name__ == "__main__":
+
     sigma = float(input('   Enter turbulence intensity sigma [m/s]     (  1) : '))
     Lg    = float(input('   Enter turbulence scale length Lg [m]       (150) : '))
-
     sigmaug_V = sigma/V
     sigmaag   = sigma/V
     
@@ -122,9 +122,9 @@ if __name__ == "__main__":
         for key in dict_vars.keys():
             globals()[key] = dict_vars[key]
         
-def cit2s_fun():
+def cit2s_fun(sigma=1.0, Lg=150.0):
     V     = 59.9
-    m     = 4547.8
+    #m     = 4547.8
     twmuc = 2*102.7
     KY2   = 0.980
     c     = 2.022
@@ -133,8 +133,23 @@ def cit2s_fun():
     
     # TURBULENCE PARAMETERS
     print(' ')
-    sigma = float(input('   Enter turbulence intensity sigma [m/s]     (  1) : '))
-    Lg    = float(input('   Enter turbulence scale length Lg [m]       (150) : '))
+    # sigma = float(input('   Enter turbulence intensity sigma [m/s]     (  1) : '))
+    # Lg    = float(input('   Enter turbulence scale length Lg [m]       (150) : '))
+
+    V   = 240.0
+    S   = 9.44
+    b   = 10.65
+    mub = 79.6
+    KX2 = 0.012
+    KZ2 = 0.037
+    KXZ = 0.002
+
+    CL  = 0.281
+    I_xx = 1212.66      # kg*m²
+    I_yy = 8466.62      # kg*m²  
+    I_zz = 9219.268     # kg*m²
+    I_xz = 382.99       # kg*m²
+    mass = 3000         # kg
 
 
     sigmaug_V = sigma/V

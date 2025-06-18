@@ -27,7 +27,7 @@ print('   This program produces Figures 7-12 and 7-13 of the lecture   ')
 print('   notes: Aircraft Responses to Atmospheric Turbulence.         ')
 
 # GET A/C DYNAMICS
-A, At, B, sigmaug_V, sigmaag, Lg, V, c = cit2s_fun()
+A, At, B, sigmaug_V, sigmaag, Lg, V, c = cit2s_fun(sigma=5.0, Lg=0.5)
     
     
 # DEFINE FREQUENCY AXES
@@ -126,3 +126,26 @@ print(' Variance of az due to vertical turbulence for aircraft')
 print(' with pitch attitude hold system')
 varazt1 = sum(Snnt1.T*dw)*g**2/pi;
 print(varazt1)
+
+# ============================================================================
+# ADDED: PEAK LOAD FACTOR CALCULATION
+# ============================================================================
+print('                                                     ')
+print('  PEAK LOAD FACTORS (3-sigma estimate):              ')
+print('                                                     ')
+
+# Calculate RMS and peak load factors from variances
+rms_horiz = sqrt(varn[0] if hasattr(varn, '__len__') else varn)
+rms_vert = sqrt(varn1[0] if hasattr(varn1, '__len__') else varn1) 
+rms_vert_autopilot = sqrt(varnt1[0] if hasattr(varnt1, '__len__') else varnt1)
+
+# Peak load factors (3-sigma)
+peak_horiz = 3 * rms_horiz
+peak_vert = 3 * rms_vert
+peak_vert_autopilot = 3 * rms_vert_autopilot
+
+print(' Peak load factor due to horizontal turbulence: {:.3f} g'.format(peak_horiz))
+print(' Peak load factor due to vertical turbulence: {:.3f} g'.format(peak_vert))
+print(' Peak load factor due to vertical turbulence (autopilot): {:.3f} g'.format(peak_vert_autopilot))
+print('')
+print(' Maximum expected load factor: {:.3f} g'.format(max(peak_horiz, peak_vert, peak_vert_autopilot)))

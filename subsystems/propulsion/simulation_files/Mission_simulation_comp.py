@@ -252,7 +252,7 @@ def run_mission_simulation_comparison():
                 {"name": "Taxi", "duration_minutes": 10, "target_thrust_N": 0.12 * T_TO_AERIS, "flight_conditions": {"mach_0": 0.02, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 900}},
                 {"name": "Take-off", "duration_minutes": 5, "target_thrust_N": T_TO_AERIS, "flight_conditions": {"mach_0": 0.21, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1400}},
                 {"name": "Climb", "duration_minutes": 20, "target_thrust_N": 0.85 * T_TO_AERIS, "flight_conditions": {"mach_0": 0.55, "ts_0": 242.7, "ps_0": 46560}, "engine_params_override": {"tt_4": 1300}},
-                {"name": "Cruise", "duration_minutes": 400, "target_thrust_N": T_CRUISE_AERIS, "flight_conditions": {"mach_0": 0.7, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1200}},
+                {"name": "Cruise", "duration_minutes": 120, "target_thrust_N": T_CRUISE_AERIS, "flight_conditions": {"mach_0": 0.7, "ts_0": 216.65, "ps_0": 18753.9}, "engine_params_override": {"tt_4": 1200}},
                 {"name": "Descent", "duration_minutes": 15, "target_thrust_N": 0.08 * T_TO_AERIS, "flight_conditions": {"mach_0": 0.55, "ts_0": 249.1, "ps_0": 46560}, "engine_params_override": {"tt_4": 900}},
                 {"name": "Loiter", "duration_minutes": 35, "target_thrust_N": 0.15 * T_TO_AERIS, "flight_conditions": {"mach_0": 0.30, "ts_0": 282.65, "ps_0": 95970}, "engine_params_override": {"tt_4": 950}},
                 {"name": "Landing", "duration_minutes": 5, "target_thrust_N": 0.30 * T_TO_AERIS, "flight_conditions": {"mach_0": 0.22, "ts_0": 288.15, "ps_0": 101325}, "engine_params_override": {"tt_4": 1000}},

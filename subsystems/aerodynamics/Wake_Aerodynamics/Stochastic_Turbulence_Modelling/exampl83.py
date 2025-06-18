@@ -41,7 +41,7 @@ A, A1, A2, B, sigmaug_V, sigmabg, sigmaag, Lg, V, b = cit2a_fun()
 #      A = A2
 
 # DEFINE OUTPUT MATRICES
-C = numpy.mat([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0],   # beta
+C = numpy.asmatrix([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0],   # beta
      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],    # phi
      [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],    # pb/2V
      [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],    # rb/2V

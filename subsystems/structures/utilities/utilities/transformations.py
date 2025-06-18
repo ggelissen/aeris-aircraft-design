@@ -92,7 +92,7 @@ class TransMatrix:
         :return: vectors rotated by transmat
         """
 
-        return np.matmul(self.mat[0:3, 0:3], _convert_to_column_vector(vector))
+        return np.asmatrixmul(self.mat[0:3, 0:3], _convert_to_column_vector(vector))
 
     def apply_translations(self, vector):
         """
@@ -123,7 +123,7 @@ class TransMatrix:
         ret_trans.mat[0:3, 0:3] = self.mat[0:3, 0:3].transpose()
 
         orig_translations = self.mat[0:3, 3]
-        ret_trans.mat[0:3, 3] = -1.0*np.matmul(ret_trans.mat[0:3, 0:3],
+        ret_trans.mat[0:3, 3] = -1.0*np.asmatrixmul(ret_trans.mat[0:3, 0:3],
                                                _convert_to_column_vector(orig_translations)).reshape(3)
 
         return ret_trans
@@ -268,37 +268,37 @@ def dcm_wind2stability(beta):
 def wind2stability(vector, beta):
     dcm = dcm_wind2stability(beta)
 
-    return np.matmul(dcm, _convert_to_column_vector(vector))
+    return np.asmatrixmul(dcm, _convert_to_column_vector(vector))
 
 
 def stability2wind(vector, beta):
     dcm = dcm_stability2wind(beta)
 
-    return np.matmul(dcm, _convert_to_column_vector(vector))
+    return np.asmatrixmul(dcm, _convert_to_column_vector(vector))
 
 
 def body2stability(vector, alpha):
     dcm = dcm_body2stability(alpha)
 
-    return np.matmul(dcm, _convert_to_column_vector(vector))
+    return np.asmatrixmul(dcm, _convert_to_column_vector(vector))
 
 
 def stability2body(vector, alpha):
     dcm = dcm_stability2body(alpha)
 
-    return np.matmul(dcm, _convert_to_column_vector(vector))
+    return np.asmatrixmul(dcm, _convert_to_column_vector(vector))
 
 
 def wind2body(vector, alpha, beta):
     dcm = dcm_wind2body(alpha, beta)
 
-    return np.matmul(dcm, _convert_to_column_vector(vector))
+    return np.asmatrixmul(dcm, _convert_to_column_vector(vector))
 
 
 def body2wind(vector, alpha, beta):
     dcm = dcm_body2wind(alpha, beta)
 
-    return np.matmul(dcm, _convert_to_column_vector(vector))
+    return np.asmatrixmul(dcm, _convert_to_column_vector(vector))
 
 def coord_transform(vector,from_axes, to_axes, alpha=0,beta=0):
     func_mapping = {('wind','body'):(dcm_wind2body,(alpha,beta)),
@@ -312,4 +312,4 @@ def coord_transform(vector,from_axes, to_axes, alpha=0,beta=0):
 
     dcm = f(*args)
 
-    return np.matmul(dcm, _convert_to_column_vector(vector))
+    return np.asmatrixmul(dcm, _convert_to_column_vector(vector))
