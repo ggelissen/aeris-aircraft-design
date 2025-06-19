@@ -380,7 +380,7 @@ class WingParameters:
         self.yehudi_pos_frac = 0.3 # Yehudi Position Fraction, where 0 is the root and 1 is the tip
         self.yehudi_area = 4.0 # Yehudi area m2
         self.yehudi_flaps = FlapGroup(spanwise_pos_frac_inbound=0.18, spanwise_pos_frac_outbound=0.3, flapwidth=0.2) # First two span, second one chord
-        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.75, flapwidth=0.04)
+        self.main_flaps = FlapGroup(spanwise_pos_frac_inbound=0.35, spanwise_pos_frac_outbound=0.7, flapwidth=0.2) # 0.3
         self.flapgroups = [self.yehudi_flaps, self.main_flaps]
         self.airfoil_clalpha = 1.5
         self.CLA_A_h = 6.2727563022846 # during cruise
@@ -445,7 +445,7 @@ class PerformanceParameters:
         self.CL_cruise = 0.4                  # Lift Coefficient at Cruise
         self.C_L_hat = 0.6                      # Design Lift Coefficient, to be updated by alejandro's code
 
-        self.V_A = 162.35                       # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
+        self.V_A = 124.757                     # Maneuvering Speed in m/s (USE this for Aerodynamic Loads)
 
 
     def load_from_dict(self, param_dict):
@@ -689,8 +689,8 @@ class ControlSurfaceParameters:
     Append more parameters as needed.
     """
     def __init__(self):
-        self.x_a_inboard = 3.7                             # Control Surface Position in m
-        self.x_a_outboard = 4.7
+        self.x_a_inboard = 4.4 # 3.7                             # Control Surface Position in m
+        self.x_a_outboard = 5.4 # 4.7
         self.aileron_width = 0.14                        # Aileron Width in m
         self.S_a = (self.x_a_outboard-self.x_a_inboard)*self.aileron_width                          # Control Surface Area in m^2
         self.delta_a = None                         # Control Surface Deflection Angle in degrees
@@ -748,25 +748,26 @@ class CGParameters:
 class WingSectionParameters:
     def __init__(self, parent):
         self.spars = {
-            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 10, "t_flange_2_mm": 10, "t_web_mm": 30, "flange_width_mm": 75, 'material_density_kgm3': parent.materials.material_density},
-            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 10, "t_flange_2_mm": 10, "t_web_mm": 30, "flange_width_mm": 75, 'material_density_kgm3': parent.materials.material_density},
+            "Spar1": {"x_pos_frac": 0.2, "t_flange_1_mm": 14, "t_flange_2_mm": 14, "t_web_mm": 30, "flange_width_mm": 90, 'material_density_kgm3': parent.materials.material_density},
+            "Spar2": {"x_pos_frac": 0.7, "t_flange_1_mm": 14, "t_flange_2_mm": 14, "t_web_mm": 30, "flange_width_mm": 90, 'material_density_kgm3': parent.materials.material_density},
         }
         self.num_spars = len(self.spars)
+        stringercross = 1610
         self.stringers = {
-            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 1350 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 1350 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 1350 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 1350 , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
-            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": 1350, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer1": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": stringercross , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer2": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": stringercross , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer3": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": stringercross , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer4": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": stringercross , 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer5": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer6": {"top_or_bottom_side": "top" , "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer7": {"top_or_bottom_side": "top", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer8": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.02, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer9": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.1, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer10": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.25, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer11": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.4, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer12": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.5, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer13": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.6, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
+            "Stringer14": {"top_or_bottom_side": "bottom", "pos_along_airfoil_side": 0.8, "crosssectionalarea_mm2": stringercross, 'material_density_kgm3': parent.materials.material_density, 'area_moment_of_inertia_m4': 5e-9*8, 'K': 1.0},
         }
         self.num_stringers = len(self.stringers)
         self.wingskin = {
@@ -782,6 +783,10 @@ class Wingribs:
             "Rib2": {"y_pos_frac": 0.4, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
             "Rib3": {"y_pos_frac": 0.6, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
             "Rib4": {"y_pos_frac": 0.8, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
+            "Rib5": {"y_pos_frac": 0.1, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
+            "Rib6": {"y_pos_frac": 0.3, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
+            "Rib7": {"y_pos_frac": 0.5, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
+            "Rib8": {"y_pos_frac": 0.7, "t_mm": 2, 'material_density_kgm3': parent.materials.material_density},
         }
         self.num_ribs = len(self.ribs)
 
@@ -902,8 +907,8 @@ class FuelTank:
         self.dist_from_wingskin = 0.15
         self.frac_pos_chord_min = 0.2537 # 0 = LE + dist_from_wingskin, 1 = TE - dist_from_wingskin
         self.frac_pos_chord_max = 0.85 # See above
-        self.frac_pos_along_span_inboard = 0.1753
-        self.frac_pos_along_span_outboard = 0.7802
+        self.frac_pos_along_span_inboard = 0
+        self.frac_pos_along_span_outboard = 1
         self.fuel_tank_wing_volume = None # calculated by subsystems.structures.vspfunctions.calculate_fuel_capacity()
         self.t = None
         self.density_kgm3 = 800 # kg/m^3, density of Jet A1 fuel
@@ -927,7 +932,7 @@ class MaterialsParameters():
         materials_data = data["materials"]
 
         # Set the material name to DESIRED material
-        self.material_name = "Aluminium_7075_T6_wrought"
+        self.material_name =  "Aluminium_2024_T3_wrought"
 
         for mat_id, mat in materials_data.items():
             if mat["name"].lower() == self.material_name.lower():

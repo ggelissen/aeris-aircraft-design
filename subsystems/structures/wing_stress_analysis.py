@@ -13,7 +13,7 @@ try:
     from subsystems.structures.vspfunctions import *
     from design_variables import DesignParameters
     from subsystems.structures.wing_structure_generation import cross_sectional_structure_along_span
-    from subsystems.structures.ideal_cross_section_analysis import run_cross_section_analysis
+    from subsystems.structures.ideal_cross_section_analysis import run_cross_section_analysis, plot_bending_stresses
     from subsystems.structures.loading_diagrams import WingLoadingDiagrams
     from subsystems.structures.utils_struct import *
     from subsystems.structures.buckling2 import  *
@@ -23,7 +23,7 @@ except:
     from vspfunctions import *
     from design_variables import DesignParameters
     from wing_structure_generation import cross_sectional_structure_along_span
-    from ideal_cross_section_analysis import run_cross_section_analysis
+    from ideal_cross_section_analysis import run_cross_section_analysis, plot_bending_stresses
     from loading_diagrams import WingLoadingDiagrams
     from utils_struct import *
     from buckling2 import *
@@ -168,9 +168,12 @@ def run_structures(designvars):
 
     wing_loading = WingLoadingDiagrams(designvars)
 
-    wing_loading = wing_loading.run_analysis(PLOT=False)
+    wing_loading = wing_loading.run_analysis(PLOT=True)
+    cross_sectional_structure_along_span(designvars, 0.5, plot=True)
 
     cross_sectional_results = []
+    highest_stress = 0.0
+    highest_stress2 = 0.0
     for i, spanwise_position in enumerate(spanwise_position_lst):
         results = perform_cross_section_analysis(designvars, wing_loading[i], spanwise_position)
         cross_sectional_results.append(results)
@@ -205,7 +208,13 @@ def run_structures(designvars):
             designvars.wing.Gamma_w)
         nameslist = (['Spar1'] + [f'Stringer{index+1}' for index in bottom_stringer_indices.tolist()] + ['Spar2', 'Spar2'] + [f'Stringer{index+1}' for index in top_stringer_indices.tolist()] + ['Spar1'])
         nameslist.reverse()
-        for boom_stress, boom_number, boom_x, boom_y, boom_area in zip(results['bending_stresses'][:-1], nameslist, results['boom_x_coords_sorted'][:-1], results['boom_y_coords_sorted'][:-1], results['boom_areas_sorted'][:-1]):
+        if spanwise_position == 0.0:
+            plot_bending_stresses(results['bending_stresses'], results['boom_x_coords_sorted'], results['boom_y_coords_sorted'])
+        for inddd, (boom_stress, boom_number, boom_x, boom_y, boom_area, boom_shearflow) in enumerate(zip(results['bending_stresses'][:-1], nameslist, results['boom_x_coords_sorted'][:-1], results['boom_y_coords_sorted'][:-1], results['boom_areas_sorted'][:-1], results["final_shear_flows"][:-1])):
+            if np.abs(boom_stress) > np.abs(highest_stress):
+                highest_stress = boom_stress
+            if np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.wingskin['thicness']) > np.abs(highest_stress2):
+                highest_stress2 = np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.wingskin['thicness'])
             if spanwise_position > 0.21:
                 if np.abs(boom_stress) > designvars.materials.material_sigma_yield:
                     print(f"Warning: Boom {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield strength with {100*(boom_stress-designvars.materials.material_sigma_yield)/boom_stress} % ")
@@ -221,10 +230,16 @@ def run_structures(designvars):
                         else:
                             if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
                                 designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(boom_number)
+                if (nameslist[inddd-1] == 'Spar1' or nameslist[inddd-1] == 'Spar2') and (nameslist[inddd] == 'Spar1' or nameslist[inddd] == 'Spar2'):
+                    if np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.spars['Spar1']["t_web_mm"]) > designvars.materials.material_tau_max*1e6:
+                        print(f"Warning: Spar web {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield shear strength with {100*(boom_shearflow/designvars.wing.wingsection.spars['Spar1']['t_web_mm']-designvars.materials.material_tau_max)/boom_shearflow/designvars.wing.wingsection.spars['Spar1']['t_web_mm']} %")
+                else:
+                    if np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.wingskin['thicness']) > designvars.materials.material_tau_max*1e6:
+                        print(f"Warning: Wing Skin {boom_number} at spanwise position {spanwise_position:.2f} exceeds yield shear strength with {100*(boom_shearflow/designvars.wing.wingsection.wingskin['thicness']-designvars.materials.material_tau_max)/boom_shearflow/designvars.wing.wingsection.wingskin['thicness']} %")
                 if not (boom_number == 'Spar1' or boom_number == 'Spar2'):
                     crit_stringer_buckling = calculate_critical_stringer_buckling_stress(designvars.materials.material_E*1e9, designvars.wing.wingsection.stringers[boom_number]['area_moment_of_inertia_m4'], designvars.wing.wingsection.stringers[boom_number]["crosssectionalarea_mm2"]/1000000, length_between_ribs, designvars.wing.wingsection.stringers[boom_number]['K'] )
-                    if np.abs(boom_stress) > crit_stringer_buckling:
-                        print(f"Warning: Stringer {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(boom_stress-crit_stringer_buckling)/boom_stress} % ")
+                    if np.abs(boom_stress*1e6) > crit_stringer_buckling:
+                        #print(f"Warning: Stringer {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(boom_stress*1e6-crit_stringer_buckling)/(boom_stress*1e6)} % ")
                         if (np.abs(boom_stress)-crit_stringer_buckling)/boom_stress > 0.3:
                             if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround:
                                 designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_30_percent_in_nextround.append(boom_number)
@@ -235,8 +250,17 @@ def run_structures(designvars):
                                 if boom_number not in designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround:
                                     designvars.structure_results.this_stringer_should_increase_stringer_AtimesI_by_10_percent_in_nextround.append(
                                         boom_number)
+                elif (boom_number == 'Spar1' and nameslist[inddd-1] == 'Spar1') or (boom_number == 'Spar2' and nameslist[inddd-1] == 'Spar2'):
+                    slenderness_ratio = length_between_ribs/np.abs(results['boom_y_coords_sorted'][:-1][inddd] - results['boom_y_coords_sorted'][:-1][inddd-1])
+                    base_height = np.abs(results['boom_y_coords_sorted'][:-1][inddd] - results['boom_y_coords_sorted'][:-1][inddd-1])
+                    young = designvars.materials.material_E*1e9
+                    thickness = designvars.wing.wingsection.spars[boom_number]["t_web_mm"] / 1000
 
-        # TODO: Check shearstress vs max shearstress
+                    spar_web_buckling_crit = skin_shear_buckling(young, slenderness_ratio, thickness, base_height)
+                    if np.abs(1e3*(boom_shearflow+results['torsional_shear_flow'])/designvars.wing.wingsection.spars['Spar1']["t_web_mm"]) >  spar_web_buckling_crit:
+                        print(f"Warning: Spar web {boom_number} at spanwise position {spanwise_position:.2f} exceeds critical buckling stress with {100*(np.abs(boom_shearflow + results['torsional_shear_flow'])/spar_web_buckling_crit-1)} %")
+
+
 
 
 
@@ -282,32 +306,139 @@ def run_structures(designvars):
         print(f"Warning: Maximum twist angle {designvars.structure_results.max_twist_angle:.4f} rad exceeds allowed limit {designvars.wing.max_allowed_twist_angle:.4f} rad.")
         designvars.structure_results.should_increase_wingskin_thickness_by_10_percent_in_nextround = True
 
-if __name__ == "__main__":
-    designvars = master_design_process('design_config.yaml')[0]
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Moment around x axis (Nm)')
+    ax1.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]['moment_x'] for i in range(len(spanwise_position_lst))]), label='Moment around x axis')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Moment around z axis (Nm)')
+    ax2.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]["moment_z"] for i in range(len(spanwise_position_lst))]), color='orange', label='Moment around z axis')
+    ax2.tick_params(axis='y')
+    ax3 = ax1.twinx()
+    ax3.set_ylabel('Torsion around y axis (Nm)')
+    ax3.plot(np.linspace(0, 1, 1000), np.array([wing_loading[i]["torsion_y"] for i in range(len(spanwise_position_lst))]), color='green', label='Torsion around y axis')
+    ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    lines3, labels3 = ax3.get_legend_handles_labels()
+    ax1.legend(lines + lines2+lines3, labels + labels2+labels3, loc=0)
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/internalmoment.pdf', format='pdf')
 
-    #### TODO: REPLACE THIS FOR AERODYNAMICS CALCULATED LOADS
-    y_array = np.array([-0.167161, -0.181016, -0.19832, -0.220221, -0.248814, -0.285837, -0.330371,
- -0.395234, -0.490279, -0.539579, -0.59748, -0.657885, -0.72174, -0.78975,
- -0.862647, -0.94073, -1.02412, -1.110966, -1.199269, -1.281431, -1.347464,
- -1.384543, -1.374316, -1.304761, -1.164779, -0.918878])
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Shear along x axis (N)')
+    ax1.plot(np.linspace(0, 1, 1000),
+             np.array([wing_loading[i]['shear_x'] for i in range(len(spanwise_position_lst))]),
+             label='Shear along x axis')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Shear along z axis (N)')
+    ax2.plot(np.linspace(0, 1, 1000),
+             np.array([wing_loading[i]["shear_z"] for i in range(len(spanwise_position_lst))]), color='orange',
+             label='Shear along z axis')
+    ax2.tick_params(axis='y')
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc=0)
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/internalshear.pdf', format='pdf')
+
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Displacement x axis (m)')
+    ax1.plot(np.linspace(0, 1, 1000),
+             x_bending_distribution-x_bending_distribution[200],
+             label='Displacement along x axis')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Displacement along z axis (m)')
+    ax2.plot(np.linspace(0, 1, 1000),
+             z_bending_distribution-z_bending_distribution[200], color='orange',
+             label='Displacement along z axis', linestyle='--')
+    ax2.tick_params(axis='y')
+    ax3 = ax1.twinx()
+    ax3.set_ylabel('Twist angle (rad)')
+    ax3.plot(np.linspace(0, 1, 1000), y_twist_distribution - y_twist_distribution[200], color='green', label='Twist angle')
+    ax3.spines['right'].set_position(('outward', 60))  # Offset the third y-axis
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    lines3, labels3 = ax3.get_legend_handles_labels()
+    ax1.legend(lines + lines2+lines3, labels + labels2+labels3, loc=0)
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/displacement.pdf', format='pdf')
+
+if __name__ == "__main__":
+    designvars = master_design_process(config_file='design_config.yaml')[0]
+
+    y_array = np.array([0.498246, 0.536841, 0.580293, 0.630283, 0.688325, 0.754001, 0.822189, 0.902446,
+ 1.010588, 1.105177, 1.192055, 1.276326, 1.36037, 1.445542, 1.532754, 1.622674,
+ 1.715753, 1.812118, 1.911301, 2.011758, 2.11037, 2.202617, 2.284359, 2.354186,
+ 2.413809, 2.466547])
     designvars.wing.CL_distribution = np.nan_to_num(interp1d(y_array, np.array([0.28188, 0.290282, 0.299745, 0.310382, 0.322649, 0.336443, 0.350593, 0.369578,
  0.387962, 0.387545, 0.391251, 0.394771, 0.398051, 0.401018, 0.40362, 0.405645,
  0.406848, 0.40646, 0.403992, 0.397873, 0.386845, 0.36981, 0.344648, 0.310145,
- 0.264228, 0.198729]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+ 0.264228, 0.198729]), fill_value=np.nan, bounds_error=False)(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
     designvars.wing.CD_distribution = np.nan_to_num(interp1d(y_array, np.array([0.006406, 0.009293, 0.00918, 0.00954, 0.009478, 0.009296, 0.009052, 0.008448,
     0.009304, 0.009367, 0.009098, 0.008897, 0.008723, 0.008562, 0.008405, 0.008248,
     0.008088, 0.007936, 0.00778, 0.007644, 0.007521, 0.007345, 0.007193, 0.007059,
     0.007079, 0.007097]
-       ), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+       ), fill_value=np.nan, bounds_error=False)(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
     designvars.wing.CM_distribution = np.nan_to_num(interp1d(y_array, np.array([-0.167161, -0.181016, -0.19832, -0.220221, -0.248814, -0.285837, -0.330371,
   -0.395234, -0.490279, -0.539579, -0.59748, -0.657885, -0.72174, -0.78975,
   -0.862647, -0.94073, -1.02412, -1.110966, -1.199269, -1.281431, -1.347464,
-  -1.384543, -1.374316, -1.304761, -1.164779, -0.918878]), fill_value='extrapolate')(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+  -1.384543, -1.374316, -1.304761, -1.164779, -0.918878]), fill_value=np.nan, bounds_error=False)(np.linspace(0.0, np.max(y_array), 1000)), neginf=0, posinf=0)
+
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Cl (-)')
+    ax1.plot(np.linspace(0,1,1000), designvars.wing.CL_distribution, label='CL distribution')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax1.legend()
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/wingaerodistributionsa.pdf', format='pdf')
+
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Cd (-)')
+    ax1.plot(np.linspace(0, 1, 1000), designvars.wing.CD_distribution, color='orange', label='CD distribution')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax1.legend()
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/wingaerodistributionsb.pdf', format='pdf')
+
+
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Cm (-)')
+    ax1.plot(np.linspace(0, 1, 1000), designvars.wing.CM_distribution, color='green', label='CM distribution')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax1.legend()
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/wingaerodistributionsc.pdf', format='pdf')
+
 
 
     print(designvars.weight.W_wing)
 
     run_structures(designvars)
 
+
     print(designvars.structure_results)
     generate_wing_structure_3D(designvars)
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel('spanwise position (%)')
+    ax1.set_ylabel('Weight (N/m)')
+    ax1.plot(np.linspace(0, 1, 1000), designvars.wing.weight_distribution, color='green', label='Weight distribution')
+    ax1.tick_params(axis='x')
+    ax1.set_xlim([0.2, 1.0])
+    ax1.legend()
+    fig.tight_layout()
+    plt.savefig('Figures/Structures/wingaerodistributionsd.pdf', format='pdf')

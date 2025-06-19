@@ -234,13 +234,14 @@ class Control:
         fig, ax1 = plt.subplots()
 
         ax1.set_xlabel('xcg/mac')
-        ax1.set_ylabel('x_lemac/lh') # This label seems incorrect based on the plot data
+        ax1.set_ylabel('x_lemac/lfus') # This label seems incorrect based on the plot data
         ax1.plot(Y1, X, label="min", color='tab:green')
         ax1.plot(Y2, X, label="max", color='tab:red')
         #l, b, w, h = ax1.get_position().bounds
         #ax1.set_position([l, b, w*0.5, h])
         # The y-limit here seems to be trying to focus on a single x_lemac value, which might not be intended
-        ax1.set_ylim(x_lemac * 0.99999, x_lemac * 1.00001)
+        ax1.set_ylim(0.999*x_lemac, 1.0001*x_lemac)
+        ax1.set_xlim(0,1)
 
         ax2 = ax1.twinx()
 
@@ -295,6 +296,7 @@ class Control:
         Y1 = [] # List to store minimum CG values
         Y2 = [] # List to store maximum CG values
         # Calculate CG range for different x_lemac/lh values
+        x_oew_list = []
         if plot:
             self.__cg_range__plot__(    W_wing, W_fuselage, X_fuselage, W_OEW, W_payload, X_payload, W_fuel)
         for i in self.x_lemac_lfus_list:
@@ -307,6 +309,7 @@ class Control:
             #print('cg stuff', W_OEW, x_oew, W_payload, X_payload, W_fuel, [i*self.l_fus + self.mac/4])
             #print('lemac', i*self.l_fus)
             #3.880469 -> 4.7121
+            x_oew_list.append(x_oew)
             Y1.append(self.__normalise_coordinate__(result[0], i*self.l_fus))
             Y2.append(self.__normalise_coordinate__(result[1], i*self.l_fus))
 
@@ -346,7 +349,8 @@ class Control:
                 result = {
                     "cg_range": Y2[i] - Y1[i],
                     "Sh/S": Sh_S,
-                    "x_lemac/lfus": self.x_lemac_lfus
+                    "x_lemac/lfus": self.x_lemac_lfus,
+                    "x_oew": x_oew_list[i]
                 }
                 #print('Y1',Y1, "Y2",Y2)
                 break
@@ -395,13 +399,14 @@ class Control:
         
         #self.scissor_plot(True)
         #self.calculate_range(OEW, Wpayload, Xpayload, Wfuel, Wwing, Wfuselage, Xfuselage, False)
-        result = {
+        result1 = {
             "x_ac": self.x_ac,
             "Sh/S": result["Sh/S"],
             "x_lemac/l_fus": self.x_lemac_lfus,
-            "lh": self.lh
+            "lh": self.lh,
+            "x_oew": result["x_oew"]
         }
-        return result
+        return result1
             
         
 
@@ -453,6 +458,8 @@ def run_control_stability(params: DesignParameters): # pragma: no cover
         Wfuselage=params.weight.W_fus,
         Xfuselage=params.cg.x_cg_fuselage
     )
+    
+    
 
     return results
 

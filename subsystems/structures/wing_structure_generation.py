@@ -183,13 +183,15 @@ def cross_sectional_structure_along_span(designvars: DesignParameters = None, sp
 
 
     if plot:
-        plt.plot(outline[:, 0], outline[:, 1])
+        fig, ax = plt.subplots()
+        ax.plot(outline[:, 0], outline[:, 1])
         for stringer in stringer_array:
-            plt.scatter(stringer[0], stringer[1], marker='o', color='r')
+            ax.scatter(stringer[0], stringer[1], marker='o', color='r')
         for spar in spar_points_array:
-            plt.plot(spar[:, 0], spar[:, 1])
+            ax.plot(spar[:, 0], spar[:, 1])
+        ax.set_aspect('equal', adjustable='box')
         plt.show()
-        plt.savefig('data/wing_structure.png', dpi=300, bbox_inches='tight')
+        plt.savefig('data/wing_structure.pdf', dpi=300, bbox_inches='tight', format='pdf')
     return spar_points_array, stringer_array, outline, chord_length, lower_airfoil, upper_airfoil
 
 def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise_points: int = 1001, plot=True):
@@ -338,7 +340,7 @@ def generate_wing_structure_3D(designvars: DesignParameters = None, num_spanwise
     fuselage_mesh = pv.read('data/fuselage.stl')
     fuselage_mesh.translate([0, 0, 0], inplace=True)
     fuselage_mesh.rotate_x(-90, inplace=True)
-    plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
+    #plotter.add_mesh(fuselage_mesh, color='brown', show_edges=False, opacity=0.2)
 
 
     if plot:
@@ -412,6 +414,7 @@ def weight_distribution(designvars: DesignParameters = None, num_points: int = 1
         weight_dist.append(stringer_weight + spar_weight + wingskin_weight + rib_weight + fuel_tank_weight + flap_weight)
     designvars.wing.weight_distribution = np.array(weight_dist)
     designvars.weight.W_wing = simpson(np.array(weight_dist), np.linspace(0, designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w), num_points)) * 2  # kg
-    designvars.structure_results.W_Wing = designvars.weight.W_wing
+    designvars.structure_results.W_Wing = simpson(np.array(spar_weight_dist) + np.array(wingskin_weight_dist) + np.array(stringer_weight_dist) + np.array(rib_weight_dist), np.linspace(0, designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w), num_points)) * 2  # kg
+    designvars.structure_results.W_Wing_structural = simpson(np.array(spar_weight_dist) + np.array(wingskin_weight_dist) + np.array(stringer_weight_dist) + np.array(rib_weight_dist) + np.array(flap_weight_dist), np.linspace(0, designvars.wing.b_w / 2 * np.cos(designvars.wing.Gamma_w), num_points)) * 2  # kg
     return np.array(weight_dist)
 

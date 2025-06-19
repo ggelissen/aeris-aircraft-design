@@ -1,14 +1,14 @@
 ...Comp Geom...
 1 Num Comps
 2 Total Num Meshes
-22264 Total Num Tris
+29944 Total Num Tris
 
 Theo_Area   Wet_Area   Theo_Vol    Wet_Vol  Name
-    1.835      1.835     -0.000     -0.000  ConformalGeom  
-    1.835      1.835     -0.000     -0.000  ConformalGeom  
+    3.475      3.475     -0.000     -0.000  ConformalGeom  
+    3.475      3.475     -0.000     -0.000  ConformalGeom  
 -------------------------------------------------
-    3.670      3.670     -0.000     -0.000  Totals         
+    6.951      6.951     -0.000     -0.000  Totals         
 
 Tag_Theo_Area   Tag_Wet_Area    Tag_Name
-        1.835          1.835    ConformalGeom_S_Surf0
-        1.835          1.835    ConformalGeom_S_Surf1
+        3.475          3.475    ConformalGeom_S_Surf0
+        3.475          3.475    ConformalGeom_S_Surf1
