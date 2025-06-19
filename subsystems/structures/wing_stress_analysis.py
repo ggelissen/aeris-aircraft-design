@@ -373,7 +373,7 @@ def run_structures(designvars):
     plt.savefig('Figures/Structures/displacement.pdf', format='pdf')
 
 if __name__ == "__main__":
-    designvars = master_design_process('design_config.yaml')[0]
+    designvars = master_design_process(config_file='design_config.yaml')[0]
 
     y_array = np.array([0.498246, 0.536841, 0.580293, 0.630283, 0.688325, 0.754001, 0.822189, 0.902446,
  1.010588, 1.105177, 1.192055, 1.276326, 1.36037, 1.445542, 1.532754, 1.622674,
