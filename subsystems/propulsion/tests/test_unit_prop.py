@@ -436,7 +436,7 @@ def test_fuselage_exhaust_cone_analysis_logic(mock_design_parameters_class):
     
 
 @patch('simulation_files.Mission_simulation_comp.turbofan_parametric_analysis')
-def test_run_mission_simulation_comparison_logic(mock_tf_analysis_comp):
+def test_run_mission_simulation_comparison_logic(mock_tf_analysis_comp, mock_design_params):
     """
     Tests the main logic of the `run_mission_simulation_comparison` script.
 
