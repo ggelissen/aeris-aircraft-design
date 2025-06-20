@@ -924,7 +924,7 @@ class FuelTank:
 class MaterialsParameters():
     def __init__(self):
         # Open VSP materials library is used to get the material properties
-        file_path =  "materials_library.toml"
+        file_path = "subsystems/structures/materials_library.toml"
         with open(file_path, 'r') as f:
             data = toml.load(f)
         
