@@ -481,7 +481,7 @@ def test_run_mission_simulation_comparison_logic(mock_tf_analysis_comp):
         {"thrust": 0.12 * T_TO_AERIS, "duration": 10, "ps_0": 101325},
         {"thrust": T_TO_AERIS, "duration": 5, "ps_0": 101325},
         {"thrust": 0.85 * T_TO_AERIS, "duration": 20, "ps_0": 46560},
-        {"thrust": T_CRUISE_AERIS, "duration": 400, "ps_0": 18753.9},
+        {"thrust": T_CRUISE_AERIS, "duration": 120, "ps_0": 18753.9},
         {"thrust": 0.08 * T_TO_AERIS, "duration": 15, "ps_0": 46560},
         {"thrust": 0.15 * T_TO_AERIS, "duration": 35, "ps_0": 95970},
         {"thrust": 0.30 * T_TO_AERIS, "duration": 5, "ps_0": 101325},

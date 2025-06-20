@@ -305,7 +305,7 @@ class TestThrustWingLoading(unittest.TestCase):
 class TestPrelimWingSizing(unittest.TestCase):
     def test_calculate_sweep_angle_025c_rad(self):
         self.assertEqual(calculate_sweep_angle_025c_rad(0.5, 0.935), 0)
-        self.assertAlmostEqual(calculate_sweep_angle_025c_rad(0.8, 0.935), 0.564, places=3)
+        self.assertAlmostEqual(calculate_sweep_angle_025c_rad(0.8, 0.935), 0.49043299, places=3)
 
     def test_calculate_taper_ratio(self):
         self.assertAlmostEqual(calculate_taper_ratio(0.5), 0.3)

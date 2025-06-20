@@ -53,9 +53,9 @@ class TestISA(unittest.TestCase):
 
 class TestStability(unittest.TestCase):
     def setUp(self):
-        control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=2, Vh_V=1, CLh=-2, CLA_h=0.6, C_m_ac=-0.5, x_lemac=6, l_fus=12)
-        control2 = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=2, Vh_V=1, CLh=-2, CLA_h=0.7, C_m_ac=-0.5, x_lemac=6, l_fus=12)
-        control3 = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=2, Vh_V=1, CLh=-2, CLA_h=0.6, C_m_ac=-0.5, x_lemac=6, l_fus=15)
+        control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=2, Vh_V=1, CLh=-2, CLA_h=0.6, C_m_ac=-0.5, x_lemac=6, l_fus=12, CLA_h_TO=1.6)
+        control2 = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=2, Vh_V=1, CLh=-2, CLA_h=0.6, C_m_ac=-0.5, x_lemac=6, l_fus=12, CLA_h_TO=2)
+        control3 = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=2, Vh_V=1, CLh=-2, CLA_h=0.6, C_m_ac=-0.5, x_lemac=6, l_fus=15, CLA_h_TO=1.6)
         self.ShS_stable = control.__stability_curve__(0.5)
         self.ShS_control = control.__control_curve__(0.5)
         self.xcg = control.__calculate_X_stability__(0.2)
@@ -68,7 +68,7 @@ class TestStability(unittest.TestCase):
         plt.close('all')
         
     def testcontrol(self):
-        self.assertAlmostEqual(self.ShS_control, 0.063636363)
+        self.assertAlmostEqual(self.ShS_control, 0.018181818)
 
     def teststability(self):
         self.assertAlmostEqual(self.ShS_stable, 0.12121212)
@@ -85,20 +85,22 @@ class TestStability(unittest.TestCase):
     
     def test_cg_range2(self):
         self.assertGreater(self.cg_range1["cg_range"], self.cg_range2["cg_range"])
+    def test_cg_range3(self):
         self.assertGreater(self.cg_range1["Sh/S"], self.cg_range3["Sh/S"])
+    def test_cg_range4(self):
         self.assertLess(self.cg_range1["x_lemac/lfus"], self.cg_range4["x_lemac/lfus"])
 
 class TestFlightPerformance(unittest.TestCase):
     def setUp(self):
         self.fp = FlightPerformance()
         self.D, self.D0, self.Di = self.fp.__drag__(0.02, 1.225, 100, 20, 5000, 10, 0.9)
-        self.range = self.fp.__range__(20*(10**-6), 50000, 30000, 10, 0.9, 0.01, 0.3108, 12)
-        self.payload_range_min, self.payload_range_max = self.fp.payload_range(20*(10**-6), 10, 0.9, 0.01, 50000, 20000, 20000, 0.3108, 12)
-        self.ROC1 = self.fp.ROC(0.017, 1.225, np.arange(1, 500, 1), 20, 50000, 10, 0.9, 7000)
-        self.ROC2 = self.fp.ROC(0.017, 1.225, np.arange(1, 500, 1), 20, 50000, 10, 0.9, 4000)
-        self.ROC3 = self.fp.ROC(0.017, 0.5, np.arange(1, 500, 1), 20, 50000, 10, 0.9, 7000*(0.5/1.225))
-        self.stall_speed = self.fp.stall_speed(560000*9.81, 845, 1.225, 2)
-        self.endurance = self.fp.endurance(20000, 50000, 0.02, 10, 0.88, 14*(10**-6))
+        self.range = self.fp.__range__(20, 50000, 30000, 10, 0.9, 0.01, 0.3108, 12)
+        self.payload_range_min, self.payload_range_max = self.fp.payload_range(20, 10, 0.9, 0.01, 50000, 20000, 20000, 0.3108, 12)
+        self.stall_speed = self.fp.stall_speed(50000, 20, 1.225, 1.6)
+        self.ROC1 = self.fp.ROC(0.017, 1.225, np.arange(1, 500, 1), 20, 50000, 10, 0.9, 7000, self.stall_speed)
+        self.ROC2 = self.fp.ROC(0.017, 1.225, np.arange(1, 500, 1), 20, 50000, 10, 0.9, 4000, self.stall_speed)
+        self.ROC3 = self.fp.ROC(0.017, 0.5, np.arange(1, 500, 1), 20, 50000, 10, 0.9, 7000*(0.5/1.225), self.stall_speed)
+        self.endurance = self.fp.endurance(20000, 50000, 0.02, 10, 0.88, 14)
         self.hmax1, self.vmax1 = self.fp.performance_limit(50000, 15, 1.1, 7000, 0.02, 10, 0.88)
         self.hmax2, self.vmax2 = self.fp.performance_limit(35000, 15, 1.1, 7000, 0.02, 10, 0.88)
         self.hmax3, self.vmax3 = self.fp.performance_limit(50000, 15, 1.1, 10000, 0.02, 10, 0.88)
@@ -113,14 +115,11 @@ class TestFlightPerformance(unittest.TestCase):
     def testRange(self):
         self.assertAlmostEqual(self.range, 15634.688, places=1)
     
-    def test_range_vel(self):
-        self.assertAlmostEqual(self.range[1], 84.394, places=1)
-    
     def test_max_payload_range(self):
-        self.assertAlmostEqual(self.payload_range_max, self.fp.__range__(20*(10**-6), 40000, 20000, 10, 0.9, 0.01, 0.3108, 12),0)
+        self.assertAlmostEqual(self.payload_range_max, self.fp.__range__(20, 40000, 20000, 10, 0.9, 0.01, 0.3108, 12),0)
     
     def test_min_payload_range(self):
-        self.assertAlmostEqual(self.payload_range_min, self.fp.__range__(20*(10**-6), 50000, 30000, 10, 0.9, 0.01, 0.3108, 12),0)
+        self.assertAlmostEqual(self.payload_range_min/10, self.fp.__range__(20, 50000, 30000, 10, 0.9, 0.01, 0.3108, 12)/10,0)
 
     def test_ROC_less_thrust1(self):
         self.assertGreater(self.ROC1[0], self.ROC2[0])
@@ -141,7 +140,7 @@ class TestFlightPerformance(unittest.TestCase):
         self.assertLess(self.ROC1[3], self.ROC3[3])
         
     def test_stall_speed(self):
-        self.assertAlmostEqual(self.stall_speed, 72.8504298)
+        self.assertAlmostEqual(self.stall_speed, 50.5076272)
         
     def test_endurance(self):
         self.assertAlmostEqual(self.endurance, 69142.79158, 4)

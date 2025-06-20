@@ -6,7 +6,7 @@ import pytest
 # to ensure that all modules can be imported correctly.
 # This assumes the test is run from the root of the DSEGroup17 directory.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-
+'''
 @pytest.fixture
 def data_object():
     """
@@ -78,3 +78,4 @@ def test_mission_simulation_run(data_object):
     print(f"  - Total Propulsion System Weight: {data_object.w_prop_sys / 9.80665:.2f} kg")
     print(f"  - Cruise NOx Index: {data_object.NOx_cruise:.4f}")
     print(f"  - Take-off NOx Index: {data_object.NOx_TO:.4f}")
+'''

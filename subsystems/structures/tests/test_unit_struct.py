@@ -7,7 +7,7 @@ try:
     from subsystems.structures.utils_struct import *
     from subsystems.structures.wing_stress_analysis import *
 except:
-    from wingstructure_generation import *
+    from wing_structure_generation import *
     from utils_struct import *
     from wing_stress_analysis import *
 

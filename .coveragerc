@@ -1,4 +1,8 @@
 [run]
-omit = *tests*, ./subsystems/structures/packages/openvsp/*
+omit = 
+    subsystems/structures/packages/openvsp/* 
+    subsystems/propulsion/gas_property_relations.py 
+    */tests/*
+    __init__.py
 [report]
 show_missing = True

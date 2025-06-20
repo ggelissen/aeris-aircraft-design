@@ -45,12 +45,17 @@ class FlightPerformance:
     def __init__(self):
         pass
     
-    def __drag__(self, cd0, rho, V, S, W, A, oswald):
-        C_L = W/(0.5*rho*V**2*S)
+    def __drag__(self, cd0, rho, V, S, W, A, oswald, C_L=None):
+        if C_L == None:
+            C_L = W/(0.5*rho*V**2*S)
         D0 = cd0 * 0.5 * rho * V**2 * S
         Di = (C_L**2)/(math.pi * A * oswald) * 0.5 * rho * V**2 * S
         D = D0 + Di
         return D, D0, Di
+    
+    def __trim_drag__(self, rho, V, V_h_V, S_h, A_h, e_h, CL_h):
+        D_trim = (0.5 * rho * V**2 * (V_h_V)**2 * S_h * CL_h**2)/(np.pi*A_h*e_h)
+        return D_trim
         
     def drag_plot(self, cd0, rho, V_range, S, W, A, oswald, V_stall):
         """
@@ -343,3 +348,9 @@ if __name__ == "__main__":
     print('stall', result6)
     result5=fp.endurance(params.weight.W_F - params.weight.W_F_res, params.weight.W_TO, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.cruise_tsfc_SI)
     print('endurance',result5)
+    
+    result7 = fp.__drag__(params.wing.C_D0, 0.3108, 250, params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.wing.CL)
+    print('drag',result7)
+    
+    result8 = fp.__trim_drag__(0.3108,250, params.empennage.Vh_v, params.empennage.S_h, params.empennage.A_t_h, params.wing.e, params.empennage.CL_h)
+    print('trim drag',result8)

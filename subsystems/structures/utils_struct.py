@@ -211,7 +211,7 @@ def calculate_Mohrs_circle_stress(sigma_x: float, sigma_y: float, tau_xy: float)
     return sigma_1 / 1e6, sigma_2 / 1e6, tau_max / 1e6  # Convert to MPa
 
 
-def plot_Mohrs_circle(sigma_x: float, sigma_y: float, tau_xy: float):
+def plot_Mohrs_circle(sigma_x: float, sigma_y: float, tau_xy: float): # pragma: no cover
     """
     Plot Mohr's circle for the given stresses.
 
@@ -241,7 +241,7 @@ def plot_Mohrs_circle(sigma_x: float, sigma_y: float, tau_xy: float):
     plt.show()
 
 
-def plot_Mohrs_circle_subplots(sigma_x: float, sigma_y: float, sigma_z: float, tau_xy: float, tau_xz: float, tau_yz: float):
+def plot_Mohrs_circle_subplots(sigma_x: float, sigma_y: float, sigma_z: float, tau_xy: float, tau_xz: float, tau_yz: float): # pragma: no cover
     """
     Plot Mohr's circle for the given stresses in subplots.
 
@@ -359,7 +359,7 @@ def plot_Mohrs_circle_subplots(sigma_x: float, sigma_y: float, sigma_z: float, t
     plt.show()
 
 
-def plot_Mohrs_circle_complete(sigma_x: float, sigma_y: float, sigma_z: float, tau_xy: float, tau_xz: float, tau_yz: float):
+def plot_Mohrs_circle_complete(sigma_x: float, sigma_y: float, sigma_z: float, tau_xy: float, tau_xz: float, tau_yz: float): # pragma: no cover
     """
     Plot Mohr's circle for the given stresses.
 
@@ -415,7 +415,7 @@ def plot_Mohrs_circle_complete(sigma_x: float, sigma_y: float, sigma_z: float, t
     return principal_stresses
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     # Example usage
     sigma_x = 100e6     # Pa
     sigma_y = 60e6         # Pa

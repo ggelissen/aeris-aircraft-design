@@ -26,7 +26,7 @@ def calculate_sweep_angle_025c_rad(Mach_cruise: float, Mach_cross: float = 0.935
         return np.arccos(1)
     else:
         #return np.arccos(0.75 * (Mach_cross / Mach_dd))
-        return np.arccos(1.16  / (Mach_dd + 0.5)) # TODO, equation from PJ thesis
+        return np.arccos(1.16  / (Mach_dd + 0.5)) # Equation from PJ thesis, Climate Optimal Aircraft Design, journal of aircraft (2022)
     
 
 def calculate_taper_ratio(Lambda_025c: float) -> float:
