@@ -210,6 +210,7 @@ def update_parameters_from_wing_optimization(params: DesignParameters, wing_resu
         updates += 1
     if 'S_w_optimal' in wing_results:
         params.wing.S_w = wing_results['S_w_optimal']
+        params.wing.S_ref = wing_results['S_w_optimal']
         updates += 1
     if 'b_w_optimal' in wing_results:
         params.wing.b_w = wing_results['b_w_optimal']
