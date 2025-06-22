@@ -219,7 +219,6 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
             return 1e6  # High penalty for unrealistic fuel weight
         
         if W_S_adjusted > params.weight.W_S_max:
-            #print(f"    ⚠️  Warning: W/S exceeds maximum ({W_S_adjusted:.2f} N/m² > {params.weight.W_S_max:.2f} N/m²)")
             print(f"    ⚠️  Warning: W/S exceeds maximum ({W_S_adjusted:.2f} N/m² > {params.weight.W_S_max:.2f} N/m²), returning high penalty")
             return 1e6
         
@@ -309,7 +308,7 @@ def optimize_wing_for_fuel_burn(params) -> dict:
     
     # Define optimization ranges (reasonable for business jet UAV)
     A_w_range = np.linspace(11, 12,2)           # Aspect ratio
-    S_w_range = np.linspace(5,30 , 40)          # Wing area (m²)  
+    S_w_range = np.linspace(5,60 , 40)          # Wing area (m²)  
     sweep_deg_range = np.linspace(5, 40, 10)    # Sweep angle (deg)
     
     # Initialize best solution tracking
@@ -342,7 +341,7 @@ def optimize_wing_for_fuel_burn(params) -> dict:
                 params.weight.W_S = updated_WS_TW['W_S']  # Update W/S from performance diagram
                 params.weight.T_W = updated_WS_TW['T_W']  # Update T/W from performance diagram
 
-                if wing_loading < 1500 or wing_loading > params.weight.W_S:  # N/m² - reasonable bounds
+                if wing_loading < 000 or wing_loading > params.weight.W_S:  # N/m² - reasonable bounds
                     continue
 
                 if W_TO_baseline * params.weight.T_W > 9300:

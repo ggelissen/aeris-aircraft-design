@@ -60,7 +60,9 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         updates += 1
     if 'W_S' in class_i_results:
         params.weight.W_S = class_i_results['W_S']
-        params.wing.W_S_max = class_i_results['W_S']  # Assume max W/S is same as design W/S, as its given by the TW_SW graph
+        params.weight.W_S_max = class_i_results['W_S']  # Assume max W/S is same as design W/S, as its given by the TW_SW graph
+        print(f"        ⚠️  W_S updated to {params.weight.W_S} (from Class I results)")
+        print(f"        ⚠️  W_S_max updated to {params.weight.W_S_max} (from Class I results)")
         updates += 1
 
     
