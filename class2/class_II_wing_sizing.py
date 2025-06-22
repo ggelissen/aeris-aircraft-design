@@ -101,6 +101,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         params.wing.A_w_actual = A_w
         params.wing.A_w_target = A_w  # Keep both consistent        
         params.wing.S_w = S_w
+        params.wing.S_ref = S_w  # Update reference area for performance diagram
         params.wing.b_w = math.sqrt(A_w * S_w)
         params.wing.Lambda_025c_w = np.deg2rad(sweep_deg) # Todo, supposed to be in radians, ok.
         params.wing.t_c_w_r = t_c
@@ -326,6 +327,7 @@ def optimize_wing_for_fuel_burn(params) -> dict:
         params.wing.A_w_target = A_w  # Update target aspect ratio
         for S_w in S_w_range:
             params.wing.S_w = S_w  # Update wing area
+            params.wing.S_ref = S_w  # Update reference area for performance diagram
             # Check wing loading constraint first (quick elimination)
 
             for sweep_deg in sweep_deg_range:
