@@ -308,8 +308,8 @@ def optimize_wing_for_fuel_burn(params) -> dict:
     print(f"    🎯 Objective: Minimize total mission fuel weight")
     
     # Define optimization ranges (reasonable for business jet UAV)
-    A_w_range = np.linspace(11, 12,10)           # Aspect ratio
-    S_w_range = np.linspace(5,15 , 10)          # Wing area (m²)  
+    A_w_range = np.linspace(11, 12,2)           # Aspect ratio
+    S_w_range = np.linspace(5,30 , 40)          # Wing area (m²)  
     sweep_deg_range = np.linspace(5, 40, 10)    # Sweep angle (deg)
     
     # Initialize best solution tracking
