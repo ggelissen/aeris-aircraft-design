@@ -238,7 +238,7 @@ def empennage_weight_N(params):
     The formula resolves projected area weights back to the true panel weight.
     """
     #print("  - Calculating Empennage Weight (Original Method)...")
-    WA_emp = 8  # Weight per area factor for empennage (lb/ft²)
+    WA_emp = 3  # Weight per area factor for empennage (lb/ft²)
     W_HT_proj_lb = WA_emp * m2_to_ft2(params.empennage.S_h)
     W_VT_proj_lb = WA_emp * m2_to_ft2(params.empennage.S_v)
     
