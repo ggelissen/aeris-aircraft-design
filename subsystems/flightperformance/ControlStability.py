@@ -492,11 +492,27 @@ if __name__ == "__main__": # pragma: no cover
     # 'd_e_d_alpha': 0.24661649214142314, 
     # 'CL0_cruise': -0.08856541837104315, 
     # 'C_m_ac_cruise': -0.3584513802937876}
+
+    f = plt.figure()
+    ax = f.add_subplot(111)
+    ax.yaxis.set_label_position("right")
+    ax.yaxis.tick_right()
     
-    params = DesignParameters()
-    params.load_from_yaml('design_config.yaml')
-    result = run_control_stability(params)
-    print(result)
+    plt.plot(-4.3241, 0, "ro", label="Aperiodic Roll")
+    plt.plot(-0.5960, 5.2091, "bo", label="Dutch Roll")
+    plt.plot(-0.0019, 0, "go", label="Spiral Motion")
+    plt.grid()
+    plt.ylim(-6,6)
+    plt.legend()
+    plt.ylabel("Imaginary Axis")
+    plt.xlabel("Real Axis")
+    plt.show()
+
+
+    # params = DesignParameters()
+    # params.load_from_yaml('design_config.yaml')
+    # result = run_control_stability(params)
+    # print(result)
 
     #control = Control(CLah=0.1, CLaA_h=0.1, de_da=0.1, mac=1, Vh_V=1, x_lemac=7, CLh=-1, CLA_h=1, C_m_ac=-0.5, l_fus=12)
     #control.__cg_range__plot__(1000, 1000, 7, 2000, [600], [7], [1000])
