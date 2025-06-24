@@ -13,7 +13,7 @@
 
 %%% End Preamble Requirements %%%
 
-\input{"/root/miniconda3/envs/vsppytools/lib/python3.10/site-packages/pyxdsm/diagram_styles"}
+\input{"C:/Users/aleja/AppData/Local/Programs/Python/Python312/Lib/site-packages/pyxdsm/diagram_styles"}
 \begin{tikzpicture}
 
 \matrix[MatrixSetup]{
@@ -158,7 +158,7 @@
 &
 &
 &
-\node [Function] (constraints) {$\text{10: Constraints}$};&
+\node [ImplicitFunction] (constraints) {$\text{10: Constraints}$};&
 \\
 %Row 11
 &

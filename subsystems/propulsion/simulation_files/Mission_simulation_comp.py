@@ -32,6 +32,7 @@ def ei_nox_dallara(pt_3, tt_3, h):
     if any(isnan(val) for val in [pt_3, tt_3, h]):
         return nan
     ei = (2 + 28.5 * ((pt_3 / 1000) / 3100) ** 0.5 * np.exp((tt_3 - 825) / 250)) / 1000
+    print(f"Calculated NOx emission index: {ei} g/kg at altitude {h} m, pt_3 {pt_3} Pa, tt_3 {tt_3} K")
     return ei
 
 # --- Corrected Emissions Calculation ---
