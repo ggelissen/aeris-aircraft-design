@@ -60,7 +60,7 @@ def update_parameters_from_class_i(params: DesignParameters, class_i_results: Di
         updates += 1
     if 'W_S' in class_i_results:
         params.weight.W_S = class_i_results['W_S']
-        params.wing.W_S_max = class_i_results['W_S']  # Assume max W/S is same as design W/S, as its given by the TW_SW graph
+        params.weight.W_S_max = class_i_results['W_S']  # Assume max W/S is same as design W/S, as its given by the TW_SW graph
         updates += 1
 
     
@@ -210,6 +210,7 @@ def update_parameters_from_wing_optimization(params: DesignParameters, wing_resu
         updates += 1
     if 'S_w_optimal' in wing_results:
         params.wing.S_w = wing_results['S_w_optimal']
+        params.wing.S_ref = wing_results['S_w_optimal']
         updates += 1
     if 'b_w_optimal' in wing_results:
         params.wing.b_w = wing_results['b_w_optimal']
