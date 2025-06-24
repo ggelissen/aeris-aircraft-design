@@ -101,6 +101,7 @@ class FlightPerformance:
         plt.tight_layout()
         os.makedirs("Figures", exist_ok=True)
         plt.savefig("Figures/flight performance/drag_plot.pdf", transparent=False)
+        plt.savefig("Figures/flight performance/drag_plot.png", transparent=False)
         plt.close(fig)
         print("Saved plot: Figures/flight performance/drag_plot.pdf")
 
@@ -110,11 +111,11 @@ class FlightPerformance:
         R = 2 * (2/(rho*S))**0.5 * 1/(cT*0.000001 * 9.81) * (C_L**0.5)/C_D * (W_ini**0.5 - W_fin**0.5)
         return R/1000
 
-    def payload_range(self, cT, A, oswald, cd0, Wtotal, Wfuel, OEW, rho, S, plot=False):
+    def payload_range(self, cT, A, oswald, cd0, Wtotal, Wfuel, OEW, rho, S,Wfres, plot=False):
         Wpayload = np.arange(0, Wtotal-Wfuel-OEW, 1*9.81)
         ranges = []
         for payload in Wpayload:
-            range1 = self.__range__(cT, OEW + Wfuel + payload, OEW + payload, A, oswald, cd0, rho, S)
+            range1 = self.__range__(cT, OEW + Wfuel + payload, OEW + payload+Wfres, A, oswald, cd0, rho, S)
             ranges.append(range1)
         
         if plot:
@@ -149,6 +150,7 @@ class FlightPerformance:
         plt.tight_layout()
         os.makedirs("Figures", exist_ok=True)
         plt.savefig("Figures/flight performance/payload_range.pdf", transparent=False)
+        plt.savefig("Figures/flight performance/payload_range.png", transparent=False)
         plt.close(fig)
         print("Saved plot: Figures/flight performance/payload_range.pdf")
 
@@ -167,6 +169,8 @@ class FlightPerformance:
             self._plot_roc_forces(V_flight, D, T, V_stall)
 
         ROC = (V_flight * T - V_flight * D) / W
+        print("ROC", "V_flight")
+        print(ROC, V_flight)
         max_ROC = np.max(ROC)
         ROC_V = V_flight[np.argmax(ROC)]
         
@@ -208,6 +212,7 @@ class FlightPerformance:
         plt.tight_layout()
         os.makedirs("Figures", exist_ok=True)
         plt.savefig("Figures/flight performance/roc_forces.pdf", transparent=False)
+        plt.savefig("Figures/flight performance/roc_forces.png", transparent=False)
         plt.close(fig)
         print("Saved plot: Figures/flight performance/roc_forces.pdf")
 
@@ -243,6 +248,7 @@ class FlightPerformance:
         plt.tight_layout()
         os.makedirs("Figures", exist_ok=True)
         plt.savefig("Figures/flight performance/roc_power.pdf", transparent=False)
+        plt.savefig("Figures/flight performance/roc_power.png", transparent=False)
         plt.close(fig)
         print("Saved plot: Figures/flight performance/roc_power.pdf")
 
@@ -257,10 +263,10 @@ class FlightPerformance:
     
     def performance_limit(self, W, S, CLmax, T0, cd0, A, oswald, plot=False):
         h = np.arange(0,20000,1)
-        Vmin, Vmax, actual_h = [], [], []
+        Vmin, Vmax, actual_h, mach = [], [], [], []
         
         for val in h:
-            _, _, density1, _ = __ISA__(val)
+            _, _, density1, sos1 = __ISA__(val)
             Vstall = self.stall_speed(W, S, density1, CLmax)
             thrust = T0*(density1/1.225)
             V = np.arange(1, 500, 0.1)
@@ -272,11 +278,15 @@ class FlightPerformance:
                 hmax = val
                 break
             Vmax.append(V[idx_vmax[-1]])
+            mach.append(V[idx_vmax[-1]]/sos1)
             
             # Find Vmin
             idx_vmin = np.where(D < thrust)[0]
             Vmin.append(max(Vstall, V[idx_vmin[0]]))
             actual_h.append(val)
+        
+        print('mach at 40k ft',mach[12192])
+        
         
         if plot:
             self._plot_performance_limit(Vmin, Vmax, actual_h)
@@ -312,6 +322,7 @@ class FlightPerformance:
         plt.tight_layout()
         os.makedirs("Figures", exist_ok=True)
         plt.savefig("Figures/flight performance/performance_limit.pdf", transparent=False)
+        plt.savefig("Figures/flight performance/performance_limit.png", transparent=False)
         plt.close(fig)
         print("Saved plot: Figures/flight performance/performance_limit.pdf")
 
@@ -332,17 +343,17 @@ if __name__ == "__main__":
     #fp.drag_plot(0.017, 0.3, np.arange(1,300, 1), 12, 4000*9.81, 12, 0.85, 60)
     #fp.drag_plot(params.wing.C_D0, )
     #fp.payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
-    print("T1", params.engine.engine_max_thrust)
-    result1 = fp.payload_range(params.engine.cruise_tsfc_SI, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_TO, params.weight.W_F - params.weight.W_F_res , params.weight.W_OE, 0.3108, params.wing.S_w, True)
+    print("T1", params.engine.T_TO)
+    result1 = fp.payload_range(params.engine.cruise_tsfc_SI, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_TO, params.weight.W_F , params.weight.W_OE, 0.3108, params.wing.S_w,params.weight.W_F_res, True)
     print('pl-range', result1)
     #fp.ROC(0.017, 1.225, np.arange(1,300,1), 15, 35000, 10, 0.85, 7000, 60, plot=True)
-    result2 = fp.ROC(params.wing.C_D0, 1.225, np.arange(1,400,1), params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.engine.engine_max_thrust, fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO), plot=True)
+    result2 = fp.ROC(params.wing.C_D0, 1.225, np.arange(1,400,1), params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.engine.T_TO, fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO), plot=True)
     print('ROC',result2)
     #fp.performance_limit(35000, 15, 1.6, 7000, 0.017, 12, 0.88, True)
     result3 = fp.performance_limit(params.weight.W_TO, params.wing.S_w, params.performance.CL_max_TO, params.engine.engine_max_thrust, params.wing.C_D0, params.wing.A_w_target, params.wing.e, True)
     print('perf-limit', result3)
     
-    result4= FlightSim().ground_run2(params.engine.engine_max_thrust, params.weight.W_TO/9.81, params.wing.S_w, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.take_off_tsfc, params.performance.CL_max_TO, 1500)
+    result4= FlightSim().ground_run2(params.engine.T_TO, params.weight.W_TO/9.80665, params.wing.S_w, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.take_off_tsfc, params.performance.CL_max_TO, 1500)
     print('ground run', result4)
     result6=fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO)
     print('stall', result6)

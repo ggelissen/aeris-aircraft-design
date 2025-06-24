@@ -253,7 +253,8 @@ def update_parameters_from_wing_optimization(params: DesignParameters, wing_resu
         params.weight.M_ff_nominal = wing_results['M_ff_nominal']
         updates += 1
     if 'W_S_optimal' in wing_results:
-        params.weight.W_S = wing_results['W_S_optimal']
+        params.weight.W_S = wing_results['wing_loading_optimal']
+        print(f"        ⚠️  W_S updated to {params.weight.W_S} (from wing optimization results) from wing_results['wing_loading_optimal'] = {wing_results['wing_loading_optimal']}")
         updates += 1
     if 'C_L_design_optimal' in wing_results:
         params.wing.CL = wing_results['C_L_design_optimal']

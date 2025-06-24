@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
-#from design_variables import DesignParameters
+from design_variables import DesignParameters
 from class1.preliminary_sizing.prelim_sizing_wing import calculate_sweep_angle_x_c, calculate_sweep_angle_LE
 
 # TODO add winglet CD0_winglet
@@ -25,10 +25,10 @@ def calculate_CD0(S_ref: float, C_f_c: np.ndarray, FF_c: np.ndarray, IF_c: np.nd
     float: The calculated zero-lift drag coefficient.
     """
     #print(f"S_ref: {S_ref}, C_f_c: {C_f_c}, FF_c: {FF_c}, IF_c: {IF_c}, S_wet_c: {S_wet_c}, CD_misc: {CD_misc}")
-    CD0 = 1 / S_ref * np.sum(C_f_c * FF_c * IF_c * S_wet_c) + np.sum(CD_misc)
+    CD0 = 1 / S_ref * np.sum(C_f_c * FF_c * IF_c * S_wet_c) + np.sum(CD_misc) # TODO, why is there a sum over CD_misc? Shouldn't it be a single value?
     # if CD0 > 0.02:
     #     CD0 = 0.02  # Limit CD0 to a maximum of 0.02 as per design constraints
-    CD0_tail = C_f_c[2] * FF_c[2] * IF_c[2] * S_wet_c[2] / S_ref
+    CD0_tail = C_f_c[2] * FF_c[2] * IF_c[2] * S_wet_c[2] / S_ref # TODO, why is there a separate CD0_tail? Could've done this in a separate function...
     return CD0, CD0_tail
 
 
@@ -105,7 +105,7 @@ def determine_interference_factor(component: str) -> float:
         'empennage': 1.03 # Based on V-tail configuration
     }
     
-    return interference_factors.get(component, 1.0)  # Default to 1.0 if not found
+    return interference_factors.get(component, 1.0)  # Default to 1.0 if not found # TODO, this is not the way to go, if it fails, let it fail, don't return 1.0, we would like to know if something is wrong.
 
 
 def calculate_total_wetted_area(S_w, c_w_r, D_f, S_t, t_c_w_r, tau_w, lambda_w, t_c_t, lambda_t, l_f, l_n, lf_df) -> np.ndarray:
@@ -140,7 +140,7 @@ def calculate_misc_drag_coefficient(Mach_dd: float, Mach_cr: float) -> float:
         return 0.002 * (1 + 2.5 * (Mach_dd - Mach_cr) / 0.05) ** (-1)
     
 
-def run_improved_drag_estimations(params) -> dict:
+def run_improved_drag_estimations(params: DesignParameters) -> dict:
     """
     Run the improved drag estimations based on the design parameters.
     
@@ -181,7 +181,7 @@ def run_improved_drag_estimations(params) -> dict:
 
     CD_misc = calculate_misc_drag_coefficient(params.cruise_mach + 0.03, params.cruise_mach)
 
-    CD0, CD0_tail = calculate_CD0(params.wing.S_ref, C_f_lst, FF_lst, IF_lst, S_wet_lst, CD_misc)
+    CD0, CD0_tail = calculate_CD0(params.wing.S_ref, C_f_lst, FF_lst, IF_lst, S_wet_lst, CD_misc) # TODO, If S_ref is the same as S_w, might as well use S_w here.
     
     # Prepare C_f_lst for output TODO, not sure if this is the best way to do it, but it works for now.
     C_f_lst = {
