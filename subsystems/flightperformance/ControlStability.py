@@ -1,7 +1,34 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 from design_variables import DesignParameters
+
+def _set_report_style():
+    """Sets a professional plot style suitable for reports."""
+    try:
+        plt.rcParams['font.family'] = 'Arial'
+    except RuntimeError:
+        print("Arial font not found, falling back to default sans-serif.")
+        plt.rcParams['font.family'] = 'sans-serif'
+    
+    plt.rcParams['figure.dpi'] = 100
+    plt.rcParams['savefig.dpi'] = 300
+    plt.rcParams['axes.titlesize'] = 14
+    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['xtick.labelsize'] = 10
+    plt.rcParams['ytick.labelsize'] = 10
+    plt.rcParams['legend.fontsize'] = 10
+    plt.rcParams['lines.linewidth'] = 2.5
+    plt.rcParams['lines.markersize'] = 6
+
+COLOR_PALETTE = {
+    'blue': '#0d3b66',
+    'orange': '#ee964b',
+    'grey': '#4F4F4F',
+    'green': '#5fad56',
+    'red': '#D7263D'
+}
 
 class Control:
     """
@@ -41,7 +68,7 @@ class Control:
         self.cg_list = np.arange(0, 1, 0.001)
         self.x_lemac_lfus_list = np.arange(0,1, 0.001)
 
-    def __plot_result__(self, x, y, legend, x_label="x", y_label='y', y_limit=[None, None]): # pragma: no cover
+    def __plot_result__(self, x, y, legend, colors, x_label="x", y_label='y', y_limit=[None, None]): # pragma: no cover
         """
         Plots a given set of data with labels and legend.
 
@@ -53,12 +80,17 @@ class Control:
         y_label (str): Label for the y-axis.
         y_limit (list): List containing the lower and upper limits for the y-axis.
         """
+        _set_report_style()
         for i in range(len(x)):
-            plt.plot(x[i], y[i], label=legend[i])
+            plt.plot(x[i], y[i], label=legend[i], color=colors[i])
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.ylim(y_limit[0], y_limit[1])
         plt.legend()
+        os.makedirs("Figures/stability", exist_ok=True)
+        plt.tight_layout()
+        plt.savefig("Figures/stability/scissor_plot.pdf", transparent=True)
+        plt.savefig("Figures/stability/scissor_plot.png", transparent=True)
         plt.show()
             
     def __normalise_coordinate__(self, x, lemac):
@@ -82,7 +114,7 @@ class Control:
         #print('stability',Y)
         #print('stab den',den)
         if plot: # pragma: no cover
-            self.__plot_result__([X], [Y], ["Stability"], "xcg/mac", "Sh/S")
+            self.__plot_result__([X], [Y], ["Stability"], "xcg/mac", "Sh/S", colors=[COLOR_PALETTE["blue"]])
 
         return Y
 
@@ -108,7 +140,7 @@ class Control:
         #print('b',((self.C_m_ac / self.CLA_h) - self.__normalise_coordinate__(self.x_ac, self.x_lemac)) / den)
         
         if plot: # pragma: no cover
-            self.__plot_result__([X], [Y], ["Controllability"], "xcg/mac", "Sh/S")
+            self.__plot_result__([X], [Y], ["Controllability"], "xcg/mac", "Sh/S", colors=[COLOR_PALETTE["orange"]])
 
         return Y
 
@@ -139,7 +171,19 @@ class Control:
         stability = self.__stability_curve__(self.cg_list)
         controllability = self.__control_curve__(self.cg_list)
         if plot: # pragma: no cover
-            self.__plot_result__([self.cg_list, self.cg_list], [stability, controllability], y_limit=[0, None], y_label="Sh/S", x_label="xcg/mac", legend=["Stability", "Controllability"])
+            _set_report_style()
+            plt.plot(self.cg_list, stability, label="Stability", color=COLOR_PALETTE['blue'])
+            plt.plot(self.cg_list, controllability, label="Controllability", color=COLOR_PALETTE['orange'])
+            plt.xlabel("xcg/mac")
+            plt.ylabel("Sh/S")
+            plt.ylim(0, min(max(controllability), max(stability))*1.1)
+            plt.xlim(0,1)
+            plt.legend()
+            os.makedirs("Figures/stability", exist_ok=True)
+            plt.tight_layout()
+            plt.savefig("Figures/stability/scissor_plot.pdf", transparent=True)
+            plt.savefig("Figures/stability/scissor_plot.png", transparent=True)
+            plt.show()
 
         return stability, controllability
 
@@ -231,12 +275,13 @@ class Control:
         Sh (float): Horizontal tail surface area.
         x_lemac (float): x-location of the wing leading edge mean aerodynamic chord.
         """
+        _set_report_style
         fig, ax1 = plt.subplots()
-
-        ax1.set_xlabel('xcg/mac')
+        
+        ax1.set_xlabel('x_cg/mac')
         ax1.set_ylabel('x_lemac/lfus') # This label seems incorrect based on the plot data
-        ax1.plot(Y1, X, label="min", color='tab:green')
-        ax1.plot(Y2, X, label="max", color='tab:red')
+        ax1.plot(Y1, X, label="min", color=COLOR_PALETTE["green"])
+        ax1.plot(Y2, X, label="max", color=COLOR_PALETTE["red"])
         #l, b, w, h = ax1.get_position().bounds
         #ax1.set_position([l, b, w*0.5, h])
         # The y-limit here seems to be trying to focus on a single x_lemac value, which might not be intended
@@ -246,14 +291,17 @@ class Control:
         ax2 = ax1.twinx()
 
         ax2.set_ylabel('Sh/S')  # we already handled the x-label with ax1
-        ax2.plot(X, stability, label="stability")
-        ax2.plot(X, controllability, label="controllability")
+        ax2.plot(X, stability, label="stability", color=COLOR_PALETTE["blue"])
+        ax2.plot(X, controllability, label="controllability", color=COLOR_PALETTE["orange"])
         # Plot a horizontal line for the calculated Sh/S
-        ax2.plot(X, len(X) * [Sh], label="Sh/S", color="tab:pink")
-        ax2.set_ylim(0, None)
+        ax2.plot(X, len(X) * [Sh], label="Sh/S", color=COLOR_PALETTE["grey"])
+        ax2.set_ylim(0, min(max(stability), max(controllability))*1.1)
 
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
         fig.legend()
+        os.makedirs("Figures/stability", exist_ok=True)
+        fig.savefig("Figures/stability/combined_plot.pdf", transparent=True)
+        fig.savefig("Figures/stability/combined_plot.png", transparent=True)
         plt.show()
         
     def __cg_range__plot__(self, W_wing, W_fuselage, X_fuselage, W_OEW, W_payload, X_payload, W_fuel):
@@ -268,12 +316,21 @@ class Control:
             #print(i, x_oew, result[0], result[1], self.__normalise_coordinate__(result[0], i*self.l_fus), self.__normalise_coordinate__(result[1], i*self.l_fus))
             Y1.append(self.__normalise_coordinate__(result[0], i*self.l_fus))
             Y2.append(self.__normalise_coordinate__(result[1], i*self.l_fus))
-        
-        plt.plot(Y1, self.x_lemac_lfus_list, label="min c.g.")
-        plt.plot(Y2, self.x_lemac_lfus_list, label="max c.g.")
+        _set_report_style()
+        f = plt.figure()
+        ax = f.add_subplot(111)
+        ax.yaxis.tick_right()
+        ax.yaxis.set_label_position("right")
+        plt.plot(Y1, self.x_lemac_lfus_list, label="min c.g.", color=COLOR_PALETTE['green'])
+        plt.plot(Y2, self.x_lemac_lfus_list, label="max c.g.", color=COLOR_PALETTE['red'])
         plt.ylabel("x_lemac/l_fus")
-        plt.xlabel("x_cg/mac")
+        plt.xlabel("xcg/mac")
+        plt.xlim(0, 1)
         plt.legend()
+        os.makedirs("Figures/stability", exist_ok=True)
+        plt.tight_layout()
+        plt.savefig("Figures/stability/cg_plot.pdf", transparent=True)
+        plt.savefig("Figures/stability/cg_plot.png", transparent=True)
         plt.show()
         
 

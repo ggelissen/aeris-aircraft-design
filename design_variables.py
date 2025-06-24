@@ -431,7 +431,7 @@ class PerformanceParameters:
         self.climb_gradient_OEI_alt = None          # Climb Gradient OEI Altitude in ft
         self.delta_CD0_OEI = None                   # Zero-Lift Drag Coefficient Differential AEO
 
-        self.CL_max_TO = 1.3                        # Maximum Lift Coefficient at Take-Off
+        self.CL_max_TO = 2.3                        # Maximum Lift Coefficient at Take-Off
         self.CL_max_LAND = 1.6                      # Maximum Lift Coefficient at Landing
         self.CL_max_cruise = 1.6                    # Maximum Lift Coefficient at Cruise
 

@@ -326,26 +326,28 @@ class FlightSim:
 
         # Calculate initial acceleration using the equation of motion
         acc = (T*math.cos(aoa) - D - Df*math.cos(aoc) - W*math.sin(aoc)) / mass
+        #print(acc)
 
         max_time = 360 # Maximum simulation time (s)
 
         # Simulation loop
         while True:
             # Check for takeoff condition (Lift >= Weight)
-            if (L >= W):
+            if (L >= W*1.1):
                 # Check if takeoff distance is close to the target (1800m)
                 if X_TO*0.9999< X < X_TO*1.0001:
                     # If close, print results and return
-                    print(T0)
+                    print(T)
                     print(X)
                     print(V/sos)
-                    return T0,X,V
+                    print(t)
+                    return T,X,V,t
                 # If takeoff distance is greater than target, reduce thrust and rerun
                 if X > X_TO:
-                    return self.ground_run2(T0+(X-X_TO), mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO)
+                    return self.ground_run2(T+(X-X_TO), mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO)
                 # If takeoff distance is less than target, increase thrust and rerun
                 else:
-                    return self.ground_run2(T0-(X_TO-X), mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO)
+                    return self.ground_run2(T-(X_TO-X), mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO)
 
 
             # Update state variables using Euler integration
