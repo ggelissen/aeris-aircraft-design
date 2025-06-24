@@ -1,4 +1,4 @@
-from pyxdsm.XDSM import XDSM, OPT, SOLVER, FUNC, GROUP
+from pyxdsm.XDSM import XDSM, OPT, SOLVER, FUNC, GROUP, IFUNC
 
 # XDSM setup
 x = XDSM()
@@ -12,7 +12,7 @@ x.add_system("class1", FUNC, r"\text{2: Class I Estimations}")
 x.add_system("prelim_sizing", FUNC, r"\text{3: Preliminary Sizing}")
 x.add_system("class2", FUNC, r"\text{4: Class II Estimations}")
 x.add_system("prelim_positioning", FUNC, r"\text{5: Prelim. Positioning}")
-x.add_system("constraints", FUNC, r"\text{7: Constraints}")
+x.add_system("constraints", IFUNC, r"\text{7: Constraints}")
 
 # 2. Add connections
 # Connections from the outside to the first block\
