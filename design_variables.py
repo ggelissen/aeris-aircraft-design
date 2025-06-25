@@ -386,7 +386,7 @@ class WingParameters:
         self.CLA_A_h = 6.2727563022846 # during cruise
         self.CLA_A_h_M0 = 5.115368 # during cruise, M = 0 (M=0 during cruise doesn't make sense but Roskam wants it so fuck it)
         self.airfoil_cd0 = 0.025826
-        self.C_D0 = 0.017196 
+        self.C_D0 = 0.025826 
         self.e = 0.9         #oswald efficiency factor
         self.k2 = 1 / (np.pi * self.A_w_target * self.e)
         self.Mach_cross = 0.935
