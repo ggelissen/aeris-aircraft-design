@@ -1,4 +1,4 @@
-from pyxdsm.XDSM import XDSM, OPT, SOLVER, FUNC, GROUP
+from pyxdsm.XDSM import XDSM, OPT, SOLVER, FUNC, GROUP, IFUNC
 
 # 1. Create a new XDSM instance
 # We can specify if we want to use LaTeX's sans-serif fonts
@@ -16,7 +16,7 @@ xdsm.add_system("propulsion", FUNC, r"\text{5: Propulsion}")
 xdsm.add_system("flight_perf", FUNC, r"\text{6: Flight Performance}")
 xdsm.add_system("climate", FUNC, r"\text{8: Climate}")
 xdsm.add_system("cost", FUNC, r"\text{9: Cost}")
-xdsm.add_system("constraints", FUNC, r"\text{10: Constraints}")             # TODO: Add stability and control subsystem
+xdsm.add_system("constraints", IFUNC, r"\text{10: Constraints}")             # TODO: Add stability and control subsystem
 
 # 3. Define the connections (data flow) between the components
 
