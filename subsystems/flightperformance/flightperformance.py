@@ -122,6 +122,14 @@ class FlightPerformance:
             self._plot_payload_range(ranges, Wpayload)
             
         return (min(ranges), max(ranges))
+    
+    def fuel_for_range(self, cT, A, oswald, cd0, Wmaxfuel, OEW, rho, S,Wfres,Wpayload,range):
+        fuel_list = np.arange(Wfres, Wmaxfuel)
+        for fuel in fuel_list:
+            range1 = self.__range__(cT, OEW + fuel + Wpayload, OEW + Wpayload+Wfres, A, oswald, cd0, rho, S)
+            #print(fuel-Wfres, range1)
+            if range1 >= range:
+                return fuel-Wfres
 
     def _plot_payload_range(self, ranges, Wpayload):
         """Generates a styled payload-range diagram."""
@@ -255,9 +263,13 @@ class FlightPerformance:
     def stall_speed(self, W, S, rho, CLmax):
         return ((W/S)*(2/rho)*(1/CLmax))**0.5
     
-    def endurance(self, Wfuel, Wtotal, Cd0, AR, oswald, cT):
-        CD = 2 * Cd0
-        CL = (Cd0 * math.pi * oswald * AR)**0.5
+    def endurance(self, Wfuel, Wtotal, Cd0, AR, oswald, cT, CD=None, CL=None):
+        if CD == None:
+            CD = 2 * Cd0
+        if CL == None:
+            CL = (Cd0 * math.pi * oswald * AR)**0.5
+        
+        print('CL/CD',CL/CD)
         endurance = 1/(cT*0.000001*9.81) * CL/CD * math.log(Wtotal/(Wtotal-Wfuel))
         return endurance
     
@@ -299,7 +311,7 @@ class FlightPerformance:
         fig, ax = plt.subplots(figsize=(8, 5))
 
         ax.plot(Vmin, h, color=COLOR_PALETTE['blue'], label='Min Speed (Stall Limit)')
-        ax.plot(Vmax, h, color=COLOR_PALETTE['grey'], label='Max Speed (Thrust Limit)')
+        ax.plot(Vmax, h, color=COLOR_PALETTE['red'], label='Max Speed (Thrust Limit)')
         ax.fill_betweenx(h, Vmin, Vmax, color=COLOR_PALETTE['blue'], alpha=0.1, label='Flight Envelope')
 
         #ax.set_title('Flight Envelope')
@@ -357,7 +369,7 @@ if __name__ == "__main__":
     print('ground run', result4)
     result6=fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO)
     print('stall', result6)
-    result5=fp.endurance(params.weight.W_F - params.weight.W_F_res, params.weight.W_TO, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.cruise_tsfc_SI)
+    result5=fp.endurance(743, params.weight.W_OE +params.weight.W_PL + params.weight.W_F_res+743, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.cruise_tsfc_SI)#, CD=1, CL=19.44)
     print('endurance',result5)
     
     result7 = fp.__drag__(params.wing.C_D0, 0.3108, 250, params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.wing.CL)
@@ -365,3 +377,6 @@ if __name__ == "__main__":
     
     result8 = fp.__trim_drag__(0.3108,250, params.empennage.Vh_v, params.empennage.S_h, params.empennage.A_t_h, params.wing.e, params.empennage.CL_h)
     print('trim drag',result8)
+
+    result9 = fp.fuel_for_range(params.engine.cruise_tsfc_SI, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_F, params.weight.W_OE, 0.3108, params.wing.S_w,params.weight.W_F_res, params.weight.W_PL, 6500)
+    print('fuel for range',result9)

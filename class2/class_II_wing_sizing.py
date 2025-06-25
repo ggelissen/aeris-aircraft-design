@@ -34,6 +34,8 @@ from class2.updater import update_parameters_from_class_ii
 from class2.main_class_II import perform_class_II_analysis
 #try:
 import delta_method_classII as dm
+from design_variables import DesignParameters
+
 #DELTA_METHOD_AVAILABLE = True
 #except ImportError:
   #  print("Warning: Delta method not available")
@@ -44,7 +46,7 @@ G = 9.80665  # Gravity constant in m/s^2
 
 
 def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: float, 
-                               params, W_TO_baseline: float) -> float:
+                               params: DesignParameters, W_TO_baseline: float) -> float:
     """
     Calculate fuel burn penalty for given wing parameters.
     
@@ -218,10 +220,10 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         if W_F_total_N <= 0 or W_F_total_N > W_TO_adjusted * 0.8:
             return 1e6  # High penalty for unrealistic fuel weight
         
-        if W_S_adjusted > params.weight.W_S_max:
-            #print(f"    ⚠️  Warning: W/S exceeds maximum ({W_S_adjusted:.2f} N/m² > {params.weight.W_S_max:.2f} N/m²)")
-            print(f"    ⚠️  Warning: W/S exceeds maximum ({W_S_adjusted:.2f} N/m² > {params.weight.W_S_max:.2f} N/m²), returning high penalty")
-            return 1e6
+        # if W_S_adjusted > params.weight.W_S_max:
+        #     #print(f"    ⚠️  Warning: W/S exceeds maximum ({W_S_adjusted:.2f} N/m² > {params.weight.W_S_max:.2f} N/m²)")
+        #     print(f"    ⚠️  Warning: W/S exceeds maximum ({W_S_adjusted:.2f} N/m² > {params.weight.W_S_max:.2f} N/m²), returning high penalty")
+        #     return 1e6
         
         testing_dict = {'W_TO_adjusted': W_TO_adjusted2, 'W_TO_baseline': W_TO_baseline,
                         'Wing Weight Current': W_wing_current,
@@ -252,7 +254,7 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
         return 1e6
 
 
-def optimize_wing_for_fuel_burn(params) -> dict:
+def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
     """
     Optimize wing planform by minimizing fuel burn.
     
@@ -336,15 +338,15 @@ def optimize_wing_for_fuel_burn(params) -> dict:
                 W_TO_baseline = params.weight.W_TO  # Use baseline W_TO for wing weight calculation
                 W_wing_trial = wing_weight_N(params)  # Current wing weight with baseline parameters
                 W_TO_baseline = W_TO_baseline - W_wing_baseline_start + W_wing_trial  # Adjust W_TO for trial wing weight
-                wing_loading = W_TO_baseline / S_w
-                updated_WS_TW = run_performance_diagram(params)
+                # wing_loading = W_TO_baseline / S_w
+                # updated_WS_TW = run_performance_diagram(params)
 
-                params.weight.W_S = updated_WS_TW['W_S']  # Update W/S from performance diagram
-                params.weight.T_W = updated_WS_TW['T_W']  # Update T/W from performance diagram
+                #params.weight.W_S = updated_WS_TW['W_S']  # Update W/S from performance diagram
+                #params.weight.T_W = updated_WS_TW['T_W']  # Update T/W from performance diagram
 
-                if wing_loading < 1500 or wing_loading > params.weight.W_S:  # N/m² - reasonable bounds
-                    continue
-
+                # if wing_loading < 1500 or wing_loading > params.weight.W_S:  # N/m² - reasonable bounds
+                #     continue 
+                # Commented out, as a check is done later.
                 if W_TO_baseline * params.weight.T_W > 9300:
                     #print(f" W_TO_baseline * T_W = {W_TO_baseline * params.weight.T_W:.0f} N, T_W = {params.weight.T_W:.2f} N/N, W_TO_baseline = {W_TO_baseline:.0f} N, ")
                     continue
@@ -397,7 +399,8 @@ def optimize_wing_for_fuel_burn(params) -> dict:
                     )
                     successful_evaluations += 1
                     #print(f"   Successful evaluation: A_w={A_w:.1f}, S_w={S_w:.1f} m², ")
-                    if fuel_weight < best_fuel_weight and W_S_opt < params.weight.W_S_max:
+                    if fuel_weight < best_fuel_weight and W_S_opt < params.weight.W_S_max and W_S_opt * S_w * params.weight.T_W < 9300:
+                        #print(f"New wing loading: {W_S_opt:.2f} N/m²,Max W/S: {params.weight.W_S_max:.2f} N/m²")
                         winner_dict = test_dict.copy()  # Copy the test dictionary for the winning configuration
                         #print(f"CD0_opt = {CDO_opt:.6f}, L/D_opt = {L_D_opt:.2f}, M_ff_opt = {M_ff_opt:.4f}")
                         # L_D_loiter = calculate_L_D_loiter(
@@ -425,6 +428,7 @@ def optimize_wing_for_fuel_burn(params) -> dict:
                         # ) * get_statistical_fuel_fractions(
                         #     aircraft_type, "M11_land_taxi_shutdown"
                         # )
+                        #print(f"Wing Loading: {W_S_opt:.2f} N/m², Max W/S: {params.weight.W_S_max:.2f} N/m²")
                         best_fuel_weight = fuel_weight
                         best_params = {
                             'A_w_optimal': A_w,
