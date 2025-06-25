@@ -304,7 +304,7 @@ class FlightSim:
         #C_L = 1.1 # Lift coefficient (Note: this is a constant value, likely simplified for ground run)
         h = 0 # Initial altitude (m) - assumed 0 for ground run
 
-        T = T0 # Current Thrust (N)
+        T = 0 # Current Thrust (N)
 
         # Calculate drag coefficient
         C_D = Cd0 + C_L**2 / (math.pi * AR * oswald)
@@ -322,7 +322,10 @@ class FlightSim:
 
         # Calculate normal force and friction force
         N = W + D*math.sin(aoc) - L*math.cos(aoc) - T*math.sin(aoc+aoa)
-        Df = friction*N # Friction force
+        if V != 0:
+            Df = friction*N # Friction force
+        else: 
+            Df = 0
 
         # Calculate initial acceleration using the equation of motion
         acc = (T*math.cos(aoa) - D - Df*math.cos(aoc) - W*math.sin(aoc)) / mass
@@ -350,6 +353,12 @@ class FlightSim:
                     return self.ground_run2(T-(X_TO-X), mass0, S, Cd0, AR, oswald, TSFC, C_L, X_TO)
 
 
+            if t <= 15:
+                T = (T0)/10*t
+            else:
+                T = T0
+
+
             # Update state variables using Euler integration
             V += acc * dt
             X += V * dt
@@ -361,11 +370,14 @@ class FlightSim:
             mass -= (FF * dt) # Update mass due to fuel burn
             W = mass * g0 # Update weight
             N = W + D*math.sin(aoc) - L*math.cos(aoc) - T*math.sin(aoc+aoa) # Normal force
-            Df = friction*N # Friction force
+            if V != 0:
+                Df = friction*N # Friction force
+            else: 
+                Df = 0
 
             # Calculate acceleration
             acc = (T*math.cos(aoa) - D - Df*math.cos(aoc) - W*math.sin(aoc)) / mass
-
+            
             t += dt # Increment time
 
 
