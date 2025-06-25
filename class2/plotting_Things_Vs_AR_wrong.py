@@ -125,10 +125,10 @@ def plot_planform_overlay_comparison(configurations):
         left_wing_y = [LE_root_y, -LE_tip_y, -TE_tip_y, -TE_root_y, -LE_root_y]
         
         # Plot with different styles for better visibility
-        color = 'red'#colors[i % len(colors)]
-        alpha = 0.5#alphas[i % len(alphas)]
-        linewidth = 3 if i == 2 else 2  # Emphasize first configuration
-        linestyle = '-' if i == 2 else '--'
+        color = colors[i % len(colors)]
+        alpha = alphas[i % len(alphas)]
+        linewidth = 3 if i == 0 else 2  # Emphasize first configuration
+        linestyle = '-' if i == 0 else '--'
         
         ax.fill(right_wing_x, right_wing_y, color=color, alpha=alpha, 
                 label=f"{config['name']} (A_w={config['aspect_ratio']:.1f})")
@@ -147,8 +147,7 @@ def plot_planform_overlay_comparison(configurations):
     ax.set_xlabel('Chordwise Distance [m]', fontsize=12)
     ax.set_ylabel('Spanwise Distance [m]', fontsize=12)
     ax.legend(loc='upper right', bbox_to_anchor=(1.15, 1))
-    ax.set_title('Wing Planform Overlay Comparison\nOptimized for Different Objectives', 
-                 fontsize=14, fontweight='bold')
+
     
     # Set reasonable limits
     #ax.set_xlim(-1, max_chord * 1.1)
@@ -218,18 +217,18 @@ def plot_optimization_convergence(convergence_data):
 if __name__ == "__main__":
     # Sample wing configurations from different optimization objectives
     wing_configs = [
-        # {
-        #     'name': 'Baseline Design',
-        #     'optimization_objective': 'Initial Configuration',
-        #     'wingspan': 11.0,
-        #     'root_chord': 1.2,
-        #     'tip_chord': 0.6,
-        #     'sweep_LE': np.deg2rad(25),
-        #     'aspect_ratio': 11.0,
-        #     'wing_area': 10.5,
-        #     'fuel_weight': 9800,
-        #     'L_D': 18.5
-        # },
+        {
+            'name': 'Baseline Design',
+            'optimization_objective': 'Initial Configuration',
+            'wingspan': 11.0,
+            'root_chord': 1.2,
+            'tip_chord': 0.6,
+            'sweep_LE': np.deg2rad(25),
+            'aspect_ratio': 11.0,
+            'wing_area': 10.5,
+            'fuel_weight': 9800,
+            'L_D': 18.5
+        },
         {
             'name': 'Fuel Optimized',
             'optimization_objective': 'Minimum Fuel Burn',
@@ -241,31 +240,31 @@ if __name__ == "__main__":
             'wing_area': 11.2,
             'fuel_weight': 9650,
             'L_D': 19.8
+        },
+        {
+            'name': 'High L/D',
+            'optimization_objective': 'Maximum L/D',
+            'wingspan': 12.8,
+            'root_chord': 0.95,
+            'tip_chord': 0.48,
+            'sweep_LE': np.deg2rad(18),
+            'aspect_ratio': 13.2,
+            'wing_area': 12.4,
+            'fuel_weight': 9720,
+            'L_D': 21.2
+        },
+        {
+            'name': 'Low Weight',
+            'optimization_objective': 'Minimum Wing Weight',
+            'wingspan': 9.8,
+            'root_chord': 1.35,
+            'tip_chord': 0.67,
+            'sweep_LE': np.deg2rad(28),
+            'aspect_ratio': 9.5,
+            'wing_area': 10.1,
+            'fuel_weight': 9880,
+            'L_D': 17.6
         }
-        # {
-        #     'name': 'High L/D',
-        #     'optimization_objective': 'Maximum L/D',
-        #     'wingspan': 12.8,
-        #     'root_chord': 0.95,
-        #     'tip_chord': 0.48,
-        #     'sweep_LE': np.deg2rad(18),
-        #     'aspect_ratio': 13.2,
-        #     'wing_area': 12.4,
-        #     'fuel_weight': 9720,
-        #     'L_D': 21.2
-        # },
-        # {
-        #     'name': 'Low Weight',
-        #     'optimization_objective': 'Minimum Wing Weight',
-        #     'wingspan': 9.8,
-        #     'root_chord': 1.35,
-        #     'tip_chord': 0.67,
-        #     'sweep_LE': np.deg2rad(28),
-        #     'aspect_ratio': 9.5,
-        #     'wing_area': 10.1,
-        #     'fuel_weight': 9880,
-        #     'L_D': 17.6
-        # }
     ]
     
     # Sample convergence data
