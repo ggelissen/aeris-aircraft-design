@@ -400,7 +400,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
                     successful_evaluations += 1
                     #print(f"   Successful evaluation: A_w={A_w:.1f}, S_w={S_w:.1f} m², ")
                     if fuel_weight < best_fuel_weight and W_S_opt < params.weight.W_S_max and W_S_opt * S_w * params.weight.T_W < 9300:
-                        print(f"New wing loading: {W_S_opt:.2f} N/m²,Max W/S: {params.weight.W_S_max:.2f} N/m²")
+                        #print(f"New wing loading: {W_S_opt:.2f} N/m²,Max W/S: {params.weight.W_S_max:.2f} N/m²")
                         winner_dict = test_dict.copy()  # Copy the test dictionary for the winning configuration
                         #print(f"CD0_opt = {CDO_opt:.6f}, L/D_opt = {L_D_opt:.2f}, M_ff_opt = {M_ff_opt:.4f}")
                         # L_D_loiter = calculate_L_D_loiter(

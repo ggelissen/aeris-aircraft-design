@@ -66,7 +66,7 @@ xdsm.connect("constraints", "opt", r"g", label_width=2)
 
 # Inputs from outside the system
 xdsm.add_input("opt", r"\mathbf{x^{(0)}}")
-xdsm.add_input("iterator", r"TLAR")
+#xdsm.add_input("iterator", r"TLAR")
 xdsm.add_input("prelim_design", r"TLAR")
 xdsm.add_input("structures", r"TRB")
 xdsm.add_input("propulsion", r"TRB")
