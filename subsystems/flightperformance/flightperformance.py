@@ -105,17 +105,20 @@ class FlightPerformance:
         plt.close(fig)
         print("Saved plot: Figures/flight performance/drag_plot.pdf")
 
-    def __range__(self, cT, W_ini, W_fin, A, oswald, cd0, rho, S):
-        C_L = (1/3 * math.pi * A * oswald * cd0)**0.5
-        C_D = 4/3* cd0
+    def __range__(self, cT, W_ini, W_fin, A, oswald, cd0, rho, S, C_L=None, C_D=None):
+        if C_L==None:
+            C_L = (1/3 * math.pi * A * oswald * cd0)**0.5
+        if C_D==None:
+            C_D = 4/3* cd0
         R = 2 * (2/(rho*S))**0.5 * 1/(cT*0.000001 * 9.81) * (C_L**0.5)/C_D * (W_ini**0.5 - W_fin**0.5)
         return R/1000
 
-    def payload_range(self, cT, A, oswald, cd0, Wtotal, Wfuel, OEW, rho, S,Wfres, plot=False):
+    def payload_range(self, cT, A, oswald, cd0, Wtotal, Wfuel, OEW, rho, S,Wfres, C_L=None, C_D=None, plot=False):
         Wpayload = np.arange(0, Wtotal-Wfuel-OEW, 1*9.81)
+        #print("max payload", Wpayload[-1])
         ranges = []
         for payload in Wpayload:
-            range1 = self.__range__(cT, OEW + Wfuel + payload, OEW + payload+Wfres, A, oswald, cd0, rho, S)
+            range1 = self.__range__(cT, OEW + Wfuel + payload, OEW + payload+Wfres, A, oswald, cd0, rho, S, C_L, C_D)
             ranges.append(range1)
         
         if plot:
@@ -123,11 +126,12 @@ class FlightPerformance:
             
         return (min(ranges), max(ranges))
     
-    def fuel_for_range(self, cT, A, oswald, cd0, Wmaxfuel, OEW, rho, S,Wfres,Wpayload,range):
+    def fuel_for_range(self, cT, A, oswald, cd0, Wmaxfuel, OEW, rho, S,Wfres,Wpayload,range,C_L=None,C_D=None):
         fuel_list = np.arange(Wfres, Wmaxfuel)
+        print(Wmaxfuel)
         for fuel in fuel_list:
-            range1 = self.__range__(cT, OEW + fuel + Wpayload, OEW + Wpayload+Wfres, A, oswald, cd0, rho, S)
-            #print(fuel-Wfres, range1)
+            range1 = self.__range__(cT, OEW + fuel + Wpayload, OEW + Wpayload+Wfres, A, oswald, cd0, rho, S,C_L,C_D)
+            #print(fuel, range1)
             if range1 >= range:
                 return fuel-Wfres
 
@@ -356,7 +360,7 @@ if __name__ == "__main__":
     #fp.drag_plot(params.wing.C_D0, )
     #fp.payload_range(14*(10**-6), 10, 0.88, 0.017, 35000, 12000, 15000, 0.3108, 15, True)
     print("T1", params.engine.T_TO)
-    result1 = fp.payload_range(params.engine.cruise_tsfc_SI, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_TO, params.weight.W_F , params.weight.W_OE, 0.3108, params.wing.S_w,params.weight.W_F_res, True)
+    result1 = fp.payload_range(params.engine.cruise_tsfc_SI, params.wing.A_w_target, params.wing.e, params.wing.C_D0, params.weight.W_TO, params.weight.W_F , params.weight.W_OE, 0.3108, params.wing.S_w,params.weight.W_F_res, plot=True)
     print('pl-range', result1)
     #fp.ROC(0.017, 1.225, np.arange(1,300,1), 15, 35000, 10, 0.85, 7000, 60, plot=True)
     result2 = fp.ROC(params.wing.C_D0, 1.225, np.arange(1,400,1), params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.engine.T_TO, fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO), plot=True)
@@ -369,7 +373,7 @@ if __name__ == "__main__":
     print('ground run', result4)
     result6=fp.stall_speed(params.weight.W_TO, params.wing.S_w, 1.225, params.performance.CL_max_TO)
     print('stall', result6)
-    result5=fp.endurance(743, params.weight.W_OE +params.weight.W_PL + params.weight.W_F_res+743, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.cruise_tsfc_SI)#, CD=1, CL=19.44)
+    result5=fp.endurance(743, params.weight.W_OE +params.weight.W_PL + params.weight.W_F_res+743, params.wing.C_D0, params.wing.A_w_target, params.wing.e, params.engine.cruise_tsfc_SI, CD=1, CL=19.44)
     print('endurance',result5)
     
     result7 = fp.__drag__(params.wing.C_D0, 0.3108, 250, params.wing.S_w, params.weight.W_TO, params.wing.A_w_target, params.wing.e, params.wing.CL)
