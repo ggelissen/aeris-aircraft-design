@@ -10,7 +10,17 @@ def plot_wing_planform_comparison(configurations):
     Parameters:
     configurations: list of dicts, each containing wing geometry parameters
     """
-    
+    plt.rcParams.update({
+        'font.family': 'sans-serif',
+        'font.sans-serif': ['Arial', 'Helvetica'],
+        'font.size': 18,
+        'axes.titlesize': 25,
+        'axes.labelsize': 25,
+        'xtick.labelsize': 18,
+        'ytick.labelsize': 18,
+        'legend.fontsize': 18,
+        'figure.titlesize': 18
+    })
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
     axes = [ax1, ax2, ax3, ax4]
     
@@ -60,10 +70,10 @@ def plot_wing_planform_comparison(configurations):
         # Set equal aspect ratio and labels
         ax.set_aspect('equal')
         ax.grid(True, alpha=0.3)
-        ax.set_xlabel('Chordwise Distance [m]')
-        ax.set_ylabel('Spanwise Distance [m]')
+        ax.set_xlabel('Chordwise Distance [m]', fonstize=25)
+        ax.set_ylabel('Spanwise Distance [m]', fontsize=25)
         # Remove units from the ax
-        ax.legend(loc = 'upper right', fontsize=10)
+        ax.legend(loc = 'upper right', fontsize=18)
         
         # Add configuration details as text
         details = f"""A_w = {config['aspect_ratio']:.1f}
@@ -74,12 +84,12 @@ L/D = {config['L_D']:.1f}"""
         
         ax.text(0.02, 0.98, details, transform=ax.transAxes, 
                 verticalalignment='top', bbox=dict(boxstyle='round', 
-                facecolor='white', alpha=0.8), fontsize=9)
+                facecolor='white', alpha=0.8))
         
         ax.set_title(f"{config['name']}\n({config['optimization_objective']})")
     
-    plt.suptitle('Wing Planform Comparison - Different Optimization Objectives', 
-                 fontsize=16, fontweight='bold')
+    # plt.suptitle('Wing Planform Comparison - Different Optimization Objectives', 
+    #              fontsize=16, fontweight='bold')
     plt.tight_layout()
     plt.show()
 
@@ -144,10 +154,10 @@ def plot_planform_overlay_comparison(configurations):
     # Formatting
     ax.set_aspect('equal')
     ax.grid(True, alpha=0.3)
-    ax.set_xlabel('Chordwise Distance [m]', fontsize=12)
-    ax.set_ylabel('Spanwise Distance [m]', fontsize=12)
-    ax.legend(loc='upper right', bbox_to_anchor=(1.15, 1))
-
+    ax.set_xlabel('Chordwise Distance [m]', fontsize=18)
+    ax.set_ylabel('Spanwise Distance [m]',fontsize=18)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.15, 1), fontsize=14)
+    # Set tick
     
     # Set reasonable limits
     #ax.set_xlim(-1, max_chord * 1.1)

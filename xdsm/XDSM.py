@@ -14,8 +14,8 @@ xdsm.add_system("aero", FUNC, r"\text{3: Aerodynamics}")
 xdsm.add_system("structures", FUNC, r"\text{4: Structures}")
 xdsm.add_system("propulsion", FUNC, r"\text{5: Propulsion}")
 xdsm.add_system("flight_perf", FUNC, r"\text{6: Flight Performance}")
-xdsm.add_system("climate", FUNC, r"\text{8: Climate}")
-xdsm.add_system("cost", FUNC, r"\text{9: Cost}")
+xdsm.add_system("climate", IFUNC, r"\text{8: Climate}")
+xdsm.add_system("cost", IFUNC, r"\text{9: Cost}")
 xdsm.add_system("constraints", IFUNC, r"\text{10: Constraints}")             # TODO: Add stability and control subsystem
 
 # 3. Define the connections (data flow) between the components
