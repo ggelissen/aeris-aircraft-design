@@ -181,7 +181,7 @@ def run_improved_drag_estimations(params) -> dict:
 
     CD_misc = calculate_misc_drag_coefficient(params.cruise_mach + 0.03, params.cruise_mach)
 
-    CD0, CD0_tail = calculate_CD0(params.wing.S_ref, C_f_lst, FF_lst, IF_lst, S_wet_lst, CD_misc)
+    CD0, CD0_tail = calculate_CD0(params.wing.S_w, C_f_lst, FF_lst, IF_lst, S_wet_lst, CD_misc) # No longer using S_ref, but S_wing as reference area. Avoid traceability issues.
     
     # Prepare C_f_lst for output TODO, not sure if this is the best way to do it, but it works for now.
     C_f_lst = {
