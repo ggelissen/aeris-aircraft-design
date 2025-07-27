@@ -70,6 +70,9 @@ def calculate_fuel_burn_penalty(A_w: float, S_w: float, sweep_deg: float, t_c: f
     Returns:
         float: Total fuel weight in N (penalty to minimize)
     """
+    # Make it so that params is recognized as the class from design_variables import DesignParameters
+    if not isinstance(params, DesignParameters):
+        raise TypeError("params must be an instance of DesignParameters")
     
     try:
         # Store original values to restore later
