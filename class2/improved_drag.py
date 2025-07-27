@@ -7,6 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
 #from design_variables import DesignParameters
 from class1.preliminary_sizing.prelim_sizing_wing import calculate_sweep_angle_x_c, calculate_sweep_angle_LE
+from design_variables import DesignParameters
 
 # TODO add winglet CD0_winglet
 def calculate_CD0(S_ref: float, C_f_c: np.ndarray, FF_c: np.ndarray, IF_c: np.ndarray, S_wet_c: np.ndarray, CD_misc: np.ndarray) -> float:
@@ -140,7 +141,7 @@ def calculate_misc_drag_coefficient(Mach_dd: float, Mach_cr: float) -> float:
         return 0.002 * (1 + 2.5 * (Mach_dd - Mach_cr) / 0.05) ** (-1)
     
 
-def run_improved_drag_estimations(params) -> dict:
+def run_improved_drag_estimations(params: DesignParameters) -> dict:
     """
     Run the improved drag estimations based on the design parameters.
     
