@@ -335,8 +335,8 @@ def master_design_process(params_in: DesignParameters = None,
             print(f"    🔄 Continuing with current parameters")
         
         updated_TW_SW = run_performance_diagram(params)
-        params.weight.T_W = updated_TW_SW['T_W']
-        params.weight.W_S = updated_TW_SW['W_S']
+        #params.weight.T_W = updated_TW_SW['T_W']
+        params.weight.W_S_max = updated_TW_SW['W_S']
         # ================================================================
         # PHASE 4: CONVERGENCE CHECK
         # ================================================================
