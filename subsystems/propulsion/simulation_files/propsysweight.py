@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 from utils.unit_conversions import *    
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
     # Propulsion System Weight Calculation
 def calculate_propulsion_system_weight(params: DesignParameters):

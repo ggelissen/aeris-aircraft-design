@@ -25,7 +25,7 @@ from simulation_files.Mission_Simulation import (
     run_mission_simulation as run_mission_simulation_old,
     DesignParameters as DesignParameters_old,
 )
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 # Imports for the new test targeting temp.py
 from simulation_files.NOx_simulation import (

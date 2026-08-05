@@ -8,7 +8,7 @@ import yaml
 # Ensure correct path for importing DesignParameters
 sys.path.append(os.path.abspath(os.path.join(os.path.join(os.path.dirname(__file__), '..'), '..')))
 
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 def short_period_eigenvalues(params: DesignParameters):
     muc = params.weight.M_TO / (params.cruise_density * params.wing.S_w * params.wing.mac)

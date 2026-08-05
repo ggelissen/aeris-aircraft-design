@@ -17,7 +17,7 @@ import sys
 from typing import Dict, Tuple
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 from class2.prelim_sizing_tail import run_preliminary_sizing_tail
 from class2.prelim_sizing_undercarriage import perform_undercarriage_positioning
 from class2.improved_drag import run_improved_drag_estimations

@@ -13,7 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from utils.unit_conversions import *
-from design_variables import *
+from config.design_variables import *
 
 params = DesignParameters()
 params.load_from_yaml('design_config.yaml')

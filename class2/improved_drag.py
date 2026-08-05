@@ -5,8 +5,8 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
-from design_variables import DesignParameters
-from class1.preliminary_sizing.prelim_sizing_wing import calculate_sweep_angle_x_c, calculate_sweep_angle_LE
+from config.design_variables import DesignParameters
+from class1.prelim_sizing_wing import calculate_sweep_angle_x_c, calculate_sweep_angle_LE
 
 # TODO add winglet CD0_winglet
 def calculate_CD0(S_ref: float, C_f_c: np.ndarray, FF_c: np.ndarray, IF_c: np.ndarray, S_wet_c: np.ndarray, CD_misc: np.ndarray) -> float:
@@ -196,7 +196,7 @@ def run_improved_drag_estimations(params: DesignParameters) -> dict:
 
 
 if __name__ == "__main__":
-    from design_variables import DesignParameters
+    from config.design_variables import DesignParameters
     params = DesignParameters()
     params.load_from_yaml('design_config.yaml')
 

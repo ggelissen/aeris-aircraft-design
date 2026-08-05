@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 
 from class1.initial_weight_estimations import *
 from class1.thrust_wing_loading import *
-from class1.preliminary_sizing.prelim_sizing_wing import *
+from class1.prelim_sizing_wing import *
 
 class TestClassI(unittest.TestCase):
     def test_get_drag_polar_params(self):

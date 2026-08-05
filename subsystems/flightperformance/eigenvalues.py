@@ -7,7 +7,7 @@ import yaml
 
 sys.path.append(os.path.abspath(os.path.join(os.path.join(os.path.dirname(__file__), '..'), '..')))
 
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 # def short_period_eigenvalues(params: DesignParameters):
 

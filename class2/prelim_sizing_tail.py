@@ -7,10 +7,10 @@ import sys
 
 # Allow imports from the parent directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 from utils.unit_conversions import *
 # Import the entire wing sizing module to use its calculation functions
-import class1.preliminary_sizing.prelim_sizing_wing as psw
+import class1.prelim_sizing_wing as psw
 
 def calculate_decomposed_tail_sizing(params: DesignParameters) -> tuple:
     """

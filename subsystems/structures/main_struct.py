@@ -30,7 +30,7 @@ except:
 import openvsp as vsp
 
 #import subsystems.structures.stanag as stanag
-from design_variables import *
+from config.design_variables import *
 #from wing_structure_generation import generate_wing_structure_3D
 try:
     from material_selection import run_material_selection_analysis

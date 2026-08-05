@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 
 sys.path.append(os.path.abspath(os.path.join(os.path.join(os.path.dirname(__file__), '..'), '..')))
 
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 #roskam page 383, chapter 10 part VI, 10.2.4
 

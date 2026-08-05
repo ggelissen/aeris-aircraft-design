@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 def _set_report_style():
     """Sets a professional plot style suitable for reports."""

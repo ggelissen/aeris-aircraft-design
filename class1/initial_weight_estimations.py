@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 from class1.thrust_wing_loading import run_performance_diagram
 # --- Constants ---
 G = 9.80665  # Gravity constant in m/s^2

@@ -7,7 +7,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 from subsystems.flightperformance.utils_flight import __ISA__
 from subsystems.flightperformance.FlightSim import FlightSim
 from subsystems.flightperformance.take_off_requirement import calculate_Cm

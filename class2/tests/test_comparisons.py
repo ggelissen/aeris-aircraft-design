@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'class2')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '...')))
 
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 from utils.unit_conversions import *
 
 # --- Import Functions from Both Versions ---

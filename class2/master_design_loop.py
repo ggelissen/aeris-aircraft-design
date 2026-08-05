@@ -21,7 +21,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import core modules
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 # Import Class I modules  
 from class1.main_class_I import perform_class_I_analysis

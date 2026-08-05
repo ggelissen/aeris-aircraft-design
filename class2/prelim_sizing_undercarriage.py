@@ -6,7 +6,7 @@ import os
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 def perform_undercarriage_positioning(params: DesignParameters) -> dict:
     """

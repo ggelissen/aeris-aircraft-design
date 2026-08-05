@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.unit_conversions import *
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 #from subsystems.structures.loading_diagrams import WingLoadingDiagrams
 
 

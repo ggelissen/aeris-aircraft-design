@@ -1,4 +1,4 @@
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 from subsystems.flightperformance.FlightSim import FlightSim
 
 def calculate_Cm(C_m_ac,mass0,S,S_h,l_h,V_h_V,x_cg,x_w,c,C_N_h,z_cg,z_p, Cd0, AR, oswald, TSFC, C_L, X_TO):

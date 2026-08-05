@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 try:
     from subsystems.structures.wing_structure_generation import *
     from subsystems.structures.vspfunctions import *
-    from design_variables import DesignParameters
+    from config.design_variables import DesignParameters
     from subsystems.structures.wing_structure_generation import cross_sectional_structure_along_span
     from subsystems.structures.ideal_cross_section_analysis import run_cross_section_analysis, plot_bending_stresses
     from subsystems.structures.loading_diagrams import WingLoadingDiagrams
@@ -21,7 +21,7 @@ try:
 except:
     from wing_structure_generation import *
     from vspfunctions import *
-    from design_variables import DesignParameters
+    from config.design_variables import DesignParameters
     from wing_structure_generation import cross_sectional_structure_along_span
     from ideal_cross_section_analysis import run_cross_section_analysis, plot_bending_stresses
     from loading_diagrams import WingLoadingDiagrams

@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import core modules
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 def update_parameters_from_class_i(params: DesignParameters, class_i_results: Dict) -> None:
     """Update parameters with Class I results (inline)."""

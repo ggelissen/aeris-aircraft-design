@@ -13,7 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 from utils.unit_conversions import * 
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 import subsystems.propulsion.gas_property_relations as gpr
 
 # --- ISA Atmosphere and NOx Calculation ---

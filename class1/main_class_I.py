@@ -2,11 +2,11 @@ import os
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 from class1.initial_weight_estimations import run_initial_weight_estimations
 from class1.thrust_wing_loading import run_performance_diagram
-from class1.preliminary_sizing.prelim_sizing_wing import run_preliminary_sizing_wing
-from class1.preliminary_sizing.prelim_sizing_fus import run_preliminary_sizing_fuselage
+from class1.prelim_sizing_wing import run_preliminary_sizing_wing
+from class1.prelim_sizing_fus import run_preliminary_sizing_fuselage
 from class2.updater import update_parameters_from_class_i
 def perform_class_I_analysis(params: DesignParameters) -> dict:
     """

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d, CubicSpline
-from design_variables import *
+from config.design_variables import *
 from subsystems.flightperformance.high_lift_surfaces import *
 
 params = DesignParameters()

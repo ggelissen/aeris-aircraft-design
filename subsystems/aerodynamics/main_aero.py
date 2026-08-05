@@ -1,5 +1,5 @@
 import openvsp as vsp
-from design_variables import *
+from config.design_variables import *
 from subsystems.structures.main_struct import struct_main
 import subprocess
 import os

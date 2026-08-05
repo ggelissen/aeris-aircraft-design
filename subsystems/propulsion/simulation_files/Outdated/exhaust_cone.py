@@ -5,7 +5,7 @@ import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from utils.unit_conversions import * # Assuming this is available
-from design_variables import DesignParameters # For loading initial T_TO if needed
+from config.design_variables import DesignParameters # For loading initial T_TO if needed
 
 def fuselage_exhaust_cone_analysis():
     # 2. Create an instance of the DesignParameters class.

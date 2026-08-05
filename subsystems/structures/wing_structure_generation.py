@@ -2,7 +2,7 @@ import numpy as np
 
 import openvsp as vsp
 import os
-from design_variables import *
+from config.design_variables import *
 try:
     from vspfunctions import *
 except:

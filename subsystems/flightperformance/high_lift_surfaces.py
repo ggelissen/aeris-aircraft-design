@@ -4,8 +4,8 @@ from scipy.interpolate import interp1d, CubicSpline
 import sys
 import os
 #sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '...')))
-from design_variables import DesignParameters
-from class1.preliminary_sizing.prelim_sizing_wing import calculate_sweep_angle_LE
+from config.design_variables import DesignParameters
+from class1.prelim_sizing_wing import calculate_sweep_angle_LE
 
 
 

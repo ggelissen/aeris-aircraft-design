@@ -6,7 +6,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 try:
     from loading_diagrams import WingLoadingDiagrams
 except:

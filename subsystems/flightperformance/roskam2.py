@@ -1,6 +1,6 @@
 import math
 
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 def roll_rate_derivates(params: DesignParameters, CyBv):
     zv = input(f"zv is read from figure 10.27")

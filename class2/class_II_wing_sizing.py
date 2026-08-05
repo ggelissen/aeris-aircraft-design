@@ -22,7 +22,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 #from design_variables import DesignParameters
-import class1.preliminary_sizing.prelim_sizing_wing as psw
+import class1.prelim_sizing_wing as psw
 from class2.improved_drag import run_improved_drag_estimations
 from class1.initial_weight_estimations import (
     calculate_L_D_cruise_jet, 
@@ -34,7 +34,7 @@ from class2.updater import update_parameters_from_class_ii
 from class2.main_class_II import perform_class_II_analysis
 #try:
 import delta_method_classII as dm
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 
 #DELTA_METHOD_AVAILABLE = True
 #except ImportError:
@@ -504,7 +504,7 @@ def optimize_wing_for_fuel_burn(params: DesignParameters) -> dict:
 
 
 if __name__ == "__main__":
-    from design_variables import DesignParameters
+    from config.design_variables import DesignParameters
     from class1.main_class_I import perform_class_I_analysis
     from class2.updater import update_parameters_from_class_i
     # Test the fuel burn optimization

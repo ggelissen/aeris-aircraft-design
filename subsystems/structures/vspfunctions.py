@@ -2,7 +2,7 @@ import openvsp as vsp
 import numpy as np
 from stl import mesh
 import pyvista as pv
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 from scipy.interpolate import interp1d
 import os
 import pandas as pd

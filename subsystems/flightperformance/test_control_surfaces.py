@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.interpolate import interp1d, CubicSpline
 # Assuming design_variables.py and design_config.yaml are available in the environment
-from design_variables import DesignParameters
+from config.design_variables import DesignParameters
 params = DesignParameters()
 params.load_from_yaml("design_config.yaml")
 
